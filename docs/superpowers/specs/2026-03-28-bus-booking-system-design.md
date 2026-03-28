@@ -12,7 +12,7 @@ A mini RedBus Cambodia-style bus ticket booking system allowing users to search 
 
 - **Framework:** Next.js 14 App Router (TypeScript)
 - **Database:** MongoDB + Mongoose
-- **Authentication:** NextAuth.js (credentials provider)
+- **Authentication:** NextAuth.js (credentials provider only - Google OAuth deferred to future enhancement)
 - **UI Library:** Tailwind CSS + shadcn/ui
 - **Password Hashing:** bcryptjs
 
@@ -88,6 +88,9 @@ A mini RedBus Cambodia-style bus ticket booking system allowing users to search 
 5. **`/dashboard`** - User's bookings
    - List of user's bookings with status
    - Cancel booking option
+   - Cancellation rules: Can cancel up to 1 hour before departure
+   - Cancelled seats become available immediately for other users
+   - Cancellation status tracked as "cancelled" with original data preserved
 
 6. **`/admin`** - Admin panel (admin role only)
    - Tabs: Manage Routes, Manage Buses, View All Bookings
@@ -134,7 +137,11 @@ GET  /api/admin/bookings             - Get all bookings (admin only)
   - Yellow: Currently selected by user
 - Click to toggle selection
 - Dynamic total: `selectedSeats.length × bus.pricePerSeat`
+- Maximum seats per booking: 10 seats (configurable)
 - Maximum seats limited by availability
+- No temporary seat reservation during selection (first-come-first-served on booking confirmation)
+- Session timeout: 15 minutes of inactivity redirects to home
+- Race condition handling: If seat is taken during selection, show error and refresh available seats
 
 ### 3. Admin Panel
 
@@ -168,6 +175,47 @@ Protected by admin role, three main sections:
   - `/admin` - admin role only
 - Session-based authentication
 
+**Login Page (/login):**
+- Email and password fields
+- "Remember me" checkbox (extends session to 30 days)
+- Link to registration page for new users
+- Forgot password link (deferred to future enhancement - no password reset in MVP)
+- Form validation: Email format, password required
+- Error messages for invalid credentials
+
+**Registration Page (/register):**
+- Name, email, password, confirm password fields
+- Password strength: Minimum 6 characters, no other restrictions
+- Email uniqueness validation
+- Form validation: Required fields, email format, password match
+- Auto-login after successful registration
+- Default role: "user"
+
+### 5. Search Algorithm
+
+**Search Behavior:**
+- Exact matching for city names (case-insensitive)
+- All fields optional: User can search with partial information
+- If no buses found for exact date, show message (no nearby dates in MVP)
+- Sorting order: Departure time (earliest first)
+- No advanced filters in MVP (price, duration filters deferred)
+
+**Search Query Logic:**
+1. Find routes where `from` matches source city AND `to` matches destination city
+2. Find buses on those routes for the specified date
+3. Filter out buses with no available seats
+4. Sort by departure time
+5. Return results with bus details + route information (from, to, duration)
+
+**Search Results Display:**
+- Bus departure/arrival time
+- Price per seat
+- Number of seats available
+- Route duration
+- "Book Now" button linking to seat selection page
+- Bus operator name: Not in MVP (deferred)
+- Bus type/amenities: Not in MVP (deferred)
+
 ## Security
 
 1. **Password Security**
@@ -180,9 +228,12 @@ Protected by admin role, three main sections:
    - Input validation on all endpoints
 
 3. **Booking Integrity**
-   - Atomic seat booking operations
+   - Atomic seat booking operations using MongoDB atomic update operators
+   - Use `$addToSet` with conditional checks to prevent duplicate seat bookings
    - Check seat availability before booking
-   - Prevent double-booking
+   - Prevent double-booking through atomic operations
+   - On concurrent booking attempts for same seat: First request succeeds, second receives 409 Conflict error
+   - Implement optimistic concurrency: Client retries on conflict (max 3 attempts)
 
 4. **Data Validation**
    - Server-side validation on all inputs
@@ -201,11 +252,13 @@ Protected by admin role, three main sections:
 
 ### Component Library (shadcn/ui)
 
-- **Form:** Form, Input, Label, Button
-- **Layout:** Card, Tabs, Table, Dialog
+- **Form:** Form, Input, Label, Button, Select, Calendar (for date picker)
+- **Layout:** Card, Tabs, Table, Dialog, Separator
 - **Feedback:** Toast, Alert, Spinner
 - **Navigation:** Navbar, Sidebar
-- **Data Display:** Badge, Separator
+- **Data Display:** Badge, Pagination
+- **Form Validation:** React Hook Form + Zod schemas
+- **Custom Components:** SeatGrid (custom implementation), Seat (custom button component)
 
 ### Color Scheme
 
@@ -237,6 +290,20 @@ Protected by admin role, three main sections:
 - Appropriate HTTP status codes
 - Error logging for debugging
 
+### Client-Side Error Boundaries
+
+- React error boundary component to catch component errors
+- Graceful error UI with "Go to Home" button
+- Global error handler for uncaught promise rejections
+- MongoDB connection failure: Show error page, retry connection button
+
+### Database Connection Error Handling
+
+- Retry logic: 3 retry attempts with exponential backoff
+- Graceful degradation: Show maintenance page if connection fails after retries
+- Connection pooling: Reuse connections for better performance
+- Connection timeout: 10 seconds
+
 ## Seed Data
 
 Initial data to be created via `/scripts/seed.ts`:
@@ -250,12 +317,77 @@ Initial data to be created via `/scripts/seed.ts`:
 
 ### Buses (2 per route, tomorrow's date)
 - Total: 10 buses
-- Each with unique departure times
-- Random seat availability
+- Each with unique departure times (morning: 8:00, evening: 18:00)
+- Total seats per bus: 40 seats
+- Seat availability:
+  - 60% of seats available (24 seats)
+  - 40% pre-booked (16 seats) for realistic testing
+- Include 1 fully booked bus for edge case testing
+- Include 1 bus with only 1-2 seats for edge case testing
+- Price per seat: $15-25 USD depending on route
 
 ### Users
 - Admin: admin@bus.com / admin123
 - Regular: user@bus.com / user123
+
+## Environment Variables
+
+Create `.env.local` file with:
+
+```env
+# MongoDB
+MONGODB_URI=mongodb://localhost:27017/bus-booking
+
+# NextAuth
+NEXTAUTH_SECRET=your-random-secret-string-here
+NEXTAUTH_URL=http://localhost:3000
+
+# Optional: For production
+# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/bus-booking
+```
+
+**Generating NEXTAUTH_SECRET:**
+- Run: `openssl rand -base64 32`
+- Or use any random 32+ character string
+
+## Database Indexes
+
+For performance optimization, create these indexes:
+
+**Route Model:**
+- Compound index: `{ from: 1, to: 1 }` (for search queries)
+
+**Bus Model:**
+- Compound index: `{ routeId: 1, date: 1 }` (for search queries)
+- Single index: `{ date: 1 }` (for date-based queries)
+
+**Booking Model:**
+- Single index: `{ userId: 1 }` (for user's bookings query)
+- Single index: `{ busId: 1 }` (for booking lookups)
+- Single index: `{ status: 1 }` (for admin filtering)
+
+## Future Enhancements (Out of Scope for MVP)
+
+The following features are explicitly deferred to future versions:
+
+1. **Google OAuth Integration** - Add Google as authentication provider
+2. **Payment Gateway** - Integrate payment processing (Wing, ABA Bank, etc.)
+3. **Email Notifications** - Booking confirmation, cancellation emails
+4. **SMS Notifications** - SMS alerts for booking updates
+5. **Bus Operator Management** - Multi-operator support with operator profiles
+6. **Bus Type & Amenities** - AC/Non-AC, Sleeper/Seater, WiFi, charging points
+7. **Seat Type Preferences** - Window/aisle seat selection
+8. **Advanced Search Filters** - Price range, duration, bus type filters
+9. **Nearby Date Suggestions** - Show buses for dates near search date
+10. **Password Reset Flow** - Email-based password reset
+11. **Booking Reviews & Ratings** - User reviews for buses/routes
+12. **Loyalty Program** - Points system, discounts for frequent travelers
+13. **Mobile App** - React Native mobile application
+14. **Real-time Seat Availability** - WebSocket for live updates
+15. **Refund Management** - Automated refund processing for cancellations
+16. **Multi-language Support** - Khmer, English language toggle
+17. **Ticket PDF Generation** - Downloadable PDF tickets
+18. **Advanced Admin Analytics** - Revenue reports, occupancy charts
 
 ## Implementation Phases
 
