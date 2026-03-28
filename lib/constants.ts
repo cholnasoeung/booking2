@@ -1,0 +1,36 @@
+export const APP_NAME = "RedMiles Cambodia";
+
+export const CITY_OPTIONS = [
+  "Phnom Penh",
+  "Siem Reap",
+  "Sihanoukville",
+  "Kampot",
+  "Battambang",
+  "Poipet",
+] as const;
+
+export const POPULAR_ROUTES = [
+  {
+    from: "Phnom Penh",
+    to: "Siem Reap",
+    duration: "6h 15m",
+    fare: 18,
+  },
+  {
+    from: "Phnom Penh",
+    to: "Sihanoukville",
+    duration: "4h 45m",
+    fare: 16,
+  },
+  {
+    from: "Phnom Penh",
+    to: "Kampot",
+    duration: "3h 40m",
+    fare: 14,
+  },
+] as const;
+
+export const BUS_SEAT_COLUMNS = 4;
+export const MAX_SEATS_PER_BOOKING = 10;
+export const DEFAULT_PASSENGERS = 1;
+export const DEFAULT_TOTAL_SEATS = 40;
