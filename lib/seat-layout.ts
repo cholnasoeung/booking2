@@ -195,46 +195,39 @@ function createMiniBusTemplate(): SeatLayout {
     buildItem("empty", 1, 5),
   ];
 
-  for (let visualRow = 2; visualRow <= 6; visualRow += 1) {
-    const seatRow = visualRow - 1;
-    items.push(buildSeat(visualRow, 1, `${seatRow}A`));
-    items.push(buildSeat(visualRow, 2, `${seatRow}B`));
-    items.push(buildItem("aisle", visualRow, 3, { label: "Aisle" }));
-    items.push(buildSeat(visualRow, 4, `${seatRow}D`));
-    items.push(buildSeat(visualRow, 5, `${seatRow}E`));
-  }
+  // Row 1: 1A, 1B, aisle, 1D, 1E (4 seats)
+  items.push(buildSeat(2, 1, "1A"));
+  items.push(buildSeat(2, 2, "1B"));
+  items.push(buildItem("aisle", 2, 3, { label: "Aisle" }));
+  items.push(buildSeat(2, 4, "1D"));
+  items.push(buildSeat(2, 5, "1E"));
 
-  items.push(buildSeat(7, 1, "6A"));
-  items.push(buildSeat(7, 2, "6B"));
-  items.push(buildItem("aisle", 7, 3, { label: "Aisle" }));
-  items.push(buildItem("toilet", 7, 4, { colSpan: 2, label: "WC" }));
+  // Row 2: 2A, 2B, aisle, 2D, 2E (4 seats)
+  items.push(buildSeat(3, 1, "2A"));
+  items.push(buildSeat(3, 2, "2B"));
+  items.push(buildItem("aisle", 3, 3, { label: "Aisle" }));
+  items.push(buildSeat(3, 4, "2D"));
+  items.push(buildSeat(3, 5, "2E"));
 
-  items.push(buildSeat(8, 1, "7A"));
-  items.push(buildSeat(8, 2, "7B"));
-  items.push(buildItem("aisle", 8, 3, { label: "Aisle" }));
-  items.push(buildItem("empty", 8, 4));
-  items.push(buildItem("empty", 8, 5));
+  // Row 3: 3A, 3B, aisle, 3D, 3E (4 seats)
+  items.push(buildSeat(4, 1, "3A"));
+  items.push(buildSeat(4, 2, "3B"));
+  items.push(buildItem("aisle", 4, 3, { label: "Aisle" }));
+  items.push(buildSeat(4, 4, "3D"));
+  items.push(buildSeat(4, 5, "3E"));
 
-  for (let visualRow = 9; visualRow <= 11; visualRow += 1) {
-    const seatRow = visualRow - 1;
-    items.push(buildSeat(visualRow, 1, `${seatRow}A`));
-    items.push(buildSeat(visualRow, 2, `${seatRow}B`));
-    items.push(buildItem("aisle", visualRow, 3, { label: "Aisle" }));
-    items.push(buildSeat(visualRow, 4, `${seatRow}D`));
-    items.push(buildSeat(visualRow, 5, `${seatRow}E`));
-  }
-
-  items.push(buildSeat(12, 1, "11A"));
-  items.push(buildSeat(12, 2, "11B"));
-  items.push(buildSeat(12, 3, "11C"));
-  items.push(buildSeat(12, 4, "11D"));
-  items.push(buildSeat(12, 5, "11E"));
+  // Row 4: 4A, 4B, aisle, empty, empty (2 seats)
+  items.push(buildSeat(5, 1, "4A"));
+  items.push(buildSeat(5, 2, "4B"));
+  items.push(buildItem("aisle", 5, 3, { label: "Aisle" }));
+  items.push(buildItem("empty", 5, 4));
+  items.push(buildItem("empty", 5, 5));
 
   return {
     version: LAYOUT_VERSION,
     template: "mini_bus",
     grid: {
-      rows: 12,
+      rows: 5,
       cols: 5,
     },
     items,
