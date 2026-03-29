@@ -78,9 +78,10 @@ export async function POST(request: Request) {
     }
 
     const booking = await BookingModel.create({
-      userId: session.user.id,
-      busId,
+      user: session.user.id,
+      bus: busId,
       seats,
+      passengers: [], // Will be filled in passenger details step
       totalPrice: seats.length * busDocument.pricePerSeat,
       status: "confirmed",
     });

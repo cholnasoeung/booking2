@@ -32,15 +32,15 @@ type SeatState = "available" | "selected" | "booked";
 const legendItems: Array<{ label: string; className: string }> = [
   {
     label: "Available",
-    className: "bg-gradient-to-br from-emerald-400 to-emerald-500 shadow-md shadow-emerald-300/50",
+    className: "bg-white border-2 border-emerald-400",
   },
   {
     label: "Selected",
-    className: "bg-gradient-to-br from-amber-300 to-amber-400 shadow-md shadow-amber-300/50",
+    className: "bg-emerald-500 border-2 border-emerald-600",
   },
   {
     label: "Booked",
-    className: "bg-gradient-to-br from-slate-300 to-slate-400 shadow-md shadow-slate-300/50",
+    className: "bg-slate-200 border-2 border-slate-300",
   },
 ];
 
@@ -81,8 +81,8 @@ function SeatMap({
           <div
             className="grid gap-4"
             style={{
-              gridTemplateColumns: `repeat(${layout.grid.cols}, minmax(${compact ? "54px" : "70px"}, 1fr))`,
-              gridAutoRows: compact ? "58px" : "76px",
+              gridTemplateColumns: `repeat(${layout.grid.cols}, minmax(${compact ? "54px" : "68px"}, 1fr))`,
+              gridAutoRows: compact ? "84px" : "92px",
             }}
           >
             {items.map((item) => (
@@ -242,51 +242,43 @@ function SleeperSeat({
   return (
     <div
       className={cn(
-        "relative flex h-full min-h-0 items-center justify-between overflow-hidden rounded-2xl shadow-lg transition-all duration-300",
-        compact ? "gap-2 py-2" : "gap-3 px-4 py-3",
-        getSeatTone(state)
+        "relative flex h-full min-h-0 flex-col items-center justify-between overflow-hidden rounded-2xl border-2 transition-all duration-200",
+        state === 'available' && "bg-white border-emerald-400 hover:border-emerald-500 hover:shadow-md",
+        state === 'selected' && "bg-emerald-500 border-emerald-600 shadow-lg",
+        state === 'booked' && "bg-slate-200 border-slate-300 cursor-not-allowed opacity-70",
+        compact ? "py-2.5" : "py-3"
       )}
     >
-      {/* Top gradient shine effect */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-transparent opacity-60" />
-
-      {/* Pillow */}
-      <div className="absolute left-3 top-3 h-4 w-7 rounded-lg border border-current/20 shadow-inner transition-all duration-200" style={{
-        background: state === 'booked'
-          ? 'linear-gradient(135deg, rgba(148, 163, 184, 0.5), rgba(148, 163, 184, 0.2))'
-          : state === 'selected'
-          ? 'linear-gradient(135deg, rgba(251, 191, 36, 0.5), rgba(251, 191, 36, 0.2))'
-          : 'linear-gradient(135deg, rgba(16, 185, 129, 0.5), rgba(16, 185, 129, 0.2))'
-      }} />
-
-      <div className="relative min-w-0 flex-1">
-        <p className={cn(
-          "text-[9px] uppercase tracking-[0.28em] font-medium mb-0.5",
-          state === 'booked' ? "text-slate-500" : state === 'selected' ? "text-amber-600" : "text-emerald-600"
-        )}>
-          Sleeper
-        </p>
-        <p className={cn(
-          "truncate font-bold tracking-tight",
-          compact ? "text-xs" : "text-sm",
-          state === 'booked' ? "text-slate-700" : state === 'selected' ? "text-amber-800" : "text-emerald-800"
+      {/* Seat number at top */}
+      <div className="relative z-10 flex-1 flex items-center justify-center px-2">
+        <span className={cn(
+          "font-bold tracking-tight",
+          compact ? "text-sm" : "text-base",
+          state === 'selected' ? "text-white" : state === 'booked' ? "text-slate-500" : "text-emerald-700"
         )}>
           {label}
-        </p>
+        </span>
       </div>
 
-      {/* Blanket/fold indicator */}
-      <div className="relative h-6 w-9 rounded-lg border border-current/15 shadow-md transition-all duration-200" style={{
-        background: state === 'booked'
-          ? 'linear-gradient(135deg, rgba(203, 213, 225, 0.8), rgba(148, 163, 184, 0.4))'
-          : state === 'selected'
-          ? 'linear-gradient(135deg, rgba(253, 230, 138, 0.9), rgba(251, 191, 36, 0.5))'
-          : 'linear-gradient(135deg, rgba(110, 231, 183, 0.9), rgba(16, 185, 129, 0.5))'
-      }} />
+      {/* Pillow/blanket indicator at bottom */}
+      <div className={cn(
+        "w-full h-3 rounded-b-xl flex items-center justify-center",
+        state === 'selected' && "bg-emerald-600",
+        state === 'available' && "bg-emerald-100",
+        state === 'booked' && "bg-slate-300"
+      )}>
+        <div className={cn(
+          "w-8 h-1.5 rounded-full",
+          state === 'selected' && "bg-white/50",
+          state === 'available' && "bg-emerald-400",
+          state === 'booked' && "bg-slate-400"
+        )} />
+      </div>
 
-      {/* Decorative lines */}
-      <div className="absolute inset-x-2 bottom-2 h-px bg-current/10" />
-      <div className="absolute inset-x-2 bottom-2.5 h-px bg-current/5" />
+      {/* Subtle top highlight for available seats */}
+      {state === 'available' && (
+        <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-emerald-50/60 to-transparent rounded-t-2xl" />
+      )}
     </div>
   );
 }

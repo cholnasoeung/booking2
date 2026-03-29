@@ -23,12 +23,11 @@ export default function SeatSelection({
   const router = useRouter();
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [error, setError] = useState("");
-  const [isPending, setIsPending] = useState(false);
 
   const totalPrice = selectedSeats.length * bus.pricePerSeat;
 
   function toggleSeat(seatCode: string) {
-    if (bus.bookedSeats.includes(seatCode) || isPending) {
+    if (bus.bookedSeats.includes(seatCode)) {
       return;
     }
 
@@ -49,47 +48,17 @@ export default function SeatSelection({
     setError("");
   }
 
-  async function confirmBooking() {
+  function proceedToPassengerDetails() {
     if (selectedSeats.length === 0) {
       setError("Please select at least one seat.");
       return;
     }
 
-    setIsPending(true);
     setError("");
 
-    try {
-      const response = await fetch("/api/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          busId: bus.id,
-          seats: selectedSeats,
-        }),
-      });
-
-      const payload = (await response.json()) as {
-        bookingId?: string;
-        message?: string;
-      };
-
-      if (!response.ok || !payload.bookingId) {
-        setError(payload.message || "Unable to complete your booking.");
-        if (response.status === 409) {
-          router.refresh();
-        }
-        return;
-      }
-
-      router.push(`/booking/confirmation/${payload.bookingId}`);
-      router.refresh();
-    } catch {
-      setError("Unable to complete your booking right now.");
-    } finally {
-      setIsPending(false);
-    }
+    // Redirect to passenger details form with selected seats
+    const seatsParam = selectedSeats.join(",");
+    router.push(`/book/${bus.id}/passengers?seats=${seatsParam}`);
   }
 
   return (
@@ -113,7 +82,6 @@ export default function SeatSelection({
             layout={bus.seatLayout}
             bookedSeats={bus.bookedSeats}
             selectedSeats={selectedSeats}
-            disabled={isPending}
             onSeatToggle={toggleSeat}
             showLegend
           />
@@ -164,11 +132,11 @@ export default function SeatSelection({
           <Button
             type="button"
             size="lg"
-            disabled={isPending || selectedSeats.length === 0 || bus.seatsLeft === 0}
+            disabled={selectedSeats.length === 0 || bus.seatsLeft === 0}
             className="h-11 w-full rounded-2xl"
-            onClick={confirmBooking}
+            onClick={proceedToPassengerDetails}
           >
-            {isPending ? "Confirming..." : "Confirm booking"}
+            Continue to Passenger Details
           </Button>
 
           <p className="text-xs leading-5 text-muted-foreground">

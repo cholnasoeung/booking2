@@ -43,11 +43,14 @@ type NormalizedBusRecord = Omit<StoredBusRecord, "bookedSeats" | "seatLayout" | 
 
 type BookingRecord = {
   _id: Types.ObjectId;
-  userId: Types.ObjectId;
-  busId: Types.ObjectId;
-  seats: Array<string | number>;
+  user: Types.ObjectId;
+  bus: Types.ObjectId;
+  seats: string[];
+  passengers?: any[];
   totalPrice: number;
   status: BookingStatus;
+  cancelledAt?: Date;
+  cancellationReason?: string;
   createdAt: Date;
 };
 
@@ -165,12 +168,12 @@ function serializeBooking(
   routeMap: Map<string, RouteRecord>,
   userMap?: Map<string, UserRecord>
 ): AdminBookingSummary {
-  const bus = busMap.get(String(booking.busId));
+  const bus = busMap.get(String(booking.bus));
   const route = bus ? routeMap.get(String(bus.routeId)) ?? null : null;
-  const userRecord = userMap?.get(String(booking.userId)) ?? null;
+  const userRecord = userMap?.get(String(booking.user)) ?? null;
   const seats = bus
     ? normalizeStoredSeatCodes(booking.seats, bus.seatLayout)
-    : booking.seats.map((seat) => String(seat));
+    : booking.seats;
 
   return {
     id: String(booking._id),
@@ -277,7 +280,7 @@ export async function getBusSummary(busId: string) {
 export async function getUserBookings(userId: string) {
   await connectToDatabase();
 
-  const bookings = (await BookingModel.find({ userId })
+  const bookings = (await BookingModel.find({ user: userId })
     .sort({ createdAt: -1 })
     .lean()) as BookingRecord[];
 
@@ -285,7 +288,7 @@ export async function getUserBookings(userId: string) {
     return [];
   }
 
-  const busIds = [...new Set(bookings.map((booking) => String(booking.busId)))];
+  const busIds = [...new Set(bookings.map((booking) => String(booking.bus)))];
   const buses = (await BusModel.find({
     _id: { $in: busIds },
   }).lean()) as StoredBusRecord[];
@@ -322,12 +325,12 @@ export async function getBookingSummaryById(bookingId: string) {
     return null;
   }
 
-  const bus = (await BusModel.findById(booking.busId).lean()) as StoredBusRecord | null;
+  const bus = (await BusModel.findById(booking.bus).lean()) as StoredBusRecord | null;
   const normalizedBus = bus ? normalizeBusRecord(bus) : null;
   const route =
     normalizedBus &&
     ((await RouteModel.findById(normalizedBus.routeId).lean()) as RouteRecord | null);
-  const user = (await UserModel.findById(booking.userId)
+  const user = (await UserModel.findById(booking.user)
     .select("name email role")
     .lean()) as UserRecord | null;
 

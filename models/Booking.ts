@@ -2,31 +2,64 @@ import mongoose, { type Document, Schema } from "mongoose";
 
 export type BookingStatus = "confirmed" | "cancelled";
 
+export interface IPassenger {
+  name: string;
+  age: string;
+  gender: "male" | "female" | "other";
+  contactNumber: string;
+  email?: string;
+}
+
 export interface IBooking extends Document {
-  userId: mongoose.Types.ObjectId;
-  busId: mongoose.Types.ObjectId;
-  seats: Array<string | number>;
+  user: mongoose.Types.ObjectId;
+  bus: mongoose.Types.ObjectId;
+  seats: string[];
+  passengers: IPassenger[];
   totalPrice: number;
   status: BookingStatus;
+  cancelledAt?: Date;
+  cancellationReason?: string;
   createdAt: Date;
 }
 
 const BookingSchema = new Schema<IBooking>(
   {
-    userId: {
+    user: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    busId: {
+    bus: {
       type: Schema.Types.ObjectId,
       ref: "Bus",
       required: true,
     },
     seats: {
-      type: [Schema.Types.Mixed],
+      type: [String],
       required: true,
     },
+    passengers: [{
+      name: {
+        type: String,
+        required: true,
+      },
+      age: {
+        type: String,
+        required: true,
+      },
+      gender: {
+        type: String,
+        enum: ["male", "female", "other"],
+        required: true,
+      },
+      contactNumber: {
+        type: String,
+        required: true,
+      },
+      email: {
+        type: String,
+      },
+    }],
     totalPrice: {
       type: Number,
       required: true,
@@ -38,6 +71,12 @@ const BookingSchema = new Schema<IBooking>(
       default: "confirmed",
       required: true,
     },
+    cancelledAt: {
+      type: Date,
+    },
+    cancellationReason: {
+      type: String,
+    },
   },
   {
     timestamps: {
@@ -47,8 +86,8 @@ const BookingSchema = new Schema<IBooking>(
   }
 );
 
-BookingSchema.index({ userId: 1 });
-BookingSchema.index({ busId: 1 });
+BookingSchema.index({ user: 1 });
+BookingSchema.index({ bus: 1 });
 BookingSchema.index({ status: 1 });
 
 const BookingModel =

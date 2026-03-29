@@ -32,7 +32,7 @@ export async function DELETE(
       return Response.json({ message: "Booking not found." }, { status: 404 });
     }
 
-    const isOwner = String(existingBooking.userId) === session.user.id;
+    const isOwner = String(existingBooking.user) === session.user.id;
     const isAdmin = session.user.role === "admin";
 
     if (!isOwner && !isAdmin) {
@@ -49,7 +49,7 @@ export async function DELETE(
       );
     }
 
-    const busDocument = await BusModel.findById(existingBooking.busId);
+    const busDocument = await BusModel.findById(existingBooking.bus);
     const normalizedBus = busDocument
       ? normalizeBusSeatLayout(busDocument.toObject())
       : null;
@@ -87,7 +87,7 @@ export async function DELETE(
     }
 
     if (normalizedSeats.length > 0) {
-      await BusModel.findByIdAndUpdate(cancelledBooking.busId, {
+      await BusModel.findByIdAndUpdate(cancelledBooking.bus, {
         $pullAll: {
           bookedSeats: normalizedSeats,
         },

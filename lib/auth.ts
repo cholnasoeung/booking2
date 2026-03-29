@@ -56,6 +56,7 @@ export const authOptions: NextAuthOptions = {
           id: String(user._id),
           name: user.name,
           email: user.email,
+          phone: user.phone,
           role: user.role,
         };
       },
@@ -66,6 +67,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.phone = (user as any).phone;
       }
 
       return token;
@@ -74,6 +76,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.id ?? token.sub ?? "";
         session.user.role = token.role ?? "user";
+        session.user.phone = token.phone;
       }
 
       return session;
