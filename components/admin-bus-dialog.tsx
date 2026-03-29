@@ -123,18 +123,28 @@ export default function AdminBusDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-6xl">
-        <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit bus departure" : "Add a new bus"}</DialogTitle>
-          <DialogDescription>
-            Choose a bus type, fine-tune the seat map, and publish the departure.
-          </DialogDescription>
+      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-6xl border-2 border-orange-200/60 bg-gradient-to-br from-white to-orange-50/50 shadow-2xl backdrop-blur-xl">
+        <DialogHeader className="border-b-2 border-dashed border-orange-200/60 pb-4 bg-gradient-to-r from-orange-50 to-red-50 -mx-6 px-6 -mt-6 pt-6 rounded-t-2xl">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-600 text-white shadow-lg">
+              <svg className="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+            </div>
+            <div>
+              <DialogTitle className="text-2xl">{isEditing ? "Edit Bus Departure" : "Add New Bus"}</DialogTitle>
+              <DialogDescription className="text-sm">
+                Choose a bus type, fine-tune the seat map, and publish the departure
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
-        <form onSubmit={submitBus} className="space-y-5">
+        <form onSubmit={submitBus} className="space-y-5 pt-4">
+          {/* Route and Date/Time Grid */}
           <div className="grid gap-4 xl:grid-cols-5">
             <div className="space-y-2 xl:col-span-2">
-              <Label htmlFor="bus-route">Route</Label>
+              <Label htmlFor="bus-route" className="text-sm font-semibold">Route</Label>
               <Select
                 value={form.routeId}
                 onValueChange={(value) => {
@@ -148,7 +158,7 @@ export default function AdminBusDialog({
                   }));
                 }}
               >
-                <SelectTrigger id="bus-route" className="h-11 w-full rounded-2xl">
+                <SelectTrigger id="bus-route" className="h-11 w-full rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20">
                   <SelectValue placeholder="Select a route" />
                 </SelectTrigger>
                 <SelectContent>
@@ -162,7 +172,7 @@ export default function AdminBusDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bus-date">Date</Label>
+              <Label htmlFor="bus-date" className="text-sm font-semibold">Date</Label>
               <Input
                 id="bus-date"
                 type="date"
@@ -173,13 +183,13 @@ export default function AdminBusDialog({
                     date: event.target.value,
                   }))
                 }
-                className="h-11 rounded-2xl"
+                className="h-11 rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bus-departure">Departure</Label>
+              <Label htmlFor="bus-departure" className="text-sm font-semibold">Departure</Label>
               <Input
                 id="bus-departure"
                 type="time"
@@ -190,13 +200,13 @@ export default function AdminBusDialog({
                     departureTime: event.target.value,
                   }))
                 }
-                className="h-11 rounded-2xl"
+                className="h-11 rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bus-arrival">Arrival</Label>
+              <Label htmlFor="bus-arrival" className="text-sm font-semibold">Arrival</Label>
               <Input
                 id="bus-arrival"
                 type="time"
@@ -207,15 +217,16 @@ export default function AdminBusDialog({
                     arrivalTime: event.target.value,
                   }))
                 }
-                className="h-11 rounded-2xl"
+                className="h-11 rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
                 required
               />
             </div>
           </div>
 
+          {/* Bus Type and Price */}
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="bus-type">Bus type</Label>
+              <Label htmlFor="bus-type" className="text-sm font-semibold">Bus Type</Label>
               <Select
                 value={form.busType}
                 onValueChange={(value) => {
@@ -231,7 +242,7 @@ export default function AdminBusDialog({
                   }));
                 }}
               >
-                <SelectTrigger id="bus-type" className="h-11 w-full rounded-2xl">
+                <SelectTrigger id="bus-type" className="h-11 w-full rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20">
                   <SelectValue placeholder="Choose bus type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -245,7 +256,7 @@ export default function AdminBusDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bus-price">Price per seat</Label>
+              <Label htmlFor="bus-price" className="text-sm font-semibold">Price per Seat</Label>
               <Input
                 id="bus-price"
                 type="number"
@@ -257,42 +268,48 @@ export default function AdminBusDialog({
                     pricePerSeat: event.target.value,
                   }))
                 }
-                className="h-11 rounded-2xl"
+                className="h-11 rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
                 required
               />
             </div>
           </div>
 
-          <SeatLayoutEditor
-            busType={form.busType}
-            value={form.seatLayout}
-            bookedSeats={bus?.bookedSeats ?? []}
-            onChange={(seatLayout) =>
-              setForm((current) => ({
-                ...current,
-                seatLayout,
-              }))
-            }
-          />
+          {/* Seat Layout Editor */}
+          <div className="space-y-3">
+            <Label className="text-sm font-semibold">Seat Layout</Label>
+            <div className="rounded-2xl border-2 border-dashed border-orange-300/50 bg-gradient-to-br from-orange-50/50 to-red-50/50 p-6">
+              <SeatLayoutEditor
+                busType={form.busType}
+                value={form.seatLayout}
+                bookedSeats={bus?.bookedSeats ?? []}
+                onChange={(seatLayout) =>
+                  setForm((current) => ({
+                    ...current,
+                    seatLayout,
+                  }))
+                }
+              />
+            </div>
+          </div>
 
           {error ? (
-            <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
+            <p className="rounded-xl border-2 border-red-200/60 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+              ⚠️ {error}
             </p>
           ) : null}
 
-          <DialogFooter className="rounded-b-none border-0 bg-transparent p-0">
+          <DialogFooter className="gap-3 pt-4">
             <Button
               type="button"
               variant="outline"
-              className="h-11 rounded-2xl"
+              className="h-11 rounded-xl border-2 border-orange-200/60 hover:bg-orange-50"
               onClick={() => onOpenChange(false)}
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="h-11 rounded-2xl"
+              className="h-11 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 shadow-lg hover:shadow-xl transition-all"
               disabled={isPending || Boolean(layoutValidation)}
             >
               {isPending
@@ -300,8 +317,8 @@ export default function AdminBusDialog({
                   ? "Saving..."
                   : "Creating..."
                 : isEditing
-                  ? "Save changes"
-                  : "Create bus"}
+                ? "Save Changes"
+                : "Create Bus"}
             </Button>
           </DialogFooter>
         </form>
