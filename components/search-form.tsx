@@ -96,8 +96,8 @@ export default function SearchForm({
         className={cn(
           "grid gap-4",
           compact
-            ? "lg:grid-cols-[1.2fr_1.2fr_1fr_0.9fr_auto]"
-            : "lg:grid-cols-[1.2fr_1.2fr_1fr_0.9fr]"
+            ? "lg:grid-cols-[1fr_auto_1fr_1fr_0.9fr_auto]"
+            : "lg:grid-cols-[1fr_auto_1fr_1fr_0.9fr]"
         )}
       >
         <div className="space-y-2">
@@ -119,21 +119,22 @@ export default function SearchForm({
           </Select>
         </div>
 
+        {/* Swap button in the middle */}
+        <div className="flex items-end pb-2">
+          <button
+            type="button"
+            className="inline-flex h-12 w-12 items-center justify-center rounded-full border-2 border-indigo-200 bg-indigo-50 text-indigo-600 transition hover:bg-indigo-100 hover:border-indigo-300 hover:scale-110"
+            onClick={() => {
+              setFrom(to);
+              setTo(from);
+            }}
+          >
+            <ArrowRightLeft className="size-5" />
+          </button>
+        </div>
+
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="to-city">To</Label>
-            <button
-              type="button"
-              className="inline-flex h-8 items-center gap-1 rounded-full px-3 text-xs font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
-              onClick={() => {
-                setFrom(to);
-                setTo(from);
-              }}
-            >
-              <ArrowRightLeft className="size-3.5" />
-              Swap
-            </button>
-          </div>
+          <Label htmlFor="to-city">To</Label>
           <Select value={to} onValueChange={(value) => value && setTo(value)}>
             <SelectTrigger
               id="to-city"

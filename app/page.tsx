@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Clock3, ShieldCheck, Sparkles, Ticket } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import SearchForm from "@/components/search-form";
 import { POPULAR_ROUTES } from "@/lib/constants";
@@ -11,50 +11,9 @@ export default function Home() {
 
   return (
     <div className="pb-20">
-      <section className="mx-auto grid w-full max-w-7xl gap-12 px-4 py-10 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-16">
-        <div className="space-y-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/80 px-4 py-2 text-sm text-muted-foreground shadow-sm">
-            <Sparkles className="size-4 text-primary" />
-            RedBus-inspired booking flow built for Cambodia routes
-          </div>
-
-          <div className="space-y-5">
-            <h1 className="max-w-3xl font-heading text-5xl font-semibold tracking-tight text-foreground sm:text-6xl">
-              Bus tickets with cleaner search, live seat maps, and faster checkout.
-            </h1>
-            <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
-              Search routes across Cambodia, compare departure times, and reserve
-              seats in a booking flow that feels light, fast, and easy to trust.
-            </p>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-[28px] border border-white/60 bg-white/80 p-5 shadow-lg shadow-red-950/5">
-              <Clock3 className="size-5 text-primary" />
-              <p className="mt-4 font-heading text-lg font-semibold">Fast search</p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Compare departures and available seats in one clean list.
-              </p>
-            </div>
-            <div className="rounded-[28px] border border-white/60 bg-white/80 p-5 shadow-lg shadow-red-950/5">
-              <Ticket className="size-5 text-primary" />
-              <p className="mt-4 font-heading text-lg font-semibold">Seat-first booking</p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Pick exact seats and see the ticket total update instantly.
-              </p>
-            </div>
-            <div className="rounded-[28px] border border-white/60 bg-white/80 p-5 shadow-lg shadow-red-950/5">
-              <ShieldCheck className="size-5 text-primary" />
-              <p className="mt-4 font-heading text-lg font-semibold">Secure account</p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Track bookings, cancellations, and admin operations in one place.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative">
-          <div className="absolute inset-x-8 top-8 -z-10 h-full rounded-[32px] bg-primary/10 blur-3xl" />
+      {/* Search Section */}
+      <section className="w-full bg-gradient-to-b from-slate-50 to-white px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+        <div className="mx-auto max-w-7xl">
           <SearchForm
             initialValues={{
               from: "Phnom Penh",
@@ -68,6 +27,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Popular Routes Section */}
       <section className="mx-auto mt-4 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="rounded-[32px] border border-white/60 bg-white/85 p-6 shadow-xl shadow-red-950/5 sm:p-8">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
