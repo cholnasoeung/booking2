@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import SearchForm from "@/components/search-form";
+import HeroSlider from "@/components/hero-slider";
+import Footer from "@/components/footer";
 import { POPULAR_ROUTES } from "@/lib/constants";
 import { getTomorrowDateInput } from "@/lib/date";
 import { formatCurrency } from "@/lib/formatters";
@@ -11,25 +13,30 @@ export default function Home() {
 
   return (
     <div className="pb-20">
+      {/* Hero Slider Section */}
+      <HeroSlider />
+
       {/* Search Section */}
-      <section className="w-full bg-gradient-to-b from-slate-50 to-white px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+      <section className="w-full bg-white px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16 -mt-8 relative z-30">
         <div className="mx-auto max-w-7xl">
-          <SearchForm
-            initialValues={{
-              from: "Phnom Penh",
-              to: "Siem Reap",
-              date: tomorrow,
-              passengers: 1,
-            }}
-            title="Search buses across Cambodia"
-            description="Choose your route, travel date, and passenger count to see departures that still have room."
-          />
+          <div className="rounded-[32px] bg-white p-6 shadow-xl sm:p-8">
+            <SearchForm
+              initialValues={{
+                from: "Phnom Penh",
+                to: "Siem Reap",
+                date: tomorrow,
+                passengers: 1,
+              }}
+              title="Search buses across Cambodia"
+              description="Choose your route, travel date, and passenger count to see departures that still have room."
+            />
+          </div>
         </div>
       </section>
 
       {/* Popular Routes Section */}
       <section className="mx-auto mt-4 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-[32px] border border-white/60 bg-white/85 p-6 shadow-xl shadow-red-950/5 sm:p-8">
+        <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-lg sm:p-8">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-medium uppercase tracking-[0.22em] text-muted-foreground">
@@ -49,7 +56,7 @@ export default function Home() {
               <Link
                 key={`${route.from}-${route.to}`}
                 href={`/search?from=${encodeURIComponent(route.from)}&to=${encodeURIComponent(route.to)}&date=${tomorrow}&passengers=1`}
-                className="group rounded-[28px] border border-border/70 bg-secondary/70 p-6 transition hover:-translate-y-0.5 hover:border-primary/30 hover:bg-white"
+                className="group rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md"
               >
                 <div className="flex items-center justify-between gap-4">
                   <p className="font-heading text-2xl font-semibold text-foreground">
@@ -61,7 +68,7 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="mt-6 flex items-center justify-between text-sm">
-                  <span className="rounded-full bg-white px-3 py-1 text-muted-foreground">
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-600">
                     {route.duration}
                   </span>
                   <span className="font-medium text-foreground">
@@ -73,6 +80,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
