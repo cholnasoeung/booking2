@@ -134,10 +134,10 @@ export default function HeroSlider() {
                   {slide.stats.map((stat, statIndex) => {
                     const Icon = stat.icon;
                     return (
-                      <div key={statIndex} className="flex items-center gap-3 rounded-full bg-white/10 px-5 py-3 backdrop-blur-sm border border-white/20">
-                        <Icon className="h-5 w-5 text-slate-200" />
+                      <div key={statIndex} className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm border border-white/20">
+                        <Icon className="h-4 w-4 text-slate-200" />
                         <div>
-                          <p className="text-xl font-bold text-white">{stat.value}</p>
+                          <p className="text-base font-bold text-white">{stat.value}</p>
                           <p className="text-xs text-slate-200">{stat.label}</p>
                         </div>
                       </div>
@@ -154,20 +154,20 @@ export default function HeroSlider() {
       <button
         type="button"
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 z-20 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm border border-white/20 transition hover:bg-white/20 hover:scale-110 sm:left-8"
+        className="absolute left-4 top-1/2 z-20 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm border border-white/20 transition hover:bg-white/20 hover:scale-110 sm:left-8"
       >
-        <ChevronLeft className="h-6 w-6" />
+        <ChevronLeft className="h-5 w-5" />
       </button>
       <button
         type="button"
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 z-20 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm border border-white/20 transition hover:bg-white/20 hover:scale-110 sm:right-8"
+        className="absolute right-4 top-1/2 z-20 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm border border-white/20 transition hover:bg-white/20 hover:scale-110 sm:right-8"
       >
-        <ChevronRight className="h-6 w-6" />
+        <ChevronRight className="h-5 w-5" />
       </button>
 
       {/* Slide Indicators */}
-      <div className="absolute bottom-8 left-1/2 z-20 flex -translate-x-1/2 gap-3">
+      <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 gap-3">
         {slides.map((_, index) => (
           <button
             key={index}
@@ -184,7 +184,7 @@ export default function HeroSlider() {
       </div>
 
       {/* Bottom Gradient Fade */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 h-32 bg-gradient-to-t from-white to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 z-20 h-24 bg-gradient-to-t from-white to-transparent" />
     </section>
   );
 }
