@@ -1,40 +1,26 @@
 import Link from "next/link";
-import { BusFront, Mail, Phone, MapPin, MessageCircle, Rss, Share2 } from "lucide-react";
+import { BusFront, Mail, Phone, MapPin } from "lucide-react";
 
-const footerLinks = {
-  company: [
-    { label: "About Us", href: "/about" },
-    { label: "Careers", href: "/careers" },
-    { label: "Blog", href: "/blog" },
-    { label: "Press", href: "/press" },
-  ],
-  support: [
-    { label: "Help Center", href: "/help" },
-    { label: "Contact Us", href: "/contact" },
-    { label: "FAQs", href: "/faq" },
-    { label: "Refund Policy", href: "/refund" },
-  ],
-  legal: [
-    { label: "Terms of Service", href: "/terms" },
-    { label: "Privacy Policy", href: "/privacy" },
-    { label: "Cookie Policy", href: "/cookies" },
-    { label: "Licenses", href: "/licenses" },
-  ],
-  popular: [
-    { label: "Phnom Penh to Siem Reap", href: "/search?from=Phnom+Penh&to=Siem+Reap" },
-    { label: "Phnom Penh to Sihanoukville", href: "/search?from=Phnom+Penh&to=Sihanoukville" },
-    { label: "Siem Reap to Battambang", href: "/search?from=Siem+Reap&to=Battambang" },
-    { label: "All Routes", href: "/routes" },
-  ],
-};
+const quickLinks = [
+  { label: "About Us", href: "/about" },
+  { label: "Contact", href: "/contact" },
+  { label: "FAQs", href: "/faq" },
+  { label: "Blog", href: "/blog" },
+];
+
+const legalLinks = [
+  { label: "Terms of Service", href: "/terms" },
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Refund Policy", href: "/refund" },
+];
 
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-slate-50">
+    <footer className="border-t border-slate-200 bg-white">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {/* Brand Column */}
-          <div className="lg:col-span-2">
+          <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white">
                 <BusFront className="h-6 w-6" />
@@ -47,57 +33,32 @@ export default function Footer() {
               </div>
             </div>
 
-            <p className="mt-4 max-w-sm text-sm text-slate-600 leading-relaxed">
-              Cambodia's leading bus ticket booking platform. Search, compare, and book bus tickets across all major destinations with ease.
+            <p className="max-w-sm text-sm text-slate-600 leading-relaxed">
+              Cambodia's leading bus ticket booking platform. Book your seats across 50+ routes with instant confirmation.
             </p>
 
             {/* Contact Info */}
-            <div className="mt-6 space-y-3">
-              <div className="flex items-center gap-3 text-sm text-slate-600">
+            <div className="space-y-2 text-sm text-slate-600">
+              <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-indigo-600" />
                 <span>+855 12 345 678</span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-slate-600">
+              <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-indigo-600" />
                 <span>support@cambodiabus.kh</span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-slate-600">
+              <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-indigo-600" />
                 <span>Phnom Penh, Cambodia</span>
               </div>
             </div>
-
-            {/* Social Links */}
-            <div className="mt-6 flex gap-3">
-              <a
-                href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-slate-600 transition hover:bg-indigo-600 hover:text-white"
-                aria-label="Contact"
-              >
-                <MessageCircle className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-slate-600 transition hover:bg-indigo-600 hover:text-white"
-                aria-label="Share"
-              >
-                <Share2 className="h-4 w-4" />
-              </a>
-              <a
-                href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-slate-600 transition hover:bg-indigo-600 hover:text-white"
-                aria-label="RSS"
-              >
-                <Rss className="h-4 w-4" />
-              </a>
-            </div>
           </div>
 
-          {/* Footer Links */}
+          {/* Quick Links */}
           <div>
-            <h4 className="mb-4 font-semibold text-slate-900">Company</h4>
+            <h4 className="mb-4 font-semibold text-slate-900">Quick Links</h4>
             <ul className="space-y-3">
-              {footerLinks.company.map((link) => (
+              {quickLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
@@ -110,42 +71,11 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h4 className="mb-4 font-semibold text-slate-900">Support</h4>
-            <ul className="space-y-3">
-              {footerLinks.support.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-slate-600 transition hover:text-indigo-600"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="mb-4 font-semibold text-slate-900">Popular Routes</h4>
-            <ul className="space-y-3">
-              {footerLinks.popular.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-slate-600 transition hover:text-indigo-600"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
+          {/* Legal */}
           <div>
             <h4 className="mb-4 font-semibold text-slate-900">Legal</h4>
             <ul className="space-y-3">
-              {footerLinks.legal.map((link) => (
+              {legalLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
@@ -165,15 +95,13 @@ export default function Footer() {
             <p className="text-sm text-slate-600">
               © {new Date().getFullYear()} CambodiaBus. All rights reserved.
             </p>
-            <div className="flex items-center gap-6">
-              <Link href="/privacy" className="text-sm text-slate-600 hover:text-indigo-600">
+            <div className="flex items-center gap-4 text-sm">
+              <Link href="/privacy" className="text-slate-600 hover:text-indigo-600">
                 Privacy
               </Link>
-              <Link href="/terms" className="text-sm text-slate-600 hover:text-indigo-600">
+              <span className="text-slate-300">|</span>
+              <Link href="/terms" className="text-slate-600 hover:text-indigo-600">
                 Terms
-              </Link>
-              <Link href="/cookies" className="text-sm text-slate-600 hover:text-indigo-600">
-                Cookies
               </Link>
             </div>
           </div>
