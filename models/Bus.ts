@@ -17,6 +17,7 @@ export interface IBus extends Document {
   totalSeats: number;
   bookedSeats: Array<string | number>;
   pricePerSeat: number;
+  amenities?: string[];
 }
 
 const BusSchema = new Schema<IBus>({
@@ -62,6 +63,10 @@ const BusSchema = new Schema<IBus>({
     type: Number,
     required: true,
     min: 1,
+  },
+  amenities: {
+    type: [String],
+    default: [],
   },
 });
 
