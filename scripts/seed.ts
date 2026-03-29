@@ -1,14 +1,36 @@
-import { hash } from "bcryptjs";
+import { loadEnvConfig } from "@next/env";
 import mongoose from "mongoose";
 
-import { getTomorrowDateInput, toTravelDate } from "../lib/date";
-import { connectToDatabase } from "../lib/mongodb";
-import BookingModel from "../models/Booking";
-import BusModel from "../models/Bus";
-import RouteModel from "../models/Route";
-import UserModel from "../models/User";
+loadEnvConfig(process.cwd());
+
+type RouteSeed = {
+  from: string;
+  to: string;
+  duration: string;
+  distance: number;
+};
 
 async function seed() {
+  const [
+    { hash },
+    { getTomorrowDateInput, toTravelDate },
+    { connectToDatabase },
+    { getSeatCodesFromLayout, getSeatLayoutTemplate },
+    { default: BookingModel },
+    { default: BusModel },
+    { default: RouteModel },
+    { default: UserModel },
+  ] = await Promise.all([
+    import("bcryptjs"),
+    import("../lib/date"),
+    import("../lib/mongodb"),
+    import("../lib/seat-layout"),
+    import("../models/Booking"),
+    import("../models/Bus"),
+    import("../models/Route"),
+    import("../models/User"),
+  ]);
+
   await connectToDatabase();
 
   await Promise.all([
@@ -38,7 +60,7 @@ async function seed() {
     },
   ]);
 
-  const routes = await RouteModel.create([
+  const routeSeeds: RouteSeed[] = [
     {
       from: "Phnom Penh",
       to: "Siem Reap",
@@ -69,18 +91,22 @@ async function seed() {
       duration: "8h 00m",
       distance: 410,
     },
-  ]);
+  ];
+
+  const routes = await RouteModel.create(routeSeeds);
 
   const tomorrow = getTomorrowDateInput();
   const busDate = toTravelDate(tomorrow);
   const buses = routes.flatMap((route, index) => {
-    const morningSeats = Array.from({ length: 16 }, (_, seat) => seat + 1);
-    const eveningSeats =
-      index === 1
-        ? Array.from({ length: 40 }, (_, seat) => seat + 1)
-        : index === 4
-          ? Array.from({ length: 38 }, (_, seat) => seat + 1)
-          : Array.from({ length: 10 }, (_, seat) => seat + 1);
+    const morningType =
+      index === 2 || index === 3 ? "car" : "mini_bus";
+    const eveningType =
+      index === 0 || index === 1 || index === 4 ? "sleeping_bus" : "mini_bus";
+
+    const morningLayout = getSeatLayoutTemplate(morningType);
+    const eveningLayout = getSeatLayoutTemplate(eveningType);
+    const morningSeatCodes = getSeatCodesFromLayout(morningLayout);
+    const eveningSeatCodes = getSeatCodesFromLayout(eveningLayout);
 
     return [
       {
@@ -97,8 +123,13 @@ async function seed() {
                 : route.to === "Kampot"
                   ? "11:40"
                   : "11:10",
-        totalSeats: 40,
-        bookedSeats: morningSeats,
+        busType: morningType,
+        seatLayout: morningLayout,
+        totalSeats: morningSeatCodes.length,
+        bookedSeats: morningSeatCodes.slice(
+          0,
+          morningType === "car" ? 2 : 6 + index
+        ),
         pricePerSeat:
           route.to === "Poipet"
             ? 24
@@ -124,8 +155,13 @@ async function seed() {
                 : route.to === "Kampot"
                   ? "21:40"
                   : "21:10",
-        totalSeats: 40,
-        bookedSeats: eveningSeats,
+        busType: eveningType,
+        seatLayout: eveningLayout,
+        totalSeats: eveningSeatCodes.length,
+        bookedSeats: eveningSeatCodes.slice(
+          0,
+          eveningType === "sleeping_bus" ? 7 + index : 4 + index
+        ),
         pricePerSeat:
           route.to === "Poipet"
             ? 25
@@ -145,7 +181,7 @@ async function seed() {
   console.log("Seed completed successfully.");
   console.log(`Routes: ${routes.length}`);
   console.log(`Buses: ${buses.length}`);
-  console.log(`Users: 2`);
+  console.log("Users: 2");
   console.log(`Admin: ${adminUser.email} / admin123`);
   console.log(`User: ${regularUser.email} / user123`);
   console.log(`Travel date: ${tomorrow}`);

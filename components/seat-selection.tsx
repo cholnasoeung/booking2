@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import SeatMap from "@/components/seat-map";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BUS_SEAT_COLUMNS } from "@/lib/constants";
-import { formatCurrency, formatSeatList } from "@/lib/formatters";
+import { compareSeatCodes } from "@/lib/seat-layout";
+import { formatBusType, formatCurrency, formatSeatList } from "@/lib/formatters";
 import type { BusSummary } from "@/lib/queries";
-import { cn } from "@/lib/utils";
 
 type SeatSelectionProps = {
   bus: BusSummary;
@@ -21,21 +21,20 @@ export default function SeatSelection({
   selectionLimit,
 }: SeatSelectionProps) {
   const router = useRouter();
-  const [selectedSeats, setSelectedSeats] = useState<number[]>([]);
+  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [isPending, setIsPending] = useState(false);
 
   const totalPrice = selectedSeats.length * bus.pricePerSeat;
-  const seatNumbers = Array.from({ length: bus.totalSeats }, (_, index) => index + 1);
 
-  function toggleSeat(seatNumber: number) {
-    if (bus.bookedSeats.includes(seatNumber) || isPending) {
+  function toggleSeat(seatCode: string) {
+    if (bus.bookedSeats.includes(seatCode) || isPending) {
       return;
     }
 
-    if (selectedSeats.includes(seatNumber)) {
+    if (selectedSeats.includes(seatCode)) {
       setSelectedSeats((current) =>
-        current.filter((currentSeat) => currentSeat !== seatNumber)
+        current.filter((currentSeat) => currentSeat !== seatCode)
       );
       setError("");
       return;
@@ -46,7 +45,7 @@ export default function SeatSelection({
       return;
     }
 
-    setSelectedSeats((current) => [...current, seatNumber].sort((a, b) => a - b));
+    setSelectedSeats((current) => [...current, seatCode].sort(compareSeatCodes));
     setError("");
   }
 
@@ -94,67 +93,30 @@ export default function SeatSelection({
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.5fr_0.9fr]">
+    <div className="grid gap-6 xl:grid-cols-[1.45fr_0.9fr]">
       <Card className="border-white/60 bg-white/90 shadow-xl shadow-red-950/5">
         <CardHeader className="space-y-3">
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary">Available</Badge>
-            <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
-              Green seats
-            </Badge>
-            <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">
-              Selected seats
-            </Badge>
-            <Badge className="bg-red-100 text-red-700 hover:bg-red-100">
-              Taken seats
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary">{formatBusType(bus.busType)}</Badge>
+            <Badge variant="outline">
+              {bus.seatsLeft} seat{bus.seatsLeft === 1 ? "" : "s"} left
             </Badge>
           </div>
           <CardTitle>Choose your seats</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Pick up to {selectionLimit} seat(s). The map updates as soon as your
-            booking is confirmed.
+            Pick up to {selectionLimit} seat(s). Seat colors update instantly to show
+            what&apos;s available, selected, and already taken.
           </p>
         </CardHeader>
         <CardContent>
-          <div className="mx-auto max-w-2xl rounded-[28px] border border-dashed border-border/80 bg-secondary/60 p-4 sm:p-6">
-            <div className="mx-auto mb-6 flex h-12 w-44 items-center justify-center rounded-full bg-background/80 text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground shadow-sm">
-              Driver Cabin
-            </div>
-            <div
-              className={cn(
-                "grid gap-3 sm:gap-4",
-                BUS_SEAT_COLUMNS === 4 ? "grid-cols-4" : "grid-cols-4"
-              )}
-            >
-              {seatNumbers.map((seatNumber) => {
-                const isBooked = bus.bookedSeats.includes(seatNumber);
-                const isSelected = selectedSeats.includes(seatNumber);
-
-                return (
-                  <Button
-                    key={seatNumber}
-                    type="button"
-                    variant="outline"
-                    className={cn(
-                      "h-14 rounded-2xl border text-sm font-semibold shadow-none",
-                      seatNumber % 4 === 2 ? "mr-4 sm:mr-6" : "",
-                      isBooked &&
-                        "border-red-200 bg-red-100 text-red-700 hover:bg-red-100",
-                      isSelected &&
-                        "border-amber-200 bg-amber-100 text-amber-900 hover:bg-amber-100",
-                      !isBooked &&
-                        !isSelected &&
-                        "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                    )}
-                    disabled={isBooked || isPending}
-                    onClick={() => toggleSeat(seatNumber)}
-                  >
-                    {seatNumber}
-                  </Button>
-                );
-              })}
-            </div>
-          </div>
+          <SeatMap
+            layout={bus.seatLayout}
+            bookedSeats={bus.bookedSeats}
+            selectedSeats={selectedSeats}
+            disabled={isPending}
+            onSeatToggle={toggleSeat}
+            showLegend
+          />
         </CardContent>
       </Card>
 
@@ -173,6 +135,10 @@ export default function SeatSelection({
           </div>
 
           <div className="space-y-3 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Bus type</span>
+              <span className="font-medium">{formatBusType(bus.busType)}</span>
+            </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Seat count</span>
               <span className="font-medium">{selectedSeats.length}</span>
@@ -207,7 +173,7 @@ export default function SeatSelection({
 
           <p className="text-xs leading-5 text-muted-foreground">
             Seats are confirmed on reservation. If another customer books the same
-            seat first, we&apos;ll ask you to pick again.
+            seat first, we&apos;ll ask you to pick again before checkout is finished.
           </p>
         </CardContent>
       </Card>

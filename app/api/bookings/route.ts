@@ -1,5 +1,6 @@
 import { getCurrentSession } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
+import { normalizeBusSeatLayout } from "@/lib/seat-layout";
 import { parseSeatSelection, isValidObjectId } from "@/lib/validation";
 import BookingModel from "@/models/Booking";
 import BusModel from "@/models/Bus";
@@ -27,13 +28,21 @@ export async function POST(request: Request) {
 
     await connectToDatabase();
 
-    const bus = await BusModel.findById(busId).lean();
+    const busDocument = await BusModel.findById(busId);
 
-    if (!bus) {
+    if (!busDocument) {
       return Response.json({ message: "Bus not found." }, { status: 404 });
     }
 
-    const invalidSeat = seats.find((seat) => seat > bus.totalSeats);
+    const normalizedBus = normalizeBusSeatLayout(busDocument.toObject());
+
+    busDocument.busType = normalizedBus.busType;
+    busDocument.seatLayout = normalizedBus.seatLayout;
+    busDocument.totalSeats = normalizedBus.totalSeats;
+    busDocument.bookedSeats = normalizedBus.bookedSeats;
+    await busDocument.save();
+
+    const invalidSeat = seats.find((seat) => !normalizedBus.seatCodes.includes(seat));
 
     if (invalidSeat) {
       return Response.json(
@@ -72,7 +81,7 @@ export async function POST(request: Request) {
       userId: session.user.id,
       busId,
       seats,
-      totalPrice: seats.length * bus.pricePerSeat,
+      totalPrice: seats.length * busDocument.pricePerSeat,
       status: "confirmed",
     });
 

@@ -1,5 +1,7 @@
 export const APP_NAME = "RedMiles Cambodia";
 
+export const BUS_TYPES = ["sleeping_bus", "mini_bus", "car"] as const;
+
 export const CITY_OPTIONS = [
   "Phnom Penh",
   "Siem Reap",

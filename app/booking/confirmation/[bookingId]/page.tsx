@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireUser } from "@/lib/auth";
 import {
+  formatBusType,
   formatCurrency,
   formatDateTime,
   formatSeatList,
@@ -64,11 +65,18 @@ export default async function ConfirmationPage({
               {booking.status}
             </Badge>
           </div>
-          <CardTitle className="text-3xl">
-            {booking.bus
-              ? `${booking.bus.from} to ${booking.bus.to}`
-              : "Bus details unavailable"}
-          </CardTitle>
+          <div className="space-y-3">
+            <CardTitle className="text-3xl">
+              {booking.bus
+                ? `${booking.bus.from} to ${booking.bus.to}`
+                : "Bus details unavailable"}
+            </CardTitle>
+            {booking.bus ? (
+              <Badge variant="secondary" className="w-fit">
+                {formatBusType(booking.bus.busType)}
+              </Badge>
+            ) : null}
+          </div>
         </CardHeader>
         <CardContent className="grid gap-6 py-6 md:grid-cols-2">
           <div className="space-y-4 rounded-[28px] bg-secondary/70 p-5">

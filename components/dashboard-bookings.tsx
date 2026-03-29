@@ -7,7 +7,12 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency, formatSeatList, formatTravelDate } from "@/lib/formatters";
+import {
+  formatBusType,
+  formatCurrency,
+  formatSeatList,
+  formatTravelDate,
+} from "@/lib/formatters";
 import type { BookingSummary } from "@/lib/queries";
 
 type DashboardBookingsProps = {
@@ -99,6 +104,9 @@ export default function DashboardBookings({
                     ? `${booking.bus.from} to ${booking.bus.to}`
                     : "Route unavailable"}
                 </p>
+                {booking.bus ? (
+                  <Badge variant="outline">{formatBusType(booking.bus.busType)}</Badge>
+                ) : null}
                 <Badge
                   variant={booking.status === "confirmed" ? "secondary" : "outline"}
                 >
@@ -107,7 +115,7 @@ export default function DashboardBookings({
               </div>
               <p className="text-sm text-muted-foreground">
                 {booking.bus
-                  ? `${formatTravelDate(booking.bus.travelDate)} • ${booking.bus.departureTime} to ${booking.bus.arrivalTime}`
+                  ? `${formatTravelDate(booking.bus.travelDate)} | ${booking.bus.departureTime} to ${booking.bus.arrivalTime}`
                   : "Bus details are no longer available."}
               </p>
               <p className="text-sm text-muted-foreground">

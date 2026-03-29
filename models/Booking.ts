@@ -5,7 +5,7 @@ export type BookingStatus = "confirmed" | "cancelled";
 export interface IBooking extends Document {
   userId: mongoose.Types.ObjectId;
   busId: mongoose.Types.ObjectId;
-  seats: number[];
+  seats: Array<string | number>;
   totalPrice: number;
   status: BookingStatus;
   createdAt: Date;
@@ -24,7 +24,7 @@ const BookingSchema = new Schema<IBooking>(
       required: true,
     },
     seats: {
-      type: [Number],
+      type: [Schema.Types.Mixed],
       required: true,
     },
     totalPrice: {

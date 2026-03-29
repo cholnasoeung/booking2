@@ -1,3 +1,5 @@
+import { compareSeatCodes, getBusTypeLabel, isBusType } from "@/lib/seat-layout";
+
 export function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -31,6 +33,14 @@ export function formatDateTime(value: Date | string) {
   }).format(date);
 }
 
-export function formatSeatList(seats: number[]) {
-  return [...seats].sort((first, second) => first - second).join(", ");
+export function formatSeatList(seats: Array<string | number>) {
+  return seats
+    .map((seat) => String(seat).trim())
+    .filter(Boolean)
+    .sort(compareSeatCodes)
+    .join(", ");
+}
+
+export function formatBusType(value: string) {
+  return isBusType(value) ? getBusTypeLabel(value) : "Bus";
 }

@@ -1,9 +1,14 @@
 import { notFound } from "next/navigation";
 
 import SeatSelection from "@/components/seat-selection";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireUser } from "@/lib/auth";
-import { formatCurrency, formatTravelDate } from "@/lib/formatters";
+import {
+  formatBusType,
+  formatCurrency,
+  formatTravelDate,
+} from "@/lib/formatters";
 import { getBusSummary } from "@/lib/queries";
 import { getFirstSearchParam, parsePassengerCount } from "@/lib/validation";
 
@@ -38,11 +43,14 @@ export default async function BookPage({
         <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
           Seat selection
         </p>
-        <h1 className="font-heading text-4xl font-semibold tracking-tight text-foreground">
-          {bus.from} to {bus.to}
-        </h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="font-heading text-4xl font-semibold tracking-tight text-foreground">
+            {bus.from} to {bus.to}
+          </h1>
+          <Badge variant="secondary">{formatBusType(bus.busType)}</Badge>
+        </div>
         <p className="text-sm text-muted-foreground">
-          {formatTravelDate(bus.travelDate)} • {bus.departureTime} to {bus.arrivalTime}
+          {formatTravelDate(bus.travelDate)} | {bus.departureTime} to {bus.arrivalTime}
         </p>
       </div>
 
@@ -52,6 +60,10 @@ export default async function BookPage({
             <CardTitle>Trip details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Bus type</span>
+              <span className="font-medium text-foreground">{formatBusType(bus.busType)}</span>
+            </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Duration</span>
               <span className="font-medium text-foreground">{bus.duration}</span>
@@ -81,6 +93,12 @@ export default async function BookPage({
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Requested seats</span>
               <span className="font-medium text-foreground">{passengers}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Layout style</span>
+              <span className="font-medium text-foreground">
+                {bus.templateStatus === "custom" ? "Custom" : "Template"}
+              </span>
             </div>
             {bus.seatsLeft < passengers ? (
               <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">

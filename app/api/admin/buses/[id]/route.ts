@@ -16,7 +16,10 @@ export const runtime = "nodejs";
 
 const TIME_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
-export async function POST(request: Request) {
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const session = await getCurrentSession();
 
   if (!session?.user?.id) {
@@ -25,9 +28,15 @@ export async function POST(request: Request) {
 
   if (session.user.role !== "admin") {
     return Response.json(
-      { message: "Only admins can create buses." },
+      { message: "Only admins can update buses." },
       { status: 403 }
     );
+  }
+
+  const { id } = await params;
+
+  if (!isValidObjectId(id)) {
+    return Response.json({ message: "Invalid bus id." }, { status: 400 });
   }
 
   try {
@@ -77,34 +86,42 @@ export async function POST(request: Request) {
 
     await connectToDatabase();
 
-    const route = await RouteModel.findById(routeId).lean();
+    const [route, existingBusDocument] = await Promise.all([
+      RouteModel.findById(routeId).lean(),
+      BusModel.findById(id),
+    ]);
 
     if (!route) {
       return Response.json({ message: "Route not found." }, { status: 404 });
     }
 
+    if (!existingBusDocument) {
+      return Response.json({ message: "Bus not found." }, { status: 404 });
+    }
+
     const normalizedBus = normalizeBusSeatLayout({
       busType,
       seatLayout: seatLayout ?? getSeatLayoutTemplate(busType),
-      totalSeats: 0,
-      bookedSeats: [],
+      totalSeats: existingBusDocument.totalSeats,
+      bookedSeats: existingBusDocument.bookedSeats,
     });
     const busDate = toTravelDate(date);
 
-    const existingBus = await BusModel.findOne({
+    const conflictingBus = await BusModel.findOne({
+      _id: { $ne: id },
       routeId,
       date: busDate,
       departureTime,
     }).lean();
 
-    if (existingBus) {
+    if (conflictingBus) {
       return Response.json(
-        { message: "A bus for that route and departure time already exists." },
+        { message: "A different bus already uses that route and departure time." },
         { status: 409 }
       );
     }
 
-    const bus = await BusModel.create({
+    existingBusDocument.set({
       routeId,
       date: busDate,
       departureTime,
@@ -115,23 +132,18 @@ export async function POST(request: Request) {
       bookedSeats: normalizedBus.bookedSeats,
       pricePerSeat,
     });
+    await existingBusDocument.save();
 
-    const busSummary = await getBusSummary(String(bus._id));
+    const busSummary = await getBusSummary(id);
 
-    return Response.json(
-      {
-        message: "Bus created successfully.",
-        bus: busSummary,
-      },
-      { status: 201 }
-    );
+    return Response.json({
+      message: "Bus updated successfully.",
+      bus: busSummary,
+    });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Unable to create the bus right now.";
+      error instanceof Error ? error.message : "Unable to update the bus right now.";
 
-    return Response.json(
-      { message },
-      { status: error instanceof Error ? 400 : 500 }
-    );
+    return Response.json({ message }, { status: error instanceof Error ? 400 : 500 });
   }
 }

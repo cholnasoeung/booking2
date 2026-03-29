@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 
 import { DEFAULT_PASSENGERS, MAX_SEATS_PER_BOOKING } from "@/lib/constants";
+import { compareSeatCodes, normalizeSeatCode } from "@/lib/seat-layout";
 
 export function getFirstSearchParam(
   value: string | string[] | undefined
@@ -43,10 +44,17 @@ export function parseSeatSelection(value: unknown) {
   }
 
   const seats = value
-    .map((seat) => Number(seat))
-    .filter((seat) => Number.isInteger(seat) && seat > 0);
+    .map((seat) => {
+      if (typeof seat !== "string") {
+        return null;
+      }
 
-  const uniqueSeats = [...new Set(seats)].sort((first, second) => first - second);
+      const normalizedSeat = normalizeSeatCode(seat);
+      return normalizedSeat || null;
+    })
+    .filter((seat): seat is string => Boolean(seat));
+
+  const uniqueSeats = [...new Set(seats)].sort(compareSeatCodes);
 
   if (uniqueSeats.length === 0 || uniqueSeats.length > MAX_SEATS_PER_BOOKING) {
     return null;

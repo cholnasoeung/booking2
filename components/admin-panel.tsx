@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { BusFront, MapPinned, Plus, Ticket } from "lucide-react";
+import { BusFront, MapPinned, PencilLine, Plus, Ticket } from "lucide-react";
 
+import AdminBusDialog from "@/components/admin-bus-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,13 +25,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -39,7 +33,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatCurrency, formatSeatList, formatTravelDate } from "@/lib/formatters";
+import {
+  formatBusType,
+  formatCurrency,
+  formatSeatList,
+  formatTravelDate,
+} from "@/lib/formatters";
 import type { AdminBookingSummary, BusSummary, RouteSummary } from "@/lib/queries";
 
 type AdminPanelProps = {
@@ -63,19 +62,10 @@ export default function AdminPanel({
   const router = useRouter();
   const [routeDialogOpen, setRouteDialogOpen] = useState(false);
   const [busDialogOpen, setBusDialogOpen] = useState(false);
+  const [selectedBus, setSelectedBus] = useState<BusSummary | null>(null);
   const [routeForm, setRouteForm] = useState(emptyRouteForm);
-  const [busForm, setBusForm] = useState({
-    routeId: routes[0]?.id ?? "",
-    date: "",
-    departureTime: "08:00",
-    arrivalTime: "14:00",
-    totalSeats: "40",
-    pricePerSeat: "18",
-  });
   const [routePending, setRoutePending] = useState(false);
-  const [busPending, setBusPending] = useState(false);
   const [routeError, setRouteError] = useState("");
-  const [busError, setBusError] = useState("");
 
   async function submitRoute(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -111,51 +101,6 @@ export default function AdminPanel({
     }
   }
 
-  async function submitBus(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setBusPending(true);
-    setBusError("");
-
-    try {
-      const response = await fetch("/api/admin/buses", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          routeId: busForm.routeId,
-          date: busForm.date,
-          departureTime: busForm.departureTime,
-          arrivalTime: busForm.arrivalTime,
-          totalSeats: Number(busForm.totalSeats),
-          pricePerSeat: Number(busForm.pricePerSeat),
-        }),
-      });
-
-      const payload = (await response.json()) as { message?: string };
-
-      if (!response.ok) {
-        setBusError(payload.message || "Unable to create the bus.");
-        return;
-      }
-
-      setBusDialogOpen(false);
-      setBusForm({
-        routeId: routes[0]?.id ?? "",
-        date: "",
-        departureTime: "08:00",
-        arrivalTime: "14:00",
-        totalSeats: "40",
-        pricePerSeat: "18",
-      });
-      router.refresh();
-    } catch {
-      setBusError("Unable to create the bus right now.");
-    } finally {
-      setBusPending(false);
-    }
-  }
-
   return (
     <>
       <Tabs defaultValue="routes" className="gap-5">
@@ -183,7 +128,12 @@ export default function AdminPanel({
                   Keep your city pairs, durations, and distance estimates current.
                 </CardDescription>
               </div>
-              <Button type="button" size="lg" className="rounded-full" onClick={() => setRouteDialogOpen(true)}>
+              <Button
+                type="button"
+                size="lg"
+                className="rounded-full"
+                onClick={() => setRouteDialogOpen(true)}
+              >
                 <Plus className="size-4" />
                 Add route
               </Button>
@@ -219,7 +169,8 @@ export default function AdminPanel({
               <div>
                 <CardTitle>Bus departures</CardTitle>
                 <CardDescription>
-                  Publish new schedules and monitor how many seats remain open.
+                  Publish schedules, assign the right vehicle type, and keep each
+                  departure&apos;s seat map polished.
                 </CardDescription>
               </div>
               <Button
@@ -227,39 +178,80 @@ export default function AdminPanel({
                 size="lg"
                 className="rounded-full"
                 disabled={routes.length === 0}
-                onClick={() => setBusDialogOpen(true)}
+                onClick={() => {
+                  setSelectedBus(null);
+                  setBusDialogOpen(true);
+                }}
               >
                 <Plus className="size-4" />
                 Add bus
               </Button>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Route</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Schedule</TableHead>
-                    <TableHead>Fare</TableHead>
-                    <TableHead>Seats left</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {buses.map((bus) => (
-                    <TableRow key={bus.id}>
-                      <TableCell>{`${bus.from} to ${bus.to}`}</TableCell>
-                      <TableCell>{formatTravelDate(bus.travelDate)}</TableCell>
-                      <TableCell>{`${bus.departureTime} to ${bus.arrivalTime}`}</TableCell>
-                      <TableCell>{formatCurrency(bus.pricePerSeat)}</TableCell>
-                      <TableCell>
-                        <Badge variant={bus.seatsLeft === 0 ? "outline" : "secondary"}>
-                          {bus.seatsLeft} left
-                        </Badge>
-                      </TableCell>
+              {buses.length === 0 ? (
+                <div className="rounded-[28px] border border-dashed border-border/80 bg-secondary/50 px-5 py-8 text-sm text-muted-foreground">
+                  Create your first departure to start selling seats. Each bus can
+                  now use a mini bus, sleeping bus, or car layout.
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Route</TableHead>
+                      <TableHead>Bus type</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Schedule</TableHead>
+                      <TableHead>Fare</TableHead>
+                      <TableHead>Seats</TableHead>
+                      <TableHead>Layout</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {buses.map((bus) => (
+                      <TableRow key={bus.id}>
+                        <TableCell>{`${bus.from} to ${bus.to}`}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">{formatBusType(bus.busType)}</Badge>
+                        </TableCell>
+                        <TableCell>{formatTravelDate(bus.travelDate)}</TableCell>
+                        <TableCell>{`${bus.departureTime} to ${bus.arrivalTime}`}</TableCell>
+                        <TableCell>{formatCurrency(bus.pricePerSeat)}</TableCell>
+                        <TableCell>
+                          <div className="space-y-1 text-sm">
+                            <p className="font-medium text-foreground">
+                              {bus.seatsLeft} left / {bus.totalSeats} total
+                            </p>
+                            <p className="text-muted-foreground">
+                              {bus.bookedSeats.length} booked
+                            </p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={bus.templateStatus === "custom" ? "outline" : "secondary"}>
+                            {bus.templateStatus === "custom" ? "Custom" : "Template"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="rounded-full"
+                            onClick={() => {
+                              setSelectedBus(bus);
+                              setBusDialogOpen(true);
+                            }}
+                          >
+                            <PencilLine className="size-4" />
+                            Edit
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -269,7 +261,8 @@ export default function AdminPanel({
             <CardHeader>
               <CardTitle>Customer bookings</CardTitle>
               <CardDescription>
-                Track confirmed tickets, cancellations, and route demand in one table.
+                Track confirmed tickets, cancellations, and demand across every
+                vehicle type.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -277,7 +270,7 @@ export default function AdminPanel({
                 <TableHeader>
                   <TableRow>
                     <TableHead>Passenger</TableHead>
-                    <TableHead>Route</TableHead>
+                    <TableHead>Trip</TableHead>
                     <TableHead>Seats</TableHead>
                     <TableHead>Total</TableHead>
                     <TableHead>Status</TableHead>
@@ -298,9 +291,23 @@ export default function AdminPanel({
                         </div>
                       </TableCell>
                       <TableCell>
-                        {booking.bus
-                          ? `${booking.bus.from} to ${booking.bus.to}`
-                          : "Unavailable"}
+                        {booking.bus ? (
+                          <div className="space-y-1">
+                            <p className="font-medium text-foreground">
+                              {booking.bus.from} to {booking.bus.to}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Badge variant="secondary">
+                                {formatBusType(booking.bus.busType)}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {booking.bus.departureTime} to {booking.bus.arrivalTime}
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          "Unavailable"
+                        )}
                       </TableCell>
                       <TableCell>{formatSeatList(booking.seats)}</TableCell>
                       <TableCell>{formatCurrency(booking.totalPrice)}</TableCell>
@@ -415,148 +422,18 @@ export default function AdminPanel({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={busDialogOpen} onOpenChange={setBusDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Add a new bus</DialogTitle>
-            <DialogDescription>
-              Publish a departure with its date, seats, and ticket price.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={submitBus} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="bus-route">Route</Label>
-              <Select
-                value={busForm.routeId}
-                onValueChange={(value) =>
-                  value
-                    ? setBusForm((current) => ({ ...current, routeId: value }))
-                    : undefined
-                }
-              >
-                <SelectTrigger
-                  id="bus-route"
-                  className="h-11 w-full rounded-2xl"
-                >
-                  <SelectValue placeholder="Select a route" />
-                </SelectTrigger>
-                <SelectContent>
-                  {routes.map((route) => (
-                    <SelectItem key={route.id} value={route.id}>
-                      {route.from} to {route.to}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+      <AdminBusDialog
+        open={busDialogOpen}
+        routes={routes}
+        bus={selectedBus}
+        onOpenChange={(open) => {
+          setBusDialogOpen(open);
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="space-y-2">
-                <Label htmlFor="bus-date">Date</Label>
-                <Input
-                  id="bus-date"
-                  type="date"
-                  value={busForm.date}
-                  onChange={(event) =>
-                    setBusForm((current) => ({ ...current, date: event.target.value }))
-                  }
-                  className="h-11 rounded-2xl"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bus-departure">Departure</Label>
-                <Input
-                  id="bus-departure"
-                  type="time"
-                  value={busForm.departureTime}
-                  onChange={(event) =>
-                    setBusForm((current) => ({
-                      ...current,
-                      departureTime: event.target.value,
-                    }))
-                  }
-                  className="h-11 rounded-2xl"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bus-arrival">Arrival</Label>
-                <Input
-                  id="bus-arrival"
-                  type="time"
-                  value={busForm.arrivalTime}
-                  onChange={(event) =>
-                    setBusForm((current) => ({
-                      ...current,
-                      arrivalTime: event.target.value,
-                    }))
-                  }
-                  className="h-11 rounded-2xl"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="bus-total-seats">Total seats</Label>
-                <Input
-                  id="bus-total-seats"
-                  type="number"
-                  min={1}
-                  value={busForm.totalSeats}
-                  onChange={(event) =>
-                    setBusForm((current) => ({
-                      ...current,
-                      totalSeats: event.target.value,
-                    }))
-                  }
-                  className="h-11 rounded-2xl"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bus-price">Price per seat</Label>
-                <Input
-                  id="bus-price"
-                  type="number"
-                  min={1}
-                  value={busForm.pricePerSeat}
-                  onChange={(event) =>
-                    setBusForm((current) => ({
-                      ...current,
-                      pricePerSeat: event.target.value,
-                    }))
-                  }
-                  className="h-11 rounded-2xl"
-                  required
-                />
-              </div>
-            </div>
-
-            {busError ? (
-              <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {busError}
-              </p>
-            ) : null}
-
-            <DialogFooter className="rounded-b-none border-0 bg-transparent p-0">
-              <Button
-                type="button"
-                variant="outline"
-                className="h-11 rounded-2xl"
-                onClick={() => setBusDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" className="h-11 rounded-2xl" disabled={busPending}>
-                {busPending ? "Creating..." : "Create bus"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+          if (!open) {
+            setSelectedBus(null);
+          }
+        }}
+      />
     </>
   );
 }

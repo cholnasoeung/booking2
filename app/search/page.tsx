@@ -2,9 +2,14 @@ import Link from "next/link";
 import { ArrowRight, BusFront } from "lucide-react";
 
 import SearchForm from "@/components/search-form";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getTomorrowDateInput, isValidDateInput } from "@/lib/date";
-import { formatCurrency, formatTravelDate } from "@/lib/formatters";
+import {
+  formatBusType,
+  formatCurrency,
+  formatTravelDate,
+} from "@/lib/formatters";
 import { searchBuses } from "@/lib/queries";
 import { getFirstSearchParam, parsePassengerCount } from "@/lib/validation";
 
@@ -57,7 +62,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         </h1>
         {hasSearch ? (
           <p className="text-sm text-muted-foreground">
-            {formatTravelDate(date)} • {passengers} passenger
+            {formatTravelDate(date)} | {passengers} passenger
             {passengers === 1 ? "" : "s"}
           </p>
         ) : null}
@@ -77,8 +82,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             <CardTitle>Start with a city pair and date</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            Use the search form above to compare buses, prices, and seats left for
-            your preferred route.
+            Use the search form above to compare buses, fares, layout styles, and
+            seats left for your preferred route.
           </CardContent>
         </Card>
       ) : null}
@@ -118,7 +123,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                     {bus.from} to {bus.to}
                   </p>
                 </div>
+                <Badge variant="secondary">{formatBusType(bus.busType)}</Badge>
               </div>
+
               <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
                 <span className="rounded-full bg-secondary px-3 py-1">{bus.duration}</span>
                 <span className="rounded-full bg-secondary px-3 py-1">
@@ -126,6 +133,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 </span>
                 <span className="rounded-full bg-secondary px-3 py-1">
                   {bus.seatsLeft} seat{bus.seatsLeft === 1 ? "" : "s"} left
+                </span>
+                <span className="rounded-full bg-secondary px-3 py-1">
+                  {bus.templateStatus === "custom" ? "Custom layout" : "Template layout"}
                 </span>
               </div>
             </div>
@@ -140,7 +150,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             </div>
 
             <div className="flex flex-col items-start justify-between gap-4 sm:items-end">
-              <div>
+              <div className="text-left sm:text-right">
                 <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                   Fare
                 </p>

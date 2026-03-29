@@ -1,5 +1,6 @@
 import { getCurrentSession } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
+import { normalizeBusSeatLayout, normalizeStoredSeatCodes } from "@/lib/seat-layout";
 import { isValidObjectId } from "@/lib/validation";
 import BookingModel from "@/models/Booking";
 import BusModel from "@/models/Bus";
@@ -48,6 +49,22 @@ export async function DELETE(
       );
     }
 
+    const busDocument = await BusModel.findById(existingBooking.busId);
+    const normalizedBus = busDocument
+      ? normalizeBusSeatLayout(busDocument.toObject())
+      : null;
+    const normalizedSeats = normalizedBus
+      ? normalizeStoredSeatCodes(existingBooking.seats, normalizedBus.seatLayout)
+      : existingBooking.seats.map((seat) => String(seat));
+
+    if (busDocument && normalizedBus) {
+      busDocument.busType = normalizedBus.busType;
+      busDocument.seatLayout = normalizedBus.seatLayout;
+      busDocument.totalSeats = normalizedBus.totalSeats;
+      busDocument.bookedSeats = normalizedBus.bookedSeats;
+      await busDocument.save();
+    }
+
     const cancelledBooking = await BookingModel.findOneAndUpdate(
       {
         _id: id,
@@ -55,6 +72,7 @@ export async function DELETE(
       },
       {
         status: "cancelled",
+        seats: normalizedSeats,
       },
       {
         new: true,
@@ -68,11 +86,13 @@ export async function DELETE(
       );
     }
 
-    await BusModel.findByIdAndUpdate(cancelledBooking.busId, {
-      $pullAll: {
-        bookedSeats: cancelledBooking.seats,
-      },
-    });
+    if (normalizedSeats.length > 0) {
+      await BusModel.findByIdAndUpdate(cancelledBooking.busId, {
+        $pullAll: {
+          bookedSeats: normalizedSeats,
+        },
+      });
+    }
 
     return Response.json({ message: "Booking cancelled successfully." });
   } catch {
