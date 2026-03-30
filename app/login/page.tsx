@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import Navbar from "@/components/navbar";
 import LoginForm from "@/components/login-form";
 import { getCurrentUser } from "@/lib/auth";
 import { getFirstSearchParam } from "@/lib/validation";
@@ -18,7 +19,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <div className="mx-auto grid min-h-[calc(100vh-6rem)] w-full max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8 lg:py-16">
+    <>
+      <Navbar />
+      <div className="mx-auto grid min-h-[calc(100vh-6rem)] w-full max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8 lg:py-16">
       <div className="flex flex-col justify-center gap-6">
         <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
           Account access
@@ -36,5 +39,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <LoginForm callbackUrl={callbackUrl} />
       </div>
     </div>
+    </>
   );
 }

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { BusFront, Home, LayoutDashboard, MapPinned, Menu, Ticket, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import AdminUserDropdown from "@/components/admin-user-dropdown";
 
 const navItems = [
   {
@@ -33,7 +34,12 @@ const navItems = [
   },
 ];
 
-export default function AdminSidebar() {
+type AdminSidebarProps = {
+  userName: string;
+  userEmail: string;
+};
+
+export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -142,14 +148,9 @@ export default function AdminSidebar() {
           </Link>
         </nav>
 
-        {/* Footer */}
-        <div className="border-t border-slate-700/50 p-4 bg-gradient-to-r from-slate-800 to-slate-900 lg:p-5">
-          <div className="rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-600/10 p-4 border border-indigo-500/20">
-            <p className="text-xs font-semibold text-indigo-400">💡 Pro Tip</p>
-            <p className="mt-1 text-[10px] text-slate-400 leading-relaxed">
-              Use keyboard shortcuts to navigate faster through the admin panel
-            </p>
-          </div>
+        {/* Footer with User Dropdown */}
+        <div className="border-t border-slate-700/50 p-3 bg-gradient-to-r from-slate-800 to-slate-900 lg:p-4">
+          <AdminUserDropdown userName={userName} userEmail={userEmail} />
         </div>
       </aside>
     </>

@@ -1,3 +1,4 @@
+import Navbar from "@/components/navbar";
 import SearchPageClient from "@/components/search-page-client";
 import { getTomorrowDateInput, isValidDateInput } from "@/lib/date";
 import { searchBuses } from "@/lib/queries";
@@ -35,25 +36,31 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   // Show empty state if no search yet or invalid date
   if (!hasSearch || invalidDate) {
     return (
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-        <SearchPageClient
-          initialBuses={[]}
-          from={from}
-          to={to}
-          date={date}
-          passengers={passengers}
-        />
-      </div>
+      <>
+        <Navbar />
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+          <SearchPageClient
+            initialBuses={[]}
+            from={from}
+            to={to}
+            date={date}
+            passengers={passengers}
+          />
+        </div>
+      </>
     );
   }
 
   return (
-    <SearchPageClient
-      initialBuses={buses}
-      from={from}
-      to={to}
-      date={date}
-      passengers={passengers}
-    />
+    <>
+      <Navbar />
+      <SearchPageClient
+        initialBuses={buses}
+        from={from}
+        to={to}
+        date={date}
+        passengers={passengers}
+      />
+    </>
   );
 }

@@ -39,9 +39,14 @@ export default async function Navbar() {
             Home
           </Link>
           {user ? (
-            <Link href="/dashboard" className={navLinkClass}>
-              My Bookings
-            </Link>
+            <>
+              <Link href="/dashboard" className={navLinkClass}>
+                My Bookings
+              </Link>
+              <Link href="/dashboard/profile" className={navLinkClass}>
+                Profile
+              </Link>
+            </>
           ) : null}
           {user?.role === "admin" ? (
             <Link href="/admin" className={navLinkClass}>

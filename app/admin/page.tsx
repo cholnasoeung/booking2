@@ -1,17 +1,18 @@
 import AdminPanel from "@/components/admin-panel";
 import AdminSidebar from "@/components/admin-sidebar";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin, getCurrentUser } from "@/lib/auth";
 import { getAdminSnapshot } from "@/lib/queries";
 import { BusFront, MapPinned, Ticket } from "lucide-react";
 
 export default async function AdminPage() {
   await requireAdmin("/dashboard");
   const snapshot = await getAdminSnapshot();
+  const user = await getCurrentUser();
 
   return (
     <div className="flex min-h-screen w-full">
       {/* Sidebar - Fixed, doesn't move */}
-      <AdminSidebar />
+      <AdminSidebar userName={user?.name || "Admin"} userEmail={user?.email || "admin@example.com"} />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:ml-64">

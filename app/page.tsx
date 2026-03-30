@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import Navbar from "@/components/navbar";
 import SearchForm from "@/components/search-form";
 import HeroSlider from "@/components/hero-slider";
 import AboutSection from "@/components/about-section";
@@ -16,7 +17,9 @@ export default function Home() {
   const tomorrow = getTomorrowDateInput();
 
   return (
-    <div className="pb-20">
+    <>
+      <Navbar />
+      <div className="pb-20">
       {/* Hero Slider Section */}
       <HeroSlider />
 
@@ -100,5 +103,6 @@ export default function Home() {
       {/* Footer */}
       <Footer />
     </div>
+    </>
   );
 }

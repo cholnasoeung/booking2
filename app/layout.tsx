@@ -59,8 +59,7 @@ export default function RootLayout({
               <div className="absolute inset-0 bg-gradient-to-br from-amber-50/30 via-transparent to-orange-50/30" />
             </div>
 
-            <Navbar />
-            <main className="relative">{children}</main>
+            {children}
           </div>
         </Providers>
       </body>
