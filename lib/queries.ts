@@ -385,3 +385,125 @@ export async function getAdminSnapshot() {
     ),
   };
 }
+
+export interface KPIMetrics {
+  revenueToday: {
+    value: number;
+    change: number;
+  };
+  bookingsToday: {
+    value: number;
+    change: number;
+  };
+  cancellations: {
+    value: number;
+    change: number;
+  };
+  pendingRefunds: {
+    value: number;
+  };
+}
+
+export async function getKPIMetrics(): Promise<KPIMetrics> {
+  await connectToDatabase();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  // Today's revenue
+  const revenueTodayResult = await BookingModel.aggregate([
+    {
+      $match: {
+        status: 'confirmed',
+        createdAt: { $gte: today }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: '$totalPrice' }
+      }
+    }
+  ]);
+
+  const revenueYesterdayResult = await BookingModel.aggregate([
+    {
+      $match: {
+        status: 'confirmed',
+        createdAt: { $gte: yesterday, $lt: today }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: '$totalPrice' }
+      }
+    }
+  ]);
+
+  const revenueToday = revenueTodayResult[0]?.total || 0;
+  const revenueYesterday = revenueYesterdayResult[0]?.total || 0;
+  const revenueChange = revenueYesterday > 0
+    ? Math.round(((revenueToday - revenueYesterday) / revenueYesterday) * 100)
+    : 0;
+
+  // Today's bookings
+  const bookingsToday = await BookingModel.countDocuments({
+    status: 'confirmed',
+    createdAt: { $gte: today }
+  });
+
+  const bookingsYesterday = await BookingModel.countDocuments({
+    status: 'confirmed',
+    createdAt: { $gte: yesterday, $lt: today }
+  });
+
+  const bookingsChange = bookingsYesterday > 0
+    ? Math.round(((bookingsToday - bookingsYesterday) / bookingsYesterday) * 100)
+    : 0;
+
+  // Today's cancellations
+  const cancellationsToday = await BookingModel.countDocuments({
+    status: 'cancelled',
+    updatedAt: { $gte: today }
+  });
+
+  const cancellationsYesterday = await BookingModel.countDocuments({
+    status: 'cancelled',
+    updatedAt: { $gte: yesterday, $lt: today }
+  });
+
+  const cancellationsChange = cancellationsYesterday > 0
+    ? Math.round(((cancellationsToday - cancellationsYesterday) / cancellationsYesterday) * 100)
+    : 0;
+
+  // Pending refunds
+  const pendingRefunds = await BookingModel.countDocuments({
+    status: 'cancelled',
+    $or: [
+      { refundStatus: { $exists: false } },
+      { refundStatus: 'pending' }
+    ]
+  });
+
+  return {
+    revenueToday: {
+      value: revenueToday,
+      change: revenueChange
+    },
+    bookingsToday: {
+      value: bookingsToday,
+      change: bookingsChange
+    },
+    cancellations: {
+      value: cancellationsToday,
+      change: cancellationsChange
+    },
+    pendingRefunds: {
+      value: pendingRefunds
+    }
+  };
+}
