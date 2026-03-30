@@ -7,6 +7,7 @@ import { ArrowUpDown, SlidersHorizontal } from "lucide-react";
 import SearchFilters, {
   type FilterState,
   type BusTypeFilter,
+  TIME_SLOTS,
 } from "@/components/search-filters";
 import { Button } from "@/components/ui/button";
 import SearchForm from "@/components/search-form";
@@ -77,7 +78,7 @@ export default function SearchPageClient({
       filtered = filtered.filter((bus) => {
         const hour = Number.parseInt(bus.departureTime.split(":")[0]);
         return filters.timeSlots.some((slotId) => {
-          const slot = SearchFilters.TIME_SLOTS.find((s) => s.id === slotId);
+          const slot = TIME_SLOTS.find((s) => s.id === slotId);
           if (!slot) return false;
           const [start, end] = slot.hours;
           if (start < end) {

@@ -82,19 +82,19 @@ export default function HeroSlider() {
   }
 
   return (
-    <section className="relative h-[280px] overflow-hidden sm:h-[320px] lg:h-[360px]">
+    <section className="relative h-[350px] overflow-hidden sm:h-[400px] lg:h-[480px]">
       {slides.map((slide, index) => (
         <div
           key={slide.id}
           className={cn(
-            "absolute inset-0 transition-opacity duration-500",
-            index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
+            "absolute inset-0 transition-all duration-700 ease-out",
+            index === currentSlide ? "opacity-100 scale-100 z-10" : "opacity-0 scale-105 z-0"
           )}
         >
           {/* Background Image */}
           <div
             className={cn(
-              "absolute inset-0 bg-cover bg-center transition-transform duration-[2000ms]",
+              "absolute inset-0 bg-cover bg-center transition-transform duration-[3000ms] ease-out",
               isAnimating && index === currentSlide && "scale-110"
             )}
             style={{ backgroundImage: `url(${slide.image})` }}
@@ -102,7 +102,7 @@ export default function HeroSlider() {
 
           {/* Gradient Overlay */}
           <div className={cn(
-            "absolute inset-0 bg-gradient-to-r opacity-90",
+            "absolute inset-0 bg-gradient-to-br opacity-95",
             slide.gradient
           )} />
 
@@ -111,34 +111,34 @@ export default function HeroSlider() {
 
           {/* Content */}
           <div className="relative mx-auto h-full max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-full flex-col justify-center py-6">
-              <div className="max-w-3xl space-y-3 animate-slide-up">
+            <div className="flex h-full flex-col justify-center py-8 sm:py-10">
+              <div className="max-w-3xl space-y-4 animate-slide-up">
                 {/* Badge */}
-                <div className="inline-flex animate-fade-in items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm border border-white/20">
-                  <span className="flex h-2 w-2 animate-pulse rounded-full bg-slate-300" />
+                <div className="inline-flex animate-fade-in items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-xs font-bold text-white backdrop-blur-md border-2 border-white/30 shadow-lg">
+                  <span className="flex h-2.5 w-2.5 animate-pulse rounded-full bg-amber-300 shadow-glow" />
                   {slide.subtitle}
                 </div>
 
                 {/* Title */}
-                <h1 className="font-heading text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl animate-fade-in-delayed">
+                <h1 className="font-heading text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl animate-fade-in-delayed drop-shadow-2xl">
                   {slide.title}
                 </h1>
 
                 {/* Description */}
-                <p className="max-w-2xl text-sm text-white/90 animate-fade-in-delayed-2">
+                <p className="max-w-2xl text-base text-white/95 animate-fade-in-delayed-2 font-medium leading-relaxed">
                   {slide.description}
                 </p>
 
                 {/* Stats */}
-                <div className="flex flex-wrap gap-3 pt-1 animate-fade-in-delayed-3">
+                <div className="flex flex-wrap gap-4 pt-2 animate-fade-in-delayed-3">
                   {slide.stats.map((stat, statIndex) => {
                     const Icon = stat.icon;
                     return (
-                      <div key={statIndex} className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 backdrop-blur-sm border border-white/20">
-                        <Icon className="h-3.5 w-3.5 text-slate-200" />
+                      <div key={statIndex} className="flex items-center gap-2.5 rounded-full bg-white/15 px-4 py-2 backdrop-blur-md border-2 border-white/30 shadow-lg transition hover:bg-white/20 hover:scale-105">
+                        <Icon className="h-4 w-4 text-amber-300" />
                         <div>
-                          <p className="text-sm font-bold text-white">{stat.value}</p>
-                          <p className="text-xs text-slate-200">{stat.label}</p>
+                          <p className="text-base font-bold text-white">{stat.value}</p>
+                          <p className="text-xs text-white/80">{stat.label}</p>
                         </div>
                       </div>
                     );
@@ -154,37 +154,37 @@ export default function HeroSlider() {
       <button
         type="button"
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 z-20 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm border border-white/20 transition hover:bg-white/20 hover:scale-110 sm:left-8"
+        className="absolute left-4 top-1/2 z-20 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md border-2 border-white/30 shadow-lg transition hover:bg-white/25 hover:scale-110 active:scale-95 sm:left-8"
       >
-        <ChevronLeft className="h-4 w-4" />
+        <ChevronLeft className="h-5 w-5" />
       </button>
       <button
         type="button"
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 z-20 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm border border-white/20 transition hover:bg-white/20 hover:scale-110 sm:right-8"
+        className="absolute right-4 top-1/2 z-20 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-md border-2 border-white/30 shadow-lg transition hover:bg-white/25 hover:scale-110 active:scale-95 sm:right-8"
       >
-        <ChevronRight className="h-4 w-4" />
+        <ChevronRight className="h-5 w-5" />
       </button>
 
       {/* Slide Indicators */}
-      <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-2">
+      <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 gap-2.5">
         {slides.map((_, index) => (
           <button
             key={index}
             type="button"
             onClick={() => goToSlide(index)}
             className={cn(
-              "h-2 rounded-full transition-all duration-300",
+              "h-2.5 rounded-full transition-all duration-300 ease-out",
               index === currentSlide
-                ? "w-8 bg-white/90"
-                : "w-2 bg-white/40 hover:bg-white/60"
+                ? "w-10 bg-white shadow-glow"
+                : "w-2.5 bg-white/40 hover:bg-white/60 hover:w-4"
             )}
           />
         ))}
       </div>
 
       {/* Bottom Gradient Fade */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 h-16 bg-gradient-to-t from-white to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 z-20 h-24 bg-gradient-to-t from-white via-white/80 to-transparent" />
     </section>
   );
 }

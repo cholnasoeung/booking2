@@ -15,7 +15,7 @@ const Slider = React.forwardRef<
   }
 >(
   (
-    { className, value = [0], onValueChange, min = 0, max = 100, step = 1, disabled = false, ...props },
+    { className, value = [0, 100], onValueChange, min = 0, max = 100, step = 1, disabled = false, ...props },
     ref
   ) => {
     const percentage = (value[0] - min) / (max - min) * 100;
@@ -23,20 +23,15 @@ const Slider = React.forwardRef<
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
       const newValue = Number(e.target.value);
-      const range = value[1] - value[0];
 
       if (e.target.id === "min") {
-        if (newValue > value[1] - step) {
-          onChange?.([value[1] - range, value[1]]);
-        } else {
-          onChange?.([newValue, value[1]]);
-        }
+        // Prevent min from crossing max
+        const clampedValue = Math.min(newValue, value[1] - step);
+        onValueChange?.([clampedValue, value[1]]);
       } else {
-        if (newValue < value[0] + step) {
-          onChange?.([value[0], value[0] + step]);
-        } else {
-          onChange?.([value[0], newValue]);
-        }
+        // Prevent max from crossing min
+        const clampedValue = Math.max(newValue, value[0] + step);
+        onValueChange?.([value[0], clampedValue]);
       }
     }
 
@@ -68,10 +63,10 @@ const Slider = React.forwardRef<
           value={value[0]}
           disabled={disabled}
           onChange={handleChange}
-          className="absolute w-full h-5 opacity-0 cursor-pointer"
+          className="absolute w-full h-5 opacity-0 cursor-pointer z-10"
           style={{
             left: 0,
-            right: `${100 - percentageEnd}%`,
+            right: 0,
           }}
         />
 
@@ -85,20 +80,20 @@ const Slider = React.forwardRef<
           value={value[1]}
           disabled={disabled}
           onChange={handleChange}
-          className="absolute w-full h-5 opacity-0 cursor-pointer"
+          className="absolute w-full h-5 opacity-0 cursor-pointer z-10"
           style={{
-            left: `${percentage}%`,
+            left: 0,
             right: 0,
           }}
         />
 
         {/* Thumbs */}
         <div
-          className="absolute h-5 w-5 bg-white border-2 border-indigo-500 rounded-full shadow-md cursor-grab active:scale-110 transition-transform"
+          className="absolute h-5 w-5 bg-white border-2 border-indigo-500 rounded-full shadow-md cursor-grab active:scale-110 transition-transform pointer-events-none z-20"
           style={{ left: `calc(${percentage}% - 10px)` }}
         />
         <div
-          className="absolute h-5 w-5 bg-white border-2 border-indigo-500 rounded-full shadow-md cursor-grab active:scale-110 transition-transform"
+          className="absolute h-5 w-5 bg-white border-2 border-indigo-500 rounded-full shadow-md cursor-grab active:scale-110 transition-transform pointer-events-none z-20"
           style={{ left: `calc(${percentageEnd}% - 10px)` }}
         />
       </div>
