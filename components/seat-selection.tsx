@@ -116,8 +116,13 @@ export default function SeatSelection({
               <span className="text-muted-foreground">Price per seat</span>
               <span className="font-medium">{formatCurrency(bus.pricePerSeat)}</span>
             </div>
+            {selectedSeats.length > 0 && (
+              <div className="rounded-xl bg-slate-100 px-3 py-2 text-xs text-slate-600">
+                Calculation: {selectedSeats.length} seat{selectedSeats.length > 1 ? 's' : ''} × {formatCurrency(bus.pricePerSeat)} = {formatCurrency(totalPrice)}
+              </div>
+            )}
             <div className="flex items-center justify-between border-t border-border pt-3">
-              <span className="text-muted-foreground">Total</span>
+              <span className="text-muted-foreground font-medium">Total</span>
               <span className="font-heading text-2xl font-semibold text-foreground">
                 {formatCurrency(totalPrice)}
               </span>

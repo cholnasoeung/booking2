@@ -16,12 +16,13 @@ async function createBooking(
   busId: string,
   userId: string,
   selectedSeats: string[],
-  passengers: Passenger[]
+  passengers: Passenger[],
+  pricePerSeat: number
 ) {
   "use server";
 
   const { createBooking } = await import("@/lib/actions");
-  const totalPrice = passengers.length * 25; // Will be dynamic
+  const totalPrice = passengers.length * pricePerSeat;
 
   try {
     const booking = await createBooking({
@@ -33,9 +34,12 @@ async function createBooking(
     });
 
     return { success: true, bookingId: booking.id };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Booking creation error:", error);
-    return { success: false, error: "Failed to create booking" };
+    return {
+      success: false,
+      error: error?.message || "Failed to create booking. Please try again."
+    };
   }
 }
 
@@ -70,13 +74,8 @@ export default async function PassengersPage({ params, searchParams }: Passenger
   async function handlePassengerSubmit(passengers: Passenger[]) {
     "use server";
 
-    const result = await createBooking(busId, user.id, selectedSeats, passengers);
-
-    if (result.success && result.bookingId) {
-      redirect(`/booking/confirmation/${result.bookingId}`);
-    } else {
-      redirect(`/book/${busId}?error=booking_failed`);
-    }
+    const result = await createBooking(busId, user.id, selectedSeats, passengers, bus.pricePerSeat);
+    return result;
   }
 
   return (
@@ -96,6 +95,7 @@ export default async function PassengersPage({ params, searchParams }: Passenger
           <PassengerDetailsForm
             selectedSeats={selectedSeats}
             seatLabels={selectedSeats}
+            pricePerSeat={bus.pricePerSeat}
             onSubmit={handlePassengerSubmit}
           />
         </div>

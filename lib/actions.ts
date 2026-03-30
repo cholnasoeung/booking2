@@ -26,6 +26,8 @@ type CreateBookingResult = {
   seats: string[];
   passengers: Passenger[];
   totalPrice: number;
+  discountAmount: number;
+  finalPrice: number;
   status: string;
   createdAt: Date;
 };
@@ -87,6 +89,8 @@ export async function createBooking(input: CreateBookingInput) {
     seats: input.seats,
     passengers: input.passengers,
     totalPrice: input.totalPrice,
+    discountAmount: 0,
+    finalPrice: input.totalPrice,
     status: "confirmed",
   });
 
@@ -108,6 +112,8 @@ export async function createBooking(input: CreateBookingInput) {
     seats: booking.seats,
     passengers: booking.passengers as unknown as Passenger[],
     totalPrice: booking.totalPrice,
+    discountAmount: booking.discountAmount,
+    finalPrice: booking.finalPrice,
     status: booking.status,
     createdAt: booking.createdAt,
   };

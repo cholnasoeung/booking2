@@ -22,7 +22,8 @@ import type { Passenger } from "@/types/passenger";
 type PassengerDetailsFormProps = {
   selectedSeats: string[];
   seatLabels?: string[];
-  onSubmit: (passengers: Passenger[]) => void;
+  pricePerSeat?: number;
+  onSubmit: (passengers: Passenger[]) => Promise<{ success: boolean; bookingId?: string; error?: string }>;
   onCancel?: () => void;
   isSubmitting?: boolean;
 };
@@ -36,6 +37,7 @@ const GENDER_OPTIONS = [
 export default function PassengerDetailsForm({
   selectedSeats,
   seatLabels = selectedSeats,
+  pricePerSeat = 25,
   onSubmit,
   onCancel,
   isSubmitting = false,
@@ -48,6 +50,7 @@ export default function PassengerDetailsForm({
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [submitError, setSubmitError] = useState("");
 
   // Initialize passengers based on selected seats
   useEffect(() => {
@@ -136,7 +139,7 @@ export default function PassengerDetailsForm({
     return Object.keys(newErrors).length === 0;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     // Mark all fields as touched
@@ -153,7 +156,16 @@ export default function PassengerDetailsForm({
       return;
     }
 
-    onSubmit(passengers);
+    setSubmitError("");
+
+    const result = await onSubmit(passengers);
+
+    // If successful, redirect to confirmation page
+    if (result.success && result.bookingId) {
+      router.push(`/booking/confirmation/${result.bookingId}`);
+    } else if (result.error) {
+      setSubmitError(result.error);
+    }
   }
 
   function handleBack() {
@@ -164,7 +176,7 @@ export default function PassengerDetailsForm({
     }
   }
 
-  const totalPrice = passengers.length * 25; // Will be dynamic based on bus price
+  const totalPrice = passengers.length * pricePerSeat;
 
   return (
     <div className="w-full">
@@ -224,6 +236,23 @@ export default function PassengerDetailsForm({
           </CardContent>
         </Card>
 
+        {/* Submit Error */}
+        {submitError && (
+          <Card className="border-red-200 bg-red-50">
+            <CardContent className="flex items-start gap-3 p-4">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-500 text-white mt-0.5">
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <div className="flex-1 text-sm text-red-800">
+                <p className="font-semibold">Booking Failed</p>
+                <p className="text-red-700">{submitError}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Action Buttons */}
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
           <Button
@@ -244,7 +273,7 @@ export default function PassengerDetailsForm({
             <Button
               type="submit"
               className="h-12 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-8 shadow-lg hover:shadow-xl transition-all"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !!submitError}
             >
               {isSubmitting ? (
                 <>
