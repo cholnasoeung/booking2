@@ -4,6 +4,8 @@ import { normalizeBusSeatLayout } from "@/lib/seat-layout";
 import { parseSeatSelection, isValidObjectId } from "@/lib/validation";
 import BookingModel from "@/models/Booking";
 import BusModel from "@/models/Bus";
+import PromoCodeModel from "@/models/PromoCode";
+import { sendBookingConfirmationEmail } from "@/lib/email-service";
 
 export const runtime = "nodejs";
 
@@ -18,6 +20,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const busId = typeof body?.busId === "string" ? body.busId : "";
     const seats = parseSeatSelection(body?.seats);
+    const promoCode = typeof body?.promoCode === "string" ? body.promoCode : undefined;
+    const passengers = body?.passengers || [];
 
     if (!isValidObjectId(busId) || !seats) {
       return Response.json(
@@ -26,22 +30,26 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!seats || seats.length === 0) {
+      return Response.json(
+        { message: "Please select at least one seat." },
+        { status: 400 }
+      );
+    }
+
     await connectToDatabase();
 
-    const busDocument = await BusModel.findById(busId);
+    // Fetch bus with route information
+    const busDocument = await BusModel.findById(busId).populate("routeId");
 
     if (!busDocument) {
       return Response.json({ message: "Bus not found." }, { status: 404 });
     }
 
+    // Normalize bus seat layout
     const normalizedBus = normalizeBusSeatLayout(busDocument.toObject());
 
-    busDocument.busType = normalizedBus.busType;
-    busDocument.seatLayout = normalizedBus.seatLayout;
-    busDocument.totalSeats = normalizedBus.totalSeats;
-    busDocument.bookedSeats = normalizedBus.bookedSeats;
-    await busDocument.save();
-
+    // Validate seats exist
     const invalidSeat = seats.find((seat) => !normalizedBus.seatCodes.includes(seat));
 
     if (invalidSeat) {
@@ -51,51 +59,122 @@ export async function POST(request: Request) {
       );
     }
 
-    const updatedBus = await BusModel.findOneAndUpdate(
-      {
-        _id: busId,
-        bookedSeats: {
-          $nin: seats,
-        },
-      },
-      {
-        $addToSet: {
-          bookedSeats: {
-            $each: seats,
-          },
-        },
-      },
-      {
-        new: true,
-      }
-    );
+    // Check real-time seat availability
+    const availability = await BookingModel.checkSeatAvailability(busId, seats);
 
-    if (!updatedBus) {
+    if (!availability.available) {
       return Response.json(
-        { message: "One or more selected seats were just booked by another user." },
+        {
+          message: "Some seats are no longer available.",
+          unavailableSeats: availability.unavailableSeats,
+        },
         { status: 409 }
       );
     }
 
+    // Calculate pricing
+    const totalPrice = seats.length * busDocument.pricePerSeat;
+    let discountAmount = 0;
+    let appliedPromoCode = null;
+
+    // Apply promo code if provided
+    if (promoCode) {
+      const promo = await PromoCodeModel.findOne({ code: promoCode.toUpperCase() });
+
+      if (promo) {
+        const discountResult = promo.calculateDiscount(totalPrice);
+
+        if (discountResult.valid) {
+          discountAmount = discountResult.discount;
+          appliedPromoCode = promo.code;
+
+          // Increment promo code usage
+          await promo.incrementUsage();
+        }
+      }
+    }
+
+    const finalPrice = totalPrice - discountAmount;
+
+    // Atomically book seats and create booking
+    const updatedBus = await BusModel.findOneAndUpdate(
+      {
+        _id: busId,
+        bookedSeats: { $nin: seats },
+      },
+      {
+        $addToSet: { bookedSeats: { $each: seats } },
+      },
+      { new: true }
+    );
+
+    if (!updatedBus) {
+      return Response.json(
+        { message: "Seats were just booked by another user. Please try again." },
+        { status: 409 }
+      );
+    }
+
+    // Create booking
     const booking = await BookingModel.create({
       user: session.user.id,
       bus: busId,
       seats,
-      passengers: [], // Will be filled in passenger details step
-      totalPrice: seats.length * busDocument.pricePerSeat,
+      passengers,
+      totalPrice,
+      discountAmount,
+      finalPrice,
+      promoCode: appliedPromoCode,
       status: "confirmed",
+      paymentStatus: "paid",
+      metadata: {
+        bookingSource: "web",
+      },
     });
+
+    // Send confirmation email
+    const UserModel = require("@/models/User").default;
+    const user = await UserModel.findById(session.user.id);
+
+    if (user) {
+      // Get route information
+      const route = (busDocument as any).routeId;
+      const routeStr = route ? `${route.from} to ${route.to}` : "Unknown Route";
+
+      await sendBookingConfirmationEmail(user.email, {
+        customerName: user.name,
+        bookingId: String(booking._id),
+        route: routeStr,
+        busType: busDocument.busType,
+        date: busDocument.date.toISOString().split('T')[0],
+        departureTime: busDocument.departureTime,
+        arrivalTime: busDocument.arrivalTime,
+        seats,
+        passengers: passengers.map(p => ({
+          name: p.name,
+          age: p.age,
+          gender: p.gender,
+        })),
+        totalPrice,
+        discountAmount: discountAmount > 0 ? discountAmount : undefined,
+        finalPrice,
+      }).catch(err => console.error('Failed to send confirmation email:', err));
+    }
 
     return Response.json(
       {
-        message: "Booking confirmed.",
+        message: "Booking confirmed successfully.",
         bookingId: String(booking._id),
+        finalPrice,
+        discountAmount,
+        seats,
       },
       { status: 201 }
     );
-  } catch {
+  } catch (error) {
+    console.error('Booking error:', error);
     return Response.json(
-      { message: "Unable to complete your booking right now." },
+      { message: error instanceof Error ? error.message : "Unable to complete your booking right now." },
       { status: 500 }
     );
   }

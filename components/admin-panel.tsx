@@ -7,6 +7,13 @@ import AdminBookingsManager from "@/components/admin-bookings-manager";
 import AdminBusesManager from "@/components/admin-buses-manager";
 import AdminOverviewTab from "@/components/admin-overview-tab";
 import AdminRoutesManager from "@/components/admin-routes-manager";
+import AdminAnalyticsTab from "@/components/admin-analytics-tab";
+import AdminPromoCodesTab from "@/components/admin-promo-codes-tab";
+import AdminImportExportTab from "@/components/admin-import-export-tab";
+import AdminAlertsTab from "@/components/admin-alerts-tab";
+import AdminAuditLogsTab from "@/components/admin-audit-logs-tab";
+import AdminSecurityTab from "@/components/admin-security-tab";
+import AdminSystemStatusTab from "@/components/admin-system-status-tab";
 import type { AdminBookingSummary, BusSummary, RouteSummary } from "@/lib/queries";
 
 type FeedbackState =
@@ -69,6 +76,20 @@ export default function AdminPanel({
       {activeTab === "bookings" ? (
         <AdminBookingsManager routes={routes} bookings={bookings} />
       ) : null}
+
+      {activeTab === "analytics" ? <AdminAnalyticsTab /> : null}
+
+      {activeTab === "promo-codes" ? <AdminPromoCodesTab /> : null}
+
+      {activeTab === "import-export" ? <AdminImportExportTab /> : null}
+
+      {activeTab === "alerts" ? <AdminAlertsTab /> : null}
+
+      {activeTab === "audit-logs" ? <AdminAuditLogsTab /> : null}
+
+      {activeTab === "security" ? <AdminSecurityTab /> : null}
+
+      {activeTab === "system-status" ? <AdminSystemStatusTab /> : null}
     </div>
   );
 }
