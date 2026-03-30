@@ -84,10 +84,10 @@ export default function HeroSearchForm({ onRouteSelect }: HeroSearchFormProps) {
                   <select
                     value={fromCity}
                     onChange={(e) => setFromCity(e.target.value)}
-                    className="w-full rounded-xl border border-white/20 bg-white/5 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all appearance-none cursor-pointer [color-scheme:dark]"
+                    className="w-full rounded-xl border border-white/20 bg-slate-800 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all appearance-none cursor-pointer"
                   >
                     {CITY_OPTIONS.map((city) => (
-                      <option key={city} value={city}>
+                      <option key={city} value={city} className="bg-slate-900 text-white">
                         {city}
                       </option>
                     ))}
@@ -99,10 +99,10 @@ export default function HeroSearchForm({ onRouteSelect }: HeroSearchFormProps) {
                   <select
                     value={toCity}
                     onChange={(e) => setToCity(e.target.value)}
-                    className="w-full rounded-xl border border-white/20 bg-white/5 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all appearance-none cursor-pointer [color-scheme:dark]"
+                    className="w-full rounded-xl border border-white/20 bg-slate-800 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all appearance-none cursor-pointer"
                   >
                     {CITY_OPTIONS.map((city) => (
-                      <option key={city} value={city}>
+                      <option key={city} value={city} className="bg-slate-900 text-white">
                         {city}
                       </option>
                     ))}
@@ -118,20 +118,20 @@ export default function HeroSearchForm({ onRouteSelect }: HeroSearchFormProps) {
                     type="date"
                     defaultValue={tomorrow}
                     min={tomorrow}
-                    className="w-full rounded-xl border border-white/20 bg-white/5 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all [color-scheme:dark]"
+                    className="w-full rounded-xl border border-white/20 bg-slate-800 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all [color-scheme:dark]"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-xs font-medium text-white/70">Passengers</label>
                   <select
-                    className="w-full rounded-xl border border-white/20 bg-white/5 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all [color-scheme:dark]"
+                    className="w-full rounded-xl border border-white/20 bg-slate-800 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all appearance-none cursor-pointer"
                   >
-                    <option value="1">1 Passenger</option>
-                    <option value="2">2 Passengers</option>
-                    <option value="3">3 Passengers</option>
-                    <option value="4">4 Passengers</option>
-                    <option value="5">5+ Passengers</option>
+                    <option value="1" className="bg-slate-900 text-white">1 Passenger</option>
+                    <option value="2" className="bg-slate-900 text-white">2 Passengers</option>
+                    <option value="3" className="bg-slate-900 text-white">3 Passengers</option>
+                    <option value="4" className="bg-slate-900 text-white">4 Passengers</option>
+                    <option value="5" className="bg-slate-900 text-white">5+ Passengers</option>
                   </select>
                 </div>
               </div>
