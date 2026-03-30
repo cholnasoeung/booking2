@@ -3,7 +3,6 @@ import { ArrowRight } from "lucide-react";
 
 import Navbar from "@/components/navbar";
 import SearchForm from "@/components/search-form";
-import HeroSlider from "@/components/hero-slider";
 import AboutSection from "@/components/about-section";
 import HowItWorks from "@/components/how-it-works";
 import CTASection from "@/components/cta-section";
@@ -15,31 +14,74 @@ import { formatCurrency } from "@/lib/formatters";
 
 export default function Home() {
   const tomorrow = getTomorrowDateInput();
+  const heroHighlights = [
+    { label: "Routes", value: "50+", description: "Cambodia-wide network" },
+    { label: "Departure pairs", value: "120+", description: "Daily schedules" },
+    { label: "Seats filled", value: "5k+", description: "Happy travellers" },
+  ];
 
   return (
     <>
       <Navbar />
       <div className="pb-20">
-      {/* Hero Slider Section */}
-      <HeroSlider />
-
-      {/* Search Section */}
-      <section className="w-full bg-white px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-20 -mt-8 relative z-30">
-        <div className="mx-auto max-w-7xl">
-          <div className="rounded-[40px] bg-white p-8 shadow-2xl border border-slate-100/50 sm:p-10 lg:p-12">
-            <SearchForm
-              initialValues={{
-                from: "Phnom Penh",
-                to: "Siem Reap",
-                date: tomorrow,
-                passengers: 1,
-              }}
-              title="Search buses across Cambodia"
-              description="Choose your route, travel date, and passenger count to see departures that still have room."
-            />
+        {/* Hero Section */}
+        <section className="relative isolate overflow-hidden bg-slate-950 text-white w-full">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 opacity-70" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_55%)]" />
+          <div className="relative z-10 w-full space-y-8 px-4 py-16 sm:py-20">
+            <p className="text-xs uppercase tracking-[0.5em] text-amber-300">Cambodia express</p>
+            <h1 className="font-heading text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Plan your next bus trip just as fast as you imagine it.
+            </h1>
+            <p className="max-w-3xl text-lg text-white/80">
+              Discover friendly crews, clean coaches, and real-time seat availability across every
+              major route. We handle confirmations, so you can focus on the journey.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href={`/search?from=Phnom Penh&to=Siem Reap&date=${tomorrow}&passengers=1`}
+                className="inline-flex items-center gap-2 rounded-2xl bg-amber-400 px-5 py-3 text-sm font-semibold text-slate-900 shadow-lg shadow-amber-400/30 transition hover:scale-[1.02]"
+              >
+                Search buses
+                <ArrowRight className="size-4" />
+              </Link>
+              <Link
+                href="/about"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/50 px-5 py-3 text-sm font-semibold text-white/80 transition hover:border-white hover:text-white"
+              >
+                View route map
+              </Link>
+            </div>
+            <div className="grid gap-3 md:grid-cols-3">
+              {heroHighlights.map((highlight) => (
+                <div
+                  key={highlight.label}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm shadow-xl backdrop-blur"
+                >
+                  <p className="text-2xl font-semibold text-white">{highlight.value}</p>
+                  <p className="text-xs uppercase tracking-[0.3em] text-white/70">
+                    {highlight.label}
+                  </p>
+                  <p className="text-xs text-white/70">{highlight.description}</p>
+                </div>
+              ))}
+            </div>
+            <div className="rounded-[32px] border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur">
+              <SearchForm
+                compact
+                initialValues={{
+                  from: "Phnom Penh",
+                  to: "Siem Reap",
+                  date: tomorrow,
+                  passengers: 1,
+                }}
+                title="Quick search"
+                description="Swap, select a date, and take off in seconds."
+                className="bg-transparent border-0 text-white shadow-none"
+              />
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
       {/* Popular Routes Section */}
       <section className="mx-auto mt-16 w-full max-w-7xl px-4 sm:px-6 lg:px-8">

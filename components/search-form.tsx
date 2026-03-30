@@ -80,7 +80,7 @@ export default function SearchForm({
     <form
       onSubmit={handleSubmit}
       className={cn(
-        "rounded-[28px] border border-white/60 bg-white/88 text-foreground shadow-2xl shadow-red-950/10 backdrop-blur-xl",
+        "w-full rounded-[28px] border border-white/20 bg-white/20 text-foreground shadow-lg shadow-slate-950/40 backdrop-blur-xl",
         compact ? "p-4 sm:p-5" : "p-5 sm:p-7",
         className
       )}
@@ -94,7 +94,7 @@ export default function SearchForm({
 
       <div
         className={cn(
-          "grid gap-4",
+          "grid gap-3",
           compact
             ? "lg:grid-cols-[1fr_auto_1fr_1fr_0.9fr_auto]"
             : "lg:grid-cols-[1fr_auto_1fr_1fr_0.9fr]"
@@ -105,7 +105,7 @@ export default function SearchForm({
           <Select value={from} onValueChange={(value) => value && setFrom(value)}>
             <SelectTrigger
               id="from-city"
-              className="h-12 w-full rounded-2xl border-white/60 bg-white/90 px-4"
+              className="h-12 w-full rounded-2xl border-white/30 bg-white/70 px-4 text-sm text-slate-800"
             >
               <SelectValue placeholder="Departure city" />
             </SelectTrigger>
@@ -138,7 +138,7 @@ export default function SearchForm({
           <Select value={to} onValueChange={(value) => value && setTo(value)}>
             <SelectTrigger
               id="to-city"
-              className="h-12 w-full rounded-2xl border-white/60 bg-white/90 px-4"
+              className="h-12 w-full rounded-2xl border-white/30 bg-white/70 px-4 text-sm text-slate-800"
             >
               <SelectValue placeholder="Destination city" />
             </SelectTrigger>
@@ -161,7 +161,7 @@ export default function SearchForm({
               type="date"
               value={date}
               onChange={(event) => setDate(event.target.value)}
-              className="h-12 rounded-2xl border-white/60 bg-white/90 pl-11"
+              className="h-12 rounded-2xl border-white/30 bg-white/70 pl-11 text-sm text-slate-800"
               required
             />
           </div>
@@ -178,7 +178,7 @@ export default function SearchForm({
               max={10}
               value={passengers}
               onChange={(event) => setPassengers(event.target.value)}
-              className="h-12 rounded-2xl border-white/60 bg-white/90 pl-11"
+              className="h-12 rounded-2xl border-white/30 bg-white/70 pl-11 text-sm text-slate-800"
               required
             />
           </div>
@@ -190,7 +190,7 @@ export default function SearchForm({
             size="lg"
             disabled={isPending}
             className={cn(
-              "h-12 rounded-2xl px-5 text-sm font-semibold shadow-lg shadow-primary/25",
+              "h-12 rounded-2xl px-5 text-sm font-semibold shadow-lg shadow-amber-400/30 bg-amber-400 text-slate-950",
               compact ? "w-full lg:w-auto" : "w-full"
             )}
           >
