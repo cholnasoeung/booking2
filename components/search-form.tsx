@@ -124,13 +124,16 @@ export default function SearchForm({
 
         <div
           className={cn(
-            "grid gap-2",
             compact
-              ? "lg:grid-cols-[1fr_auto_1fr_1fr_0.85fr_auto] lg:items-end lg:gap-3"
-              : "lg:grid-cols-[1fr_auto_1fr_1fr_0.9fr]"
+              ? "flex flex-wrap items-center justify-between gap-3"
+              : "grid gap-2 lg:grid-cols-[1fr_auto_1fr_1fr_0.9fr]"
           )}
         >
-          <div className="space-y-1">
+          <div
+            className={cn(
+              compact ? "flex-1 min-w-[150px] space-y-1" : "space-y-1"
+            )}
+          >
             <Label htmlFor="from-city" className={cn("text-sm font-semibold", labelClasses)}>
               From
             </Label>
@@ -155,8 +158,8 @@ export default function SearchForm({
             </Select>
           </div>
 
-          {/* Swap button in the middle */}
-          <div className="flex items-end lg:pb-0.5">
+          {/* Swap button */}
+          <div className="flex items-end">
             <button
               type="button"
               className="inline-flex h-10 w-10 items-center justify-center rounded-full border-2 border-indigo-200 bg-indigo-50 text-indigo-600 transition hover:scale-110 hover:border-indigo-300 hover:bg-indigo-100"
@@ -169,7 +172,11 @@ export default function SearchForm({
             </button>
           </div>
 
-          <div className="space-y-1">
+          <div
+            className={cn(
+              compact ? "flex-1 min-w-[150px] space-y-1" : "space-y-1"
+            )}
+          >
             <Label htmlFor="to-city" className={cn("text-sm font-semibold", labelClasses)}>
               To
             </Label>
@@ -194,7 +201,11 @@ export default function SearchForm({
             </Select>
           </div>
 
-          <div className="space-y-1">
+          <div
+            className={cn(
+              compact ? "flex-1 min-w-[150px] space-y-1" : "space-y-1"
+            )}
+          >
             <Label htmlFor="travel-date" className={cn("text-sm font-semibold", labelClasses)}>
               Date
             </Label>
@@ -207,7 +218,7 @@ export default function SearchForm({
                 onChange={(event) => setDate(event.target.value)}
                 className={cn(
                   fieldHeight,
-                  "rounded-2xl pl-11 text-sm",
+                  "w-full rounded-2xl pl-11 text-sm",
                   controlClasses
                 )}
                 required
@@ -215,7 +226,11 @@ export default function SearchForm({
             </div>
           </div>
 
-          <div className="space-y-1">
+          <div
+            className={cn(
+              compact ? "flex-1 min-w-[150px] space-y-1" : "space-y-1"
+            )}
+          >
             <Label htmlFor="passengers" className={cn("text-sm font-semibold", labelClasses)}>
               Passengers
             </Label>
@@ -230,7 +245,7 @@ export default function SearchForm({
                 onChange={(event) => setPassengers(event.target.value)}
                 className={cn(
                   fieldHeight,
-                  "rounded-2xl pl-11 text-sm",
+                  "w-full rounded-2xl pl-11 text-sm",
                   controlClasses
                 )}
                 required
@@ -238,14 +253,14 @@ export default function SearchForm({
             </div>
           </div>
 
-          <div className={cn("flex items-end", compact ? "" : "lg:col-span-4")}>
+          <div className={cn("flex items-end", compact ? "flex-1 min-w-[150px]" : "lg:col-span-4")}>
             <Button
               type="submit"
               disabled={isPending}
               className={cn(
                 fieldHeight,
                 "rounded-2xl bg-amber-400 px-5 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-400/30",
-                compact ? "w-full lg:min-w-[180px]" : "w-full"
+                compact ? "w-full lg:min-w-[160px]" : "w-full"
               )}
             >
               <Search className="size-4" />
