@@ -27,7 +27,7 @@ export default function SeatSelection({
   const totalPrice = selectedSeats.length * bus.pricePerSeat;
 
   function toggleSeat(seatCode: string) {
-    if (bus.bookedSeats.includes(seatCode)) {
+    if (bus.bookedSeats.includes(seatCode) || bus.blockedSeats.includes(seatCode)) {
       return;
     }
 
@@ -81,6 +81,7 @@ export default function SeatSelection({
           <SeatMap
             layout={bus.seatLayout}
             bookedSeats={bus.bookedSeats}
+            blockedSeats={bus.blockedSeats}
             selectedSeats={selectedSeats}
             onSeatToggle={toggleSeat}
             showLegend

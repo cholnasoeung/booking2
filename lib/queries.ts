@@ -35,11 +35,16 @@ type StoredBusRecord = {
   seatLayout?: SeatLayout | null;
   totalSeats: number;
   bookedSeats: Array<string | number>;
+  blockedSeats: Array<string | number>;
   pricePerSeat: number;
+  amenities?: string[];
 };
 
-type NormalizedBusRecord = Omit<StoredBusRecord, "bookedSeats" | "seatLayout" | "busType"> &
-  NormalizedSeatLayout;
+type NormalizedBusRecord = Omit<StoredBusRecord, "bookedSeats" | "seatLayout" | "busType" | "blockedSeats" | "amenities"> &
+  NormalizedSeatLayout & {
+    blockedSeats: string[];
+    amenities: string[];
+  };
 
 type BookingRecord = {
   _id: Types.ObjectId;
@@ -92,8 +97,10 @@ export type BusSummary = {
   templateStatus: SeatLayout["template"];
   totalSeats: number;
   bookedSeats: string[];
+  blockedSeats: string[];
   seatsLeft: number;
   pricePerSeat: number;
+  amenities: string[];
 };
 
 export type UserSummary = {
@@ -167,8 +174,10 @@ function serializeBus(bus: NormalizedBusRecord, route: RouteRecord): BusSummary 
     templateStatus: bus.templateStatus,
     totalSeats: bus.totalSeats,
     bookedSeats: bus.bookedSeats,
-    seatsLeft: Math.max(bus.totalSeats - bus.bookedSeats.length, 0),
+    blockedSeats: bus.blockedSeats ?? [],
+    seatsLeft: Math.max(bus.totalSeats - bus.bookedSeats.length - (bus.blockedSeats?.length ?? 0), 0),
     pricePerSeat: bus.pricePerSeat,
+    amenities: bus.amenities ?? [],
   };
 }
 

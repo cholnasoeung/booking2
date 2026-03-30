@@ -20,6 +20,7 @@ type SeatMapProps = {
   layout: SeatLayout;
   bookedSeats?: string[];
   selectedSeats?: string[];
+  blockedSeats?: string[];
   disabled?: boolean;
   onSeatToggle?: (seatCode: string) => void;
   className?: string;
@@ -27,7 +28,7 @@ type SeatMapProps = {
   compact?: boolean;
 };
 
-type SeatState = "available" | "selected" | "booked";
+type SeatState = "available" | "selected" | "booked" | "blocked";
 
 const legendItems: Array<{ label: string; className: string }> = [
   {
@@ -42,12 +43,17 @@ const legendItems: Array<{ label: string; className: string }> = [
     label: "Booked",
     className: "bg-slate-200 border-2 border-slate-300",
   },
+  {
+    label: "Blocked",
+    className: "bg-red-100 border-2 border-red-300",
+  },
 ];
 
 function SeatMap({
   layout,
   bookedSeats = [],
   selectedSeats = [],
+  blockedSeats = [],
   disabled = false,
   onSeatToggle,
   className,
@@ -56,6 +62,7 @@ function SeatMap({
 }: SeatMapProps) {
   const bookedSeatSet = new Set(bookedSeats.map(normalizeSeatCode));
   const selectedSeatSet = new Set(selectedSeats.map(normalizeSeatCode));
+  const blockedSeatSet = new Set(blockedSeats.map(normalizeSeatCode));
   const items = getSeatLayoutItems(layout);
 
   return (
@@ -91,6 +98,7 @@ function SeatMap({
                 item={item}
                 bookedSeatSet={bookedSeatSet}
                 selectedSeatSet={selectedSeatSet}
+                blockedSeatSet={blockedSeatSet}
                 disabled={disabled}
                 compact={compact}
                 onSeatToggle={onSeatToggle}
@@ -107,6 +115,7 @@ type SeatMapCellProps = {
   item: SeatLayoutItem;
   bookedSeatSet: Set<string>;
   selectedSeatSet: Set<string>;
+  blockedSeatSet: Set<string>;
   disabled: boolean;
   compact: boolean;
   onSeatToggle?: (seatCode: string) => void;
@@ -116,6 +125,7 @@ const SeatMapCell = memo(function SeatMapCell({
   item,
   bookedSeatSet,
   selectedSeatSet,
+  blockedSeatSet,
   disabled,
   compact,
   onSeatToggle,
@@ -134,12 +144,14 @@ const SeatMapCell = memo(function SeatMapCell({
   }
 
   const seatCode = normalizeSeatCode(item.seatCode);
-  const seatState: SeatState = bookedSeatSet.has(seatCode)
-    ? "booked"
-    : selectedSeatSet.has(seatCode)
-      ? "selected"
-      : "available";
-  const isInteractive = Boolean(onSeatToggle) && seatState !== "booked" && !disabled;
+  const seatState: SeatState = blockedSeatSet.has(seatCode)
+    ? "blocked"
+    : bookedSeatSet.has(seatCode)
+      ? "booked"
+      : selectedSeatSet.has(seatCode)
+        ? "selected"
+        : "available";
+  const isInteractive = Boolean(onSeatToggle) && seatState !== "booked" && seatState !== "blocked" && !disabled;
 
   return (
     <div style={style}>
@@ -186,12 +198,16 @@ function UprightSeat({
     >
       {/* Seat back/top section */}
       <div className="relative w-full flex-1 flex items-center justify-center rounded-t-xl border-2 border-b-0 px-2 pt-2 pb-1 transition-all duration-200" style={{
-        background: state === 'booked'
+        background: state === 'blocked'
+          ? 'linear-gradient(180deg, rgba(254, 202, 202, 0.8), rgba(248, 113, 113, 0.5))'
+          : state === 'booked'
           ? 'linear-gradient(180deg, rgba(203, 213, 225, 0.8), rgba(148, 163, 184, 0.5))'
           : state === 'selected'
           ? 'linear-gradient(180deg, rgba(253, 230, 138, 0.9), rgba(251, 191, 36, 0.6))'
           : 'linear-gradient(180deg, rgba(110, 231, 183, 0.9), rgba(16, 185, 129, 0.6))',
-        borderColor: state === 'booked'
+        borderColor: state === 'blocked'
+          ? 'rgba(248, 113, 113, 0.6)'
+          : state === 'booked'
           ? 'rgba(148, 163, 184, 0.6)'
           : state === 'selected'
           ? 'rgba(251, 191, 36, 0.6)'
@@ -201,7 +217,7 @@ function UprightSeat({
         <span className={cn(
           "relative z-10 font-bold tracking-tight",
           compact ? "text-xs" : "text-sm",
-          state === 'booked' ? "text-slate-700" : state === 'selected' ? "text-amber-800" : "text-emerald-800"
+          state === 'blocked' ? "text-red-800" : state === 'booked' ? "text-slate-700" : state === 'selected' ? "text-amber-800" : "text-emerald-800"
         )}>
           {label}
         </span>
@@ -212,12 +228,16 @@ function UprightSeat({
 
       {/* Seat cushion/bottom section */}
       <div className="relative w-full h-[40%] rounded-b-xl border-2 border-t-0 transition-all duration-200" style={{
-        background: state === 'booked'
+        background: state === 'blocked'
+          ? 'linear-gradient(180deg, rgba(248, 113, 113, 0.6), rgba(254, 202, 202, 0.4))'
+          : state === 'booked'
           ? 'linear-gradient(180deg, rgba(148, 163, 184, 0.6), rgba(203, 213, 225, 0.4))'
           : state === 'selected'
           ? 'linear-gradient(180deg, rgba(251, 191, 36, 0.7), rgba(253, 230, 138, 0.5))'
           : 'linear-gradient(180deg, rgba(16, 185, 129, 0.7), rgba(110, 231, 183, 0.5))',
-        borderColor: state === 'booked'
+        borderColor: state === 'blocked'
+          ? 'rgba(248, 113, 113, 0.5)'
+          : state === 'booked'
           ? 'rgba(148, 163, 184, 0.5)'
           : state === 'selected'
           ? 'rgba(251, 191, 36, 0.5)'
@@ -246,6 +266,7 @@ function SleeperSeat({
         state === 'available' && "bg-white border-emerald-400 hover:border-emerald-500 hover:shadow-md",
         state === 'selected' && "bg-emerald-500 border-emerald-600 shadow-lg",
         state === 'booked' && "bg-slate-200 border-slate-300 cursor-not-allowed opacity-70",
+        state === 'blocked' && "bg-red-100 border-red-300 cursor-not-allowed opacity-80",
         compact ? "py-2.5" : "py-3"
       )}
     >
@@ -254,7 +275,7 @@ function SleeperSeat({
         <span className={cn(
           "font-bold tracking-tight",
           compact ? "text-sm" : "text-base",
-          state === 'selected' ? "text-white" : state === 'booked' ? "text-slate-500" : "text-emerald-700"
+          state === 'selected' ? "text-white" : state === 'booked' ? "text-slate-500" : state === 'blocked' ? "text-red-700" : "text-emerald-700"
         )}>
           {label}
         </span>
@@ -265,13 +286,15 @@ function SleeperSeat({
         "w-full h-3 rounded-b-xl flex items-center justify-center",
         state === 'selected' && "bg-emerald-600",
         state === 'available' && "bg-emerald-100",
-        state === 'booked' && "bg-slate-300"
+        state === 'booked' && "bg-slate-300",
+        state === 'blocked' && "bg-red-200"
       )}>
         <div className={cn(
           "w-8 h-1.5 rounded-full",
           state === 'selected' && "bg-white/50",
           state === 'available' && "bg-emerald-400",
-          state === 'booked' && "bg-slate-400"
+          state === 'booked' && "bg-slate-400",
+          state === 'blocked' && "bg-red-400"
         )} />
       </div>
 
@@ -374,6 +397,8 @@ function getSeatTone(state: SeatState) {
       return "shadow-md shadow-amber-200/40 hover:shadow-lg hover:shadow-amber-300/50";
     case "booked":
       return "shadow-sm shadow-slate-200/40";
+    case "blocked":
+      return "shadow-sm shadow-red-200/40";
     case "available":
     default:
       return "shadow-md shadow-emerald-200/40 hover:shadow-lg hover:shadow-emerald-300/50 hover:-translate-y-0.5";

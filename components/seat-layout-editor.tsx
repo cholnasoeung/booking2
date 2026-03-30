@@ -45,19 +45,33 @@ type SeatLayoutEditorProps = {
   busType: BusType;
   value: SeatLayout;
   bookedSeats?: string[];
+  blockedSeats?: string[];
   onChange: (layout: SeatLayout) => void;
+  onBlockedSeatsChange?: (blockedSeats: string[]) => void;
 };
 
 export default function SeatLayoutEditor({
   busType,
   value,
   bookedSeats = [],
+  blockedSeats = [],
   onChange,
+  onBlockedSeatsChange,
 }: SeatLayoutEditorProps) {
   const [nextItemKind, setNextItemKind] = useState<SeatLayoutItemKind>("seat");
 
   const validation = getLayoutValidation(value, bookedSeats);
   const sortedItems = getSeatLayoutItems(value);
+
+  function toggleSeatBlock(seatCode: string) {
+    if (!onBlockedSeatsChange) return;
+
+    const newBlockedSeats = blockedSeats.includes(seatCode)
+      ? blockedSeats.filter((s) => s !== seatCode)
+      : [...blockedSeats, seatCode];
+
+    onBlockedSeatsChange(newBlockedSeats);
+  }
 
   function applyChange(updater: (layout: SeatLayout) => SeatLayout) {
     const nextLayout = normalizeLayout(updater(cloneSeatLayout(value)));

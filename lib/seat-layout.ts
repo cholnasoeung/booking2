@@ -522,8 +522,15 @@ export function normalizeBusSeatLayout(record: {
   seatLayout?: SeatLayout | null;
   totalSeats?: number;
   bookedSeats?: Array<string | number>;
+  blockedSeats?: Array<string | number>;
+  amenities?: string[];
 }) {
-  return getNormalizedLayoutFromRecord(record);
+  const normalized = getNormalizedLayoutFromRecord(record);
+  return {
+    ...normalized,
+    blockedSeats: normalizeStoredSeatCodes(record.blockedSeats ?? [], normalized.seatLayout),
+    amenities: record.amenities ?? [],
+  };
 }
 
 export function needsLegacySeatLayoutUpgrade(record: {
@@ -531,6 +538,7 @@ export function needsLegacySeatLayoutUpgrade(record: {
   seatLayout?: SeatLayout | null;
   totalSeats?: number;
   bookedSeats?: Array<string | number>;
+  blockedSeats?: Array<string | number>;
 }) {
   if (!isBusType(record.busType)) {
     return true;
@@ -545,6 +553,10 @@ export function needsLegacySeatLayoutUpgrade(record: {
   }
 
   if (record.bookedSeats.some((seat) => typeof seat !== "string")) {
+    return true;
+  }
+
+  if (record.blockedSeats && record.blockedSeats.some((seat) => typeof seat !== "string")) {
     return true;
   }
 

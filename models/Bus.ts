@@ -16,6 +16,7 @@ export interface IBus extends Document {
   seatLayout?: SeatLayout | null;
   totalSeats: number;
   bookedSeats: Array<string | number>;
+  blockedSeats: Array<string | number>;
   pricePerSeat: number;
   amenities?: string[];
 }
@@ -56,6 +57,10 @@ const BusSchema = new Schema<IBus>({
     min: 1,
   },
   bookedSeats: {
+    type: [Schema.Types.Mixed],
+    default: [],
+  },
+  blockedSeats: {
     type: [Schema.Types.Mixed],
     default: [],
   },

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import SeatLayoutEditor from "@/components/seat-layout-editor";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BUS_TYPES } from "@/lib/constants";
+import { AMENITY_OPTIONS, BUS_TYPES, type AmenityValue } from "@/lib/constants";
 import { formatBusType } from "@/lib/formatters";
 import type { BusSummary, RouteSummary } from "@/lib/queries";
 import {
@@ -48,6 +49,8 @@ type BusFormState = {
   busType: BusType;
   pricePerSeat: string;
   seatLayout: BusSummary["seatLayout"];
+  amenities: AmenityValue[];
+  blockedSeats: string[];
 };
 
 export default function AdminBusDialog({
@@ -102,6 +105,8 @@ export default function AdminBusDialog({
           busType: form.busType,
           pricePerSeat: Number(form.pricePerSeat),
           seatLayout: form.seatLayout,
+          amenities: form.amenities,
+          blockedSeats: form.blockedSeats,
         }),
       });
 
@@ -274,18 +279,71 @@ export default function AdminBusDialog({
             </div>
           </div>
 
-          {/* Seat Layout Editor */}
+          {/* Amenities Section */}
           <div className="space-y-3">
-            <Label className="text-sm font-semibold">Seat Layout</Label>
+            <Label className="text-sm font-semibold">Bus Amenities</Label>
+            <div className="rounded-2xl border-2 border-dashed border-orange-300/50 bg-gradient-to-br from-orange-50/50 to-red-50/50 p-5">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {AMENITY_OPTIONS.map((amenity) => (
+                  <div key={amenity.value} className="flex items-start space-x-3 rounded-xl border border-orange-200/60 bg-white/80 p-3 hover:bg-white/100 transition-colors">
+                    <Checkbox
+                      id={`amenity-${amenity.value}`}
+                      checked={form.amenities.includes(amenity.value as AmenityValue)}
+                      onCheckedChange={(checked) => {
+                        setForm((current) => ({
+                          ...current,
+                          amenities: checked
+                            ? [...current.amenities, amenity.value as AmenityValue]
+                            : current.amenities.filter((a) => a !== amenity.value),
+                        }));
+                      }}
+                      className="mt-0.5 border-orange-300 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                    />
+                    <div className="flex-1">
+                      <Label
+                        htmlFor={`amenity-${amenity.value}`}
+                        className="cursor-pointer text-sm font-medium text-foreground"
+                      >
+                        <span className="mr-1.5">{amenity.icon}</span>
+                        {amenity.label}
+                      </Label>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground text-center">
+                {form.amenities.length} amen{form.amenities.length === 1 ? 'y' : 'ies'} selected
+              </p>
+            </div>
+          </div>
+
+          {/* Seat Layout Editor with Blocking */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-semibold">Seat Layout & Blocking</Label>
+              <div className="flex items-center gap-2 text-xs">
+                <div className="flex items-center gap-1">
+                  <div className="h-3 w-3 rounded bg-red-200 border border-red-400" />
+                  <span className="text-muted-foreground">Blocked</span>
+                </div>
+              </div>
+            </div>
             <div className="rounded-2xl border-2 border-dashed border-orange-300/50 bg-gradient-to-br from-orange-50/50 to-red-50/50 p-6">
               <SeatLayoutEditor
                 busType={form.busType}
                 value={form.seatLayout}
                 bookedSeats={bus?.bookedSeats ?? []}
+                blockedSeats={form.blockedSeats}
                 onChange={(seatLayout) =>
                   setForm((current) => ({
                     ...current,
                     seatLayout,
+                  }))
+                }
+                onBlockedSeatsChange={(blockedSeats) =>
+                  setForm((current) => ({
+                    ...current,
+                    blockedSeats,
                   }))
                 }
               />
@@ -337,6 +395,8 @@ function createFormState(routes: RouteSummary[], bus?: BusSummary | null): BusFo
       busType: bus.busType,
       pricePerSeat: String(bus.pricePerSeat),
       seatLayout: cloneSeatLayout(bus.seatLayout),
+      amenities: (bus.amenities ?? []) as AmenityValue[],
+      blockedSeats: bus.blockedSeats ?? [],
     };
   }
 
@@ -350,6 +410,8 @@ function createFormState(routes: RouteSummary[], bus?: BusSummary | null): BusFo
     busType: initialType,
     pricePerSeat: "18",
     seatLayout: getSeatLayoutTemplate(initialType),
+    amenities: [],
+    blockedSeats: [],
   };
 }
 

@@ -42,6 +42,8 @@ export async function POST(request: Request) {
     const busType = isBusType(requestedBusType) ? requestedBusType : null;
     const pricePerSeat = Number(body?.pricePerSeat);
     const seatLayout = (body?.seatLayout ?? null) as SeatLayout | null;
+    const amenities = Array.isArray(body?.amenities) ? body.amenities : [];
+    const blockedSeats = Array.isArray(body?.blockedSeats) ? body.blockedSeats : [];
 
     if (!isValidObjectId(routeId)) {
       return Response.json({ message: "A valid route is required." }, { status: 400 });
@@ -88,6 +90,8 @@ export async function POST(request: Request) {
       seatLayout: seatLayout ?? getSeatLayoutTemplate(busType),
       totalSeats: 0,
       bookedSeats: [],
+      blockedSeats,
+      amenities,
     });
     const busDate = toTravelDate(date);
 
@@ -113,7 +117,9 @@ export async function POST(request: Request) {
       seatLayout: normalizedBus.seatLayout,
       totalSeats: normalizedBus.totalSeats,
       bookedSeats: normalizedBus.bookedSeats,
+      blockedSeats: normalizedBus.blockedSeats,
       pricePerSeat,
+      amenities,
     });
 
     const busSummary = await getBusSummary(String(bus._id));

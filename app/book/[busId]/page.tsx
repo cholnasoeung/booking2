@@ -109,6 +109,29 @@ export default async function BookPage({
           </CardContent>
         </Card>
 
+        {bus.amenities && bus.amenities.length > 0 && (
+          <Card className="border-white/60 bg-white/90 shadow-xl shadow-red-950/5">
+            <CardHeader>
+              <CardTitle>Amenities</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {bus.amenities.map((amenity) => {
+                  const amenityInfo = (typeof amenity === 'string')
+                    ? require("@/lib/constants").AMENITY_OPTIONS.find(a => a.value === amenity)
+                    : null;
+                  return (
+                    <Badge key={amenity} variant="outline" className="gap-1.5 border-indigo-200 bg-indigo-50 text-indigo-700">
+                      <span>{amenityInfo?.icon || '✓'}</span>
+                      {amenityInfo?.label || amenity}
+                    </Badge>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="border-white/60 bg-white/90 shadow-xl shadow-red-950/5">
           <CardHeader>
             <CardTitle>Booking policy</CardTitle>
