@@ -86,10 +86,10 @@ export default function SearchForm({
       )}
     >
       <div className={cn("space-y-2", compact ? "mb-4" : "mb-6")}>
-        <p className="font-heading text-2xl font-semibold tracking-tight text-foreground">
+        <p className="font-heading text-2xl font-semibold tracking-tight text-white">
           {title}
         </p>
-        <p className="max-w-2xl text-sm text-muted-foreground">{description}</p>
+        <p className="max-w-2xl text-sm text-white/80">{description}</p>
       </div>
 
       <div
@@ -101,7 +101,9 @@ export default function SearchForm({
         )}
       >
         <div className="space-y-2">
-          <Label htmlFor="from-city">From</Label>
+          <Label htmlFor="from-city" className="text-sm font-semibold text-white/80">
+            From
+          </Label>
           <Select value={from} onValueChange={(value) => value && setFrom(value)}>
             <SelectTrigger
               id="from-city"
@@ -134,7 +136,9 @@ export default function SearchForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="to-city">To</Label>
+          <Label htmlFor="to-city" className="text-sm font-semibold text-white/80">
+            To
+          </Label>
           <Select value={to} onValueChange={(value) => value && setTo(value)}>
             <SelectTrigger
               id="to-city"
@@ -153,7 +157,9 @@ export default function SearchForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="travel-date">Date</Label>
+          <Label htmlFor="travel-date" className="text-sm font-semibold text-white/80">
+            Date
+          </Label>
           <div className="relative">
             <CalendarDays className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -168,7 +174,9 @@ export default function SearchForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="passengers">Passengers</Label>
+          <Label htmlFor="passengers" className="text-sm font-semibold text-white/80">
+            Passengers
+          </Label>
           <div className="relative">
             <Users className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
