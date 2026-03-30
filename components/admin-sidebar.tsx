@@ -148,7 +148,7 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
       {/* Mobile Menu Button */}
       <button
         type="button"
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-indigo-600 text-white shadow-md hover:bg-indigo-700 transition-all"
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
       >
         {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -165,25 +165,25 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
       {/* Sidebar - Fixed position, doesn't move on scroll */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-50 h-screen w-64 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-r border-slate-700/50 shadow-2xl transition-transform duration-300 flex flex-col",
+          "fixed top-0 left-0 z-50 h-screen w-64 bg-white border-r border-gray-200 shadow-sm transition-transform duration-300 flex flex-col",
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
         {/* Logo/Brand Section */}
-        <div className="border-b border-slate-700/50 p-5 bg-gradient-to-r from-slate-800 to-slate-900 lg:p-6">
+        <div className="border-b border-gray-200 p-5 lg:p-6">
           <Link href="/admin" className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
               <LayoutDashboard className="size-5" />
             </div>
             <div>
-              <h2 className="font-heading text-base font-bold text-white">Admin</h2>
-              <p className="text-[10px] text-slate-400 uppercase tracking-wide">Control Center</p>
+              <h2 className="font-heading text-base font-bold text-gray-900">Admin</h2>
+              <p className="text-[10px] text-gray-500 uppercase tracking-wide">Control Center</p>
             </div>
           </Link>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 p-3 overflow-y-auto">
+        <nav className="flex-1 space-y-1 p-3 overflow-y-auto bg-gray-50">
           {navSections.map((section, sectionIndex) => {
             const isCollapsed = collapsedSections.has(section.title);
             return (
@@ -212,13 +212,13 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
                       className={cn(
                         "group relative flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 mb-1",
                         isActive
-                          ? `bg-gradient-to-r ${item.color} shadow-lg text-white`
-                          : "text-slate-300 hover:bg-slate-800/50 hover:text-white"
+                          ? "bg-indigo-600 text-white shadow-sm"
+                          : "text-gray-700 hover:bg-white hover:text-gray-900"
                       )}
                     >
                       {/* Active indicator */}
                       {isActive && (
-                        <div className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-white to-white/50" />
+                        <div className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-indigo-800" />
                       )}
 
                       {/* Icon */}
@@ -226,8 +226,8 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
                         className={cn(
                           "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all",
                           isActive
-                            ? "bg-white/20 shadow-inner"
-                            : "bg-slate-800 group-hover:bg-slate-700"
+                            ? "bg-white/20"
+                            : "bg-gray-200 group-hover:bg-gray-300"
                         )}
                       >
                         <item.icon className="size-4" />
@@ -237,19 +237,11 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
                       <div className="flex items-center gap-2 flex-1">
                         <span className="font-medium text-sm">{item.title}</span>
                         {item.badge && (
-                          <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow">
+                          <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-amber-500 text-white">
                             {item.badge}
                           </span>
                         )}
                       </div>
-
-                      {/* Hover glow effect */}
-                      {!isActive && (
-                        <div className={cn(
-                          "absolute inset-0 rounded-xl bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity",
-                          item.color.replace("from-", "from-").replace(" to-", "to-")
-                        )} />
-                      )}
                     </Link>
                   );
                 })}
@@ -263,9 +255,9 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
           {/* Back to Dashboard Link */}
           <Link
             href="/dashboard"
-            className="group relative flex items-center gap-3 rounded-xl px-4 py-3 text-slate-300 hover:bg-slate-800/50 hover:text-white transition-all duration-200"
+            className="group relative flex items-center gap-3 rounded-xl px-4 py-3 text-gray-700 hover:bg-white transition-all duration-200"
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-800 group-hover:bg-slate-700 transition-all">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-200 group-hover:bg-gray-300 transition-all">
               <Home className="size-4" />
             </div>
             <span className="font-medium text-sm">Back to Dashboard</span>
@@ -273,7 +265,7 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
         </nav>
 
         {/* Footer with User Dropdown */}
-        <div className="border-t border-slate-700/50 p-3 bg-gradient-to-r from-slate-800 to-slate-900 lg:p-4">
+        <div className="border-t border-gray-200 p-3 bg-white lg:p-4">
           <AdminUserDropdown userName={userName} userEmail={userEmail} />
         </div>
       </aside>
