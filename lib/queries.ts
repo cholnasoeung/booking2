@@ -46,12 +46,20 @@ type BookingRecord = {
   user: Types.ObjectId;
   bus: Types.ObjectId;
   seats: string[];
-  passengers?: any[];
+  passengers?: PassengerRecord[];
   totalPrice: number;
   status: BookingStatus;
   cancelledAt?: Date;
   cancellationReason?: string;
   createdAt: Date;
+};
+
+type PassengerRecord = {
+  name: string;
+  age: string;
+  gender: "male" | "female" | "other";
+  contactNumber: string;
+  email?: string;
 };
 
 type UserRecord = {
@@ -104,8 +112,19 @@ export type BookingSummary = {
   bus: BusSummary | null;
 };
 
+export type PassengerSummary = {
+  name: string;
+  age: string;
+  gender: "male" | "female" | "other";
+  contactNumber: string;
+  email?: string;
+};
+
 export type AdminBookingSummary = BookingSummary & {
   user: UserSummary | null;
+  passengers: PassengerSummary[];
+  cancelledAt: string | null;
+  cancellationReason: string | null;
 };
 
 function serializeRoute(route: RouteRecord): RouteSummary {
@@ -183,6 +202,15 @@ function serializeBooking(
     createdAt: booking.createdAt.toISOString(),
     bus: bus && route ? serializeBus(bus, route) : null,
     user: userRecord ? serializeUser(userRecord) : null,
+    passengers: (booking.passengers ?? []).map((passenger) => ({
+      name: passenger.name,
+      age: passenger.age,
+      gender: passenger.gender,
+      contactNumber: passenger.contactNumber,
+      email: passenger.email,
+    })),
+    cancelledAt: booking.cancelledAt?.toISOString() ?? null,
+    cancellationReason: booking.cancellationReason ?? null,
   };
 }
 

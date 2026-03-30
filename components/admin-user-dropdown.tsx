@@ -20,7 +20,7 @@ export default function AdminUserDropdown({
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    function handleClickOutside(event: Event) {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node) &&

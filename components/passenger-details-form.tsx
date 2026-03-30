@@ -17,15 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-
-type Passenger = {
-  id: string;
-  name: string;
-  age: string;
-  gender: "male" | "female" | "other";
-  contactNumber: string;
-  email?: string;
-};
+import type { Passenger } from "@/types/passenger";
 
 type PassengerDetailsFormProps = {
   selectedSeats: string[];

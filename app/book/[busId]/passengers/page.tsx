@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireUser } from "@/lib/auth";
 import { formatBusType, formatCurrency, formatTravelDate } from "@/lib/formatters";
-import type { Passenger } from "@/components/passenger-details-form";
+import type { Passenger } from "@/types/passenger";
 
 type PassengersPageProps = {
   params: Promise<{ busId: string }>;

@@ -9,6 +9,7 @@ import {
   normalizeBusSeatLayout,
 } from "@/lib/seat-layout";
 import { isValidObjectId } from "@/lib/validation";
+import BookingModel from "@/models/Booking";
 import BusModel from "@/models/Bus";
 import RouteModel from "@/models/Route";
 
@@ -145,5 +146,61 @@ export async function PUT(
       error instanceof Error ? error.message : "Unable to update the bus right now.";
 
     return Response.json({ message }, { status: error instanceof Error ? 400 : 500 });
+  }
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getCurrentSession();
+
+  if (!session?.user?.id) {
+    return Response.json({ message: "Please log in to continue." }, { status: 401 });
+  }
+
+  if (session.user.role !== "admin") {
+    return Response.json(
+      { message: "Only admins can delete buses." },
+      { status: 403 }
+    );
+  }
+
+  const { id } = await params;
+
+  if (!isValidObjectId(id)) {
+    return Response.json({ message: "Invalid bus id." }, { status: 400 });
+  }
+
+  try {
+    await connectToDatabase();
+
+    const [bus, bookingCount] = await Promise.all([
+      BusModel.findById(id).lean(),
+      BookingModel.countDocuments({ bus: id }),
+    ]);
+
+    if (!bus) {
+      return Response.json({ message: "Bus not found." }, { status: 404 });
+    }
+
+    if (bookingCount > 0) {
+      return Response.json(
+        {
+          message:
+            "This bus already has bookings. Cancel or resolve those bookings before deleting the departure.",
+        },
+        { status: 409 }
+      );
+    }
+
+    await BusModel.findByIdAndDelete(id);
+
+    return Response.json({ message: "Bus deleted successfully." });
+  } catch {
+    return Response.json(
+      { message: "Unable to delete the bus right now." },
+      { status: 500 }
+    );
   }
 }

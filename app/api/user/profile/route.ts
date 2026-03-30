@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getCurrentUser } from "@/lib/auth";
+import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
-import dbConnect from "@/lib/mongodb";
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -15,7 +15,7 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const { name, phone, address } = body;
 
-    await dbConnect();
+    await connectToDatabase();
 
     // Update user
     const updatedUser = await User.findByIdAndUpdate(

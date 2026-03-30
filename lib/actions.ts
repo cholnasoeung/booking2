@@ -9,7 +9,7 @@ import BookingModel from "@/models/Booking";
 import BusModel from "@/models/Bus";
 import UserModel from "@/models/User";
 import { authOptions } from "@/lib/auth";
-import type { Passenger } from "@/components/passenger-details-form";
+import type { Passenger } from "@/types/passenger";
 
 type CreateBookingInput = {
   busId: string;

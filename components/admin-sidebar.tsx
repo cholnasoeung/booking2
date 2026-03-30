@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { BusFront, Home, LayoutDashboard, MapPinned, Menu, Ticket, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -41,7 +41,9 @@ type AdminSidebarProps = {
 
 export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const activeTab = searchParams.get("tab") || "overview";
 
   return (
     <>
@@ -85,7 +87,8 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
         {/* Navigation */}
         <nav className="flex-1 space-y-1 p-3 overflow-y-auto">
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const itemTab = item.href.split("?tab=")[1] || "overview";
+            const isActive = pathname === "/admin" && activeTab === itemTab;
             return (
               <Link
                 key={item.href}
@@ -94,16 +97,9 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
                 className={cn(
                   "group relative flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200",
                   isActive
-                    ? "bg-gradient-to-r shadow-lg text-white"
+                    ? `bg-gradient-to-r ${item.color} shadow-lg text-white`
                     : "text-slate-300 hover:bg-slate-800/50 hover:text-white"
                 )}
-                style={
-                  isActive
-                    ? {
-                        background: `linear-gradient(to right, var(--tw-gradient-stops))`,
-                      }
-                    : {}
-                }
               >
                 {/* Active indicator */}
                 {isActive && (

@@ -7,6 +7,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   phone?: string;
+  address?: string;
   role: UserRole;
   createdAt: Date;
 }
@@ -30,6 +31,10 @@ const UserSchema = new Schema<IUser>(
       required: true,
     },
     phone: {
+      type: String,
+      trim: true,
+    },
+    address: {
       type: String,
       trim: true,
     },

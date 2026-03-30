@@ -8,7 +8,7 @@ import BusModel from "@/models/Bus";
 export const runtime = "nodejs";
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getCurrentSession();
@@ -24,6 +24,17 @@ export async function DELETE(
   }
 
   try {
+    let cancellationReason: string | undefined;
+
+    try {
+      const body = await request.json();
+      if (typeof body?.reason === "string" && body.reason.trim()) {
+        cancellationReason = body.reason.trim();
+      }
+    } catch {
+      cancellationReason = undefined;
+    }
+
     await connectToDatabase();
 
     const existingBooking = await BookingModel.findById(id).lean();
@@ -73,6 +84,10 @@ export async function DELETE(
       {
         status: "cancelled",
         seats: normalizedSeats,
+        cancelledAt: new Date(),
+        ...(cancellationReason
+          ? { cancellationReason }
+          : {}),
       },
       {
         new: true,
