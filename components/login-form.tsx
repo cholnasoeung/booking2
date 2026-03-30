@@ -6,13 +6,6 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -58,65 +51,87 @@ export default function LoginForm({ callbackUrl }: LoginFormProps) {
     : "/register";
 
   return (
-    <Card className="border-white/60 bg-white/90 shadow-2xl shadow-red-950/10">
-      <CardHeader>
-        <CardTitle>Welcome back</CardTitle>
-        <CardDescription>
-          Sign in to manage your trips, pick seats, and keep booking faster next
-          time.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="login-email">Email</Label>
-            <Input
-              id="login-email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="you@example.com"
-              required
-              className="h-11 rounded-2xl"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="login-password">Password</Label>
-            <Input
-              id="login-password"
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="Enter your password"
-              required
-              className="h-11 rounded-2xl"
-            />
-          </div>
-
-          {error ? (
-            <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
-            </p>
-          ) : null}
-
-          <Button
-            type="submit"
-            size="lg"
-            disabled={isPending}
-            className="h-11 w-full rounded-2xl"
-          >
-            {isPending ? "Signing in..." : "Login"}
-          </Button>
-        </form>
-
-        <p className="mt-5 text-sm text-muted-foreground">
-          New here?{" "}
-          <Link href={registerHref} className="font-medium text-primary hover:underline">
-            Create an account
-          </Link>
+    <div className="w-full overflow-hidden rounded-[32px] border border-slate-200 bg-white px-6 py-8 shadow-2xl shadow-slate-200/40">
+      <div className="relative space-y-4">
+        <div className="flex flex-wrap gap-3 text-[0.65rem] uppercase tracking-[0.4em] text-slate-500">
+          <span className="rounded-full border border-slate-200 px-3 py-1">Secure</span>
+          <span className="rounded-full border border-slate-200 px-3 py-1">Fast</span>
+        </div>
+        <h2 className="font-heading text-3xl font-semibold text-slate-900">
+          Welcome back
+        </h2>
+        <p className="text-sm text-slate-500">
+          Sign in to unlock saved routes, seat preferences, and alerts in one pass.
         </p>
-      </CardContent>
-    </Card>
+      </div>
+
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <div className="space-y-1">
+          <Label htmlFor="login-email" className="text-sm uppercase text-slate-500">
+            Email
+          </Label>
+          <Input
+            id="login-email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="you@example.com"
+            required
+            className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="login-password" className="text-sm uppercase text-slate-500">
+            Password
+          </Label>
+          <Input
+            id="login-password"
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Enter your password"
+            required
+            className="h-12 rounded-2xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400"
+          />
+        </div>
+
+        {error ? (
+          <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm">
+            {error}
+          </p>
+        ) : null}
+
+        <Button
+          type="submit"
+          disabled={isPending}
+          className="flex h-12 w-full items-center justify-center rounded-2xl bg-amber-400 px-5 text-sm font-semibold text-slate-950 shadow-md shadow-amber-400/50"
+        >
+          {isPending ? "Signing in..." : "Login"}
+        </Button>
+      </form>
+
+      <div className="mt-6 grid grid-cols-2 gap-3 text-[0.65rem] text-slate-500">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+          <p className="text-lg font-semibold text-slate-900">98%</p>
+          <p className="uppercase tracking-[0.3em] text-[0.6rem] text-slate-500">
+            on-time checks
+          </p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+          <p className="text-lg font-semibold text-slate-900">24/7</p>
+          <p className="uppercase tracking-[0.3em] text-[0.65rem] text-slate-500">
+            live crew support
+          </p>
+        </div>
+      </div>
+
+      <p className="mt-6 text-sm text-slate-500">
+        New here?{" "}
+        <Link href={registerHref} className="font-medium text-indigo-600 underline decoration-indigo-300">
+          Create an account
+        </Link>
+      </p>
+    </div>
   );
 }
