@@ -29,6 +29,7 @@ type SearchFormProps = {
   title?: string;
   description?: string;
   submitLabel?: string;
+  tone?: "dark" | "light";
 };
 
 export default function SearchForm({
@@ -38,6 +39,7 @@ export default function SearchForm({
   title = "Find your next bus",
   description = "Compare departures, fares, and available seats in one place.",
   submitLabel = "Search buses",
+  tone = "dark",
 }: SearchFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -48,6 +50,18 @@ export default function SearchForm({
     String(initialValues?.passengers ?? 1)
   );
   const [error, setError] = useState("");
+  const fieldHeight = "h-10";
+  const formPadding = compact ? "p-3 sm:p-4" : "p-4 sm:p-5";
+  const isLight = tone === "light";
+  const shellClasses = isLight
+    ? "border-slate-200/80 bg-white/95 text-slate-900 shadow-xl shadow-slate-200/70"
+    : "border-white/20 bg-white/20 text-foreground shadow-lg shadow-slate-950/40";
+  const titleClasses = isLight ? "text-slate-900" : "text-white";
+  const descriptionClasses = isLight ? "text-slate-600" : "text-white/80";
+  const labelClasses = isLight ? "text-slate-500" : "text-white/80";
+  const controlClasses = isLight
+    ? "border-slate-200 bg-white text-slate-800"
+    : "border-white/30 bg-white/70 text-slate-800";
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -80,131 +94,164 @@ export default function SearchForm({
     <form
       onSubmit={handleSubmit}
       className={cn(
-        "w-full rounded-[28px] border border-white/20 bg-white/20 text-foreground shadow-lg shadow-slate-950/40 backdrop-blur-xl",
-        compact ? "p-4 sm:p-5" : "p-5 sm:p-7",
+        "w-full rounded-[28px] border backdrop-blur-xl",
+        shellClasses,
+        formPadding,
         className
       )}
     >
-      <div className={cn("space-y-2", compact ? "mb-4" : "mb-6")}>
-        <p className="font-heading text-2xl font-semibold tracking-tight text-white">
-          {title}
-        </p>
-        <p className="max-w-2xl text-sm text-white/80">{description}</p>
-      </div>
-
-      <div
-        className={cn(
-          "grid gap-3",
-          compact
-            ? "lg:grid-cols-[1fr_auto_1fr_1fr_0.9fr_auto]"
-            : "lg:grid-cols-[1fr_auto_1fr_1fr_0.9fr]"
-        )}
-      >
-        <div className="space-y-2">
-          <Label htmlFor="from-city" className="text-sm font-semibold text-white/80">
-            From
-          </Label>
-          <Select value={from} onValueChange={(value) => value && setFrom(value)}>
-            <SelectTrigger
-              id="from-city"
-              className="h-12 w-full rounded-2xl border-white/30 bg-white/70 px-4 text-sm text-slate-800"
-            >
-              <SelectValue placeholder="Departure city" />
-            </SelectTrigger>
-            <SelectContent>
-              {CITY_OPTIONS.map((city) => (
-                <SelectItem key={city} value={city}>
-                  {city}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Swap button in the middle */}
-        <div className="flex items-end pb-2">
-          <button
-            type="button"
-            className="inline-flex h-12 w-12 items-center justify-center rounded-full border-2 border-indigo-200 bg-indigo-50 text-indigo-600 transition hover:bg-indigo-100 hover:border-indigo-300 hover:scale-110"
-            onClick={() => {
-              setFrom(to);
-              setTo(from);
-            }}
-          >
-            <ArrowRightLeft className="size-5" />
-          </button>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="to-city" className="text-sm font-semibold text-white/80">
-            To
-          </Label>
-          <Select value={to} onValueChange={(value) => value && setTo(value)}>
-            <SelectTrigger
-              id="to-city"
-              className="h-12 w-full rounded-2xl border-white/30 bg-white/70 px-4 text-sm text-slate-800"
-            >
-              <SelectValue placeholder="Destination city" />
-            </SelectTrigger>
-            <SelectContent>
-              {CITY_OPTIONS.map((city) => (
-                <SelectItem key={city} value={city}>
-                  {city}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="travel-date" className="text-sm font-semibold text-white/80">
-            Date
-          </Label>
-          <div className="relative">
-            <CalendarDays className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="travel-date"
-              type="date"
-              value={date}
-              onChange={(event) => setDate(event.target.value)}
-              className="h-12 rounded-2xl border-white/30 bg-white/70 pl-11 text-sm text-slate-800"
-              required
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="passengers" className="text-sm font-semibold text-white/80">
-            Passengers
-          </Label>
-          <div className="relative">
-            <Users className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              id="passengers"
-              type="number"
-              min={1}
-              max={10}
-              value={passengers}
-              onChange={(event) => setPassengers(event.target.value)}
-              className="h-12 rounded-2xl border-white/30 bg-white/70 pl-11 text-sm text-slate-800"
-              required
-            />
-          </div>
-        </div>
-
-        <div className={cn("flex items-end", compact ? "" : "lg:col-span-4")}>
-          <Button
-            type="submit"
-            size="lg"
-            disabled={isPending}
+      <div className={cn(compact && "lg:grid lg:grid-cols-[240px_1fr] lg:items-end lg:gap-4")}>
+        <div className={cn("space-y-1", compact ? "mb-3 lg:mb-0" : "mb-4")}>
+          <p
             className={cn(
-              "h-12 rounded-2xl px-5 text-sm font-semibold shadow-lg shadow-amber-400/30 bg-amber-400 text-slate-950",
-              compact ? "w-full lg:w-auto" : "w-full"
+              "font-heading font-semibold tracking-tight",
+              compact ? "text-xl sm:text-2xl" : "text-2xl",
+              titleClasses
             )}
           >
-            <Search className="size-4" />
-            {isPending ? "Searching..." : submitLabel}
-          </Button>
+            {title}
+          </p>
+          <p
+            className={cn(
+              "max-w-2xl",
+              compact ? "text-xs sm:text-sm" : "text-sm",
+              descriptionClasses
+            )}
+          >
+            {description}
+          </p>
+        </div>
+
+        <div
+          className={cn(
+            "grid gap-2",
+            compact
+              ? "lg:grid-cols-[1fr_auto_1fr_1fr_0.85fr_auto] lg:items-end lg:gap-3"
+              : "lg:grid-cols-[1fr_auto_1fr_1fr_0.9fr]"
+          )}
+        >
+          <div className="space-y-1">
+            <Label htmlFor="from-city" className={cn("text-sm font-semibold", labelClasses)}>
+              From
+            </Label>
+            <Select value={from} onValueChange={(value) => value && setFrom(value)}>
+              <SelectTrigger
+                id="from-city"
+                className={cn(
+                  fieldHeight,
+                  "w-full rounded-2xl px-4 text-sm",
+                  controlClasses
+                )}
+              >
+                <SelectValue placeholder="Departure city" />
+              </SelectTrigger>
+              <SelectContent>
+                {CITY_OPTIONS.map((city) => (
+                  <SelectItem key={city} value={city}>
+                    {city}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Swap button in the middle */}
+          <div className="flex items-end lg:pb-0.5">
+            <button
+              type="button"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border-2 border-indigo-200 bg-indigo-50 text-indigo-600 transition hover:scale-110 hover:border-indigo-300 hover:bg-indigo-100"
+              onClick={() => {
+                setFrom(to);
+                setTo(from);
+              }}
+            >
+              <ArrowRightLeft className="size-5" />
+            </button>
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="to-city" className={cn("text-sm font-semibold", labelClasses)}>
+              To
+            </Label>
+            <Select value={to} onValueChange={(value) => value && setTo(value)}>
+              <SelectTrigger
+                id="to-city"
+                className={cn(
+                  fieldHeight,
+                  "w-full rounded-2xl px-4 text-sm",
+                  controlClasses
+                )}
+              >
+                <SelectValue placeholder="Destination city" />
+              </SelectTrigger>
+              <SelectContent>
+                {CITY_OPTIONS.map((city) => (
+                  <SelectItem key={city} value={city}>
+                    {city}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="travel-date" className={cn("text-sm font-semibold", labelClasses)}>
+              Date
+            </Label>
+            <div className="relative">
+              <CalendarDays className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="travel-date"
+                type="date"
+                value={date}
+                onChange={(event) => setDate(event.target.value)}
+                className={cn(
+                  fieldHeight,
+                  "rounded-2xl pl-11 text-sm",
+                  controlClasses
+                )}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="passengers" className={cn("text-sm font-semibold", labelClasses)}>
+              Passengers
+            </Label>
+            <div className="relative">
+              <Users className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="passengers"
+                type="number"
+                min={1}
+                max={10}
+                value={passengers}
+                onChange={(event) => setPassengers(event.target.value)}
+                className={cn(
+                  fieldHeight,
+                  "rounded-2xl pl-11 text-sm",
+                  controlClasses
+                )}
+                required
+              />
+            </div>
+          </div>
+
+          <div className={cn("flex items-end", compact ? "" : "lg:col-span-4")}>
+            <Button
+              type="submit"
+              disabled={isPending}
+              className={cn(
+                fieldHeight,
+                "rounded-2xl bg-amber-400 px-5 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-400/30",
+                compact ? "w-full lg:min-w-[180px]" : "w-full"
+              )}
+            >
+              <Search className="size-4" />
+              {isPending ? "Searching..." : submitLabel}
+            </Button>
+          </div>
         </div>
       </div>
 

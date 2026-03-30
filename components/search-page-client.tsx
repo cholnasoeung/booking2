@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowUpDown, SlidersHorizontal } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { SlidersHorizontal } from "lucide-react";
 
 import SearchFilters, {
   type FilterState,
-  type BusTypeFilter,
   TIME_SLOTS,
 } from "@/components/search-filters";
 import { Button } from "@/components/ui/button";
@@ -39,7 +38,6 @@ export default function SearchPageClient({
   passengers,
 }: SearchPageClientProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   // Calculate price range from available buses
   const prices = initialBuses.map((bus) => bus.pricePerSeat);
@@ -133,19 +131,6 @@ export default function SearchPageClient({
     });
   }
 
-  function updateSearchParams(params: Record<string, string>) {
-    const currentParams = new URLSearchParams(Array.from(searchParams.entries()));
-    Object.entries(params).forEach(([key, value]) => {
-      if (value === "") {
-        currentParams.delete(key);
-      } else {
-        currentParams.set(key, value);
-      }
-    });
-
-    router.push(`/search?${currentParams.toString()}`);
-  }
-
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
       {/* Search Form */}
@@ -154,6 +139,7 @@ export default function SearchPageClient({
         initialValues={{ from, to, date, passengers }}
         title="Refine your journey"
         description="Update your route, date, or passenger count and compare departures."
+        tone="light"
       />
 
       {/* Results Header with Sort */}
