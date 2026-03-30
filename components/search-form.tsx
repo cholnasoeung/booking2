@@ -50,8 +50,8 @@ export default function SearchForm({
     String(initialValues?.passengers ?? 1)
   );
   const [error, setError] = useState("");
-  const fieldHeight = "h-10";
-  const formPadding = compact ? "p-3 sm:p-4" : "p-4 sm:p-5";
+  const fieldHeight = compact ? "h-11" : "h-10";
+  const formPadding = compact ? "p-4" : "p-4 sm:p-5";
   const isLight = tone === "light";
   const shellClasses = isLight
     ? "border-slate-200/80 bg-white/95 text-slate-900 shadow-xl shadow-slate-200/70"
@@ -101,52 +101,51 @@ export default function SearchForm({
       )}
     >
       <div className={cn(compact && "lg:grid lg:grid-cols-[240px_1fr] lg:items-end lg:gap-4")}>
-        <div className={cn("space-y-1", compact ? "mb-3 lg:mb-0" : "mb-4")}>
-          <p
-            className={cn(
-              "font-heading font-semibold tracking-tight",
-              compact ? "text-xl sm:text-2xl" : "text-2xl",
-              titleClasses
-            )}
-          >
-            {title}
-          </p>
-          <p
-            className={cn(
-              "max-w-2xl",
-              compact ? "text-xs sm:text-sm" : "text-sm",
-              descriptionClasses
-            )}
-          >
-            {description}
-          </p>
-        </div>
+        {!compact && (
+          <div className="space-y-1 mb-4">
+            <p
+              className={cn(
+                "font-heading font-semibold tracking-tight text-2xl",
+                titleClasses
+              )}
+            >
+              {title}
+            </p>
+            <p
+              className={cn(
+                "max-w-2xl text-sm",
+                descriptionClasses
+              )}
+            >
+              {description}
+            </p>
+          </div>
+        )}
 
         <div
           className={cn(
             compact
-              ? "flex flex-wrap items-center justify-between gap-3"
+              ? "grid grid-cols-[1.4fr_auto_1.4fr_1fr_1fr_auto] items-center gap-3"
               : "grid gap-2 lg:grid-cols-[1fr_auto_1fr_1fr_0.9fr]"
           )}
         >
-          <div
-            className={cn(
-              compact ? "flex-1 min-w-[150px] space-y-1" : "space-y-1"
+          <div className="space-y-1">
+            {!compact && (
+              <Label htmlFor="from-city" className={cn("text-sm font-semibold", labelClasses)}>
+                From
+              </Label>
             )}
-          >
-            <Label htmlFor="from-city" className={cn("text-sm font-semibold", labelClasses)}>
-              From
-            </Label>
             <Select value={from} onValueChange={(value) => value && setFrom(value)}>
               <SelectTrigger
                 id="from-city"
                 className={cn(
                   fieldHeight,
-                  "w-full rounded-2xl px-4 text-sm",
+                  "w-full rounded-2xl text-sm",
+                  compact ? "px-4" : "px-4",
                   controlClasses
                 )}
               >
-                <SelectValue placeholder="Departure city" />
+                <SelectValue placeholder={compact ? "From" : "Departure city"} />
               </SelectTrigger>
               <SelectContent>
                 {CITY_OPTIONS.map((city) => (
@@ -159,37 +158,39 @@ export default function SearchForm({
           </div>
 
           {/* Swap button */}
-          <div className="flex items-end">
+          <div className={cn(compact ? "flex items-center" : "flex items-end")}>
             <button
               type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border-2 border-indigo-200 bg-indigo-50 text-indigo-600 transition hover:scale-110 hover:border-indigo-300 hover:bg-indigo-100"
+              className={cn(
+                "inline-flex items-center justify-center rounded-full border-2 border-indigo-200 bg-indigo-50 text-indigo-600 transition hover:scale-110 hover:border-indigo-300 hover:bg-indigo-100",
+                compact ? "h-9 w-9" : "h-10 w-10"
+              )}
               onClick={() => {
                 setFrom(to);
                 setTo(from);
               }}
             >
-              <ArrowRightLeft className="size-5" />
+              <ArrowRightLeft className={cn(compact ? "size-4" : "size-5")} />
             </button>
           </div>
 
-          <div
-            className={cn(
-              compact ? "flex-1 min-w-[150px] space-y-1" : "space-y-1"
+          <div className="space-y-1">
+            {!compact && (
+              <Label htmlFor="to-city" className={cn("text-sm font-semibold", labelClasses)}>
+                To
+              </Label>
             )}
-          >
-            <Label htmlFor="to-city" className={cn("text-sm font-semibold", labelClasses)}>
-              To
-            </Label>
             <Select value={to} onValueChange={(value) => value && setTo(value)}>
               <SelectTrigger
                 id="to-city"
                 className={cn(
                   fieldHeight,
-                  "w-full rounded-2xl px-4 text-sm",
+                  "w-full rounded-2xl text-sm",
+                  compact ? "px-4" : "px-4",
                   controlClasses
                 )}
               >
-                <SelectValue placeholder="Destination city" />
+                <SelectValue placeholder={compact ? "To" : "Destination city"} />
               </SelectTrigger>
               <SelectContent>
                 {CITY_OPTIONS.map((city) => (
@@ -201,16 +202,14 @@ export default function SearchForm({
             </Select>
           </div>
 
-          <div
-            className={cn(
-              compact ? "flex-1 min-w-[150px] space-y-1" : "space-y-1"
+          <div className="space-y-1">
+            {!compact && (
+              <Label htmlFor="travel-date" className={cn("text-sm font-semibold", labelClasses)}>
+                Date
+              </Label>
             )}
-          >
-            <Label htmlFor="travel-date" className={cn("text-sm font-semibold", labelClasses)}>
-              Date
-            </Label>
             <div className="relative">
-              <CalendarDays className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
+              <CalendarDays className={cn("pointer-events-none absolute top-1/2 size-4 -translate-y-1/2 text-muted-foreground", compact ? "left-3.5" : "left-4")} />
               <Input
                 id="travel-date"
                 type="date"
@@ -218,7 +217,8 @@ export default function SearchForm({
                 onChange={(event) => setDate(event.target.value)}
                 className={cn(
                   fieldHeight,
-                  "w-full rounded-2xl pl-11 text-sm",
+                  "w-full rounded-2xl text-sm",
+                  compact ? "pl-10" : "pl-11",
                   controlClasses
                 )}
                 required
@@ -226,16 +226,14 @@ export default function SearchForm({
             </div>
           </div>
 
-          <div
-            className={cn(
-              compact ? "flex-1 min-w-[150px] space-y-1" : "space-y-1"
+          <div className="space-y-1">
+            {!compact && (
+              <Label htmlFor="passengers" className={cn("text-sm font-semibold", labelClasses)}>
+                Passengers
+              </Label>
             )}
-          >
-            <Label htmlFor="passengers" className={cn("text-sm font-semibold", labelClasses)}>
-              Passengers
-            </Label>
             <div className="relative">
-              <Users className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Users className={cn("pointer-events-none absolute top-1/2 size-4 -translate-y-1/2 text-muted-foreground", compact ? "left-3.5" : "left-4")} />
               <Input
                 id="passengers"
                 type="number"
@@ -245,22 +243,24 @@ export default function SearchForm({
                 onChange={(event) => setPassengers(event.target.value)}
                 className={cn(
                   fieldHeight,
-                  "w-full rounded-2xl pl-11 text-sm",
+                  "w-full rounded-2xl text-sm",
+                  compact ? "pl-10" : "pl-11",
                   controlClasses
                 )}
+                placeholder={compact ? "Guests" : ""}
                 required
               />
             </div>
           </div>
 
-          <div className={cn("flex items-end", compact ? "flex-1 min-w-[150px]" : "lg:col-span-4")}>
+          <div className={cn("flex items-end", compact ? "" : "lg:col-span-4")}>
             <Button
               type="submit"
               disabled={isPending}
               className={cn(
                 fieldHeight,
                 "rounded-2xl bg-amber-400 px-5 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-400/30",
-                compact ? "w-full lg:min-w-[160px]" : "w-full"
+                compact ? "w-full" : "w-full"
               )}
             >
               <Search className="size-4" />
