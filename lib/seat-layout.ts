@@ -178,6 +178,8 @@ export function getBusTypeLabel(busType: BusType) {
   switch (busType) {
     case "sleeping_bus":
       return "Sleeping Bus";
+    case "bus_45":
+      return "45 Seater";
     case "mini_bus":
       return "Mini Bus";
     case "car":
@@ -281,10 +283,42 @@ function createSleepingBusTemplate(): SeatLayout {
   };
 }
 
+function createSleeper45Template(): SeatLayout {
+  const items: SeatLayoutItem[] = [
+    buildItem("driver", 1, 1, { colSpan: 2, label: "Driver" }),
+    buildItem("aisle", 1, 3, { label: "Aisle" }),
+    buildItem("empty", 1, 4),
+  ];
+
+  // 15 rows of regular seats: 2 left + 1 right = 3 seats per row × 15 rows = 45 seats
+  for (let row = 2; row <= 16; row += 1) {
+    const seatRow = row - 1;
+    // Left side: 2 seats
+    items.push(buildSeat(row, 1, `${seatRow}A`));
+    items.push(buildSeat(row, 2, `${seatRow}B`));
+    // Aisle
+    items.push(buildItem("aisle", row, 3, { label: "Aisle" }));
+    // Right side: 1 seat
+    items.push(buildSeat(row, 4, `${seatRow}C`));
+  }
+
+  return {
+    version: LAYOUT_VERSION,
+    template: "bus_45",
+    grid: {
+      rows: 16,
+      cols: 4,
+    },
+    items,
+  };
+}
+
 export function getSeatLayoutTemplate(busType: BusType): SeatLayout {
   switch (busType) {
     case "sleeping_bus":
       return createSleepingBusTemplate();
+    case "bus_45":
+      return createSleeper45Template();
     case "mini_bus":
       return createMiniBusTemplate();
     case "car":
