@@ -8,6 +8,7 @@ import CTASection from "@/components/cta-section";
 import FAQSection from "@/components/faq-section";
 import Footer from "@/components/footer";
 import HeroSearchForm from "@/components/hero-search-form";
+import DiscountPopup from "@/components/discount-popup";
 import { POPULAR_ROUTES } from "@/lib/constants";
 import { getTomorrowDateInput } from "@/lib/date";
 import { formatCurrency } from "@/lib/formatters";
@@ -27,6 +28,7 @@ export default function Home() {
       <Navbar />
 
       <main>
+        <DiscountPopup />
         {/* ── HERO ─────────────────────────────────────────────────────── */}
         <section className="relative min-h-[90vh] overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white flex flex-col">
           {/* Background layers */}

@@ -190,7 +190,7 @@ export default async function BookPage({
         </Card>
       </div>
 
-      <SeatSelection bus={bus} selectionLimit={selectionLimit} />
+      <SeatSelection key={bus.id} bus={bus} selectionLimit={selectionLimit} />
     </div>
   );
 }
