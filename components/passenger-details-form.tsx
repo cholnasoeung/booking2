@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ArrowRight, CheckCircle2, User, Mail, Phone, Calendar, Users } from "lucide-react";
+import { ArrowRight, CheckCircle2, User, Mail, Phone, Calendar, Users, Tag, X, Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,9 +23,10 @@ type PassengerDetailsFormProps = {
   selectedSeats: string[];
   seatLabels?: string[];
   pricePerSeat?: number;
-  onSubmit: (passengers: Passenger[]) => Promise<{ success: boolean; bookingId?: string; error?: string }>;
+  onSubmit: (passengers: Passenger[], promoCode?: string) => Promise<{ success: boolean; bookingId?: string; error?: string }>;
   onCancel?: () => void;
   isSubmitting?: boolean;
+  busId?: string;
 };
 
 const GENDER_OPTIONS = [
@@ -34,6 +35,13 @@ const GENDER_OPTIONS = [
   { value: "other", label: "Other" },
 ];
 
+interface PromoCodeValidation {
+  valid: boolean;
+  discount: number;
+  message: string;
+  code?: string;
+}
+
 export default function PassengerDetailsForm({
   selectedSeats,
   seatLabels = selectedSeats,
@@ -41,16 +49,23 @@ export default function PassengerDetailsForm({
   onSubmit,
   onCancel,
   isSubmitting = false,
+  busId = "",
 }: PassengerDetailsFormProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const busId = searchParams.get("busId");
+  const paramBusId = searchParams.get("busId") || busId;
 
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitError, setSubmitError] = useState("");
+
+  // Promo code state
+  const [promoCode, setPromoCode] = useState("");
+  const [promoValidation, setPromoValidation] = useState<PromoCodeValidation | null>(null);
+  const [validatingPromo, setValidatingPromo] = useState(false);
+  const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
 
   // Initialize passengers based on selected seats
   useEffect(() => {
@@ -83,6 +98,63 @@ export default function PassengerDetailsForm({
       });
     }
   }, [session]);
+
+  // Validate promo code
+  async function validatePromoCode(code: string) {
+    if (!code.trim()) {
+      setPromoValidation(null);
+      return;
+    }
+
+    setValidatingPromo(true);
+    setPromoValidation(null);
+
+    try {
+      const bookingAmount = passengers.length * pricePerSeat;
+      const response = await fetch(
+        `/api/promo-codes/validate?code=${code.toUpperCase()}&busId=${paramBusId}&bookingAmount=${bookingAmount}`
+      );
+      const data = await response.json();
+
+      if (response.ok && data.valid) {
+        setPromoValidation({
+          valid: true,
+          discount: data.discount || 0,
+          message: data.message || "Promo code applied successfully!",
+          code: code.toUpperCase(),
+        });
+        setAppliedPromo(code.toUpperCase());
+      } else {
+        setPromoValidation({
+          valid: false,
+          discount: 0,
+          message: data.message || "Invalid promo code",
+        });
+      }
+    } catch (error) {
+      setPromoValidation({
+        valid: false,
+        discount: 0,
+        message: "Unable to validate promo code",
+      });
+    } finally {
+      setValidatingPromo(false);
+    }
+  }
+
+  // Apply promo code
+  function handleApplyPromo() {
+    if (promoCode.trim()) {
+      validatePromoCode(promoCode);
+    }
+  }
+
+  // Remove promo code
+  function handleRemovePromo() {
+    setPromoCode("");
+    setAppliedPromo(null);
+    setPromoValidation(null);
+  }
 
   function updatePassenger(index: number, field: keyof Passenger, value: string) {
     setPassengers((prev) => {
@@ -158,7 +230,7 @@ export default function PassengerDetailsForm({
 
     setSubmitError("");
 
-    const result = await onSubmit(passengers);
+    const result = await onSubmit(passengers, appliedPromo || undefined);
 
     // If successful, redirect to confirmation page
     if (result.success && result.bookingId) {
@@ -169,14 +241,16 @@ export default function PassengerDetailsForm({
   }
 
   function handleBack() {
-    if (busId) {
-      router.push(`/book/${busId}`);
+    if (paramBusId) {
+      router.push(`/book/${paramBusId}`);
     } else {
       onCancel?.();
     }
   }
 
-  const totalPrice = passengers.length * pricePerSeat;
+  const baseTotal = passengers.length * pricePerSeat;
+  const discountAmount = promoValidation?.valid ? promoValidation.discount : 0;
+  const totalPrice = baseTotal - discountAmount;
 
   return (
     <div className="w-full">
@@ -196,6 +270,111 @@ export default function PassengerDetailsForm({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Promo Code Section */}
+        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Tag className="h-4 w-4 text-amber-600" />
+              <h3 className="font-semibold text-amber-900">Promo Code</h3>
+              {appliedPromo && (
+                <span className="flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+                  <Check className="w-3 h-3" />
+                  Applied
+                </span>
+              )}
+            </div>
+
+            {!appliedPromo ? (
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <Input
+                    type="text"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                    placeholder="Enter promo code"
+                    className="h-11 pr-24"
+                    disabled={validatingPromo}
+                  />
+                  {promoValidation && (
+                    <div className={cn(
+                      "absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 rounded text-xs font-medium",
+                      promoValidation.valid
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                    )}>
+                      {promoValidation.valid ? "✓ Valid" : "✗ Invalid"}
+                    </div>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleApplyPromo}
+                  disabled={!promoCode.trim() || validatingPromo}
+                  className="h-11 px-4"
+                >
+                  {validatingPromo ? "Checking..." : "Apply"}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between bg-green-100 border border-green-200 rounded-lg px-4 py-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono font-bold text-green-800">{appliedPromo}</span>
+                  <span className="text-sm text-green-700">
+                    -${discountAmount.toFixed(2)} discount
+                  </span>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRemovePromo}
+                  className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+
+            {promoValidation && !promoValidation.valid && (
+              <p className="text-xs text-red-600 mt-2">{promoValidation.message}</p>
+            )}
+
+            {promoValidation?.valid && (
+              <p className="text-xs text-green-700 mt-2">{promoValidation.message}</p>
+            )}
+
+            <div className="mt-3 flex flex-wrap gap-2 text-xs text-amber-700">
+              <span className="font-medium">Try:</span>
+              <span className="cursor-pointer hover:underline" onClick={() => { setPromoCode("SAVE10"); validatePromoCode("SAVE10"); }}>SAVE10</span>
+              <span className="cursor-pointer hover:underline" onClick={() => { setPromoCode("WELCOME20"); validatePromoCode("WELCOME20"); }}>WELCOME20</span>
+              <span className="cursor-pointer hover:underline" onClick={() => { setPromoCode("FIRST5"); validatePromoCode("FIRST5"); }}>FIRST5</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Pricing Summary */}
+        <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
+          <CardContent className="p-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-600">Base Price ({passengers.length} seats × ${pricePerSeat})</span>
+                <span className="font-medium text-slate-900">${baseTotal.toFixed(2)}</span>
+              </div>
+              {discountAmount > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-green-700">Discount ({appliedPromo})</span>
+                  <span className="font-medium text-green-700">-${discountAmount.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between pt-2 border-t border-blue-200">
+                <span className="text-base font-bold text-slate-900">Total Amount</span>
+                <span className="text-xl font-bold text-blue-600">${totalPrice.toFixed(2)}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Passengers List */}
         <div className="space-y-4">
           {passengers.map((passenger, index) => (

@@ -17,7 +17,8 @@ async function createBooking(
   userId: string,
   selectedSeats: string[],
   passengers: Passenger[],
-  pricePerSeat: number
+  pricePerSeat: number,
+  promoCode?: string
 ) {
   "use server";
 
@@ -31,6 +32,7 @@ async function createBooking(
       seats: selectedSeats,
       passengers,
       totalPrice,
+      promoCode,
     });
 
     return { success: true, bookingId: booking.id };
@@ -71,10 +73,10 @@ export default async function PassengersPage({ params, searchParams }: Passenger
     redirect(`/book/${busId}?error=seats_unavailable`);
   }
 
-  async function handlePassengerSubmit(passengers: Passenger[]) {
+  async function handlePassengerSubmit(passengers: Passenger[], promoCode?: string) {
     "use server";
 
-    const result = await createBooking(busId, user.id, selectedSeats, passengers, bus.pricePerSeat);
+    const result = await createBooking(busId, user.id, selectedSeats, passengers, bus.pricePerSeat, promoCode);
     return result;
   }
 
@@ -96,6 +98,7 @@ export default async function PassengersPage({ params, searchParams }: Passenger
             selectedSeats={selectedSeats}
             seatLabels={selectedSeats}
             pricePerSeat={bus.pricePerSeat}
+            busId={busId}
             onSubmit={handlePassengerSubmit}
           />
         </div>

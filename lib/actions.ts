@@ -17,6 +17,7 @@ type CreateBookingInput = {
   seats: string[];
   passengers: Passenger[];
   totalPrice: number;
+  promoCode?: string;
 };
 
 type CreateBookingResult = {
@@ -82,6 +83,31 @@ export async function createBooking(input: CreateBookingInput) {
     throw new Error("Not enough seats available");
   }
 
+  // Apply promo code discount if provided
+  let discountAmount = 0;
+  let finalPrice = input.totalPrice;
+  let appliedPromoCode = null;
+
+  if (input.promoCode) {
+    const PromoCodeModel = (await import("@/models/PromoCode")).default;
+    const promoCode = await PromoCodeModel.findOne({
+      code: input.promoCode.toUpperCase(),
+      isActive: true,
+    });
+
+    if (promoCode && promoCode.isValid()) {
+      const discountResult = promoCode.calculateDiscount(input.totalPrice);
+      if (discountResult.valid) {
+        discountAmount = discountResult.discount || 0;
+        finalPrice = input.totalPrice - discountAmount;
+        appliedPromoCode = promoCode.code;
+
+        // Increment promo code usage
+        await promoCode.incrementUsage();
+      }
+    }
+  }
+
   // Create booking
   const booking = await BookingModel.create({
     bus: bus.id,
@@ -89,8 +115,9 @@ export async function createBooking(input: CreateBookingInput) {
     seats: input.seats,
     passengers: input.passengers,
     totalPrice: input.totalPrice,
-    discountAmount: 0,
-    finalPrice: input.totalPrice,
+    discountAmount,
+    finalPrice,
+    promoCode: appliedPromoCode,
     status: "confirmed",
   });
 
