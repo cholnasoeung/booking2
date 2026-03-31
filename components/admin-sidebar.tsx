@@ -19,10 +19,11 @@ import {
   Package,
   ChevronDown,
   Users,
+  LogOut,
 } from "lucide-react";
+import { signOut } from "next-auth/react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import AdminUserDropdown from "@/components/admin-user-dropdown";
 
 const navSections = [
   {
@@ -130,6 +131,16 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
   const activeTab = searchParams.get("tab") || "overview";
+  const userInitials = userName
+    .split(" ")
+    .map((part) => part[0] ?? "")
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  const handleLogout = () => {
+    signOut({ callbackUrl: "/" });
+  };
 
   const toggleSection = (sectionTitle: string) => {
     setCollapsedSections((prev) => {
@@ -264,9 +275,38 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
           </Link>
         </nav>
 
-        {/* Footer with User Dropdown */}
         <div className="border-t border-gray-200 p-3 bg-white lg:p-4">
-          <AdminUserDropdown userName={userName} userEmail={userEmail} />
+          <div className="rounded-2xl bg-gradient-to-br from-indigo-500/90 to-purple-600/90 p-3 text-white shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-black/20 text-lg font-semibold uppercase tracking-wide">
+                {userInitials || "A"}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold leading-tight">{userName}</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">
+                  Admin
+                </p>
+              </div>
+              <ChevronDown className="size-4 text-white/70" />
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-medium">
+              <Link
+                href="/dashboard/profile"
+                className="inline-flex items-center gap-2 rounded-full border border-white/40 px-3 py-1.5 text-white/90 transition hover:border-white hover:text-white"
+              >
+                <Users className="size-3" />
+                Profile
+              </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center gap-2 rounded-full border border-white/40 px-3 py-1.5 text-white/90 transition hover:border-white hover:text-white"
+              >
+                <LogOut className="size-3" />
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
       </aside>
     </>
