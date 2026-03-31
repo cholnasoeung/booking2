@@ -21,6 +21,7 @@ export interface IBus extends Document {
   stops: BusStop[];
   pricePerSeat: number;
   amenities?: string[];
+  driverId?: mongoose.Types.ObjectId | null;
 }
 
 const BusSchema = new Schema<IBus>({
@@ -85,6 +86,16 @@ const BusSchema = new Schema<IBus>({
   amenities: {
     type: [String],
     default: [],
+  },
+  driverId: {
+    type: Schema.Types.ObjectId,
+    ref: "Driver",
+    default: null,
+  },
+  busDetailId: {
+    type: Schema.Types.ObjectId,
+    ref: "BusDetail",
+    default: null,
   },
 });
 

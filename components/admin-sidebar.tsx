@@ -77,6 +77,18 @@ const navSections = [
     title: "Management",
     items: [
       {
+        title: "Drivers",
+        href: "/admin?tab=drivers",
+        icon: Users,
+        color: "from-cyan-500 to-blue-600",
+      },
+      {
+        title: "Bus Details",
+        href: "/admin?tab=bus-details",
+        icon: Package,
+        color: "from-slate-500 to-gray-600",
+      },
+      {
         title: "Promo Codes",
         href: "/admin?tab=promo-codes",
         icon: Tags,

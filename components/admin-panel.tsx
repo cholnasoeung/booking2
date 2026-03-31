@@ -12,9 +12,17 @@ import AdminPromoCodesTab from "@/components/admin-promo-codes-tab";
 import AdminImportExportTab from "@/components/admin-import-export-tab";
 import AdminAlertsTab from "@/components/admin-alerts-tab";
 import AdminAuditLogsTab from "@/components/admin-audit-logs-tab";
+import AdminBusDetailsManager from "@/components/admin-bus-details-manager";
+import AdminDriversManager from "@/components/admin-drivers-manager";
 import AdminSecurityTab from "@/components/admin-security-tab";
 import AdminSystemStatusTab from "@/components/admin-system-status-tab";
-import type { AdminBookingSummary, BusSummary, RouteSummary } from "@/lib/queries";
+import type {
+  AdminBookingSummary,
+  BusDetailSummary,
+  BusSummary,
+  DriverSummary,
+  RouteSummary,
+} from "@/lib/queries";
 
 type FeedbackState =
   | {
@@ -27,12 +35,16 @@ type AdminPanelProps = {
   routes: RouteSummary[];
   buses: BusSummary[];
   bookings: AdminBookingSummary[];
+  drivers: DriverSummary[];
+  busDetails: BusDetailSummary[];
 };
 
 export default function AdminPanel({
   routes,
   buses,
   bookings,
+  drivers,
+  busDetails,
 }: AdminPanelProps) {
   const searchParams = useSearchParams();
   const activeTab = searchParams.get("tab") || "overview";
@@ -86,6 +98,14 @@ export default function AdminPanel({
       {activeTab === "alerts" ? <AdminAlertsTab /> : null}
 
       {activeTab === "audit-logs" ? <AdminAuditLogsTab /> : null}
+
+      {activeTab === "drivers" ? (
+        <AdminDriversManager drivers={drivers} />
+      ) : null}
+
+      {activeTab === "bus-details" ? (
+        <AdminBusDetailsManager busDetails={busDetails} />
+      ) : null}
 
       {activeTab === "security" ? <AdminSecurityTab /> : null}
 

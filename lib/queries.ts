@@ -14,7 +14,9 @@ import {
 import { BusStop } from "@/types/bus";
 import { escapeRegExp, normalizeCity, parsePassengerCount } from "@/lib/validation";
 import BookingModel, { type BookingStatus } from "@/models/Booking";
+import BusDetailModel from "@/models/BusDetail";
 import BusModel from "@/models/Bus";
+import DriverModel from "@/models/Driver";
 import RouteModel from "@/models/Route";
 import UserModel, { type UserRole } from "@/models/User";
 
@@ -40,12 +42,37 @@ type StoredBusRecord = {
   pricePerSeat: number;
   amenities?: string[];
   stops?: BusStop[];
+  driverId?: Types.ObjectId | null;
+  busDetailId?: Types.ObjectId | null;
+};
+
+type DriverRecord = {
+  _id: Types.ObjectId;
+  name: string;
+  phone: string;
+  licenseNumber: string;
+  vehicleNumber?: string;
+  status: "active" | "inactive";
+  createdAt: Date;
+};
+
+type BusDetailRecord = {
+  _id: Types.ObjectId;
+  name: string;
+  registrationNumber: string;
+  busType: BusType;
+  totalSeats: number;
+  seatLayoutTemplate?: SeatLayout | null;
+  amenities: string[];
+  createdAt: Date;
 };
 
 type NormalizedBusRecord = Omit<StoredBusRecord, "bookedSeats" | "seatLayout" | "busType" | "blockedSeats" | "amenities"> &
   NormalizedSeatLayout & {
     blockedSeats: string[];
     stops: BusStop[];
+    driverId: string | null;
+    busDetailId: string | null;
     amenities: string[];
   };
 
@@ -107,6 +134,20 @@ export type BusSummary = {
   pricePerSeat: number;
   amenities: string[];
   stops: BusStop[];
+  driver?: {
+    id: string;
+    name: string;
+    phone: string;
+    vehicleNumber?: string;
+  } | null;
+  busDetail?: {
+    id: string;
+    name: string;
+    registrationNumber: string;
+    busType: BusType;
+    totalSeats: number;
+    amenities: string[];
+  } | null;
 };
 
 export type UserSummary = {
@@ -114,6 +155,27 @@ export type UserSummary = {
   name: string;
   email: string;
   role: UserRole;
+};
+
+export type DriverSummary = {
+  id: string;
+  name: string;
+  phone: string;
+  licenseNumber: string;
+  vehicleNumber?: string;
+  status: "active" | "inactive";
+  createdAt: string;
+};
+
+export type BusDetailSummary = {
+  id: string;
+  name: string;
+  registrationNumber: string;
+  busType: BusType;
+  totalSeats: number;
+  amenities: string[];
+  createdAt: string;
+  seatLayoutTemplate?: SeatLayout | null;
 };
 
 export type BookingSummary = {
@@ -163,11 +225,23 @@ function normalizeBusRecord(bus: StoredBusRecord): NormalizedBusRecord {
     totalSeats: normalized.totalSeats,
     bookedSeats: normalized.bookedSeats,
     seatCodes: normalized.seatCodes,
-    stops: bus.stops ?? [],
+    stops: (bus.stops ?? []).map((stop) => ({
+      location: stop.location,
+      boarding: stop.boarding,
+      dropping: stop.dropping,
+      order: stop.order,
+    })),
+    driverId: bus.driverId ? String(bus.driverId) : null,
+    busDetailId: bus.busDetailId ? String(bus.busDetailId) : null,
   };
 }
 
-function serializeBus(bus: NormalizedBusRecord, route: RouteRecord): BusSummary {
+function serializeBus(
+  bus: NormalizedBusRecord,
+  route: RouteRecord,
+  driver: DriverRecord | null = null,
+  busDetail: BusDetailRecord | null = null
+): BusSummary {
   const stops =
     bus.stops && bus.stops.length > 0
       ? bus.stops
@@ -196,6 +270,24 @@ function serializeBus(bus: NormalizedBusRecord, route: RouteRecord): BusSummary 
     pricePerSeat: bus.pricePerSeat,
     amenities: bus.amenities ?? [],
     stops,
+    driver: driver
+      ? {
+          id: String(driver._id),
+          name: driver.name,
+          phone: driver.phone,
+          vehicleNumber: driver.vehicleNumber,
+        }
+      : null,
+    busDetail: busDetail
+      ? {
+          id: String(busDetail._id),
+          name: busDetail.name,
+          registrationNumber: busDetail.registrationNumber,
+          busType: busDetail.busType,
+          totalSeats: busDetail.totalSeats,
+          amenities: busDetail.amenities,
+        }
+      : null,
   };
 }
 
@@ -205,6 +297,31 @@ function serializeUser(user: UserRecord): UserSummary {
     name: user.name,
     email: user.email,
     role: user.role,
+  };
+}
+
+function serializeDriver(driver: DriverRecord): DriverSummary {
+  return {
+    id: String(driver._id),
+    name: driver.name,
+    phone: driver.phone,
+    licenseNumber: driver.licenseNumber,
+    vehicleNumber: driver.vehicleNumber,
+    status: driver.status,
+    createdAt: driver.createdAt.toISOString(),
+  };
+}
+
+function serializeBusDetail(detail: BusDetailRecord): BusDetailSummary {
+  return {
+    id: String(detail._id),
+    name: detail.name,
+    registrationNumber: detail.registrationNumber,
+    busType: detail.busType,
+    totalSeats: detail.totalSeats,
+    amenities: detail.amenities,
+    createdAt: detail.createdAt.toISOString(),
+    seatLayoutTemplate: detail.seatLayoutTemplate ?? null,
   };
 }
 
@@ -299,18 +416,35 @@ export async function searchBuses(filters: {
     .sort({ departureTime: 1 })
     .lean()) as StoredBusRecord[];
 
+  const detailIds = [
+    ...new Set(
+      buses
+        .map((bus) => bus.busDetailId)
+        .filter((id): id is Types.ObjectId => Boolean(id))
+        .map((id) => String(id))
+    ),
+  ];
+  const busDetails =
+    detailIds.length === 0
+      ? []
+      : ((await BusDetailModel.find({ _id: { $in: detailIds } }).lean()) as BusDetailRecord[]);
+  const busDetailMap = new Map(busDetails.map((detail) => [String(detail._id), detail]));
   const routeMap = new Map(routes.map((route) => [String(route._id), route]));
   const passengers = parsePassengerCount(filters.passengers);
 
   return buses
-    .map((bus) => {
-      const route = routeMap.get(String(bus.routeId));
-      if (!route) {
-        return null;
-      }
+      .map((bus) => {
+        const route = routeMap.get(String(bus.routeId));
+        if (!route) {
+          return null;
+        }
 
-      return serializeBus(normalizeBusRecord(bus), route);
-    })
+        const busDetail = bus.busDetailId
+          ? busDetailMap.get(String(bus.busDetailId)) ?? null
+          : null;
+
+        return serializeBus(normalizeBusRecord(bus), route, null, busDetail);
+      })
     .filter((bus): bus is BusSummary => bus !== null)
     .filter((bus) => bus.seatsLeft >= passengers)
     .sort((first, second) => first.departureTime.localeCompare(second.departureTime));
@@ -331,7 +465,16 @@ export async function getBusSummary(busId: string) {
     return null;
   }
 
-  return serializeBus(normalizeBusRecord(bus), route);
+  const [driver, busDetail] = await Promise.all([
+    bus.driverId
+      ? (DriverModel.findById(bus.driverId).lean() as Promise<DriverRecord | null>)
+      : Promise.resolve(null),
+    bus.busDetailId
+      ? (BusDetailModel.findById(bus.busDetailId).lean() as Promise<BusDetailRecord | null>)
+      : Promise.resolve(null),
+  ]);
+
+  return serializeBus(normalizeBusRecord(bus), route, driver, busDetail);
 }
 
 export async function getUserBookings(userId: string) {
@@ -424,24 +567,47 @@ export async function getAdminSnapshot() {
   const typedBuses = (buses as StoredBusRecord[]).map(normalizeBusRecord);
   const typedBookings = bookings as BookingRecord[];
   const typedUsers = users as UserRecord[];
+  const drivers = (await DriverModel.find().lean()) as DriverRecord[];
 
+  const typedDrivers = drivers;
+  const detailIds = [
+    ...new Set(
+      typedBuses
+        .map((bus) => bus.busDetailId)
+        .filter((id): id is string => Boolean(id))
+    ),
+  ];
+  const typedBusDetails =
+    detailIds.length === 0
+      ? []
+      : ((await BusDetailModel.find({
+          _id: { $in: detailIds },
+        }).lean()) as BusDetailRecord[]);
+  const busDetailMap = new Map(typedBusDetails.map((detail) => [String(detail._id), detail]));
   const routeMap = new Map(typedRoutes.map((route) => [String(route._id), route]));
   const busMap = new Map(typedBuses.map((bus) => [String(bus._id), bus]));
   const userMap = new Map(typedUsers.map((user) => [String(user._id), user]));
+  const driverMap = new Map(typedDrivers.map((driver) => [String(driver._id), driver]));
 
   return {
     routes: typedRoutes.map(serializeRoute),
     buses: typedBuses
       .map((bus) => {
         const route = routeMap.get(String(bus.routeId));
-        return route ? serializeBus(bus, route) : null;
+        const driver = bus.driverId ? driverMap.get(bus.driverId) ?? null : null;
+        const busDetail = bus.busDetailId
+          ? busDetailMap.get(bus.busDetailId) ?? null
+          : null;
+        return route ? serializeBus(bus, route, driver, busDetail) : null;
       })
       .filter((bus): bus is BusSummary => bus !== null),
-    bookings: typedBookings.map((booking) =>
-      serializeBooking(booking, busMap, routeMap, userMap)
-    ),
-  };
-}
+      bookings: typedBookings.map((booking) =>
+        serializeBooking(booking, busMap, routeMap, userMap)
+      ),
+      drivers: typedDrivers.map(serializeDriver),
+      busDetails: typedBusDetails.map(serializeBusDetail),
+    };
+  }
 
 export interface KPIMetrics {
   revenueToday: {

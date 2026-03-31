@@ -12,6 +12,8 @@ import { normalizeStops } from "@/lib/stops";
 import { isValidObjectId } from "@/lib/validation";
 import BookingModel from "@/models/Booking";
 import BusModel from "@/models/Bus";
+import DriverModel from "@/models/Driver";
+import BusDetailModel from "@/models/BusDetail";
 import RouteModel from "@/models/Route";
 
 export const runtime = "nodejs";
@@ -55,6 +57,12 @@ export async function PUT(
     const seatLayout = (body?.seatLayout ?? null) as SeatLayout | null;
     const amenities = Array.isArray(body?.amenities) ? body.amenities : [];
     const blockedSeats = Array.isArray(body?.blockedSeats) ? body.blockedSeats : [];
+    const driverId =
+      typeof body?.driverId === "string" && body.driverId.trim() ? body.driverId.trim() : "";
+    const busDetailId =
+      typeof body?.busDetailId === "string" && body.busDetailId.trim()
+        ? body.busDetailId.trim()
+        : "";
 
     if (!isValidObjectId(routeId)) {
       return Response.json({ message: "A valid route is required." }, { status: 400 });
@@ -65,6 +73,14 @@ export async function PUT(
         { message: "Date must be in YYYY-MM-DD format." },
         { status: 400 }
       );
+    }
+
+    if (driverId && !isValidObjectId(driverId)) {
+      return Response.json({ message: "Driver id is invalid." }, { status: 400 });
+    }
+
+    if (busDetailId && !isValidObjectId(busDetailId)) {
+      return Response.json({ message: "Vehicle id is invalid." }, { status: 400 });
     }
 
     if (!TIME_REGEX.test(departureTime) || !TIME_REGEX.test(arrivalTime)) {
@@ -101,13 +117,31 @@ export async function PUT(
 
     const stops = normalizeStops(body?.stops, route.from, route.to);
 
+    if (driverId) {
+      const driverExists = await DriverModel.findById(driverId).lean();
+      if (!driverExists) {
+        return Response.json({ message: "Driver not found." }, { status: 404 });
+      }
+    }
+
+    let busDetailTemplate: SeatLayout | null = null;
+
+    if (busDetailId) {
+      const detail = await BusDetailModel.findById(busDetailId).lean();
+      if (!detail) {
+        return Response.json({ message: "Vehicle not found." }, { status: 404 });
+      }
+
+      busDetailTemplate = detail.seatLayoutTemplate ?? null;
+    }
+
     if (!existingBusDocument) {
       return Response.json({ message: "Bus not found." }, { status: 404 });
     }
 
     const normalizedBus = normalizeBusSeatLayout({
       busType,
-      seatLayout: seatLayout ?? getSeatLayoutTemplate(busType),
+      seatLayout: seatLayout ?? busDetailTemplate ?? getSeatLayoutTemplate(busType),
       totalSeats: existingBusDocument.totalSeats,
       bookedSeats: existingBusDocument.bookedSeats,
       blockedSeats,
@@ -142,6 +176,8 @@ export async function PUT(
       stops,
       pricePerSeat,
       amenities,
+      driverId: driverId || null,
+      busDetailId: busDetailId || null,
     });
     await existingBusDocument.save();
 

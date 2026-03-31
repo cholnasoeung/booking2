@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { AMENITY_OPTIONS, BUS_TYPES, type AmenityValue } from "@/lib/constants";
 import { formatBusType } from "@/lib/formatters";
-import type { BusSummary, RouteSummary } from "@/lib/queries";
+import type { BusDetailSummary, BusSummary, DriverSummary, RouteSummary } from "@/lib/queries";
 import { type BusStop } from "@/types/bus";
 import {
   type BusType,
@@ -53,6 +53,8 @@ type BusFormState = {
   amenities: AmenityValue[];
   blockedSeats: string[];
   stops: StopEntry[];
+  driverId: string;
+  busDetailId: string;
   endDate: string;
 };
 
@@ -69,6 +71,12 @@ export default function AdminBusDialog({
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState("");
+  const [drivers, setDrivers] = useState<DriverSummary[]>([]);
+  const [driversLoading, setDriversLoading] = useState(false);
+  const [driversError, setDriversError] = useState("");
+  const [busDetails, setBusDetails] = useState<BusDetailSummary[]>([]);
+  const [busDetailsLoading, setBusDetailsLoading] = useState(false);
+  const [busDetailsError, setBusDetailsError] = useState("");
   const [form, setForm] = useState<BusFormState>(() => createFormState(routes, bus));
 
   useEffect(() => {
@@ -80,6 +88,87 @@ export default function AdminBusDialog({
     setError("");
     setIsPending(false);
   }, [bus, open, routes]);
+
+  useEffect(() => {
+    let mounted = true;
+    setDriversLoading(true);
+    setDriversError("");
+
+    fetch("/api/admin/drivers")
+      .then(async (response) => {
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({}));
+          throw new Error(payload?.message ?? "Unable to load drivers.");
+        }
+        return response.json();
+      })
+      .then((payload) => {
+        if (mounted) {
+          setDrivers(payload?.drivers ?? []);
+        }
+      })
+      .catch((fetchError) => {
+        if (mounted) {
+          setDriversError(
+            typeof fetchError === "string"
+              ? fetchError
+              : fetchError instanceof Error
+              ? fetchError.message
+              : "Unable to load drivers."
+          );
+        }
+      })
+      .finally(() => {
+        if (mounted) {
+          setDriversLoading(false);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    setBusDetailsLoading(true);
+    setBusDetailsError("");
+
+    fetch("/api/admin/bus-details")
+      .then(async (response) => {
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({}));
+          throw new Error(payload?.message ?? "Unable to load bus details.");
+        }
+
+        return response.json();
+      })
+      .then((payload) => {
+        if (mounted) {
+          setBusDetails(payload?.busDetails ?? []);
+        }
+      })
+      .catch((fetchError) => {
+        if (mounted) {
+          setBusDetailsError(
+            typeof fetchError === "string"
+              ? fetchError
+              : fetchError instanceof Error
+              ? fetchError.message
+              : "Unable to load bus details."
+          );
+        }
+      })
+      .finally(() => {
+        if (mounted) {
+          setBusDetailsLoading(false);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const layoutValidation = getLayoutValidation(form.seatLayout, bus?.bookedSeats ?? []);
   const isEditing = Boolean(bus);
@@ -149,24 +238,26 @@ export default function AdminBusDialog({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          routeId: form.routeId,
-          date: form.date,
-          departureTime: form.departureTime,
-          arrivalTime: form.arrivalTime,
-          busType: form.busType,
-          pricePerSeat: Number(form.pricePerSeat),
-          seatLayout: form.seatLayout,
-          amenities: form.amenities,
-          blockedSeats: form.blockedSeats,
-          endDate: form.endDate,
-          stops: form.stops.map((stop) => ({
-            location: stop.location,
-            boarding: stop.boarding,
-            dropping: stop.dropping,
-          })),
-        }),
-      });
+          body: JSON.stringify({
+            routeId: form.routeId,
+            date: form.date,
+            departureTime: form.departureTime,
+            arrivalTime: form.arrivalTime,
+            busType: form.busType,
+            pricePerSeat: Number(form.pricePerSeat),
+            seatLayout: form.seatLayout,
+            amenities: form.amenities,
+            blockedSeats: form.blockedSeats,
+            endDate: form.endDate,
+            stops: form.stops.map((stop) => ({
+              location: stop.location,
+              boarding: stop.boarding,
+              dropping: stop.dropping,
+            })),
+            driverId: form.driverId || null,
+            busDetailId: form.busDetailId || null,
+          }),
+        });
 
       const payload = (await response.json()) as { message?: string };
 
@@ -308,6 +399,61 @@ export default function AdminBusDialog({
             </div>
           </div>
 
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-semibold">Assigned Bus Detail</Label>
+              <span className="text-xs text-slate-400">
+                {busDetails.length} vehicle{busDetails.length === 1 ? "" : "s"} available
+              </span>
+            </div>
+            <Select
+              value={form.busDetailId}
+              onValueChange={(value) => {
+                const selectedDetail = busDetails.find((detail) => detail.id === value);
+                setForm((current) => {
+                  if (!selectedDetail) {
+                    return {
+                      ...current,
+                      busDetailId: value,
+                    };
+                  }
+
+                  const template =
+                    selectedDetail.seatLayoutTemplate ??
+                    getSeatLayoutTemplate(selectedDetail.busType);
+
+                  return {
+                    ...current,
+                    busDetailId: value,
+                    busType: selectedDetail.busType,
+                    seatLayout: structuredClone(template),
+                  };
+                });
+              }}
+            >
+              <SelectTrigger className="h-11 rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20">
+                <SelectValue placeholder="Select a bus or leave blank" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Unassigned</SelectItem>
+                {busDetails.map((detail) => (
+                  <SelectItem key={detail.id} value={detail.id}>
+                    {detail.name} · {detail.registrationNumber}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {busDetailsLoading ? (
+              <p className="text-[11px] text-slate-500">Loading vehicles…</p>
+            ) : busDetailsError ? (
+              <p className="text-[11px] text-red-600">{busDetailsError}</p>
+            ) : (
+              <p className="text-[11px] text-slate-500">
+                Pick a saved vehicle so passengers see a consistent fleet.
+              </p>
+            )}
+          </div>
+
           {/* Bus Type and Price */}
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
@@ -357,6 +503,46 @@ export default function AdminBusDialog({
                 required
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="bus-driver" className="text-sm font-semibold">
+              Assigned driver
+            </Label>
+            <Select
+              value={form.driverId}
+              onValueChange={(value) =>
+                setForm((current) => ({
+                  ...current,
+                  driverId: value,
+                }))
+              }
+            >
+              <SelectTrigger
+                id="bus-driver"
+                className="h-11 rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
+              >
+                <SelectValue placeholder="Select a driver (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Unassigned</SelectItem>
+                {drivers.map((driver) => (
+                  <SelectItem key={driver.id} value={driver.id}>
+                    {driver.name} · {driver.phone}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[11px] text-slate-500">
+              {driversLoading
+                ? "Loading driver roster…"
+                : drivers.length === 0
+                ? "Add a driver first before assigning it to a bus."
+                : "Choose a driver who will operate this departure."}
+            </p>
+            {driversError ? (
+              <p className="text-[11px] text-red-600">{driversError}</p>
+            ) : null}
           </div>
 
           {/* Amenities Section */}
@@ -548,6 +734,8 @@ function createFormState(routes: RouteSummary[], bus?: BusSummary | null): BusFo
       blockedSeats: bus.blockedSeats ?? [],
       stops: mapBusStops(bus.stops),
       endDate: bus.travelDate,
+      driverId: bus.driver?.id ?? "",
+      busDetailId: bus.busDetail?.id ?? "",
     };
   }
 
@@ -566,6 +754,8 @@ function createFormState(routes: RouteSummary[], bus?: BusSummary | null): BusFo
     blockedSeats: [],
     stops: getDefaultStopEntries(defaultRoute),
     endDate: "",
+    driverId: "",
+    busDetailId: "",
   };
 }
 

@@ -230,21 +230,26 @@ export default function SearchPageClient({
                           <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">
                             {formatBusType(bus.busType)}
                           </Badge>
-                          {bus.amenities && bus.amenities.length > 0 && (
-                            <div className="flex gap-1">
-                              {bus.amenities.slice(0, 2).map((amenity) => (
-                                <Badge
-                                  key={amenity}
-                                  variant="outline"
-                                  className="text-xs border-slate-300 text-slate-600"
-                                >
-                                  {amenity}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                        {bus.amenities && bus.amenities.length > 0 && (
+                          <div className="flex gap-1">
+                            {bus.amenities.slice(0, 2).map((amenity) => (
+                              <Badge
+                                key={amenity}
+                                variant="outline"
+                                className="text-xs border-slate-300 text-slate-600"
+                              >
+                                {amenity}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        {bus.busDetail && (
+                          <p className="text-xs text-slate-500">
+                            {bus.busDetail.name} · {bus.busDetail.registrationNumber}
+                          </p>
+                        )}
                       </div>
+                    </div>
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-indigo-600">
