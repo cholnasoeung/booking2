@@ -222,42 +222,42 @@ export default function SearchPageClient({
                   className="border-white/60 bg-white/90 shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-200 cursor-pointer"
                   onClick={() => router.push(`/book/${bus.id}`)}
                 >
-                  <CardHeader className="space-y-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-xl">{bus.from} → {bus.to}</CardTitle>
-                        <div className="flex flex-wrap items-center gap-2 mt-2">
-                          <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">
-                            {formatBusType(bus.busType)}
-                          </Badge>
-                        {bus.amenities && bus.amenities.length > 0 && (
-                          <div className="flex gap-1">
-                            {bus.amenities.slice(0, 2).map((amenity) => (
-                              <Badge
-                                key={amenity}
-                                variant="outline"
-                                className="text-xs border-slate-300 text-slate-600"
-                              >
-                                {amenity}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                        {bus.busDetail && (
-                          <p className="text-xs text-slate-500">
-                            {bus.busDetail.name} · {bus.busDetail.registrationNumber}
-                          </p>
-                        )}
-                      </div>
+              <CardHeader className="space-y-3">
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex-1 space-y-1">
+                    <CardTitle className="text-xl">{bus.from} → {bus.to}</CardTitle>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">
+                        {formatBusType(bus.busType)}
+                      </Badge>
+                      {bus.amenities && bus.amenities.length > 0 && (
+                        <div className="flex gap-1">
+                          {bus.amenities.slice(0, 2).map((amenity) => (
+                            <Badge
+                              key={amenity}
+                              variant="outline"
+                              className="text-xs border-slate-300 text-slate-600"
+                            >
+                              {amenity}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-indigo-600">
-                        {formatCurrency(bus.pricePerSeat)}
+                    {bus.busDetail && (
+                      <p className="text-xs text-slate-500">
+                        {bus.busDetail.name} · {bus.busDetail.registrationNumber}
                       </p>
-                      <p className="text-xs text-slate-500">per seat</p>
-                    </div>
-                  </CardHeader>
+                    )}
+                  </div>
+                  <div className="text-right space-y-1">
+                    <p className="text-2xl font-bold text-indigo-600">
+                      {formatCurrency(bus.pricePerSeat)}
+                    </p>
+                    <p className="text-xs text-slate-500">per seat</p>
+                  </div>
+                </div>
+              </CardHeader>
 
                   <div className="grid grid-cols-3 gap-4 text-sm">
                     <div>

@@ -54,6 +54,32 @@ export default async function BookPage({
         </p>
       </div>
 
+      {bus.busDetail?.images && bus.busDetail.images.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground">Vehicle gallery</h2>
+            <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+              {bus.busDetail.images.length} view
+              {bus.busDetail.images.length === 1 ? "" : "s"}
+            </span>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {bus.busDetail.images.map((src, index) => (
+              <div
+                key={`${src}-${index}`}
+                className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+              >
+                <img
+                  src={src}
+                  alt={`${bus.busDetail?.name ?? "Vehicle"} image ${index + 1}`}
+                  className="h-40 w-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="border-white/60 bg-white/90 shadow-xl shadow-red-950/5">
           <CardHeader>

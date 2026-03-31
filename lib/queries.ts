@@ -65,6 +65,7 @@ type BusDetailRecord = {
   seatLayoutTemplate?: SeatLayout | null;
   amenities: string[];
   createdAt: Date;
+  images: string[];
 };
 
 type NormalizedBusRecord = Omit<StoredBusRecord, "bookedSeats" | "seatLayout" | "busType" | "blockedSeats" | "amenities"> &
@@ -176,6 +177,7 @@ export type BusDetailSummary = {
   amenities: string[];
   createdAt: string;
   seatLayoutTemplate?: SeatLayout | null;
+  images: string[];
 };
 
 export type BookingSummary = {
@@ -286,6 +288,8 @@ function serializeBus(
           busType: busDetail.busType,
           totalSeats: busDetail.totalSeats,
           amenities: busDetail.amenities,
+          seatLayoutTemplate: busDetail.seatLayoutTemplate ?? null,
+          images: busDetail.images ?? [],
         }
       : null,
   };
@@ -322,6 +326,7 @@ function serializeBusDetail(detail: BusDetailRecord): BusDetailSummary {
     amenities: detail.amenities,
     createdAt: detail.createdAt.toISOString(),
     seatLayoutTemplate: detail.seatLayoutTemplate ?? null,
+    images: detail.images ?? [],
   };
 }
 

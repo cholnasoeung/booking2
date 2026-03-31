@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import { useState, useTransition } from "react";
 
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -23,6 +24,7 @@ type BusDetailsFormState = {
   busType: BusType;
   totalSeats: string;
   amenities: string;
+  imageUrls: string;
 };
 
 type AdminBusDetailsManagerProps = {
@@ -35,6 +37,7 @@ const initialState: BusDetailsFormState = {
   busType: "mini_bus",
   totalSeats: "30",
   amenities: "",
+  imageUrls: "",
 };
 
 export default function AdminBusDetailsManager({ busDetails }: AdminBusDetailsManagerProps) {
@@ -49,7 +52,12 @@ export default function AdminBusDetailsManager({ busDetails }: AdminBusDetailsMa
 
     startTransition(async () => {
       try {
-        const response = await fetch("/api/admin/bus-details", {
+    const images = form.imageUrls
+      .split(/\s+/)
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0);
+
+    const response = await fetch("/api/admin/bus-details", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -63,6 +71,7 @@ export default function AdminBusDetailsManager({ busDetails }: AdminBusDetailsMa
               .split(",")
               .map((value) => value.trim())
               .filter(Boolean),
+            images,
           }),
         });
 
@@ -174,6 +183,21 @@ export default function AdminBusDetailsManager({ busDetails }: AdminBusDetailsMa
                   placeholder="Wi-Fi, Restroom, USB Charging"
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bus-detail-images">Image URLs (one per line)</Label>
+              <Textarea
+                id="bus-detail-images"
+                value={form.imageUrls}
+                onChange={(event) =>
+                  setForm((current) => ({ ...current, imageUrls: event.target.value }))
+                }
+                placeholder="https://example.com/bus1.jpg"
+                className="h-24 rounded-xl border border-slate-200 bg-slate-50"
+              />
+              <p className="text-[11px] text-slate-500">
+                Enter publicly accessible image URLs so passengers can preview the vehicle.
+              </p>
             </div>
             {message ? (
               <p

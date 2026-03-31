@@ -26,6 +26,7 @@ export async function GET() {
         totalSeats: driver.totalSeats,
         amenities: driver.amenities,
         seatLayoutTemplate: driver.seatLayoutTemplate ?? null,
+        images: driver.images ?? [],
         createdAt: driver.createdAt.toISOString(),
       })),
     },
@@ -55,6 +56,10 @@ export async function POST(request: Request) {
     const busType = BUS_TYPES.includes(requestedType) ? (requestedType as BusType) : null;
     const totalSeats = Number(body?.totalSeats);
     const amenities = Array.isArray(body?.amenities) ? body.amenities : [];
+    const images =
+      Array.isArray(body?.images) && body.images.every((item) => typeof item === "string")
+        ? body.images.map((item) => item.trim()).filter(Boolean)
+        : [];
 
     if (!name || !registrationNumber || !busType) {
       return NextResponse.json(
@@ -90,6 +95,7 @@ export async function POST(request: Request) {
       totalSeats,
       amenities,
       seatLayoutTemplate: body?.seatLayoutTemplate ?? null,
+      images,
     });
 
     return NextResponse.json(
@@ -103,6 +109,7 @@ export async function POST(request: Request) {
           totalSeats: busDetail.totalSeats,
           amenities: busDetail.amenities,
           seatLayoutTemplate: busDetail.seatLayoutTemplate ?? null,
+          images: busDetail.images ?? [],
           createdAt: busDetail.createdAt.toISOString(),
         },
       },

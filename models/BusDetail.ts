@@ -45,6 +45,10 @@ const BusDetailSchema = new Schema<IBusDetail>(
       type: [String],
       default: [],
     },
+    images: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,
