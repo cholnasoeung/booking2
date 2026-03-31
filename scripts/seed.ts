@@ -101,7 +101,7 @@ async function seed() {
     const morningType =
       index === 2 || index === 3 ? "car" : "mini_bus";
     const eveningType =
-      index === 0 || index === 1 || index === 4 ? "sleeping_bus" : "mini_bus";
+      index === 0 || index === 1 || index === 4 ? "bus_45" : "mini_bus";
 
     const morningLayout = getSeatLayoutTemplate(morningType);
     const eveningLayout = getSeatLayoutTemplate(eveningType);
@@ -160,7 +160,7 @@ async function seed() {
         totalSeats: eveningSeatCodes.length,
         bookedSeats: eveningSeatCodes.slice(
           0,
-          eveningType === "sleeping_bus" ? 7 + index : 4 + index
+          eveningType === "bus_45" ? 7 + index : 4 + index
         ),
         pricePerSeat:
           route.to === "Poipet"

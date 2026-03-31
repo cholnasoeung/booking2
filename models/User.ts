@@ -102,7 +102,7 @@ const UserSchema = new Schema<IUser>(
       preferredSeatType: [String],
       preferredBusType: {
         type: [String],
-        enum: ["sleeping_bus", "mini_bus", "car"],
+        enum: ["bus_45", "mini_bus", "car"],
       },
       notifications: {
         bookingConfirmation: { type: Boolean, default: true },

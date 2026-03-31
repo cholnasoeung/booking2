@@ -27,7 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
-export type BusTypeFilter = "all" | "mini_bus" | "sleeping_bus" | "car";
+export type BusTypeFilter = "all" | "bus_45" | "mini_bus" | "car";
 
 export type TimeSlot = {
   id: string;
@@ -95,8 +95,8 @@ export const AMENITIES_OPTIONS = [
 
 const BUS_TYPE_OPTIONS = [
   { value: "all", label: "All Types" },
+  { value: "bus_45", label: "45 Seater" },
   { value: "mini_bus", label: "Mini Bus" },
-  { value: "sleeping_bus", label: "Sleeper Bus" },
   { value: "car", label: "Car" },
 ];
 

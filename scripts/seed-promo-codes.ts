@@ -48,7 +48,7 @@ async function seedPromoCodes() {
         isActive: true,
       },
       {
-        code: "SLEEPER50",
+        code: "BUS4550",
         type: "percentage",
         value: 50,
         maxUses: 25,
@@ -56,7 +56,7 @@ async function seedPromoCodes() {
         maxDiscountAmount: 100,
         validFrom: new Date(),
         validUntil: new Date(Date.now() + 120 * 24 * 60 * 60 * 1000), // 120 days
-        applicableBusTypes: ["sleeping_bus"],
+        applicableBusTypes: ["bus_45"],
         applicableRoutes: [],
         isActive: true,
       },
@@ -91,7 +91,7 @@ async function seedPromoCodes() {
     console.log("   • SAVE10 - 10% off (max $50)");
     console.log("   • WELCOME20 - 20% off (max $30, min $20)");
     console.log("   • FIRST5 - $5 off (min $10)");
-    console.log("   • SLEEPER50 - 50% off sleeping buses (max $100)");
+    console.log("   • BUS4550 - 50% off 45-seater buses (max $100)");
     console.log("   • BIGDISCOUNT - 25% off orders $100+ (max $75)");
 
   } catch (error) {

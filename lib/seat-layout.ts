@@ -176,8 +176,6 @@ export function cloneSeatLayout(layout: SeatLayout) {
 
 export function getBusTypeLabel(busType: BusType) {
   switch (busType) {
-    case "sleeping_bus":
-      return "Sleeping Bus";
     case "bus_45":
       return "45 Seater";
     case "mini_bus":
@@ -258,32 +256,7 @@ function createCarTemplate(): SeatLayout {
   };
 }
 
-function createSleepingBusTemplate(): SeatLayout {
-  const items: SeatLayoutItem[] = [
-    buildItem("driver", 1, 1, { colSpan: 2, label: "Driver" }),
-    buildItem("aisle", 1, 3, { label: "Aisle" }),
-    buildItem("toilet", 1, 4, { colSpan: 2, label: "WC" }),
-  ];
-
-  for (let row = 2; row <= 10; row += 1) {
-    const seatRow = row - 1;
-    items.push(buildSleeper(row, 1, `${seatRow}A`));
-    items.push(buildItem("aisle", row, 3, { label: "Aisle" }));
-    items.push(buildSleeper(row, 4, `${seatRow}B`));
-  }
-
-  return {
-    version: LAYOUT_VERSION,
-    template: "sleeping_bus",
-    grid: {
-      rows: 10,
-      cols: 5,
-    },
-    items,
-  };
-}
-
-function createSleeper45Template(): SeatLayout {
+function createBus45Template(): SeatLayout {
   const items: SeatLayoutItem[] = [
     buildItem("driver", 1, 1, { colSpan: 2, label: "Driver" }),
     buildItem("aisle", 1, 3, { label: "Aisle" }),
@@ -315,10 +288,8 @@ function createSleeper45Template(): SeatLayout {
 
 export function getSeatLayoutTemplate(busType: BusType): SeatLayout {
   switch (busType) {
-    case "sleeping_bus":
-      return createSleepingBusTemplate();
     case "bus_45":
-      return createSleeper45Template();
+      return createBus45Template();
     case "mini_bus":
       return createMiniBusTemplate();
     case "car":

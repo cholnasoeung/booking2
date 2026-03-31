@@ -73,7 +73,7 @@ const PromoCodeSchema = new Schema<IPromoCode>(
     },
     applicableBusTypes: {
       type: [String],
-      enum: ["sleeping_bus", "bus_45", "mini_bus", "car"],
+      enum: ["bus_45", "mini_bus", "car"],
       default: [],
     },
     isActive: {
