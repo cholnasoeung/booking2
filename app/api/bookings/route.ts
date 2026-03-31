@@ -21,6 +21,10 @@ export async function POST(request: Request) {
     const busId = typeof body?.busId === "string" ? body.busId : "";
     const seats = parseSeatSelection(body?.seats);
     const promoCode = typeof body?.promoCode === "string" ? body.promoCode : undefined;
+    const boardingStop =
+      typeof body?.boardingStop === "string" ? body.boardingStop : undefined;
+    const droppingStop =
+      typeof body?.droppingStop === "string" ? body.droppingStop : undefined;
     const passengers = body?.passengers || [];
 
     if (!isValidObjectId(busId) || !seats) {
@@ -125,6 +129,8 @@ export async function POST(request: Request) {
       discountAmount,
       finalPrice,
       promoCode: appliedPromoCode,
+      boardingStop,
+      droppingStop,
       status: "confirmed",
       paymentStatus: "paid",
       metadata: {

@@ -109,6 +109,24 @@ export default async function BookPage({
           </CardContent>
         </Card>
 
+        <Card className="border-white/60 bg-white/90 shadow-xl shadow-red-950/5">
+          <CardHeader>
+            <CardTitle>Stops</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm text-muted-foreground">
+            {bus.stops.map((stop) => (
+              <div key={stop.location} className="flex items-center justify-between gap-3">
+                <span className="font-medium text-foreground">{stop.location}</span>
+                <span className="text-xs uppercase tracking-[0.2em]">
+                  {stop.boarding ? "Boarding" : ""}
+                  {stop.boarding && stop.dropping ? " / " : ""}
+                  {stop.dropping ? "Drop-off" : ""}
+                </span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
         {bus.amenities && bus.amenities.length > 0 && (
           <Card className="border-white/60 bg-white/90 shadow-xl shadow-red-950/5">
             <CardHeader>

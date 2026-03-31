@@ -27,6 +27,8 @@ type PassengerDetailsFormProps = {
   onCancel?: () => void;
   isSubmitting?: boolean;
   busId?: string;
+  boardingStop?: string;
+  droppingStop?: string;
 };
 
 const GENDER_OPTIONS = [
@@ -50,6 +52,8 @@ export default function PassengerDetailsForm({
   onCancel,
   isSubmitting = false,
   busId = "",
+  boardingStop,
+  droppingStop,
 }: PassengerDetailsFormProps) {
   const { data: session } = useSession();
   const router = useRouter();
@@ -267,6 +271,12 @@ export default function PassengerDetailsForm({
         <p className="text-slate-600">
           Enter details for {passengers.length} passenger{passengers.length > 1 ? "s" : ""}
         </p>
+        {(boardingStop || droppingStop) && (
+          <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+            {boardingStop && <span>Board at {boardingStop}</span>}
+            {droppingStop && <span>Drop at {droppingStop}</span>}
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

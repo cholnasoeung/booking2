@@ -106,6 +106,22 @@ export default async function ConfirmationPage({
                 {formatSeatList(booking.seats)}
               </p>
             </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                Boarding stop
+              </p>
+              <p className="mt-2 text-lg font-medium text-foreground">
+                {booking.boardingStop ?? booking.bus?.from ?? "Unavailable"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                Drop-off stop
+              </p>
+              <p className="mt-2 text-lg font-medium text-foreground">
+                {booking.droppingStop ?? booking.bus?.to ?? "Unavailable"}
+              </p>
+            </div>
           </div>
 
           <div className="space-y-4">

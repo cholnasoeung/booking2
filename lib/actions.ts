@@ -18,6 +18,8 @@ type CreateBookingInput = {
   passengers: Passenger[];
   totalPrice: number;
   promoCode?: string;
+  boardingStop?: string;
+  droppingStop?: string;
 };
 
 type CreateBookingResult = {
@@ -114,12 +116,14 @@ export async function createBooking(input: CreateBookingInput) {
     user: input.userId,
     seats: input.seats,
     passengers: input.passengers,
-    totalPrice: input.totalPrice,
-    discountAmount,
-    finalPrice,
-    promoCode: appliedPromoCode,
-    status: "confirmed",
-  });
+      totalPrice: input.totalPrice,
+      discountAmount,
+      finalPrice,
+      promoCode: appliedPromoCode,
+      boardingStop: input.boardingStop,
+      droppingStop: input.droppingStop,
+      status: "confirmed",
+    });
 
   // Update bus with new booked seats
   await BusModel.findByIdAndUpdate(bus.id, {

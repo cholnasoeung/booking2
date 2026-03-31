@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import SeatMap from "@/components/seat-map";
@@ -10,6 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { compareSeatCodes } from "@/lib/seat-layout";
 import { formatBusType, formatCurrency, formatSeatList } from "@/lib/formatters";
 import type { BusSummary } from "@/lib/queries";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type SeatSelectionProps = {
   bus: BusSummary;
@@ -23,6 +30,19 @@ export default function SeatSelection({
   const router = useRouter();
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [error, setError] = useState("");
+  const boardingOptions = bus.stops.filter((stop) => stop.boarding);
+  const droppingOptions = bus.stops.filter((stop) => stop.dropping);
+  const [boardingStop, setBoardingStop] = useState(
+    boardingOptions[0]?.location ?? bus.from
+  );
+  const [droppingStop, setDroppingStop] = useState(
+    droppingOptions[0]?.location ?? bus.to
+  );
+
+  useEffect(() => {
+    setBoardingStop(boardingOptions[0]?.location ?? bus.from);
+    setDroppingStop(droppingOptions[0]?.location ?? bus.to);
+  }, [bus.id, boardingOptions[0]?.location, droppingOptions[0]?.location, bus.from, bus.to]);
 
   const totalPrice = selectedSeats.length * bus.pricePerSeat;
 
@@ -58,7 +78,12 @@ export default function SeatSelection({
 
     // Redirect to passenger details form with selected seats
     const seatsParam = selectedSeats.join(",");
-    router.push(`/book/${bus.id}/passengers?seats=${seatsParam}`);
+    const params = new URLSearchParams({
+      seats: seatsParam,
+      boardingStop,
+      droppingStop,
+    });
+    router.push(`/book/${bus.id}/passengers?${params.toString()}`);
   }
 
   return (
@@ -78,6 +103,38 @@ export default function SeatSelection({
           </p>
         </CardHeader>
         <CardContent>
+          <div className="grid gap-3 sm:grid-cols-2 mb-4">
+            <div>
+              <p className="text-xs text-muted-foreground">Boarding stop</p>
+              <Select value={boardingStop} onValueChange={(value) => value && setBoardingStop(value)}>
+                <SelectTrigger className="h-10 rounded-xl">
+                  <SelectValue placeholder="Boarding stop" />
+                </SelectTrigger>
+                <SelectContent>
+                  {boardingOptions.map((stop) => (
+                    <SelectItem key={stop.location} value={stop.location}>
+                      {stop.location}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Drop-off stop</p>
+              <Select value={droppingStop} onValueChange={(value) => value && setDroppingStop(value)}>
+                <SelectTrigger className="h-10 rounded-xl">
+                  <SelectValue placeholder="Drop-off stop" />
+                </SelectTrigger>
+                <SelectContent>
+                  {droppingOptions.map((stop) => (
+                    <SelectItem key={stop.location} value={stop.location}>
+                      {stop.location}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <SeatMap
             layout={bus.seatLayout}
             bookedSeats={bus.bookedSeats}
@@ -94,14 +151,19 @@ export default function SeatSelection({
           <CardTitle>Booking summary</CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
-          <div className="rounded-3xl bg-secondary/70 p-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              Selected seats
-            </p>
-            <p className="mt-2 font-heading text-2xl font-semibold text-foreground">
-              {selectedSeats.length > 0 ? formatSeatList(selectedSeats) : "None yet"}
-            </p>
-          </div>
+              <div className="rounded-3xl bg-secondary/70 p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  Selected seats
+                </p>
+                <p className="mt-2 font-heading text-2xl font-semibold text-foreground">
+                  {selectedSeats.length > 0 ? formatSeatList(selectedSeats) : "None yet"}
+                </p>
+              </div>
+
+              <div className="rounded-xl bg-slate-50/60 px-4 py-3 text-xs text-slate-600">
+                <p>Boarding at {boardingStop}</p>
+                <p>Dropping at {droppingStop}</p>
+              </div>
 
           <div className="space-y-3 text-sm">
             <div className="flex items-center justify-between">

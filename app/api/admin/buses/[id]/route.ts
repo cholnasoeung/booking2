@@ -8,6 +8,7 @@ import {
   isBusType,
   normalizeBusSeatLayout,
 } from "@/lib/seat-layout";
+import { normalizeStops } from "@/lib/stops";
 import { isValidObjectId } from "@/lib/validation";
 import BookingModel from "@/models/Booking";
 import BusModel from "@/models/Bus";
@@ -98,6 +99,8 @@ export async function PUT(
       return Response.json({ message: "Route not found." }, { status: 404 });
     }
 
+    const stops = normalizeStops(body?.stops, route.from, route.to);
+
     if (!existingBusDocument) {
       return Response.json({ message: "Bus not found." }, { status: 404 });
     }
@@ -136,6 +139,7 @@ export async function PUT(
       totalSeats: normalizedBus.totalSeats,
       bookedSeats: normalizedBus.bookedSeats,
       blockedSeats: normalizedBus.blockedSeats,
+      stops,
       pricePerSeat,
       amenities,
     });

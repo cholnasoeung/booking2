@@ -208,33 +208,42 @@ export default function SearchPageClient({
               </CardContent>
             </Card>
           ) : (
-            sortedBuses.map((bus) => (
-              <Card
-                key={bus.id}
-                className="border-white/60 bg-white/90 shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-200 cursor-pointer"
-                onClick={() => router.push(`/book/${bus.id}`)}
-              >
-                <CardHeader className="space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-xl">{bus.from} → {bus.to}</CardTitle>
-                      <div className="flex flex-wrap items-center gap-2 mt-2">
-                        <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">
-                          {formatBusType(bus.busType)}
-                        </Badge>
-                        {bus.amenities && bus.amenities.length > 0 && (
-                          <div className="flex gap-1">
-                            {bus.amenities.slice(0, 2).map((amenity) => (
-                              <Badge
-                                key={amenity}
-                                variant="outline"
-                                className="text-xs border-slate-300 text-slate-600"
-                              >
-                                {amenity}
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
+            sortedBuses.map((bus) => {
+              const boardingStops = bus.stops
+                .filter((stop) => stop.boarding)
+                .map((stop) => stop.location);
+              const droppingStops = bus.stops
+                .filter((stop) => stop.dropping)
+                .map((stop) => stop.location);
+
+              return (
+                <Card
+                  key={bus.id}
+                  className="border-white/60 bg-white/90 shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-200 cursor-pointer"
+                  onClick={() => router.push(`/book/${bus.id}`)}
+                >
+                  <CardHeader className="space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-xl">{bus.from} → {bus.to}</CardTitle>
+                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                          <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">
+                            {formatBusType(bus.busType)}
+                          </Badge>
+                          {bus.amenities && bus.amenities.length > 0 && (
+                            <div className="flex gap-1">
+                              {bus.amenities.slice(0, 2).map((amenity) => (
+                                <Badge
+                                  key={amenity}
+                                  variant="outline"
+                                  className="text-xs border-slate-300 text-slate-600"
+                                >
+                                  {amenity}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">
@@ -243,7 +252,7 @@ export default function SearchPageClient({
                       </p>
                       <p className="text-xs text-slate-500">per seat</p>
                     </div>
-                  </div>
+                  </CardHeader>
 
                   <div className="grid grid-cols-3 gap-4 text-sm">
                     <div>
@@ -259,33 +268,46 @@ export default function SearchPageClient({
                       <p className="font-medium text-slate-900">{bus.arrivalTime}</p>
                     </div>
                   </div>
-                </CardHeader>
 
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between rounded-xl bg-slate-100 px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-slate-600">Seats Available</span>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between rounded-xl bg-slate-100 px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-slate-600">Seats Available</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-bold text-slate-900">{bus.seatsLeft}</span>
+                        <span className="text-xs text-slate-500">/ {bus.totalSeats}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg font-bold text-slate-900">{bus.seatsLeft}</span>
-                      <span className="text-xs text-slate-500">/ {bus.totalSeats}</span>
-                    </div>
+
+                    {bus.seatsLeft <= 5 && (
+                      <div className="rounded-xl bg-amber-50 px-4 py-2 text-center">
+                        <p className="text-sm font-medium text-amber-700">
+                          ⚡ Fast filling - Only {bus.seatsLeft} seats left!
+                        </p>
+                      </div>
+                    )}
+
+                    <Button className="w-full h-11 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md hover:shadow-lg transition-all">
+                      Select Seats
+                    </Button>
+                  </CardContent>
+
+                  <div className="flex flex-wrap gap-2 text-xs text-slate-500 mt-2 px-4 pb-4">
+                    {boardingStops.length > 0 && (
+                      <span className="rounded-full border border-slate-200 px-3 py-1">
+                        Board at {boardingStops.join(", ")}
+                      </span>
+                    )}
+                    {droppingStops.length > 0 && (
+                      <span className="rounded-full border border-slate-200 px-3 py-1">
+                        Drop at {droppingStops.join(", ")}
+                      </span>
+                    )}
                   </div>
-
-                  {bus.seatsLeft <= 5 && (
-                    <div className="rounded-xl bg-amber-50 px-4 py-2 text-center">
-                      <p className="text-sm font-medium text-amber-700">
-                        ⚡ Fast filling - Only {bus.seatsLeft} seats left!
-                      </p>
-                    </div>
-                  )}
-
-                  <Button className="w-full h-11 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md hover:shadow-lg transition-all">
-                    Select Seats
-                  </Button>
-                </CardContent>
-              </Card>
-            ))
+                </Card>
+              );
+            })
           )}
         </div>
       </div>

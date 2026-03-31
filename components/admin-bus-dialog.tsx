@@ -26,6 +26,7 @@ import {
 import { AMENITY_OPTIONS, BUS_TYPES, type AmenityValue } from "@/lib/constants";
 import { formatBusType } from "@/lib/formatters";
 import type { BusSummary, RouteSummary } from "@/lib/queries";
+import { type BusStop } from "@/types/bus";
 import {
   type BusType,
   cloneSeatLayout,
@@ -51,7 +52,12 @@ type BusFormState = {
   seatLayout: BusSummary["seatLayout"];
   amenities: AmenityValue[];
   blockedSeats: string[];
+  stops: StopEntry[];
   endDate: string;
+};
+
+type StopEntry = BusStop & {
+  id: string;
 };
 
 export default function AdminBusDialog({
@@ -77,6 +83,51 @@ export default function AdminBusDialog({
 
   const layoutValidation = getLayoutValidation(form.seatLayout, bus?.bookedSeats ?? []);
   const isEditing = Boolean(bus);
+
+  function addStop() {
+    setForm((current) => {
+      if (current.stops.length === 0) {
+        return {
+          ...current,
+          stops: reindexStops([createStopEntry(), createStopEntry("", false, true)]),
+        };
+      }
+
+      const updatedStops = [
+        ...current.stops.slice(0, current.stops.length - 1),
+        createStopEntry(),
+        current.stops[current.stops.length - 1],
+      ];
+
+      return {
+        ...current,
+        stops: reindexStops(updatedStops),
+      };
+    });
+  }
+
+  function removeStop(stopId: string) {
+    setForm((current) => ({
+      ...current,
+      stops: reindexStops(current.stops.filter((stop) => stop.id !== stopId)),
+    }));
+  }
+
+  function updateStop(stopId: string, updates: Partial<StopEntry>) {
+    setForm((current) => ({
+      ...current,
+      stops: reindexStops(
+        current.stops.map((stop) =>
+          stop.id === stopId
+            ? {
+                ...stop,
+                ...updates,
+              }
+            : stop
+        )
+      ),
+    }));
+  }
 
   async function submitBus(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -109,6 +160,11 @@ export default function AdminBusDialog({
           amenities: form.amenities,
           blockedSeats: form.blockedSeats,
           endDate: form.endDate,
+          stops: form.stops.map((stop) => ({
+            location: stop.location,
+            boarding: stop.boarding,
+            dropping: stop.dropping,
+          })),
         }),
       });
 
@@ -309,7 +365,10 @@ export default function AdminBusDialog({
             <div className="rounded-2xl border-2 border-dashed border-orange-300/50 bg-gradient-to-br from-orange-50/50 to-red-50/50 p-5">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {AMENITY_OPTIONS.map((amenity) => (
-                  <div key={amenity.value} className="flex items-start space-x-3 rounded-xl border border-orange-200/60 bg-white/80 p-3 hover:bg-white/100 transition-colors">
+                  <div
+                    key={amenity.value}
+                    className="flex items-start space-x-3 rounded-xl border border-orange-200/60 bg-white/80 p-3 hover:bg-white/100 transition-colors"
+                  >
                     <Checkbox
                       id={`amenity-${amenity.value}`}
                       checked={form.amenities.includes(amenity.value as AmenityValue)}
@@ -338,6 +397,71 @@ export default function AdminBusDialog({
               <p className="mt-4 text-xs text-muted-foreground text-center">
                 {form.amenities.length} amen{form.amenities.length === 1 ? 'y' : 'ies'} selected
               </p>
+            </div>
+          </div>
+
+          {/* Stops Section */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-semibold">Boarding & Drop-off stops</Label>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-10 rounded-full"
+                onClick={addStop}
+              >
+                Add stop
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Keep the first stop as the main boarding point and the last as the final drop-off.
+            </p>
+            <div className="space-y-3">
+              {form.stops.map((stop, index) => (
+                <div
+                  key={stop.id}
+                  className="grid grid-cols-1 gap-3 rounded-2xl border border-dashed border-orange-200/60 bg-white/80 p-3 md:grid-cols-[1fr_auto_auto_auto]"
+                >
+                  <Input
+                    value={stop.location}
+                    onChange={(event) =>
+                      updateStop(stop.id, { location: event.target.value })
+                    }
+                    placeholder="Stop location"
+                    className="h-11 rounded-2xl"
+                  />
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={stop.boarding}
+                      onCheckedChange={(checked) =>
+                        updateStop(stop.id, { boarding: Boolean(checked) })
+                      }
+                      className="border-orange-300 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                    />
+                    <span className="text-sm font-medium text-foreground">Boarding</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={stop.dropping}
+                      onCheckedChange={(checked) =>
+                        updateStop(stop.id, { dropping: Boolean(checked) })
+                      }
+                      className="border-orange-300 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                    />
+                    <span className="text-sm font-medium text-foreground">Drop-off</span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-11 rounded-2xl text-red-600 hover:bg-red-50"
+                    onClick={() => removeStop(stop.id)}
+                    disabled={index === 0 || index === form.stops.length - 1}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -411,6 +535,7 @@ export default function AdminBusDialog({
 
 function createFormState(routes: RouteSummary[], bus?: BusSummary | null): BusFormState {
   if (bus) {
+    const route = routes.find((current) => current.id === bus.routeId) ?? routes[0];
     return {
       routeId: bus.routeId,
       date: bus.travelDate,
@@ -421,11 +546,13 @@ function createFormState(routes: RouteSummary[], bus?: BusSummary | null): BusFo
       seatLayout: cloneSeatLayout(bus.seatLayout),
       amenities: (bus.amenities ?? []) as AmenityValue[],
       blockedSeats: bus.blockedSeats ?? [],
+      stops: mapBusStops(bus.stops),
       endDate: bus.travelDate,
     };
   }
 
   const initialType: BusType = "mini_bus";
+  const defaultRoute = routes[0];
 
   return {
     routeId: routes[0]?.id ?? "",
@@ -437,6 +564,7 @@ function createFormState(routes: RouteSummary[], bus?: BusSummary | null): BusFo
     seatLayout: getSeatLayoutTemplate(initialType),
     amenities: [],
     blockedSeats: [],
+    stops: getDefaultStopEntries(defaultRoute),
     endDate: "",
   };
 }
@@ -448,4 +576,55 @@ function getLayoutValidation(layout: BusSummary["seatLayout"], bookedSeats: stri
   } catch (error) {
     return error instanceof Error ? error.message : "Seat layout is invalid.";
   }
+}
+
+function mapBusStops(stops?: BusSummary["stops"]) {
+  if (!stops || stops.length === 0) {
+    return [];
+  }
+
+  return stops.map((stop, index) => ({
+    id: `${stop.location}-${index}-${Math.random().toString(16).slice(2)}`,
+    location: stop.location,
+    boarding: stop.boarding,
+    dropping: stop.dropping,
+    order: index,
+  }));
+}
+
+function getDefaultStopEntries(route?: RouteSummary | null) {
+  if (!route) {
+    return [];
+  }
+
+  return [
+    {
+      id: `start-${route.id}`,
+      location: route.from,
+      boarding: true,
+      dropping: false,
+      order: 0,
+    },
+    {
+      id: `end-${route.id}`,
+      location: route.to,
+      boarding: false,
+      dropping: true,
+      order: 1,
+    },
+  ];
+}
+
+function createStopEntry(location = "", boarding = true, dropping = true): StopEntry {
+  return {
+    id: `stop-${location}-${Math.random().toString(16).slice(2)}`,
+    location,
+    boarding,
+    dropping,
+    order: 0,
+  };
+}
+
+function reindexStops(stops: StopEntry[]) {
+  return stops.map((stop, index) => ({ ...stop, order: index }));
 }

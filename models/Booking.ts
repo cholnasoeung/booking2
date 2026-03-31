@@ -33,6 +33,8 @@ export interface IBooking extends Document {
     userAgent?: string;
     bookingSource?: "web" | "mobile" | "admin";
   };
+  boardingStop?: string;
+  droppingStop?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -83,6 +85,8 @@ const BookingSchema = new Schema<IBooking>(
       required: true,
       min: 1,
     },
+    boardingStop: String,
+    droppingStop: String,
     discountAmount: {
       type: Number,
       default: 0,

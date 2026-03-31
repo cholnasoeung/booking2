@@ -64,6 +64,15 @@ export default async function PassengersPage({ params, searchParams }: Passenger
 
   const selectedSeats = rawSeats.split(",");
 
+  const boardingStop =
+    getFirstSearchParam(query.boardingStop) ??
+    bus.stops.find((stop) => stop.boarding)?.location ??
+    bus.from;
+  const droppingStop =
+    getFirstSearchParam(query.droppingStop) ??
+    bus.stops.find((stop) => stop.dropping)?.location ??
+    bus.to;
+
   // Validate seats are available
   const unavailableSeats = selectedSeats.filter(seat =>
     bus.bookedSeats.includes(seat)
@@ -76,7 +85,16 @@ export default async function PassengersPage({ params, searchParams }: Passenger
   async function handlePassengerSubmit(passengers: Passenger[], promoCode?: string) {
     "use server";
 
-    const result = await createBooking(busId, user.id, selectedSeats, passengers, bus.pricePerSeat, promoCode);
+    const result = await createBooking(
+      busId,
+      user.id,
+      selectedSeats,
+      passengers,
+      bus.pricePerSeat,
+      promoCode,
+      boardingStop,
+      droppingStop
+    );
     return result;
   }
 
@@ -93,15 +111,17 @@ export default async function PassengersPage({ params, searchParams }: Passenger
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main Form */}
-        <div className="lg:col-span-2">
-          <PassengerDetailsForm
-            selectedSeats={selectedSeats}
-            seatLabels={selectedSeats}
-            pricePerSeat={bus.pricePerSeat}
-            busId={busId}
-            onSubmit={handlePassengerSubmit}
-          />
-        </div>
+          <div className="lg:col-span-2">
+            <PassengerDetailsForm
+              selectedSeats={selectedSeats}
+              seatLabels={selectedSeats}
+              pricePerSeat={bus.pricePerSeat}
+              busId={busId}
+              onSubmit={handlePassengerSubmit}
+              boardingStop={boardingStop}
+              droppingStop={droppingStop}
+            />
+          </div>
 
         {/* Sidebar - Trip Summary */}
         <div className="space-y-4">
@@ -141,6 +161,14 @@ export default async function PassengersPage({ params, searchParams }: Passenger
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-600">Duration</span>
                   <span className="text-sm font-medium text-slate-900">{bus.duration}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">Boarding stop</span>
+                  <span className="text-sm font-medium text-slate-900">{boardingStop}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">Drop-off stop</span>
+                  <span className="text-sm font-medium text-slate-900">{droppingStop}</span>
                 </div>
               </div>
 

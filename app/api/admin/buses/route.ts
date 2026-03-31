@@ -1,3 +1,4 @@
+import { getCurrentSession } from "@/lib/auth";
 import { formatDateInput, isValidDateInput, toTravelDate } from "@/lib/date";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getBusSummary, type BusSummary } from "@/lib/queries";
@@ -7,6 +8,7 @@ import {
   isBusType,
   normalizeBusSeatLayout,
 } from "@/lib/seat-layout";
+import { normalizeStops } from "@/lib/stops";
 import { isValidObjectId } from "@/lib/validation";
 import BusModel from "@/models/Bus";
 import RouteModel from "@/models/Route";
@@ -104,6 +106,7 @@ export async function POST(request: Request) {
     if (!route) {
       return Response.json({ message: "Route not found." }, { status: 404 });
     }
+    const stops = normalizeStops(body?.stops, route.from, route.to);
 
     const travelDateStart = toTravelDate(date);
     const travelDateEnd = endDate ? toTravelDate(endDate) : travelDateStart;
@@ -162,6 +165,7 @@ export async function POST(request: Request) {
         totalSeats: normalizedBus.totalSeats,
         bookedSeats: normalizedBus.bookedSeats,
         blockedSeats: normalizedBus.blockedSeats,
+        stops: stops.map((stop) => ({ ...stop })),
         pricePerSeat,
         amenities,
       }))

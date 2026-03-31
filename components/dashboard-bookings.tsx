@@ -118,6 +118,12 @@ export default function DashboardBookings({
                   ? `${formatTravelDate(booking.bus.travelDate)} | ${booking.bus.departureTime} to ${booking.bus.arrivalTime}`
                   : "Bus details are no longer available."}
               </p>
+              {booking.boardingStop ? (
+                <p className="text-sm text-muted-foreground">Board at {booking.boardingStop}</p>
+              ) : null}
+              {booking.droppingStop ? (
+                <p className="text-sm text-muted-foreground">Drop at {booking.droppingStop}</p>
+              ) : null}
               <p className="text-sm text-muted-foreground">
                 Seats {formatSeatList(booking.seats)}
               </p>

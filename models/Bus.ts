@@ -6,6 +6,7 @@ import {
   needsLegacySeatLayoutUpgrade,
   normalizeBusSeatLayout,
 } from "@/lib/seat-layout";
+import { type BusStop } from "@/types/bus";
 
 export interface IBus extends Document {
   routeId: mongoose.Types.ObjectId;
@@ -17,6 +18,7 @@ export interface IBus extends Document {
   totalSeats: number;
   bookedSeats: Array<string | number>;
   blockedSeats: Array<string | number>;
+  stops: BusStop[];
   pricePerSeat: number;
   amenities?: string[];
 }
@@ -62,6 +64,17 @@ const BusSchema = new Schema<IBus>({
   },
   blockedSeats: {
     type: [Schema.Types.Mixed],
+    default: [],
+  },
+  stops: {
+    type: [
+      {
+        location: { type: String, required: true },
+        boarding: { type: Boolean, default: false },
+        dropping: { type: Boolean, default: false },
+        order: { type: Number, default: 0 },
+      },
+    ],
     default: [],
   },
   pricePerSeat: {

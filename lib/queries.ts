@@ -11,6 +11,7 @@ import {
   normalizeBusSeatLayout,
   normalizeStoredSeatCodes,
 } from "@/lib/seat-layout";
+import { BusStop } from "@/types/bus";
 import { escapeRegExp, normalizeCity, parsePassengerCount } from "@/lib/validation";
 import BookingModel, { type BookingStatus } from "@/models/Booking";
 import BusModel from "@/models/Bus";
@@ -38,11 +39,13 @@ type StoredBusRecord = {
   blockedSeats: Array<string | number>;
   pricePerSeat: number;
   amenities?: string[];
+  stops?: BusStop[];
 };
 
 type NormalizedBusRecord = Omit<StoredBusRecord, "bookedSeats" | "seatLayout" | "busType" | "blockedSeats" | "amenities"> &
   NormalizedSeatLayout & {
     blockedSeats: string[];
+    stops: BusStop[];
     amenities: string[];
   };
 
@@ -57,6 +60,8 @@ type BookingRecord = {
   cancelledAt?: Date;
   cancellationReason?: string;
   createdAt: Date;
+  boardingStop?: string;
+  droppingStop?: string;
 };
 
 type PassengerRecord = {
@@ -101,6 +106,7 @@ export type BusSummary = {
   seatsLeft: number;
   pricePerSeat: number;
   amenities: string[];
+  stops: BusStop[];
 };
 
 export type UserSummary = {
@@ -117,6 +123,8 @@ export type BookingSummary = {
   totalPrice: number;
   createdAt: string;
   bus: BusSummary | null;
+  boardingStop?: string;
+  droppingStop?: string;
 };
 
 export type PassengerSummary = {
@@ -155,10 +163,19 @@ function normalizeBusRecord(bus: StoredBusRecord): NormalizedBusRecord {
     totalSeats: normalized.totalSeats,
     bookedSeats: normalized.bookedSeats,
     seatCodes: normalized.seatCodes,
+    stops: bus.stops ?? [],
   };
 }
 
 function serializeBus(bus: NormalizedBusRecord, route: RouteRecord): BusSummary {
+  const stops =
+    bus.stops && bus.stops.length > 0
+      ? bus.stops
+      : [
+          { location: route.from, boarding: true, dropping: false, order: 0 },
+          { location: route.to, boarding: false, dropping: true, order: 1 },
+        ];
+
   return {
     id: String(bus._id),
     routeId: String(route._id),
@@ -178,6 +195,7 @@ function serializeBus(bus: NormalizedBusRecord, route: RouteRecord): BusSummary 
     seatsLeft: Math.max(bus.totalSeats - bus.bookedSeats.length - (bus.blockedSeats?.length ?? 0), 0),
     pricePerSeat: bus.pricePerSeat,
     amenities: bus.amenities ?? [],
+    stops,
   };
 }
 
@@ -218,6 +236,8 @@ function serializeBooking(
       contactNumber: passenger.contactNumber,
       email: passenger.email,
     })),
+    boardingStop: booking.boardingStop,
+    droppingStop: booking.droppingStop,
     cancelledAt: booking.cancelledAt?.toISOString() ?? null,
     cancellationReason: booking.cancellationReason ?? null,
   };
