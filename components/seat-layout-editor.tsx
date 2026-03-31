@@ -273,8 +273,14 @@ export default function SeatLayoutEditor({
               <SeatMap
                 layout={value}
                 bookedSeats={bookedSeats}
+                blockedSeats={blockedSeats}
+                allowBlockedToggle
+                onSeatToggle={toggleSeatBlock}
                 className="space-y-0"
               />
+              <p className="mt-3 text-xs text-muted-foreground">
+                Click a seat to toggle block status while setting up a departure.
+              </p>
             </div>
           </div>
 

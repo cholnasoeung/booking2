@@ -51,6 +51,7 @@ type BusFormState = {
   seatLayout: BusSummary["seatLayout"];
   amenities: AmenityValue[];
   blockedSeats: string[];
+  endDate: string;
 };
 
 export default function AdminBusDialog({
@@ -107,6 +108,7 @@ export default function AdminBusDialog({
           seatLayout: form.seatLayout,
           amenities: form.amenities,
           blockedSeats: form.blockedSeats,
+          endDate: form.endDate,
         }),
       });
 
@@ -147,7 +149,7 @@ export default function AdminBusDialog({
 
         <form onSubmit={submitBus} className="space-y-5 pt-4">
           {/* Route and Date/Time Grid */}
-          <div className="grid gap-4 xl:grid-cols-5">
+          <div className="grid gap-4 xl:grid-cols-6">
             <div className="space-y-2 xl:col-span-2">
               <Label htmlFor="bus-route" className="text-sm font-semibold">Route</Label>
               <Select
@@ -191,6 +193,28 @@ export default function AdminBusDialog({
                 className="h-11 rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="bus-end-date" className="text-sm font-semibold">
+                End date
+              </Label>
+              <Input
+                id="bus-end-date"
+                type="date"
+                value={form.endDate}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    endDate: event.target.value,
+                  }))
+                }
+                className="h-11 rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
+              />
+              <p className="text-xs text-muted-foreground">
+                Set an end date to publish this departure every day until that date.
+                Leave empty for a single departure.
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -397,6 +421,7 @@ function createFormState(routes: RouteSummary[], bus?: BusSummary | null): BusFo
       seatLayout: cloneSeatLayout(bus.seatLayout),
       amenities: (bus.amenities ?? []) as AmenityValue[],
       blockedSeats: bus.blockedSeats ?? [],
+      endDate: bus.travelDate,
     };
   }
 
@@ -412,6 +437,7 @@ function createFormState(routes: RouteSummary[], bus?: BusSummary | null): BusFo
     seatLayout: getSeatLayoutTemplate(initialType),
     amenities: [],
     blockedSeats: [],
+    endDate: "",
   };
 }
 

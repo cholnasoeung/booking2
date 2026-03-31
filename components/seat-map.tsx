@@ -23,6 +23,7 @@ type SeatMapProps = {
   blockedSeats?: string[];
   disabled?: boolean;
   onSeatToggle?: (seatCode: string) => void;
+  allowBlockedToggle?: boolean;
   className?: string;
   showLegend?: boolean;
   compact?: boolean;
@@ -56,6 +57,7 @@ function SeatMap({
   blockedSeats = [],
   disabled = false,
   onSeatToggle,
+  allowBlockedToggle = false,
   className,
   showLegend = false,
   compact = false,
@@ -102,6 +104,7 @@ function SeatMap({
                 disabled={disabled}
                 compact={compact}
                 onSeatToggle={onSeatToggle}
+                allowBlockedToggle={allowBlockedToggle}
               />
             ))}
           </div>
@@ -119,6 +122,7 @@ type SeatMapCellProps = {
   disabled: boolean;
   compact: boolean;
   onSeatToggle?: (seatCode: string) => void;
+  allowBlockedToggle: boolean;
 };
 
 const SeatMapCell = memo(function SeatMapCell({
@@ -129,6 +133,7 @@ const SeatMapCell = memo(function SeatMapCell({
   disabled,
   compact,
   onSeatToggle,
+  allowBlockedToggle,
 }: SeatMapCellProps) {
   const style: CSSProperties = {
     gridColumn: `${item.col} / span ${item.colSpan ?? 1}`,
@@ -151,7 +156,12 @@ const SeatMapCell = memo(function SeatMapCell({
       : selectedSeatSet.has(seatCode)
         ? "selected"
         : "available";
-  const isInteractive = Boolean(onSeatToggle) && seatState !== "booked" && seatState !== "blocked" && !disabled;
+  const isBlocked = seatState === "blocked";
+  const isInteractive =
+    Boolean(onSeatToggle) &&
+    seatState !== "booked" &&
+    (!isBlocked || allowBlockedToggle) &&
+    !disabled;
 
   return (
     <div style={style}>

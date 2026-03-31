@@ -1,7 +1,6 @@
-import { getCurrentSession } from "@/lib/auth";
-import { isValidDateInput, toTravelDate } from "@/lib/date";
+import { formatDateInput, isValidDateInput, toTravelDate } from "@/lib/date";
 import { connectToDatabase } from "@/lib/mongodb";
-import { getBusSummary } from "@/lib/queries";
+import { getBusSummary, type BusSummary } from "@/lib/queries";
 import {
   type SeatLayout,
   getSeatLayoutTemplate,
@@ -15,6 +14,19 @@ import RouteModel from "@/models/Route";
 export const runtime = "nodejs";
 
 const TIME_REGEX = /^([01]\d|2[0-3]):([0-5]\d)$/;
+const MAX_DATE_RANGE_DAYS = 90;
+
+function getTravelDatesBetween(start: Date, end: Date) {
+  const dates: Date[] = [];
+  const current = new Date(start);
+
+  while (current <= end) {
+    dates.push(new Date(current));
+    current.setUTCDate(current.getUTCDate() + 1);
+  }
+
+  return dates;
+}
 
 export async function POST(request: Request) {
   const session = await getCurrentSession();
@@ -44,6 +56,7 @@ export async function POST(request: Request) {
     const seatLayout = (body?.seatLayout ?? null) as SeatLayout | null;
     const amenities = Array.isArray(body?.amenities) ? body.amenities : [];
     const blockedSeats = Array.isArray(body?.blockedSeats) ? body.blockedSeats : [];
+    const endDate = typeof body?.endDate === "string" ? body.endDate : "";
 
     if (!isValidObjectId(routeId)) {
       return Response.json({ message: "A valid route is required." }, { status: 400 });
@@ -52,6 +65,13 @@ export async function POST(request: Request) {
     if (!isValidDateInput(date)) {
       return Response.json(
         { message: "Date must be in YYYY-MM-DD format." },
+        { status: 400 }
+      );
+    }
+
+    if (endDate && !isValidDateInput(endDate)) {
+      return Response.json(
+        { message: "End date must be in YYYY-MM-DD format." },
         { status: 400 }
       );
     }
@@ -85,6 +105,25 @@ export async function POST(request: Request) {
       return Response.json({ message: "Route not found." }, { status: 404 });
     }
 
+    const travelDateStart = toTravelDate(date);
+    const travelDateEnd = endDate ? toTravelDate(endDate) : travelDateStart;
+
+    if (travelDateEnd < travelDateStart) {
+      return Response.json(
+        { message: "End date cannot be before the start date." },
+        { status: 400 }
+      );
+    }
+
+    const travelDates = getTravelDatesBetween(travelDateStart, travelDateEnd);
+
+    if (travelDates.length > MAX_DATE_RANGE_DAYS) {
+      return Response.json(
+        { message: `Date range must be ${MAX_DATE_RANGE_DAYS} days or fewer.` },
+        { status: 400 }
+      );
+    }
+
     const normalizedBus = normalizeBusSeatLayout({
       busType,
       seatLayout: seatLayout ?? getSeatLayoutTemplate(busType),
@@ -93,41 +132,54 @@ export async function POST(request: Request) {
       blockedSeats,
       amenities,
     });
-    const busDate = toTravelDate(date);
-
-    const existingBus = await BusModel.findOne({
+    const conflictingBuses = await BusModel.find({
       routeId,
-      date: busDate,
       departureTime,
+      date: { $in: travelDates },
     }).lean();
 
-    if (existingBus) {
+    if (conflictingBuses.length > 0) {
+      const conflictDates = conflictingBuses
+        .map((conflict) => formatDateInput(conflict.date))
+        .join(", ");
+
       return Response.json(
-        { message: "A bus for that route and departure time already exists." },
+        {
+          message: `A bus already exists for ${conflictDates} at that departure time.`,
+        },
         { status: 409 }
       );
     }
 
-    const bus = await BusModel.create({
-      routeId,
-      date: busDate,
-      departureTime,
-      arrivalTime,
-      busType: normalizedBus.busType,
-      seatLayout: normalizedBus.seatLayout,
-      totalSeats: normalizedBus.totalSeats,
-      bookedSeats: normalizedBus.bookedSeats,
-      blockedSeats: normalizedBus.blockedSeats,
-      pricePerSeat,
-      amenities,
-    });
+    const createdBuses = await BusModel.insertMany(
+      travelDates.map((travelDate) => ({
+        routeId,
+        date: travelDate,
+        departureTime,
+        arrivalTime,
+        busType: normalizedBus.busType,
+        seatLayout: structuredClone(normalizedBus.seatLayout),
+        totalSeats: normalizedBus.totalSeats,
+        bookedSeats: normalizedBus.bookedSeats,
+        blockedSeats: normalizedBus.blockedSeats,
+        pricePerSeat,
+        amenities,
+      }))
+    );
 
-    const busSummary = await getBusSummary(String(bus._id));
+    const busSummaries = (
+      await Promise.all(
+        createdBuses.map((created) => getBusSummary(String(created._id)))
+      )
+    ).filter((summary): summary is BusSummary => Boolean(summary));
 
     return Response.json(
       {
-        message: "Bus created successfully.",
-        bus: busSummary,
+        message:
+          travelDates.length === 1
+            ? "Bus created successfully."
+            : `${travelDates.length} departures created successfully.`,
+        buses: busSummaries,
       },
       { status: 201 }
     );
