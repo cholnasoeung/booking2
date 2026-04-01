@@ -5,11 +5,16 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireUser } from "@/lib/auth";
 import { formatBusType, formatCurrency, formatTravelDate } from "@/lib/formatters";
+import { getFirstSearchParam } from "@/lib/validation";
 import type { Passenger } from "@/types/passenger";
 
 type PassengersPageProps = {
   params: Promise<{ busId: string }>;
-  searchParams: Promise<{ seats?: string }>;
+  searchParams: Promise<{
+    seats?: string;
+    boardingStop?: string | string[];
+    droppingStop?: string | string[];
+  }>;
 };
 
 async function createBooking(
@@ -18,7 +23,9 @@ async function createBooking(
   selectedSeats: string[],
   passengers: Passenger[],
   pricePerSeat: number,
-  promoCode?: string
+  promoCode?: string,
+  boardingStop?: string,
+  droppingStop?: string
 ) {
   "use server";
 
@@ -33,14 +40,21 @@ async function createBooking(
       passengers,
       totalPrice,
       promoCode,
+      boardingStop,
+      droppingStop,
     });
 
     return { success: true, bookingId: booking.id };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Booking creation error:", error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to create booking. Please try again.";
+
     return {
       success: false,
-      error: error?.message || "Failed to create booking. Please try again."
+      error: message,
     };
   }
 }

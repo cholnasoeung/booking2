@@ -1,19 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Search, MapPin, Clock } from "lucide-react";
+import { ArrowRight, Search, MapPin } from "lucide-react";
 import { useState } from "react";
 import { CITY_OPTIONS } from "@/lib/constants";
 import { getTomorrowDateInput } from "@/lib/date";
 
-interface HeroSearchFormProps {
-  onRouteSelect?: (from: string, to: string) => void;
-}
-
-export default function HeroSearchForm({ onRouteSelect }: HeroSearchFormProps) {
+export default function HeroSearchForm() {
   const tomorrow = getTomorrowDateInput();
   const [fromCity, setFromCity] = useState("Phnom Penh");
   const [toCity, setToCity] = useState("Siem Reap");
+  const [travelDate, setTravelDate] = useState(tomorrow);
+  const [passengers, setPassengers] = useState("1");
+  const searchHref = `/search?from=${encodeURIComponent(fromCity)}&to=${encodeURIComponent(toCity)}&date=${travelDate}&passengers=${passengers}`;
 
   return (
     <>
@@ -36,7 +35,7 @@ export default function HeroSearchForm({ onRouteSelect }: HeroSearchFormProps) {
         {/* CTA row */}
         <div className="flex flex-wrap items-center gap-4">
           <Link
-            href={`/search?from=${encodeURIComponent(fromCity)}&to=${encodeURIComponent(toCity)}&date=${tomorrow}&passengers=1`}
+            href={searchHref}
             className="group inline-flex items-center gap-2.5 rounded-xl bg-emerald-500 px-6 py-3.5 text-sm font-semibold text-slate-900 shadow-lg hover:bg-emerald-400 transition-all duration-200 hover:-translate-y-0.5"
           >
             Search buses
@@ -116,8 +115,9 @@ export default function HeroSearchForm({ onRouteSelect }: HeroSearchFormProps) {
                   <label className="text-xs font-medium text-white/70">Journey Date</label>
                   <input
                     type="date"
-                    defaultValue={tomorrow}
+                    value={travelDate}
                     min={tomorrow}
+                    onChange={(e) => setTravelDate(e.target.value)}
                     className="w-full rounded-xl border border-white/20 bg-slate-800 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all [color-scheme:dark]"
                   />
                 </div>
@@ -125,6 +125,8 @@ export default function HeroSearchForm({ onRouteSelect }: HeroSearchFormProps) {
                 <div className="space-y-2">
                   <label className="text-xs font-medium text-white/70">Passengers</label>
                   <select
+                    value={passengers}
+                    onChange={(e) => setPassengers(e.target.value)}
                     className="w-full rounded-xl border border-white/20 bg-slate-800 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all appearance-none cursor-pointer"
                   >
                     <option value="1" className="bg-slate-900 text-white">1 Passenger</option>
@@ -138,7 +140,7 @@ export default function HeroSearchForm({ onRouteSelect }: HeroSearchFormProps) {
 
               {/* Search Button */}
               <Link
-                href={`/search?from=${encodeURIComponent(fromCity)}&to=${encodeURIComponent(toCity)}&date=${tomorrow}&passengers=1`}
+                href={searchHref}
                 className="block w-full rounded-xl bg-emerald-500 text-slate-900 font-semibold px-6 py-3.5 text-center text-sm hover:bg-emerald-400 transition-all duration-200 shadow-lg hover:shadow-emerald-500/30"
               >
                 <div className="flex items-center justify-center gap-2">

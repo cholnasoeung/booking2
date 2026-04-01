@@ -4,6 +4,7 @@ import SeatSelection from "@/components/seat-selection";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireUser } from "@/lib/auth";
+import { AMENITY_OPTIONS, MAX_SEATS_PER_BOOKING } from "@/lib/constants";
 import {
   formatBusType,
   formatCurrency,
@@ -23,10 +24,14 @@ export default async function BookPage({
 }: BookPageProps) {
   const { busId } = await params;
   const query = await searchParams;
-  const passengers = parsePassengerCount(getFirstSearchParam(query.passengers));
+  const rawPassengers = getFirstSearchParam(query.passengers);
+  const passengers = parsePassengerCount(rawPassengers);
+  const callbackUrl = rawPassengers
+    ? `/book/${busId}?passengers=${passengers}`
+    : `/book/${busId}`;
 
   await requireUser(
-    `/login?callbackUrl=${encodeURIComponent(`/book/${busId}?passengers=${passengers}`)}`
+    `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
   );
 
   const bus = await getBusSummary(busId);
@@ -35,7 +40,9 @@ export default async function BookPage({
     notFound();
   }
 
-  const selectionLimit = bus.seatsLeft > 0 ? Math.min(passengers, bus.seatsLeft) : 1;
+  const requestedSeats = rawPassengers ? passengers : MAX_SEATS_PER_BOOKING;
+  const selectionLimit =
+    bus.seatsLeft > 0 ? Math.min(requestedSeats, bus.seatsLeft) : 1;
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
@@ -118,7 +125,7 @@ export default async function BookPage({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Requested seats</span>
-              <span className="font-medium text-foreground">{passengers}</span>
+              <span className="font-medium text-foreground">{requestedSeats}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Layout style</span>
@@ -126,7 +133,7 @@ export default async function BookPage({
                 {bus.templateStatus === "custom" ? "Custom" : "Template"}
               </span>
             </div>
-            {bus.seatsLeft < passengers ? (
+            {bus.seatsLeft < requestedSeats ? (
               <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800">
                 Only {bus.seatsLeft} seat(s) remain on this departure, so your
                 selection limit was adjusted.
@@ -161,9 +168,9 @@ export default async function BookPage({
             <CardContent>
               <div className="flex flex-wrap gap-2">
                 {bus.amenities.map((amenity) => {
-                  const amenityInfo = (typeof amenity === 'string')
-                    ? require("@/lib/constants").AMENITY_OPTIONS.find(a => a.value === amenity)
-                    : null;
+                  const amenityInfo = AMENITY_OPTIONS.find(
+                    (option) => option.value === amenity
+                  );
                   return (
                     <Badge key={amenity} variant="outline" className="gap-1.5 border-indigo-200 bg-indigo-50 text-indigo-700">
                       <span>{amenityInfo?.icon || '✓'}</span>

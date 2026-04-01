@@ -131,6 +131,14 @@ export default function SearchPageClient({
     });
   }
 
+  function getBookingHref(busId: string) {
+    const params = new URLSearchParams({
+      passengers: String(passengers),
+    });
+
+    return `/book/${busId}?${params.toString()}`;
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
       {/* Search Form */}
@@ -209,6 +217,7 @@ export default function SearchPageClient({
             </Card>
           ) : (
             sortedBuses.map((bus) => {
+              const bookingHref = getBookingHref(bus.id);
               const boardingStops = bus.stops
                 .filter((stop) => stop.boarding)
                 .map((stop) => stop.location);
@@ -220,7 +229,7 @@ export default function SearchPageClient({
                 <Card
                   key={bus.id}
                   className="border-white/60 bg-white/90 shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-200 cursor-pointer"
-                  onClick={() => router.push(`/book/${bus.id}`)}
+                  onClick={() => router.push(bookingHref)}
                 >
               <CardHeader className="space-y-3">
                 <div className="flex items-start justify-between gap-6">
@@ -293,7 +302,13 @@ export default function SearchPageClient({
                       </div>
                     )}
 
-                    <Button className="w-full h-11 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md hover:shadow-lg transition-all">
+                    <Button
+                      className="w-full h-11 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md hover:shadow-lg transition-all"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        router.push(bookingHref);
+                      }}
+                    >
                       Select Seats
                     </Button>
                   </CardContent>
