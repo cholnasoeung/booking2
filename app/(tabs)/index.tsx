@@ -3,24 +3,16 @@ import { Href, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import Animated, {
-  FadeInDown,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withSpring,
-} from "react-native-reanimated";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { AnimatedInput } from "@/components/ui/animated-input";
 import { AnimatedPressable } from "@/components/ui/animated-pressable";
-import { animations } from "@/constants/animations";
-import { shadowColors } from "@/constants/theme";
+import { glass, gradients, shadowColors, Colors } from "@/constants/theme";
 import { apiFetch } from "@/lib/api";
 import {
   formatBusType,
@@ -31,16 +23,16 @@ import {
 import { useAuth } from "@/providers/auth-provider";
 import type { BusSummary, BusType } from "@/types/booking";
 
-type SearchResponse = {
-  buses: BusSummary[];
-};
-
 const SORT_OPTIONS = [
   { value: "departure", label: "Departure" },
   { value: "price", label: "Price" },
 ] as const;
 
 const POPULAR_AMENITIES = ["wifi", "ac", "usb", "restroom"] as const;
+
+type SearchResponse = {
+  buses: BusSummary[];
+};
 
 export default function SearchScreen() {
   const router = useRouter();
@@ -49,7 +41,9 @@ export default function SearchScreen() {
   const [to, setTo] = useState("Siem Reap");
   const [date, setDate] = useState(getTomorrowDateInput());
   const [passengers, setPassengers] = useState("1");
-  const [sortBy, setSortBy] = useState<(typeof SORT_OPTIONS)[number]["value"]>("departure");
+  const [sortBy, setSortBy] = useState<(typeof SORT_OPTIONS)[number]["value"]>(
+    "departure"
+  );
   const [busTypeFilter, setBusTypeFilter] = useState<BusType | "all">("all");
   const [amenityFilter, setAmenityFilter] = useState<string | "all">("all");
   const [results, setResults] = useState<BusSummary[]>([]);
@@ -123,47 +117,56 @@ export default function SearchScreen() {
     } as Href);
   }
 
+  const heroMetrics = [
+    { label: "Live departures", value: `${results.length}` },
+    { label: "Passengers", value: `${passengers || "1"} pax` },
+    { label: "Departure", value: formatTravelDate(date) },
+  ];
+
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.heroCard}>
-        <Text style={styles.eyebrow}>Mobile passenger booking</Text>
-        <Text style={styles.heroTitle}>Search, filter, and book the next trip from your phone.</Text>
+        <View style={styles.heroGlowOne} />
+        <View style={styles.heroGlowTwo} />
+        <Text style={styles.eyebrow}>mobile passenger booking</Text>
+        <Text style={styles.heroTitle}>
+          Search, filter, and book the next trip from your phone.
+        </Text>
         <Text style={styles.heroText}>
           Connects to your Next.js booking backend so the mobile app shares the same departures
           and bookings.
         </Text>
         <View style={styles.heroMetaRow}>
           <View style={styles.metaBadge}>
-            <Ionicons name="flash-outline" size={16} color="#4338ca" />
+            <Ionicons name="flash-outline" size={16} color="#ffffff" />
             <Text style={styles.metaBadgeText}>Live search</Text>
           </View>
           <View style={styles.metaBadge}>
-            <Ionicons name="shield-checkmark-outline" size={16} color="#4338ca" />
-            <Text style={styles.metaBadgeText}>{user ? `Signed in as ${user.name}` : "Secure auth"}</Text>
+            <Ionicons name="shield-checkmark-outline" size={16} color="#ffffff" />
+            <Text style={styles.metaBadgeText}>
+              {user ? `Signed in as ${user.name}` : "Secure auth"}
+            </Text>
           </View>
+        </View>
+        <View style={styles.heroStatsRow}>
+          {heroMetrics.map((metric) => (
+            <HeroMetric key={metric.label} label={metric.label} value={metric.value} />
+          ))}
         </View>
       </View>
 
-      <View style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>Search buses</Text>
+      <View style={styles.searchCard}>
+        <Text style={styles.searchTitle}>Plan your next trip</Text>
         <View style={styles.fieldGroup}>
           <Text style={styles.fieldLabel}>From</Text>
-          <AnimatedInput
-            value={from}
-            onChangeText={setFrom}
-            placeholder="Departure city"
-          />
+          <AnimatedInput value={from} onChangeText={setFrom} placeholder="Departure city" />
         </View>
         <View style={styles.fieldGroup}>
           <Text style={styles.fieldLabel}>To</Text>
-          <AnimatedInput
-            value={to}
-            onChangeText={setTo}
-            placeholder="Destination city"
-          />
+          <AnimatedInput value={to} onChangeText={setTo} placeholder="Destination city" />
         </View>
         <AnimatedPressable onPress={swapRoute} style={styles.swapButton}>
-          <Ionicons name="swap-vertical" size={18} color="#4f46e5" />
+          <Ionicons name="swap-vertical" size={18} color={Colors.light.tint} />
           <Text style={styles.swapButtonText}>Swap route</Text>
         </AnimatedPressable>
         <View style={styles.row}>
@@ -207,7 +210,11 @@ export default function SearchScreen() {
         <Text style={styles.sectionHint}>Use the same trip data from your Next.js API.</Text>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chipRow}
+      >
         {availableBusTypes.map((type) => (
           <Chip
             key={type}
@@ -218,7 +225,11 @@ export default function SearchScreen() {
         ))}
       </ScrollView>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chipRow}
+      >
         <Chip
           active={amenityFilter === "all"}
           label="All amenities"
@@ -257,15 +268,15 @@ export default function SearchScreen() {
 
       {!hasSearched ? (
         <View style={styles.emptyState}>
-          <Ionicons name="bus-outline" size={28} color="#6366f1" />
+          <Ionicons name="bus-outline" size={28} color={Colors.light.tint} />
           <Text style={styles.emptyStateTitle}>Start with a route search</Text>
           <Text style={styles.emptyStateText}>
             Enter your cities, date, and passenger count to load departures from the web app.
           </Text>
         </View>
       ) : filteredResults.length === 0 && !loading ? (
-        <View style={styles.emptyState}>
-          <Ionicons name="filter-outline" size={28} color="#6366f1" />
+        <View style={[styles.emptyState, styles.emptyStateAlt]}>
+          <Ionicons name="filter-outline" size={28} color={Colors.light.tint} />
           <Text style={styles.emptyStateTitle}>No departures match these filters</Text>
           <Text style={styles.emptyStateText}>
             Try another date, relax the filters, or switch the route to widen results.
@@ -273,10 +284,7 @@ export default function SearchScreen() {
         </View>
       ) : (
         filteredResults.map((bus, index) => (
-          <Animated.View
-            key={bus.id}
-            style={[styles.resultCard, FadeInDown.delay(index * 50)]}
-          >
+          <Animated.View key={bus.id} style={[styles.resultCard, FadeInDown.delay(index * 50)]}>
             <View style={styles.resultHeader}>
               <View style={styles.resultHeaderText}>
                 <Text style={styles.routeTitle}>
@@ -321,6 +329,15 @@ export default function SearchScreen() {
   );
 }
 
+function HeroMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.heroStatCard}>
+      <Text style={styles.heroStatValue}>{value}</Text>
+      <Text style={styles.heroStatLabel}>{label}</Text>
+    </View>
+  );
+}
+
 function Chip({
   active,
   label,
@@ -346,99 +363,136 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
+const palette = Colors.light;
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#f8f7ff",
+    backgroundColor: palette.background,
   },
   content: {
     padding: 20,
     gap: 18,
+    paddingBottom: 50,
   },
   heroCard: {
-    backgroundColor: "#312e81",
-    borderRadius: 28,
-    padding: 22,
-    gap: 10,
+    borderRadius: 32,
+    padding: 24,
+    backgroundColor: gradients.hero[0],
+    overflow: "hidden",
+    position: "relative",
+    minHeight: 220,
+  },
+  heroGlowOne: {
+    position: "absolute",
+    width: 200,
+    height: 200,
+    borderRadius: 140,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    top: -60,
+    right: -40,
+  },
+  heroGlowTwo: {
+    position: "absolute",
+    width: 160,
+    height: 160,
+    borderRadius: 120,
+    backgroundColor: "rgba(79, 70, 229, 0.4)",
+    bottom: -50,
+    left: -60,
   },
   eyebrow: {
-    color: "#c7d2fe",
+    color: "rgba(255, 255, 255, 0.8)",
+    textTransform: "uppercase",
+    letterSpacing: 1.1,
     fontSize: 12,
     fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 1,
   },
   heroTitle: {
     color: "#ffffff",
     fontSize: 28,
     fontWeight: "800",
+    marginTop: 6,
     lineHeight: 34,
   },
   heroText: {
-    color: "#e0e7ff",
-    fontSize: 15,
-    lineHeight: 22,
+    color: "rgba(255, 255, 255, 0.9)",
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 10,
   },
   heroMetaRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 10,
-    marginTop: 4,
+    marginTop: 14,
   },
   metaBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 6,
     borderRadius: 999,
-    backgroundColor: "#eef2ff",
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 6,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
   },
   metaBadgeText: {
-    color: "#3730a3",
+    color: "#ffffff",
     fontSize: 13,
     fontWeight: "600",
   },
-  sectionCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: 24,
-    padding: 18,
-    gap: 14,
-    shadowColor: "#312e81",
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 10 },
-    shadowRadius: 20,
-    elevation: 3,
+  heroStatsRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 18,
   },
-  sectionHeader: {
-    gap: 4,
+  heroStatCard: {
+    flex: 1,
+    borderRadius: 18,
+    padding: 12,
+    backgroundColor: glass.light.background,
+    borderWidth: 1,
+    borderColor: glass.light.border,
+    minHeight: 70,
   },
-  sectionTitle: {
-    color: "#111827",
-    fontSize: 20,
+  heroStatValue: {
+    color: palette.text,
+    fontSize: 16,
     fontWeight: "700",
   },
-  sectionHint: {
-    color: "#6b7280",
-    fontSize: 13,
+  heroStatLabel: {
+    color: palette.muted,
+    fontSize: 11,
+    marginTop: 2,
+    textTransform: "uppercase",
+    letterSpacing: 0.3,
+  },
+  searchCard: {
+    borderRadius: 28,
+    backgroundColor: palette.surface,
+    padding: 20,
+    gap: 14,
+    borderWidth: 1,
+    borderColor: palette.border,
+    shadowColor: shadowColors.card,
+    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 20,
+    elevation: 4,
+  },
+  searchTitle: {
+    color: palette.text,
+    fontSize: 20,
+    fontWeight: "700",
   },
   fieldGroup: {
     gap: 8,
   },
   fieldLabel: {
-    color: "#475569",
-    fontSize: 13,
+    color: palette.muted,
+    fontSize: 12,
     fontWeight: "700",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#dbe2f0",
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: "#0f172a",
-    backgroundColor: "#f8fafc",
+    letterSpacing: 0.4,
   },
   row: {
     flexDirection: "row",
@@ -456,45 +510,66 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 999,
-    backgroundColor: "#eef2ff",
+    backgroundColor: palette.highlight,
+    borderWidth: 1,
+    borderColor: palette.border,
   },
   swapButtonText: {
-    color: "#4338ca",
+    color: Colors.light.tint,
     fontSize: 14,
     fontWeight: "700",
   },
   primaryButton: {
     minHeight: 52,
-    borderRadius: 16,
-    backgroundColor: "#4f46e5",
+    borderRadius: 18,
+    backgroundColor: Colors.light.tint,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
     gap: 10,
+    marginTop: 8,
+    shadowColor: shadowColors.primary,
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 25,
+    elevation: 5,
   },
   primaryButtonText: {
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "700",
   },
+  sectionHeader: {
+    gap: 4,
+  },
+  sectionTitle: {
+    color: palette.text,
+    fontSize: 22,
+    fontWeight: "800",
+  },
+  sectionHint: {
+    color: palette.muted,
+    fontSize: 13,
+  },
   chipRow: {
     gap: 10,
     paddingRight: 12,
+    paddingBottom: 4,
   },
   chip: {
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "#dbe2f0",
-    backgroundColor: "#ffffff",
+    borderColor: palette.border,
+    backgroundColor: palette.surface,
     paddingHorizontal: 16,
     paddingVertical: 10,
   },
   chipActive: {
-    backgroundColor: "#4f46e5",
-    borderColor: "#4f46e5",
+    borderColor: Colors.light.tint,
+    backgroundColor: Colors.light.tint,
   },
   chipText: {
-    color: "#475569",
+    color: palette.muted,
     fontSize: 14,
     fontWeight: "600",
   },
@@ -505,59 +580,68 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderRadius: 16,
     padding: 4,
-    backgroundColor: "#e2e8f0",
+    backgroundColor: palette.highlight,
   },
   segmentButton: {
     flex: 1,
     borderRadius: 12,
-    paddingVertical: 12,
+    paddingVertical: 10,
     alignItems: "center",
   },
   segmentButtonActive: {
-    backgroundColor: "#ffffff",
+    backgroundColor: palette.surface,
   },
   segmentButtonText: {
-    color: "#475569",
+    color: palette.muted,
     fontSize: 14,
     fontWeight: "700",
   },
   segmentButtonTextActive: {
-    color: "#111827",
+    color: palette.text,
   },
   errorText: {
-    color: "#dc2626",
+    color: Colors.light.danger,
     fontSize: 14,
     lineHeight: 20,
+    textAlign: "center",
   },
   emptyState: {
     alignItems: "center",
     gap: 10,
-    borderRadius: 24,
+    borderRadius: 28,
     borderWidth: 1,
-    borderColor: "#dbe2f0",
-    backgroundColor: "#ffffff",
+    borderColor: palette.border,
+    backgroundColor: palette.surface,
     paddingHorizontal: 22,
     paddingVertical: 30,
   },
+  emptyStateAlt: {
+    backgroundColor: glass.light.background,
+  },
   emptyStateTitle: {
-    color: "#111827",
+    color: palette.text,
     fontSize: 18,
     fontWeight: "700",
     textAlign: "center",
   },
   emptyStateText: {
-    color: "#6b7280",
+    color: palette.muted,
     fontSize: 14,
-    lineHeight: 21,
+    lineHeight: 20,
     textAlign: "center",
   },
   resultCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: 24,
-    padding: 18,
+    borderRadius: 28,
+    backgroundColor: palette.surface,
+    padding: 20,
     gap: 14,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: palette.border,
+    shadowColor: shadowColors.card,
+    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 20,
+    elevation: 4,
   },
   resultHeader: {
     flexDirection: "row",
@@ -569,28 +653,28 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   routeTitle: {
-    color: "#0f172a",
+    color: palette.text,
     fontSize: 22,
     fontWeight: "800",
   },
   routeSubtitle: {
-    color: "#64748b",
+    color: palette.muted,
     fontSize: 14,
   },
   pricePill: {
     alignItems: "flex-end",
-    borderRadius: 16,
-    backgroundColor: "#eef2ff",
-    paddingHorizontal: 12,
+    borderRadius: 18,
+    backgroundColor: palette.highlight,
+    paddingHorizontal: 14,
     paddingVertical: 10,
   },
   priceText: {
-    color: "#4338ca",
+    color: Colors.light.tint,
     fontSize: 18,
     fontWeight: "800",
   },
   priceSubtext: {
-    color: "#6366f1",
+    color: palette.muted,
     fontSize: 11,
     fontWeight: "600",
   },
@@ -601,28 +685,24 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     borderRadius: 18,
-    backgroundColor: "#f8fafc",
+    backgroundColor: palette.highlight,
     padding: 12,
     gap: 4,
-    shadowColor: shadowColors.card,
-    shadowOpacity: 0.06,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 2,
   },
   statLabel: {
-    color: "#64748b",
-    fontSize: 12,
+    color: palette.muted,
+    fontSize: 11,
     fontWeight: "700",
     textTransform: "uppercase",
+    letterSpacing: 0.4,
   },
   statValue: {
-    color: "#0f172a",
+    color: palette.text,
     fontSize: 15,
     fontWeight: "700",
   },
   busDetailText: {
-    color: "#475569",
+    color: palette.muted,
     fontSize: 14,
     lineHeight: 20,
   },
@@ -633,19 +713,19 @@ const styles = StyleSheet.create({
   },
   amenityBadge: {
     borderRadius: 999,
-    backgroundColor: "#f1f5f9",
+    backgroundColor: palette.highlight,
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
   amenityText: {
-    color: "#475569",
+    color: palette.text,
     fontSize: 12,
     fontWeight: "600",
   },
   secondaryButton: {
     minHeight: 50,
-    borderRadius: 16,
-    backgroundColor: "#111827",
+    borderRadius: 18,
+    backgroundColor: palette.text,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",

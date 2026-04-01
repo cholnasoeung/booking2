@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import "react-native-reanimated";
 
+import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { AuthProvider, useAuth } from "@/providers/auth-provider";
 
@@ -22,16 +23,17 @@ export default function RootLayout() {
 function RootNavigator() {
   const colorScheme = useColorScheme();
   const { isReady } = useAuth();
+  const palette = Colors[colorScheme ?? "light"];
 
   if (!isReady) {
     return (
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <View style={styles.loadingScreen}>
-          <ActivityIndicator size="large" color="#5b4df7" />
-          <Text style={styles.loadingTitle}>Getting your trips ready</Text>
-          <Text style={styles.loadingText}>Loading mobile booking session...</Text>
-        </View>
-        <StatusBar style="auto" />
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <View style={[styles.loadingScreen, { backgroundColor: palette.background }]}>
+        <ActivityIndicator size="large" color="#5b4df7" />
+        <Text style={styles.loadingTitle}>Getting your trips ready</Text>
+        <Text style={styles.loadingText}>Loading mobile booking session...</Text>
+      </View>
+      <StatusBar style="auto" />
       </ThemeProvider>
     );
   }
@@ -41,12 +43,12 @@ function RootNavigator() {
       <Stack
         screenOptions={{
           headerStyle: {
-            backgroundColor: "#f8f7ff",
+            backgroundColor: palette.surface,
           },
           headerShadowVisible: false,
-          headerTintColor: "#1f2937",
+          headerTintColor: palette.text,
           contentStyle: {
-            backgroundColor: "#f8f7ff",
+            backgroundColor: palette.background,
           },
         }}
       >
@@ -69,7 +71,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#f8f7ff",
     paddingHorizontal: 24,
     gap: 10,
   },

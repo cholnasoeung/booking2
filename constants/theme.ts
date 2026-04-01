@@ -1,48 +1,91 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
+import { Platform } from "react-native";
 
-import { Platform } from 'react-native';
+const tintColorLight = "#5b4df7";
+const tintColorDark = "#dbeafe";
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+const lightPalette = {
+  text: "#0f172a",
+  background: "#f4f5fb",
+  surface: "#ffffff",
+  border: "#e6e8ff",
+  muted: "#64748b",
+  icon: "#4338ca",
+  success: "#22c55e",
+  warning: "#f59e0b",
+  danger: "#ef4444",
+  accent: "#f97316",
+  highlight: "#eef2ff",
+};
+
+const darkPalette = {
+  text: "#f8fafc",
+  background: "#0f172a",
+  surface: "#111827",
+  border: "#1f1b33",
+  muted: "#94a3b8",
+  icon: "#a5b4fc",
+  success: "#34d399",
+  warning: "#fbbf24",
+  danger: "#f87171",
+  accent: "#f472b6",
+  highlight: "#1e1b47",
+};
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
+    ...lightPalette,
     tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
+    tabIconDefault: "#9aa1d5",
     tabIconSelected: tintColorLight,
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
+    ...darkPalette,
     tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
+    tabIconDefault: "#c7d2fe",
     tabIconSelected: tintColorDark,
   },
+};
+
+export const gradients = {
+  hero: ["#4c1d95", "#7c3aed"] as const,
+  accent: ["#f97316", "#ef4444"] as const,
+  soft: ["#eef2ff", "#f5f3ff"] as const,
+  info: ["#dcfce7", "#bbf7d0"] as const,
+};
+
+export const glass = {
+  light: {
+    background: "rgba(255, 255, 255, 0.9)" as const,
+    border: "rgba(255, 255, 255, 0.5)" as const,
+  },
+  dark: {
+    background: "rgba(17, 24, 39, 0.6)" as const,
+    border: "rgba(255, 255, 255, 0.12)" as const,
+  },
+};
+
+export const shadowColors = {
+  primary: "#7c3aed",
+  success: "#34d399",
+  card: "#312e81",
 };
 
 export const Fonts = Platform.select({
   ios: {
     /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
+    sans: "system-ui",
     /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
+    serif: "ui-serif",
     /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
+    rounded: "ui-rounded",
     /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
+    mono: "ui-monospace",
   },
   default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
+    sans: "normal",
+    serif: "serif",
+    rounded: "normal",
+    mono: "monospace",
   },
   web: {
     sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
@@ -51,40 +94,3 @@ export const Fonts = Platform.select({
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });
-
-/**
- * Gradient color combinations for modern visual effects
- * Each gradient is an array of two hex colors
- */
-export const gradients = {
-  primary: ['#4f46e5', '#7c3aed'] as const,      // Indigo to violet
-  success: ['#10b981', '#059669'] as const,       // Emerald green
-  background: ['#f8f7ff', '#eef2ff'] as const,    // Subtle purple tint
-  danger: ['#ef4444', '#dc2626'] as const,        // Red gradients
-  warning: ['#f59e0b', '#d97706'] as const,      // Orange gradients
-};
-
-/**
- * Glass morphism effect configurations
- * Semi-transparent backgrounds with backdrop blur
- */
-export const glass = {
-  light: {
-    background: 'rgba(255, 255, 255, 0.7)' as const,
-    border: 'rgba(255, 255, 255, 0.5)' as const,
-  },
-  dark: {
-    background: 'rgba(0, 0, 0, 0.5)' as const,
-    border: 'rgba(255, 255, 255, 0.1)' as const,
-  },
-};
-
-/**
- * Shadow colors for soft, colored shadows
- * Replaces harsh black shadows with colored tints
- */
-export const shadowColors = {
-  primary: '#4f46e5',
-  success: '#10b981',
-  card: '#312e81',
-};

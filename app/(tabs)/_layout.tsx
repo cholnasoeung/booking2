@@ -8,17 +8,18 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const palette = Colors[colorScheme ?? "light"];
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-        tabBarInactiveTintColor: "#94a3b8",
+        tabBarActiveTintColor: palette.tint,
+        tabBarInactiveTintColor: palette.muted,
         headerShown: false,
         tabBarStyle: [
           styles.tabBar,
           {
-            backgroundColor: "#ffffff",
+            backgroundColor: palette.surface,
             borderTopWidth: 0,
             ...(Platform.OS === "ios" && {
               borderTopLeftRadius: 20,
@@ -71,7 +72,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     paddingTop: 12,
     elevation: 20,
-    shadowColor: shadowColors.primary,
+    shadowColor: shadowColors.card,
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: -5 },
     shadowRadius: 15,

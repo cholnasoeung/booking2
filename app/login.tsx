@@ -13,6 +13,7 @@ import {
 
 import { AnimatedInput } from "@/components/ui/animated-input";
 import { AnimatedPressable } from "@/components/ui/animated-pressable";
+import { glass, gradients, Colors, shadowColors } from "@/constants/theme";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function LoginScreen() {
@@ -48,16 +49,16 @@ export default function LoginScreen() {
       behavior={Platform.select({ ios: "padding", android: undefined })}
     >
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.card}>
-          <View style={styles.accentStrip} />
-          <View style={styles.iconContainer}>
-            <Ionicons name="bus" size={32} color="#4f46e5" />
-          </View>
-          <Text style={styles.title}>Welcome back</Text>
-          <Text style={styles.subtitle}>
+        <View style={styles.heroBanner}>
+          <Ionicons name="bus" size={36} color="#ffffff" />
+          <Text style={styles.heroEyebrow}>Secure login</Text>
+          <Text style={styles.heroTitle}>Welcome back</Text>
+          <Text style={styles.heroText}>
             Sign in with the account from your Next.js booking platform.
           </Text>
+        </View>
 
+        <View style={styles.formCard}>
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>Email</Text>
             <AnimatedInput
@@ -81,7 +82,11 @@ export default function LoginScreen() {
 
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-          <AnimatedPressable onPress={() => void handleLogin()} style={styles.primaryButton} disabled={submitting}>
+          <AnimatedPressable
+            onPress={() => void handleLogin()}
+            style={styles.primaryButton}
+            disabled={submitting}
+          >
             {submitting ? (
               <ActivityIndicator color="#ffffff" />
             ) : (
@@ -107,70 +112,74 @@ export default function LoginScreen() {
   );
 }
 
+const palette = Colors.light;
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#f8f7ff",
+    backgroundColor: palette.background,
   },
   content: {
     flexGrow: 1,
     justifyContent: "center",
     padding: 20,
+    gap: 20,
+    paddingBottom: 40,
   },
-  card: {
-    borderRadius: 28,
-    backgroundColor: "#ffffff",
-    padding: 22,
-    gap: 14,
+  heroBanner: {
+    borderRadius: 32,
+    backgroundColor: gradients.hero[0],
+    padding: 24,
+    gap: 8,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
-    overflow: "hidden",
+    borderColor: "rgba(255, 255, 255, 0.4)",
+    shadowColor: shadowColors.card,
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 12 },
+    shadowRadius: 30,
+    elevation: 5,
   },
-  accentStrip: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 4,
-    backgroundColor: "#4f46e5",
+  heroEyebrow: {
+    color: "rgba(255, 255, 255, 0.75)",
+    textTransform: "uppercase",
+    fontSize: 12,
+    letterSpacing: 1.2,
+    fontWeight: "700",
   },
-  iconContainer: {
-    alignItems: "center",
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  title: {
-    color: "#111827",
+  heroTitle: {
+    color: "#ffffff",
     fontSize: 28,
     fontWeight: "800",
-    textAlign: "center",
   },
-  subtitle: {
-    color: "#64748b",
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: "center",
+  heroText: {
+    color: "rgba(255, 255, 255, 0.85)",
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  formCard: {
+    borderRadius: 28,
+    backgroundColor: glass.light.background,
+    padding: 20,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: glass.light.border,
+    shadowColor: shadowColors.card,
+    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 24,
+    elevation: 5,
   },
   fieldGroup: {
     gap: 8,
   },
   label: {
-    color: "#475569",
+    color: palette.muted,
     fontSize: 13,
     fontWeight: "700",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#dbe2f0",
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: "#f8fafc",
-    color: "#0f172a",
-    fontSize: 16,
+    letterSpacing: 0.4,
   },
   errorText: {
-    color: "#dc2626",
+    color: Colors.light.danger,
     fontSize: 14,
     lineHeight: 20,
   },
@@ -178,8 +187,14 @@ const styles = StyleSheet.create({
     minHeight: 52,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 16,
-    backgroundColor: "#4f46e5",
+    borderRadius: 18,
+    backgroundColor: Colors.light.tint,
+    marginTop: 4,
+    shadowColor: shadowColors.primary,
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 20,
+    elevation: 4,
   },
   primaryButtonText: {
     color: "#ffffff",
@@ -188,15 +203,14 @@ const styles = StyleSheet.create({
   },
   footerRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
     gap: 6,
   },
   footerText: {
-    color: "#64748b",
+    color: palette.muted,
     fontSize: 14,
   },
   footerLink: {
-    color: "#4338ca",
+    color: Colors.light.tint,
     fontSize: 14,
     fontWeight: "700",
   },

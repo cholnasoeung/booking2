@@ -3,23 +3,42 @@ import { Href, useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AnimatedPressable } from "@/components/ui/animated-pressable";
-import { shadowColors } from "@/constants/theme";
 import { API_BASE_URL } from "@/lib/api";
+import { glass, gradients, Colors, shadowColors } from "@/constants/theme";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { signOut, user } = useAuth();
 
+  const heroStats = [
+    { label: "Synced trips", value: "Live" },
+    { label: "Secure auth", value: "Enabled" },
+    { label: "Support", value: "24/7" },
+  ];
+
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <View style={styles.profileCard}>
-        <View style={styles.avatarBanner} />
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{user?.name?.slice(0, 1).toUpperCase() || "G"}</Text>
+      <View style={styles.heroBanner}>
+        <View style={styles.heroGlow} />
+        <View style={styles.avatarWrapper}>
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{user?.name?.slice(0, 1).toUpperCase() || "G"}</Text>
+          </View>
+          <Ionicons name="shield-checkmark" size={18} color="#ffffff" style={styles.heroIcon} />
         </View>
         <Text style={styles.name}>{user?.name || "Guest traveler"}</Text>
-        <Text style={styles.email}>{user?.email || "Sign in to sync mobile bookings"}</Text>
+        <Text style={styles.email}>
+          {user?.email || "Sign in to sync mobile bookings and share trips across devices"}
+        </Text>
+        <View style={styles.heroStatsRow}>
+          {heroStats.map((stat) => (
+            <View style={styles.heroStatCard} key={stat.label}>
+              <Text style={styles.heroStatValue}>{stat.value}</Text>
+              <Text style={styles.heroStatLabel}>{stat.label}</Text>
+            </View>
+          ))}
+        </View>
       </View>
 
       <View style={styles.infoCard}>
@@ -40,30 +59,19 @@ export default function ProfileScreen() {
         </Text>
       </View>
 
-      {user ? (
-        <View style={styles.actionStack}>
-          <AnimatedPressable onPress={() => router.push("/(tabs)/bookings" as Href)} style={styles.primaryButton}>
-            <Text style={styles.primaryButtonText}>View my bookings</Text>
-          </AnimatedPressable>
-          <AnimatedPressable
-            onPress={() => {
-              void signOut();
-            }}
-            style={styles.outlineButton}
-          >
-            <Text style={styles.outlineButtonText}>Log out</Text>
-          </AnimatedPressable>
-        </View>
-      ) : (
-        <View style={styles.actionStack}>
-          <AnimatedPressable onPress={() => router.push("/login" as Href)} style={styles.primaryButton}>
-            <Text style={styles.primaryButtonText}>Login</Text>
-          </AnimatedPressable>
-          <AnimatedPressable onPress={() => router.push("/register" as Href)} style={styles.outlineButton}>
-            <Text style={styles.outlineButtonText}>Create account</Text>
-          </AnimatedPressable>
-        </View>
-      )}
+      <View style={styles.actionStack}>
+        <AnimatedPressable onPress={() => router.push("/(tabs)/bookings" as Href)} style={styles.primaryButton}>
+          <Text style={styles.primaryButtonText}>View my bookings</Text>
+        </AnimatedPressable>
+        <AnimatedPressable
+          onPress={() => {
+            void signOut();
+          }}
+          style={styles.outlineButton}
+        >
+          <Text style={styles.outlineButtonText}>Log out</Text>
+        </AnimatedPressable>
+      </View>
     </ScrollView>
   );
 }
@@ -71,39 +79,47 @@ export default function ProfileScreen() {
 function Feature({ icon, text }: { icon: keyof typeof Ionicons.glyphMap; text: string }) {
   return (
     <View style={styles.featureRow}>
-      <Ionicons name={icon} size={18} color="#4338ca" />
+      <Ionicons name={icon} size={18} color={Colors.light.tint} />
       <Text style={styles.featureText}>{text}</Text>
     </View>
   );
 }
 
+const palette = Colors.light;
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#f8f7ff",
+    backgroundColor: palette.background,
   },
   content: {
     padding: 20,
     gap: 18,
+    paddingBottom: 48,
   },
-  profileCard: {
-    alignItems: "center",
-    gap: 10,
-    borderRadius: 28,
-    backgroundColor: "#ffffff",
+  heroBanner: {
+    borderRadius: 32,
+    backgroundColor: gradients.hero[0],
     padding: 24,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
+    overflow: "hidden",
+    position: "relative",
   },
-  avatarBanner: {
+  heroGlow: {
     position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 60,
-    backgroundColor: "rgba(79, 70, 229, 0.08)",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    width: 200,
+    height: 200,
+    borderRadius: 150,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    top: -60,
+    right: -40,
+  },
+  avatarWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  heroIcon: {
+    marginTop: 8,
   },
   avatar: {
     height: 80,
@@ -111,10 +127,9 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#4f46e5",
-    marginTop: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderWidth: 3,
-    borderColor: "#e0e7ff",
+    borderColor: "rgba(255, 255, 255, 0.5)",
   },
   avatarText: {
     color: "#ffffff",
@@ -122,31 +137,58 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   name: {
-    color: "#111827",
-    fontSize: 24,
+    color: "#ffffff",
+    fontSize: 26,
     fontWeight: "800",
-    textAlign: "center",
+    marginTop: 12,
   },
   email: {
-    color: "#64748b",
+    color: "rgba(255, 255, 255, 0.9)",
     fontSize: 14,
-    textAlign: "center",
+    lineHeight: 20,
+    marginTop: 4,
+  },
+  heroStatsRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 16,
+  },
+  heroStatCard: {
+    flex: 1,
+    borderRadius: 18,
+    backgroundColor: glass.light.background,
+    borderWidth: 1,
+    borderColor: glass.light.border,
+    padding: 12,
+    alignItems: "center",
+  },
+  heroStatValue: {
+    color: palette.text,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  heroStatLabel: {
+    color: palette.muted,
+    fontSize: 11,
+    letterSpacing: 0.4,
+    marginTop: 2,
+    textTransform: "uppercase",
   },
   infoCard: {
     borderRadius: 24,
-    backgroundColor: "#ffffff",
+    backgroundColor: palette.surface,
     padding: 18,
     gap: 12,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
-    shadowColor: shadowColors.primary,
-    shadowOpacity: 0.06,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 12,
-    elevation: 2,
+    borderColor: palette.border,
+    shadowColor: shadowColors.card,
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 16,
+    elevation: 3,
   },
   sectionTitle: {
-    color: "#111827",
+    color: palette.text,
     fontSize: 18,
     fontWeight: "700",
   },
@@ -157,23 +199,23 @@ const styles = StyleSheet.create({
   },
   featureText: {
     flex: 1,
-    color: "#334155",
+    color: palette.muted,
     fontSize: 14,
     lineHeight: 20,
   },
   connectionText: {
-    color: "#64748b",
+    color: palette.muted,
     fontSize: 12,
     fontWeight: "700",
     textTransform: "uppercase",
   },
   connectionValue: {
-    color: "#0f172a",
+    color: palette.text,
     fontSize: 15,
     fontWeight: "700",
   },
   connectionHint: {
-    color: "#64748b",
+    color: palette.muted,
     fontSize: 14,
     lineHeight: 20,
   },
@@ -184,8 +226,13 @@ const styles = StyleSheet.create({
     minHeight: 52,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 16,
-    backgroundColor: "#4f46e5",
+    borderRadius: 18,
+    backgroundColor: Colors.light.tint,
+    shadowColor: shadowColors.primary,
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 20,
+    elevation: 4,
   },
   primaryButtonText: {
     color: "#ffffff",
@@ -196,13 +243,13 @@ const styles = StyleSheet.create({
     minHeight: 52,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 16,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: "#cbd5e1",
-    backgroundColor: "#ffffff",
+    borderColor: palette.border,
+    backgroundColor: palette.surface,
   },
   outlineButtonText: {
-    color: "#0f172a",
+    color: palette.text,
     fontSize: 15,
     fontWeight: "700",
   },
