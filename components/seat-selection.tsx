@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import SeatMap from "@/components/seat-map";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { compareSeatCodes } from "@/lib/seat-layout";
+import { getSeatCodesFromLayout, compareSeatCodes } from "@/lib/seat-layout";
 import { formatBusType, formatCurrency, formatSeatList } from "@/lib/formatters";
 import type { BusSummary } from "@/lib/queries";
 import {
@@ -23,6 +23,33 @@ type SeatSelectionProps = {
   selectionLimit: number;
 };
 
+type SavedSeatTemplate = {
+  busType: BusSummary["busType"];
+  seats: string[];
+};
+
+type UserPreferences = {
+  preferredSeatType?: string[];
+  preferredBusType?: string[];
+  savedSeatTemplates?: SavedSeatTemplate[];
+  notifications?: {
+    bookingConfirmation?: boolean;
+    cancellationAlerts?: boolean;
+    promotionalEmails?: boolean;
+  };
+};
+
+type UserProfileResponse = {
+  user?: {
+    preferences?: UserPreferences;
+  };
+};
+
+type TemplateMessage = {
+  type: "success" | "error" | "info";
+  text: string;
+};
+
 export default function SeatSelection({
   bus,
   selectionLimit,
@@ -30,6 +57,11 @@ export default function SeatSelection({
   const router = useRouter();
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [error, setError] = useState("");
+  const [preferences, setPreferences] = useState<UserPreferences | null>(null);
+  const [savedTemplate, setSavedTemplate] = useState<SavedSeatTemplate | null>(null);
+  const [templateMessage, setTemplateMessage] = useState<TemplateMessage | null>(null);
+  const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+  const [isLoadingTemplate, setIsLoadingTemplate] = useState(true);
   const boardingOptions = bus.stops.filter((stop) => stop.boarding);
   const droppingOptions = bus.stops.filter((stop) => stop.dropping);
   const [boardingStop, setBoardingStop] = useState(
@@ -40,6 +72,43 @@ export default function SeatSelection({
   );
 
   const totalPrice = selectedSeats.length * bus.pricePerSeat;
+  const validSeatCodes = useMemo(
+    () => new Set(getSeatCodesFromLayout(bus.seatLayout)),
+    [bus.seatLayout]
+  );
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadSeatTemplate() {
+      setIsLoadingTemplate(true);
+
+      try {
+        const response = await fetch("/api/user/profile");
+        const payload = (await response.json().catch(() => ({}))) as UserProfileResponse;
+
+        if (!response.ok || !mounted) {
+          return;
+        }
+
+        const nextPreferences = payload.user?.preferences ?? {};
+        const nextTemplate = getTemplateForBusType(nextPreferences, bus.busType);
+
+        setPreferences(nextPreferences);
+        setSavedTemplate(nextTemplate);
+      } finally {
+        if (mounted) {
+          setIsLoadingTemplate(false);
+        }
+      }
+    }
+
+    loadSeatTemplate();
+
+    return () => {
+      mounted = false;
+    };
+  }, [bus.busType]);
 
   function toggleSeat(seatCode: string) {
     if (bus.bookedSeats.includes(seatCode) || bus.blockedSeats.includes(seatCode)) {
@@ -51,6 +120,7 @@ export default function SeatSelection({
         current.filter((currentSeat) => currentSeat !== seatCode)
       );
       setError("");
+      setTemplateMessage(null);
       return;
     }
 
@@ -61,6 +131,110 @@ export default function SeatSelection({
 
     setSelectedSeats((current) => [...current, seatCode].sort(compareSeatCodes));
     setError("");
+    setTemplateMessage(null);
+  }
+
+  async function saveSeatTemplate() {
+    if (selectedSeats.length === 0) {
+      setTemplateMessage({
+        type: "error",
+        text: "Select at least one seat before saving a seat template.",
+      });
+      return;
+    }
+
+    setIsSavingTemplate(true);
+    setTemplateMessage(null);
+
+    const nextTemplate: SavedSeatTemplate = {
+      busType: bus.busType,
+      seats: [...selectedSeats].sort(compareSeatCodes),
+    };
+
+    const nextPreferences = mergeSeatTemplate(preferences, nextTemplate);
+
+    try {
+      const response = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          preferences: nextPreferences,
+        }),
+      });
+
+      const payload = (await response.json().catch(() => ({}))) as UserProfileResponse & {
+        message?: string;
+      };
+
+      if (!response.ok) {
+        setTemplateMessage({
+          type: "error",
+          text: payload.message ?? "Unable to save your seat template right now.",
+        });
+        return;
+      }
+
+      const updatedPreferences = payload.user?.preferences ?? nextPreferences;
+      const updatedTemplate = getTemplateForBusType(updatedPreferences, bus.busType);
+
+      setPreferences(updatedPreferences);
+      setSavedTemplate(updatedTemplate);
+      setTemplateMessage({
+        type: "success",
+        text: `Saved ${formatSeatList(nextTemplate.seats)} as your ${formatBusType(bus.busType).toLowerCase()} seat template.`,
+      });
+    } catch {
+      setTemplateMessage({
+        type: "error",
+        text: "Unable to save your seat template right now.",
+      });
+    } finally {
+      setIsSavingTemplate(false);
+    }
+  }
+
+  function applySavedTemplate() {
+    if (!savedTemplate || savedTemplate.seats.length === 0) {
+      setTemplateMessage({
+        type: "error",
+        text: "There is no saved seat template for this bus type yet.",
+      });
+      return;
+    }
+
+    const availableTemplateSeats = savedTemplate.seats
+      .map((seat) => seat.trim())
+      .filter((seat) => validSeatCodes.has(seat))
+      .filter((seat) => !bus.bookedSeats.includes(seat) && !bus.blockedSeats.includes(seat));
+    const nextSeats = [...new Set(availableTemplateSeats)]
+      .sort(compareSeatCodes)
+      .slice(0, selectionLimit);
+
+    if (nextSeats.length === 0) {
+      setTemplateMessage({
+        type: "error",
+        text: "Your saved seat template is not available on this trip.",
+      });
+      return;
+    }
+
+    setSelectedSeats(nextSeats);
+    setError("");
+
+    if (nextSeats.length < savedTemplate.seats.length) {
+      setTemplateMessage({
+        type: "info",
+        text: `Applied ${formatSeatList(nextSeats)}. Some saved seats were unavailable or over the limit for this booking.`,
+      });
+      return;
+    }
+
+    setTemplateMessage({
+      type: "success",
+      text: `Applied your saved template: ${formatSeatList(nextSeats)}.`,
+    });
   }
 
   function proceedToPassengerDetails() {
@@ -118,6 +292,62 @@ export default function SeatSelection({
             >
               {formatCurrency(bus.pricePerSeat)} per seat
             </Badge>
+          </div>
+
+          <div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  Saved seat template
+                </p>
+                <p className="text-sm text-slate-600">
+                  {savedTemplate?.seats.length
+                    ? `Template for ${formatBusType(bus.busType)}: ${formatSeatList(savedTemplate.seats)}`
+                    : isLoadingTemplate
+                    ? "Loading your saved seat template..."
+                    : `No saved ${formatBusType(bus.busType).toLowerCase()} seat template yet.`}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-full"
+                  disabled={!savedTemplate?.seats.length}
+                  onClick={applySavedTemplate}
+                >
+                  Apply saved template
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-full"
+                  disabled={isSavingTemplate || selectedSeats.length === 0}
+                  onClick={saveSeatTemplate}
+                >
+                  {isSavingTemplate
+                    ? "Saving template..."
+                    : savedTemplate?.seats.length
+                    ? "Update saved template"
+                    : "Save current seats"}
+                </Button>
+              </div>
+            </div>
+
+            {templateMessage ? (
+              <p
+                className={`mt-3 rounded-xl border px-3 py-2 text-sm ${
+                  templateMessage.type === "success"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : templateMessage.type === "info"
+                    ? "border-amber-200 bg-amber-50 text-amber-800"
+                    : "border-red-200 bg-red-50 text-red-700"
+                }`}
+              >
+                {templateMessage.text}
+              </p>
+            ) : null}
           </div>
 
           <div className="mb-4 grid gap-3 sm:grid-cols-2">
@@ -279,4 +509,31 @@ export default function SeatSelection({
       </Card>
     </div>
   );
+}
+
+function getTemplateForBusType(
+  preferences: UserPreferences | null | undefined,
+  busType: BusSummary["busType"]
+) {
+  return (
+    preferences?.savedSeatTemplates?.find((template) => template.busType === busType) ??
+    null
+  );
+}
+
+function mergeSeatTemplate(
+  preferences: UserPreferences | null,
+  nextTemplate: SavedSeatTemplate
+): UserPreferences {
+  const savedSeatTemplates = [
+    ...(preferences?.savedSeatTemplates ?? []).filter(
+      (template) => template.busType !== nextTemplate.busType
+    ),
+    nextTemplate,
+  ].sort((first, second) => first.busType.localeCompare(second.busType));
+
+  return {
+    ...(preferences ?? {}),
+    savedSeatTemplates,
+  };
 }

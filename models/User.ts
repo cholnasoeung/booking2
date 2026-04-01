@@ -1,5 +1,7 @@
 import mongoose, { type Document, Schema } from "mongoose";
 
+import { type BusType } from "@/lib/seat-layout";
+
 export type UserRole = "user" | "admin";
 
 export interface ISavedPassenger {
@@ -9,6 +11,11 @@ export interface ISavedPassenger {
   contactNumber: string;
   email?: string;
   idProof?: string;
+}
+
+export interface ISavedSeatTemplate {
+  busType: BusType;
+  seats: string[];
 }
 
 export interface IUser extends Document {
@@ -26,6 +33,7 @@ export interface IUser extends Document {
   preferences: {
     preferredSeatType?: string[];
     preferredBusType?: string[];
+    savedSeatTemplates?: ISavedSeatTemplate[];
     notifications: {
       bookingConfirmation: boolean;
       cancellationAlerts: boolean;
@@ -45,6 +53,21 @@ const SavedPassengerSchema = new Schema<ISavedPassenger>({
   email: String,
   idProof: String,
 });
+
+const SavedSeatTemplateSchema = new Schema<ISavedSeatTemplate>(
+  {
+    busType: {
+      type: String,
+      enum: ["bus_45", "mini_bus", "car"],
+      required: true,
+    },
+    seats: {
+      type: [String],
+      default: [],
+    },
+  },
+  { _id: false }
+);
 
 const UserSchema = new Schema<IUser>(
   {
@@ -103,6 +126,10 @@ const UserSchema = new Schema<IUser>(
       preferredBusType: {
         type: [String],
         enum: ["bus_45", "mini_bus", "car"],
+      },
+      savedSeatTemplates: {
+        type: [SavedSeatTemplateSchema],
+        default: [],
       },
       notifications: {
         bookingConfirmation: { type: Boolean, default: true },
