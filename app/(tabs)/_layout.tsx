@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import React from "react";
+import { Platform, StyleSheet } from "react-native";
 
-import { Colors } from "@/constants/theme";
+import { Colors, shadowColors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function TabLayout() {
@@ -14,12 +15,21 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         tabBarInactiveTintColor: "#94a3b8",
         headerShown: false,
-        tabBarStyle: {
-          height: 68,
-          paddingBottom: 10,
-          paddingTop: 10,
-          borderTopWidth: 0,
-          backgroundColor: "#ffffff",
+        tabBarStyle: [
+          styles.tabBar,
+          {
+            backgroundColor: "#ffffff",
+            borderTopWidth: 0,
+            ...(Platform.OS === "ios" && {
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+            }),
+          },
+        ],
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "600",
+          marginTop: 4,
         },
       }}
     >
@@ -27,8 +37,8 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Search",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search" size={size} color={color} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="search" size={22} color={color} />
           ),
         }}
       />
@@ -36,8 +46,8 @@ export default function TabLayout() {
         name="bookings"
         options={{
           title: "Bookings",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="ticket-outline" size={size} color={color} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="ticket-outline" size={22} color={color} />
           ),
         }}
       />
@@ -45,8 +55,8 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="person-outline" size={22} color={color} />
           ),
         }}
       />
@@ -54,3 +64,16 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    height: 72,
+    paddingBottom: 12,
+    paddingTop: 12,
+    elevation: 20,
+    shadowColor: shadowColors.primary,
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: -5 },
+    shadowRadius: 15,
+  },
+});

@@ -1,7 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Href, useRouter } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { AnimatedPressable } from "@/components/ui/animated-pressable";
+import { shadowColors } from "@/constants/theme";
 import { API_BASE_URL } from "@/lib/api";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -12,6 +14,7 @@ export default function ProfileScreen() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.profileCard}>
+        <View style={styles.avatarBanner} />
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>{user?.name?.slice(0, 1).toUpperCase() || "G"}</Text>
         </View>
@@ -39,26 +42,26 @@ export default function ProfileScreen() {
 
       {user ? (
         <View style={styles.actionStack}>
-          <Pressable onPress={() => router.push("/(tabs)/bookings" as Href)} style={styles.primaryButton}>
+          <AnimatedPressable onPress={() => router.push("/(tabs)/bookings" as Href)} style={styles.primaryButton}>
             <Text style={styles.primaryButtonText}>View my bookings</Text>
-          </Pressable>
-          <Pressable
+          </AnimatedPressable>
+          <AnimatedPressable
             onPress={() => {
               void signOut();
             }}
             style={styles.outlineButton}
           >
             <Text style={styles.outlineButtonText}>Log out</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       ) : (
         <View style={styles.actionStack}>
-          <Pressable onPress={() => router.push("/login" as Href)} style={styles.primaryButton}>
+          <AnimatedPressable onPress={() => router.push("/login" as Href)} style={styles.primaryButton}>
             <Text style={styles.primaryButtonText}>Login</Text>
-          </Pressable>
-          <Pressable onPress={() => router.push("/register" as Href)} style={styles.outlineButton}>
+          </AnimatedPressable>
+          <AnimatedPressable onPress={() => router.push("/register" as Href)} style={styles.outlineButton}>
             <Text style={styles.outlineButtonText}>Create account</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       )}
     </ScrollView>
@@ -92,13 +95,26 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e2e8f0",
   },
+  avatarBanner: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 60,
+    backgroundColor: "rgba(79, 70, 229, 0.08)",
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+  },
   avatar: {
-    height: 68,
-    width: 68,
-    borderRadius: 34,
+    height: 80,
+    width: 80,
+    borderRadius: 40,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#4f46e5",
+    marginTop: 20,
+    borderWidth: 3,
+    borderColor: "#e0e7ff",
   },
   avatarText: {
     color: "#ffffff",
@@ -123,6 +139,11 @@ const styles = StyleSheet.create({
     gap: 12,
     borderWidth: 1,
     borderColor: "#e2e8f0",
+    shadowColor: shadowColors.primary,
+    shadowOpacity: 0.06,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 12,
+    elevation: 2,
   },
   sectionTitle: {
     color: "#111827",

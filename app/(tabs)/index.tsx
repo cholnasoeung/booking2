@@ -7,10 +7,20 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
+import Animated, {
+  FadeInDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSpring,
+} from "react-native-reanimated";
 
+import { AnimatedInput } from "@/components/ui/animated-input";
+import { AnimatedPressable } from "@/components/ui/animated-pressable";
+import { animations } from "@/constants/animations";
+import { shadowColors } from "@/constants/theme";
 import { apiFetch } from "@/lib/api";
 import {
   formatBusType,
@@ -138,53 +148,49 @@ export default function SearchScreen() {
         <Text style={styles.sectionTitle}>Search buses</Text>
         <View style={styles.fieldGroup}>
           <Text style={styles.fieldLabel}>From</Text>
-          <TextInput
+          <AnimatedInput
             value={from}
             onChangeText={setFrom}
             placeholder="Departure city"
-            placeholderTextColor="#94a3b8"
-            style={styles.input}
           />
         </View>
         <View style={styles.fieldGroup}>
           <Text style={styles.fieldLabel}>To</Text>
-          <TextInput
+          <AnimatedInput
             value={to}
             onChangeText={setTo}
             placeholder="Destination city"
-            placeholderTextColor="#94a3b8"
-            style={styles.input}
           />
         </View>
-        <Pressable onPress={swapRoute} style={styles.swapButton}>
+        <AnimatedPressable onPress={swapRoute} style={styles.swapButton}>
           <Ionicons name="swap-vertical" size={18} color="#4f46e5" />
           <Text style={styles.swapButtonText}>Swap route</Text>
-        </Pressable>
+        </AnimatedPressable>
         <View style={styles.row}>
           <View style={[styles.fieldGroup, styles.rowField]}>
             <Text style={styles.fieldLabel}>Date</Text>
-            <TextInput
+            <AnimatedInput
               value={date}
               onChangeText={setDate}
               placeholder="YYYY-MM-DD"
-              placeholderTextColor="#94a3b8"
               autoCapitalize="none"
-              style={styles.input}
             />
           </View>
           <View style={[styles.fieldGroup, styles.rowField]}>
             <Text style={styles.fieldLabel}>Passengers</Text>
-            <TextInput
+            <AnimatedInput
               value={passengers}
               onChangeText={setPassengers}
               keyboardType="number-pad"
               placeholder="1"
-              placeholderTextColor="#94a3b8"
-              style={styles.input}
             />
           </View>
         </View>
-        <Pressable onPress={handleSearch} style={styles.primaryButton} disabled={loading}>
+        <AnimatedPressable
+          onPress={handleSearch}
+          style={styles.primaryButton}
+          disabled={loading}
+        >
           {loading ? (
             <ActivityIndicator color="#ffffff" />
           ) : (
@@ -193,7 +199,7 @@ export default function SearchScreen() {
               <Text style={styles.primaryButtonText}>Search departures</Text>
             </>
           )}
-        </Pressable>
+        </AnimatedPressable>
       </View>
 
       <View style={styles.sectionHeader}>
@@ -230,7 +236,7 @@ export default function SearchScreen() {
 
       <View style={styles.segmentRow}>
         {SORT_OPTIONS.map((option) => (
-          <Pressable
+          <AnimatedPressable
             key={option.value}
             onPress={() => setSortBy(option.value)}
             style={[styles.segmentButton, sortBy === option.value && styles.segmentButtonActive]}
@@ -243,7 +249,7 @@ export default function SearchScreen() {
             >
               {option.label}
             </Text>
-          </Pressable>
+          </AnimatedPressable>
         ))}
       </View>
 
@@ -266,8 +272,11 @@ export default function SearchScreen() {
           </Text>
         </View>
       ) : (
-        filteredResults.map((bus) => (
-          <View key={bus.id} style={styles.resultCard}>
+        filteredResults.map((bus, index) => (
+          <Animated.View
+            key={bus.id}
+            style={[styles.resultCard, FadeInDown.delay(index * 50)]}
+          >
             <View style={styles.resultHeader}>
               <View style={styles.resultHeaderText}>
                 <Text style={styles.routeTitle}>
@@ -301,11 +310,11 @@ export default function SearchScreen() {
               ))}
             </View>
 
-            <Pressable onPress={() => openBooking(bus.id)} style={styles.secondaryButton}>
+            <AnimatedPressable onPress={() => openBooking(bus.id)} style={styles.secondaryButton}>
               <Text style={styles.secondaryButtonText}>Book passenger seats</Text>
               <Ionicons name="arrow-forward" size={18} color="#ffffff" />
-            </Pressable>
-          </View>
+            </AnimatedPressable>
+          </Animated.View>
         ))
       )}
     </ScrollView>
@@ -322,9 +331,9 @@ function Chip({
   onPress: () => void;
 }) {
   return (
-    <Pressable onPress={onPress} style={[styles.chip, active && styles.chipActive]}>
+    <AnimatedPressable onPress={onPress} style={[styles.chip, active && styles.chipActive]}>
       <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -561,8 +570,8 @@ const styles = StyleSheet.create({
   },
   routeTitle: {
     color: "#0f172a",
-    fontSize: 20,
-    fontWeight: "700",
+    fontSize: 22,
+    fontWeight: "800",
   },
   routeSubtitle: {
     color: "#64748b",
@@ -595,6 +604,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8fafc",
     padding: 12,
     gap: 4,
+    shadowColor: shadowColors.card,
+    shadowOpacity: 0.06,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 2,
   },
   statLabel: {
     color: "#64748b",

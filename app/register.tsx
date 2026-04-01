@@ -1,17 +1,18 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Href, Link, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 
+import { AnimatedInput } from "@/components/ui/animated-input";
+import { AnimatedPressable } from "@/components/ui/animated-pressable";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function RegisterScreen() {
@@ -63,10 +64,22 @@ export default function RegisterScreen() {
     >
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.card}>
+          <View style={styles.accentStrip} />
+          <View style={styles.iconContainer}>
+            <Ionicons name="person-add" size={32} color="#4f46e5" />
+          </View>
           <Text style={styles.title}>Create account</Text>
           <Text style={styles.subtitle}>
             Register once and use the same credentials across web and mobile booking.
           </Text>
+
+          <View style={styles.progressDots}>
+            <View style={styles.dot} />
+            <View style={styles.dot} />
+            <View style={styles.dot} />
+            <View style={styles.dot} />
+            <View style={styles.dot} />
+          </View>
 
           <Field label="Full name" value={name} onChangeText={setName} placeholder="Your name" />
           <Field
@@ -101,7 +114,7 @@ export default function RegisterScreen() {
 
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-          <Pressable
+          <AnimatedPressable
             onPress={() => void handleRegister()}
             style={styles.primaryButton}
             disabled={submitting}
@@ -111,7 +124,7 @@ export default function RegisterScreen() {
             ) : (
               <Text style={styles.primaryButtonText}>Register</Text>
             )}
-          </Pressable>
+          </AnimatedPressable>
 
           <View style={styles.footerRow}>
             <Text style={styles.footerText}>Already have an account?</Text>
@@ -146,7 +159,7 @@ function Field({
   return (
     <View style={styles.fieldGroup}>
       <Text style={styles.label}>{label}</Text>
-      <TextInput placeholderTextColor="#94a3b8" style={styles.input} {...inputProps} />
+      <AnimatedInput {...inputProps} />
     </View>
   );
 }
@@ -168,16 +181,44 @@ const styles = StyleSheet.create({
     gap: 14,
     borderWidth: 1,
     borderColor: "#e2e8f0",
+    overflow: "hidden",
+  },
+  accentStrip: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+    backgroundColor: "#4f46e5",
+  },
+  iconContainer: {
+    alignItems: "center",
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  progressDots: {
+    flexDirection: "row",
+    gap: 6,
+    justifyContent: "center",
+    marginVertical: 8,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#dbe2f0",
   },
   title: {
     color: "#111827",
     fontSize: 28,
     fontWeight: "800",
+    textAlign: "center",
   },
   subtitle: {
     color: "#64748b",
     fontSize: 15,
     lineHeight: 22,
+    textAlign: "center",
   },
   fieldGroup: {
     gap: 8,

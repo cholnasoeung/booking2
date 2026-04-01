@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   },
   loadingTitle: {
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: "800",
     color: "#1f2937",
   },
   loadingText: {

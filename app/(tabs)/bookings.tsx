@@ -4,14 +4,16 @@ import { Href, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
-  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
 
+import { AnimatedPressable } from "@/components/ui/animated-pressable";
+import { shadowColors } from "@/constants/theme";
 import { apiFetch } from "@/lib/api";
 import {
   formatBookingDate,
@@ -85,9 +87,9 @@ export default function BookingsScreen() {
             Sign in with the same account from your Next.js app to see upcoming trips and new
             bookings created on mobile.
           </Text>
-          <Pressable onPress={() => router.push("/login" as Href)} style={styles.primaryButton}>
+          <AnimatedPressable onPress={() => router.push("/login" as Href)} style={styles.primaryButton}>
             <Text style={styles.primaryButtonText}>Login to continue</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       </ScrollView>
     );
@@ -114,9 +116,9 @@ export default function BookingsScreen() {
           <Ionicons name="warning-outline" size={24} color="#dc2626" />
           <Text style={styles.messageTitle}>Could not load bookings</Text>
           <Text style={styles.messageText}>{error}</Text>
-          <Pressable onPress={() => void loadBookings()} style={styles.secondaryButton}>
+          <AnimatedPressable onPress={() => void loadBookings()} style={styles.secondaryButton}>
             <Text style={styles.secondaryButtonText}>Try again</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       ) : bookings.length === 0 ? (
         <View style={styles.messageCard}>
@@ -125,13 +127,16 @@ export default function BookingsScreen() {
           <Text style={styles.messageText}>
             Search a route and complete a passenger booking to see it listed here.
           </Text>
-          <Pressable onPress={() => router.push("/" as Href)} style={styles.primaryButton}>
+          <AnimatedPressable onPress={() => router.push("/" as Href)} style={styles.primaryButton}>
             <Text style={styles.primaryButtonText}>Search departures</Text>
-          </Pressable>
+          </AnimatedPressable>
         </View>
       ) : (
-        bookings.map((booking) => (
-          <View key={booking.id} style={styles.bookingCard}>
+        bookings.map((booking, index) => (
+          <Animated.View
+            key={booking.id}
+            style={[styles.bookingCard, FadeInDown.delay(index * 50)]}
+          >
             <View style={styles.bookingHeader}>
               <View>
                 <Text style={styles.routeTitle}>
@@ -145,6 +150,14 @@ export default function BookingsScreen() {
                   booking.status === "confirmed" ? styles.statusBadgeSuccess : styles.statusBadgeMuted,
                 ]}
               >
+                <View
+                  style={[
+                    styles.statusDot,
+                    booking.status === "confirmed"
+                      ? styles.statusDotSuccess
+                      : styles.statusDotMuted,
+                  ]}
+                />
                 <Text
                   style={[
                     styles.statusText,
@@ -173,7 +186,7 @@ export default function BookingsScreen() {
               <Text style={styles.totalLabel}>Total</Text>
               <Text style={styles.totalValue}>{formatCurrency(booking.totalPrice)}</Text>
             </View>
-          </View>
+          </Animated.View>
         ))
       )}
     </ScrollView>
@@ -321,6 +334,18 @@ const styles = StyleSheet.create({
   },
   statusBadgeMuted: {
     backgroundColor: "#e2e8f0",
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  statusDotSuccess: {
+    backgroundColor: "#16a34a",
+  },
+  statusDotMuted: {
+    backgroundColor: "#94a3b8",
   },
   statusText: {
     fontSize: 12,

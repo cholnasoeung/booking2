@@ -1,17 +1,18 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Href, Link, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 
+import { AnimatedInput } from "@/components/ui/animated-input";
+import { AnimatedPressable } from "@/components/ui/animated-pressable";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function LoginScreen() {
@@ -48,6 +49,10 @@ export default function LoginScreen() {
     >
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.card}>
+          <View style={styles.accentStrip} />
+          <View style={styles.iconContainer}>
+            <Ionicons name="bus" size={32} color="#4f46e5" />
+          </View>
           <Text style={styles.title}>Welcome back</Text>
           <Text style={styles.subtitle}>
             Sign in with the account from your Next.js booking platform.
@@ -55,38 +60,34 @@ export default function LoginScreen() {
 
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>Email</Text>
-            <TextInput
+            <AnimatedInput
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
               placeholder="you@example.com"
-              placeholderTextColor="#94a3b8"
-              style={styles.input}
             />
           </View>
 
           <View style={styles.fieldGroup}>
             <Text style={styles.label}>Password</Text>
-            <TextInput
+            <AnimatedInput
               value={password}
               onChangeText={setPassword}
               secureTextEntry
               placeholder="Enter your password"
-              placeholderTextColor="#94a3b8"
-              style={styles.input}
             />
           </View>
 
           {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-          <Pressable onPress={() => void handleLogin()} style={styles.primaryButton} disabled={submitting}>
+          <AnimatedPressable onPress={() => void handleLogin()} style={styles.primaryButton} disabled={submitting}>
             {submitting ? (
               <ActivityIndicator color="#ffffff" />
             ) : (
               <Text style={styles.primaryButtonText}>Login</Text>
             )}
-          </Pressable>
+          </AnimatedPressable>
 
           <View style={styles.footerRow}>
             <Text style={styles.footerText}>New here?</Text>
@@ -123,16 +124,32 @@ const styles = StyleSheet.create({
     gap: 14,
     borderWidth: 1,
     borderColor: "#e2e8f0",
+    overflow: "hidden",
+  },
+  accentStrip: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+    backgroundColor: "#4f46e5",
+  },
+  iconContainer: {
+    alignItems: "center",
+    marginTop: 8,
+    marginBottom: 4,
   },
   title: {
     color: "#111827",
     fontSize: 28,
     fontWeight: "800",
+    textAlign: "center",
   },
   subtitle: {
     color: "#64748b",
     fontSize: 15,
     lineHeight: 22,
+    textAlign: "center",
   },
   fieldGroup: {
     gap: 8,
