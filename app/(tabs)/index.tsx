@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Href, useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
+import { PromotionBanner } from "@/components/promotion-banner";
 import { AnimatedInput } from "@/components/ui/animated-input";
 import { AnimatedPressable } from "@/components/ui/animated-pressable";
 import { glass, gradients, shadowColors, Colors } from "@/constants/theme";
@@ -21,7 +22,7 @@ import {
   getTomorrowDateInput,
 } from "@/lib/formatters";
 import { useAuth } from "@/providers/auth-provider";
-import type { BusSummary, BusType } from "@/types/booking";
+import type { BusSummary, BusType, Promotion } from "@/types/booking";
 
 const SORT_OPTIONS = [
   { value: "departure", label: "Departure" },
@@ -50,6 +51,27 @@ export default function SearchScreen() {
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [promotionDismissed, setPromotionDismissed] = useState(false);
+  const [promotion, setPromotion] = useState<Promotion | null>(null);
+  const [promotionLoading, setPromotionLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPromotion = async () => {
+      try {
+        setPromotionLoading(true);
+        const response = await apiFetch<{ promotion: Promotion }>("/api/promotions/active");
+        setPromotion(response.promotion);
+      } catch (err) {
+        // Silently fail if no active promotion
+        console.log("No active promotion found");
+        setPromotion(null);
+      } finally {
+        setPromotionLoading(false);
+      }
+    };
+
+    fetchPromotion();
+  }, []);
 
   const availableBusTypes = useMemo(
     () => ["all", ...new Set(results.map((bus) => bus.busType))] as (BusType | "all")[],
@@ -129,13 +151,6 @@ export default function SearchScreen() {
         <View style={styles.heroGlowOne} />
         <View style={styles.heroGlowTwo} />
         <Text style={styles.eyebrow}>mobile passenger booking</Text>
-        <Text style={styles.heroTitle}>
-          Search, filter, and book the next trip from your phone.
-        </Text>
-        <Text style={styles.heroText}>
-          Connects to your Next.js booking backend so the mobile app shares the same departures
-          and bookings.
-        </Text>
         <View style={styles.heroMetaRow}>
           <View style={styles.metaBadge}>
             <Ionicons name="flash-outline" size={16} color="#ffffff" />
@@ -324,6 +339,18 @@ export default function SearchScreen() {
             </AnimatedPressable>
           </Animated.View>
         ))
+      )}
+
+      {!promotionDismissed && !promotionLoading && promotion && (
+        <PromotionBanner
+          code={promotion.code}
+          discount={promotion.discount}
+          description={promotion.description}
+          expiresIn={promotion.expiresIn}
+          onDismiss={() => setPromotionDismissed(true)}
+          backgroundColor={promotion.backgroundColor || "#dc2626"}
+          icon={promotion.icon || "flame"}
+        />
       )}
     </ScrollView>
   );

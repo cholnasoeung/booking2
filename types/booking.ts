@@ -94,3 +94,14 @@ export type AuthUser = {
   role: UserRole;
   phone?: string;
 };
+
+export type Promotion = {
+  id: string;
+  code: string;
+  discount: number | string;
+  description: string;
+  expiresIn?: string;
+  isActive: boolean;
+  backgroundColor?: string;
+  icon?: string;
+};
