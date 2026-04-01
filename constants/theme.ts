@@ -51,3 +51,40 @@ export const Fonts = Platform.select({
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });
+
+/**
+ * Gradient color combinations for modern visual effects
+ * Each gradient is an array of two hex colors
+ */
+export const gradients = {
+  primary: ['#4f46e5', '#7c3aed'] as const,      // Indigo to violet
+  success: ['#10b981', '#059669'] as const,       // Emerald green
+  background: ['#f8f7ff', '#eef2ff'] as const,    // Subtle purple tint
+  danger: ['#ef4444', '#dc2626'] as const,        // Red gradients
+  warning: ['#f59e0b', '#d97706'] as const,      // Orange gradients
+};
+
+/**
+ * Glass morphism effect configurations
+ * Semi-transparent backgrounds with backdrop blur
+ */
+export const glass = {
+  light: {
+    background: 'rgba(255, 255, 255, 0.7)' as const,
+    border: 'rgba(255, 255, 255, 0.5)' as const,
+  },
+  dark: {
+    background: 'rgba(0, 0, 0, 0.5)' as const,
+    border: 'rgba(255, 255, 255, 0.1)' as const,
+  },
+};
+
+/**
+ * Shadow colors for soft, colored shadows
+ * Replaces harsh black shadows with colored tints
+ */
+export const shadowColors = {
+  primary: '#4f46e5',
+  success: '#10b981',
+  card: '#312e81',
+};
