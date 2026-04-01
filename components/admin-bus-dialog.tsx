@@ -77,6 +77,11 @@ export default function AdminBusDialog({
   const [busDetails, setBusDetails] = useState<BusDetailSummary[]>([]);
   const [busDetailsLoading, setBusDetailsLoading] = useState(false);
   const [busDetailsError, setBusDetailsError] = useState("");
+  const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+  const [templateSaveState, setTemplateSaveState] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
   const [form, setForm] = useState<BusFormState>(() => createFormState(routes, bus));
 
   useEffect(() => {
@@ -87,6 +92,8 @@ export default function AdminBusDialog({
     setForm(createFormState(routes, bus));
     setError("");
     setIsPending(false);
+    setIsSavingTemplate(false);
+    setTemplateSaveState(null);
   }, [bus, open, routes]);
 
   useEffect(() => {
@@ -172,6 +179,8 @@ export default function AdminBusDialog({
 
   const layoutValidation = getLayoutValidation(form.seatLayout, bus?.bookedSeats ?? []);
   const isEditing = Boolean(bus);
+  const selectedBusDetail =
+    busDetails.find((detail) => detail.id === form.busDetailId) ?? null;
 
   function addStop() {
     setForm((current) => {
@@ -216,6 +225,73 @@ export default function AdminBusDialog({
         )
       ),
     }));
+  }
+
+  async function saveSeatTemplate() {
+    if (!form.busDetailId) {
+      setTemplateSaveState({
+        type: "error",
+        text: "Select a vehicle above before saving a reusable seat template.",
+      });
+      return;
+    }
+
+    if (layoutValidation) {
+      setTemplateSaveState({
+        type: "error",
+        text: layoutValidation,
+      });
+      return;
+    }
+
+    setIsSavingTemplate(true);
+    setTemplateSaveState(null);
+
+    try {
+      const response = await fetch(`/api/admin/bus-details/${form.busDetailId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          busType: form.busType,
+          seatLayoutTemplate: form.seatLayout,
+        }),
+      });
+
+      const payload = (await response.json().catch(() => ({}))) as {
+        message?: string;
+        busDetail?: BusDetailSummary;
+      };
+
+      if (!response.ok || !payload.busDetail) {
+        setTemplateSaveState({
+          type: "error",
+          text: payload.message ?? "Unable to save the seat template right now.",
+        });
+        return;
+      }
+
+      setBusDetails((current) =>
+        current.map((detail) =>
+          detail.id === payload.busDetail?.id ? payload.busDetail : detail
+        )
+      );
+      setTemplateSaveState({
+        type: "success",
+        text:
+          payload.message ??
+          "Seat template saved. Future departures can reuse this layout.",
+      });
+      router.refresh();
+    } catch {
+      setTemplateSaveState({
+        type: "error",
+        text: "Unable to save the seat template right now.",
+      });
+    } finally {
+      setIsSavingTemplate(false);
+    }
   }
 
   async function submitBus(event: React.FormEvent<HTMLFormElement>) {
@@ -410,6 +486,7 @@ export default function AdminBusDialog({
               value={form.busDetailId}
               onValueChange={(value) => {
                 const selectedDetail = busDetails.find((detail) => detail.id === value);
+                setTemplateSaveState(null);
                 setForm((current) => {
                   if (!selectedDetail) {
                     return {
@@ -466,6 +543,7 @@ export default function AdminBusDialog({
                   }
 
                   const nextType = value;
+                  setTemplateSaveState(null);
                   setForm((current) => ({
                     ...current,
                     busType: nextType,
@@ -653,13 +731,31 @@ export default function AdminBusDialog({
 
           {/* Seat Layout Editor with Blocking */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-semibold">Seat Layout & Blocking</Label>
-              <div className="flex items-center gap-2 text-xs">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="space-y-1">
+                <Label className="text-sm font-semibold">Seat Layout & Blocking</Label>
+                <p className="text-xs text-muted-foreground">
+                  {selectedBusDetail
+                    ? `Saving updates the reusable layout for ${selectedBusDetail.name} (${selectedBusDetail.registrationNumber}).`
+                    : "Choose an assigned vehicle above if you want to save this layout as a reusable template."}
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 text-xs">
                 <div className="flex items-center gap-1">
                   <div className="h-3 w-3 rounded bg-red-200 border border-red-400" />
                   <span className="text-muted-foreground">Blocked</span>
                 </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-10 rounded-full"
+                  disabled={
+                    isSavingTemplate || !form.busDetailId || Boolean(layoutValidation)
+                  }
+                  onClick={saveSeatTemplate}
+                >
+                  {isSavingTemplate ? "Saving template..." : "Save as Vehicle Template"}
+                </Button>
               </div>
             </div>
             <div className="rounded-2xl border-2 border-dashed border-orange-300/50 bg-gradient-to-br from-orange-50/50 to-red-50/50 p-6">
@@ -682,6 +778,17 @@ export default function AdminBusDialog({
                 }
               />
             </div>
+            {templateSaveState ? (
+              <p
+                className={`rounded-xl border px-4 py-3 text-sm font-medium ${
+                  templateSaveState.type === "success"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-red-200 bg-red-50 text-red-700"
+                }`}
+              >
+                {templateSaveState.text}
+              </p>
+            ) : null}
           </div>
 
           {error ? (
@@ -721,7 +828,6 @@ export default function AdminBusDialog({
 
 function createFormState(routes: RouteSummary[], bus?: BusSummary | null): BusFormState {
   if (bus) {
-    const route = routes.find((current) => current.id === bus.routeId) ?? routes[0];
     return {
       routeId: bus.routeId,
       date: bus.travelDate,

@@ -71,13 +71,13 @@ export default function SeatSelection({
 
     setError("");
 
-    // Redirect to passenger details form with selected seats
     const seatsParam = selectedSeats.join(",");
     const params = new URLSearchParams({
       seats: seatsParam,
       boardingStop,
       droppingStop,
     });
+
     router.push(`/book/${bus.id}/passengers?${params.toString()}`);
   }
 
@@ -97,11 +97,36 @@ export default function SeatSelection({
             what&apos;s available, selected, and already taken.
           </p>
         </CardHeader>
+
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2 mb-4">
+          <div className="mb-4 flex flex-wrap gap-2">
+            <Badge
+              variant="outline"
+              className="rounded-full border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700"
+            >
+              {selectedSeats.length} selected
+            </Badge>
+            <Badge
+              variant="outline"
+              className="rounded-full border-amber-200 bg-amber-50 px-3 py-1 text-amber-800"
+            >
+              Up to {selectionLimit} seats
+            </Badge>
+            <Badge
+              variant="outline"
+              className="rounded-full border-slate-200 bg-white px-3 py-1 text-slate-700"
+            >
+              {formatCurrency(bus.pricePerSeat)} per seat
+            </Badge>
+          </div>
+
+          <div className="mb-4 grid gap-3 sm:grid-cols-2">
             <div>
               <p className="text-xs text-muted-foreground">Boarding stop</p>
-              <Select value={boardingStop} onValueChange={(value) => value && setBoardingStop(value)}>
+              <Select
+                value={boardingStop}
+                onValueChange={(value) => value && setBoardingStop(value)}
+              >
                 <SelectTrigger className="h-10 rounded-xl">
                   <SelectValue placeholder="Boarding stop" />
                 </SelectTrigger>
@@ -114,9 +139,13 @@ export default function SeatSelection({
                 </SelectContent>
               </Select>
             </div>
+
             <div>
               <p className="text-xs text-muted-foreground">Drop-off stop</p>
-              <Select value={droppingStop} onValueChange={(value) => value && setDroppingStop(value)}>
+              <Select
+                value={droppingStop}
+                onValueChange={(value) => value && setDroppingStop(value)}
+              >
                 <SelectTrigger className="h-10 rounded-xl">
                   <SelectValue placeholder="Drop-off stop" />
                 </SelectTrigger>
@@ -130,6 +159,7 @@ export default function SeatSelection({
               </Select>
             </div>
           </div>
+
           <SeatMap
             layout={bus.seatLayout}
             bookedSeats={bus.bookedSeats}
@@ -142,22 +172,57 @@ export default function SeatSelection({
       </Card>
 
       <Card className="border-white/60 bg-white/90 shadow-xl shadow-red-950/5">
-        <CardHeader>
+        <CardHeader className="space-y-1">
           <CardTitle>Booking summary</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Review your seats and trip details before moving to the passenger form.
+          </p>
         </CardHeader>
+
         <CardContent className="space-y-5">
-          <div className="rounded-3xl bg-secondary/70 p-4">
-            <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              Selected seats
-            </p>
-            <p className="mt-2 font-heading text-2xl font-semibold text-foreground">
-              {selectedSeats.length > 0 ? formatSeatList(selectedSeats) : "None yet"}
-            </p>
+          <div className="rounded-[28px] border border-amber-100 bg-gradient-to-br from-amber-50 via-orange-50 to-white p-4 shadow-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-amber-700/80">
+                  Selected seats
+                </p>
+                <p className="mt-1 text-sm text-slate-600">
+                  {selectedSeats.length > 0
+                    ? "Tap the map to add, remove, or swap seats anytime before continuing."
+                    : "Choose one or more open seats from the map to start your booking."}
+                </p>
+              </div>
+              <span className="rounded-full border border-white/80 bg-white/80 px-3 py-1 text-xs font-semibold text-amber-800 shadow-sm">
+                {selectedSeats.length}/{selectionLimit}
+              </span>
+            </div>
+
+            {selectedSeats.length > 0 ? (
+              <>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {selectedSeats.map((seatCode) => (
+                    <span
+                      key={seatCode}
+                      className="inline-flex items-center rounded-full border border-amber-200 bg-white px-3 py-1.5 text-sm font-semibold text-amber-900 shadow-sm"
+                    >
+                      {seatCode}
+                    </span>
+                  ))}
+                </div>
+                <p className="mt-3 text-sm font-medium text-slate-700">
+                  {formatSeatList(selectedSeats)}
+                </p>
+              </>
+            ) : null}
           </div>
 
-          <div className="rounded-xl bg-slate-50/60 px-4 py-3 text-xs text-slate-600">
-            <p>Boarding at {boardingStop}</p>
-            <p>Dropping at {droppingStop}</p>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-600">
+            <p>
+              <span className="font-medium text-slate-900">Boarding:</span> {boardingStop}
+            </p>
+            <p className="mt-1">
+              <span className="font-medium text-slate-900">Drop-off:</span> {droppingStop}
+            </p>
           </div>
 
           <div className="space-y-3 text-sm">
@@ -173,13 +238,17 @@ export default function SeatSelection({
               <span className="text-muted-foreground">Price per seat</span>
               <span className="font-medium">{formatCurrency(bus.pricePerSeat)}</span>
             </div>
-            {selectedSeats.length > 0 && (
+
+            {selectedSeats.length > 0 ? (
               <div className="rounded-xl bg-slate-100 px-3 py-2 text-xs text-slate-600">
-                Calculation: {selectedSeats.length} seat{selectedSeats.length > 1 ? "s" : ""} × {formatCurrency(bus.pricePerSeat)} = {formatCurrency(totalPrice)}
+                Calculation: {selectedSeats.length} seat
+                {selectedSeats.length > 1 ? "s" : ""} x {formatCurrency(bus.pricePerSeat)} ={" "}
+                {formatCurrency(totalPrice)}
               </div>
-            )}
+            ) : null}
+
             <div className="flex items-center justify-between border-t border-border pt-3">
-              <span className="text-muted-foreground font-medium">Total</span>
+              <span className="font-medium text-muted-foreground">Total</span>
               <span className="font-heading text-2xl font-semibold text-foreground">
                 {formatCurrency(totalPrice)}
               </span>
@@ -196,7 +265,7 @@ export default function SeatSelection({
             type="button"
             size="lg"
             disabled={selectedSeats.length === 0 || bus.seatsLeft === 0}
-            className="h-11 w-full rounded-2xl"
+            className="h-12 w-full rounded-2xl bg-gradient-to-r from-rose-500 via-red-500 to-orange-500 text-white shadow-lg shadow-rose-200 transition hover:brightness-105"
             onClick={proceedToPassengerDetails}
           >
             Continue to Passenger Details

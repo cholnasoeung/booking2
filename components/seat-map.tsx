@@ -31,22 +31,49 @@ type SeatMapProps = {
 
 type SeatState = "available" | "selected" | "booked" | "blocked";
 
-const legendItems: Array<{ label: string; className: string }> = [
+type LegendItem = {
+  label: string;
+  note: string;
+  dotClassName: string;
+  pillClassName: string;
+};
+
+type SeatTheme = {
+  shellClassName: string;
+  innerClassName: string;
+  baseClassName: string;
+  labelClassName: string;
+  chipClassName: string;
+  captionClassName: string;
+  accentClassName: string;
+  glowClassName: string;
+  statusLabel: string;
+};
+
+const legendItems: LegendItem[] = [
   {
     label: "Available",
-    className: "bg-white border-2 border-emerald-400",
+    note: "Open to book",
+    dotClassName: "bg-emerald-500 ring-emerald-100",
+    pillClassName: "border-emerald-200 bg-emerald-50 text-emerald-800",
   },
   {
     label: "Selected",
-    className: "bg-emerald-500 border-2 border-emerald-600",
+    note: "Added to trip",
+    dotClassName: "bg-amber-500 ring-amber-100",
+    pillClassName: "border-amber-200 bg-amber-50 text-amber-900",
   },
   {
     label: "Booked",
-    className: "bg-slate-200 border-2 border-slate-300",
+    note: "Already taken",
+    dotClassName: "bg-slate-400 ring-slate-200",
+    pillClassName: "border-slate-200 bg-slate-100 text-slate-700",
   },
   {
     label: "Blocked",
-    className: "bg-red-100 border-2 border-red-300",
+    note: "Temporarily unavailable",
+    dotClassName: "bg-rose-400 ring-rose-100",
+    pillClassName: "border-rose-200 bg-rose-50 text-rose-700",
   },
 ];
 
@@ -66,32 +93,90 @@ function SeatMap({
   const selectedSeatSet = new Set(selectedSeats.map(normalizeSeatCode));
   const blockedSeatSet = new Set(blockedSeats.map(normalizeSeatCode));
   const items = getSeatLayoutItems(layout);
+  const bookableSeatCodes = items
+    .filter((item) => isBookableItemKind(item.kind) && item.seatCode)
+    .map((item) => normalizeSeatCode(item.seatCode as string));
+  const openSeatCount = bookableSeatCodes.filter(
+    (seatCode) => !bookedSeatSet.has(seatCode) && !blockedSeatSet.has(seatCode)
+  ).length;
 
   return (
     <div className={cn("space-y-4", className)}>
       {showLegend ? (
-        <div className="flex flex-wrap items-center justify-center gap-5 text-sm text-muted-foreground rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/50 px-6 py-4 shadow-sm border border-slate-200/50">
-          {legendItems.map((item) => (
-            <div key={item.label} className="flex items-center gap-2.5">
-              <span className={cn("size-4 rounded-lg shadow-sm", item.className)} />
-              <span className="font-medium text-slate-700">{item.label}</span>
+        <div className="rounded-[28px] border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-amber-50/60 p-4 shadow-sm shadow-slate-200/70">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="space-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
+                Seat guide
+              </p>
+              <p className="text-sm text-slate-600">
+                Tap an open seat to add it to your trip, or tap again to remove it.
+              </p>
             </div>
-          ))}
+
+            <div className="flex flex-wrap gap-2">
+              <SeatStatePill
+                label={`${selectedSeats.length} selected`}
+                className="border-amber-200 bg-amber-50 text-amber-900"
+              />
+              <SeatStatePill
+                label={`${openSeatCount} open`}
+                className="border-emerald-200 bg-emerald-50 text-emerald-800"
+              />
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2.5">
+            {legendItems.map((item) => (
+              <div
+                key={item.label}
+                className={cn(
+                  "inline-flex items-center gap-3 rounded-full border px-3 py-2 shadow-sm",
+                  item.pillClassName
+                )}
+              >
+                <span
+                  className={cn(
+                    "size-3 rounded-full ring-4 shadow-sm",
+                    item.dotClassName
+                  )}
+                />
+                <span className="text-sm font-semibold">{item.label}</span>
+                <span className="text-xs opacity-75">{item.note}</span>
+              </div>
+            ))}
+          </div>
         </div>
       ) : null}
 
       <div className="overflow-x-auto">
-        <div className="mx-auto min-w-fit rounded-[40px] border-2 border-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 bg-gradient-to-br from-white via-slate-50/95 to-white p-5 shadow-2xl shadow-indigo-100/50 ring-4 ring-white/50 sm:p-7">
-          <div className="mb-6 flex items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 px-6 py-3 text-xs font-bold uppercase tracking-[0.32em] text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 shadow-inner">
-            <ArrowUp className="size-4 text-indigo-500" />
-            Front of Bus
+        <div className="relative mx-auto min-w-fit overflow-hidden rounded-[40px] border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-amber-50/30 p-5 shadow-[0_30px_70px_-45px_rgba(15,23,42,0.55)] ring-1 ring-white/70 sm:p-7">
+          <div className="pointer-events-none absolute left-10 top-5 h-20 w-40 rounded-full bg-amber-100/60 blur-3xl" />
+          <div className="pointer-events-none absolute bottom-6 right-8 h-24 w-48 rounded-full bg-sky-100/50 blur-3xl" />
+          <div className="pointer-events-none absolute inset-y-20 left-4 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent" />
+          <div className="pointer-events-none absolute inset-y-20 right-4 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent" />
+
+          <div className="relative mb-6 flex items-center justify-center">
+            <div className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white/80 px-6 py-3 shadow-sm backdrop-blur">
+              <span className="flex size-7 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+                <ArrowUp className="size-4" />
+              </span>
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-slate-500">
+                  Front of bus
+                </p>
+                <p className="text-xs text-slate-600">
+                  Driver cabin and entry point
+                </p>
+              </div>
+            </div>
           </div>
 
           <div
-            className="grid gap-4"
+            className="relative grid gap-4"
             style={{
-              gridTemplateColumns: `repeat(${layout.grid.cols}, minmax(${compact ? "54px" : "68px"}, 1fr))`,
-              gridAutoRows: compact ? "84px" : "92px",
+              gridTemplateColumns: `repeat(${layout.grid.cols}, minmax(${compact ? "56px" : "72px"}, 1fr))`,
+              gridAutoRows: compact ? "86px" : "98px",
             }}
           >
             {items.map((item) => (
@@ -149,6 +234,7 @@ const SeatMapCell = memo(function SeatMapCell({
   }
 
   const seatCode = normalizeSeatCode(item.seatCode);
+  const seatLabel = item.label ?? seatCode;
   const seatState: SeatState = blockedSeatSet.has(seatCode)
     ? "blocked"
     : bookedSeatSet.has(seatCode)
@@ -167,11 +253,12 @@ const SeatMapCell = memo(function SeatMapCell({
     <div style={style}>
       <button
         type="button"
+        aria-label={getSeatAriaLabel(seatLabel, seatState, isInteractive)}
         aria-pressed={seatState === "selected"}
         disabled={!isInteractive}
         className={cn(
-          "group h-full w-full text-left outline-none transition-transform duration-150",
-          isInteractive ? "hover:-translate-y-0.5" : "",
+          "group h-full w-full rounded-[28px] text-left outline-none transition duration-200 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2",
+          isInteractive ? "cursor-pointer hover:-translate-y-1" : "",
           disabled ? "cursor-not-allowed" : ""
         )}
         onClick={() => {
@@ -181,9 +268,9 @@ const SeatMapCell = memo(function SeatMapCell({
         }}
       >
         {item.kind === "sleeper" ? (
-          <SleeperSeat label={item.label ?? seatCode} state={seatState} compact={compact} />
+          <SleeperSeat label={seatLabel} state={seatState} compact={compact} />
         ) : (
-          <UprightSeat label={item.label ?? seatCode} state={seatState} compact={compact} />
+          <UprightSeat label={seatLabel} state={seatState} compact={compact} />
         )}
       </button>
     </div>
@@ -199,62 +286,72 @@ function UprightSeat({
   state: SeatState;
   compact: boolean;
 }) {
+  const theme = getSeatTheme(state);
+
   return (
     <div
       className={cn(
-        "relative flex h-full min-h-0 flex-col items-center justify-end overflow-hidden transition-all duration-200",
-        getSeatTone(state)
+        "relative flex h-full min-h-0 flex-col overflow-hidden rounded-[26px] border p-1.5 transition-all duration-200",
+        theme.shellClassName,
+        theme.glowClassName
       )}
     >
-      {/* Seat back/top section */}
-      <div className="relative w-full flex-1 flex items-center justify-center rounded-t-xl border-2 border-b-0 px-2 pt-2 pb-1 transition-all duration-200" style={{
-        background: state === 'blocked'
-          ? 'linear-gradient(180deg, rgba(254, 202, 202, 0.8), rgba(248, 113, 113, 0.5))'
-          : state === 'booked'
-          ? 'linear-gradient(180deg, rgba(203, 213, 225, 0.8), rgba(148, 163, 184, 0.5))'
-          : state === 'selected'
-          ? 'linear-gradient(180deg, rgba(253, 230, 138, 0.9), rgba(251, 191, 36, 0.6))'
-          : 'linear-gradient(180deg, rgba(110, 231, 183, 0.9), rgba(16, 185, 129, 0.6))',
-        borderColor: state === 'blocked'
-          ? 'rgba(248, 113, 113, 0.6)'
-          : state === 'booked'
-          ? 'rgba(148, 163, 184, 0.6)'
-          : state === 'selected'
-          ? 'rgba(251, 191, 36, 0.6)'
-          : 'rgba(16, 185, 129, 0.6)',
-      }}>
-        {/* Seat label */}
-        <span className={cn(
-          "relative z-10 font-bold tracking-tight",
-          compact ? "text-xs" : "text-sm",
-          state === 'blocked' ? "text-red-800" : state === 'booked' ? "text-slate-700" : state === 'selected' ? "text-amber-800" : "text-emerald-800"
-        )}>
+      <SeatPatternOverlay state={state} />
+      <div className="pointer-events-none absolute inset-x-4 top-2 h-10 rounded-full bg-white/60 blur-xl" />
+
+      <div
+        className={cn(
+          "relative flex min-h-0 flex-1 flex-col items-center justify-center rounded-[20px] border px-2 pb-2 pt-3 text-center",
+          theme.innerClassName
+        )}
+      >
+        <div
+          className={cn(
+            "absolute left-1/2 top-2 h-2.5 w-10 -translate-x-1/2 rounded-full bg-white/80 shadow-sm",
+            compact ? "w-8" : "w-10"
+          )}
+        />
+        <span
+          className={cn(
+            "absolute right-2.5 top-2.5 size-2.5 rounded-full ring-4 ring-white/60",
+            theme.chipClassName
+          )}
+        />
+        <span
+          className={cn(
+            "relative z-10 font-semibold tracking-tight",
+            compact ? "text-xs" : "text-sm",
+            theme.labelClassName
+          )}
+        >
           {label}
         </span>
-
-        {/* Headrest curve highlight */}
-        <div className="absolute top-1 left-1/2 -translate-x-1/2 w-8 h-3 rounded-t-full opacity-30 bg-white" />
+        {!compact ? (
+          <span
+            className={cn(
+              "mt-2 text-[10px] font-semibold uppercase tracking-[0.24em]",
+              theme.captionClassName
+            )}
+          >
+            {theme.statusLabel}
+          </span>
+        ) : null}
       </div>
 
-      {/* Seat cushion/bottom section */}
-      <div className="relative w-full h-[40%] rounded-b-xl border-2 border-t-0 transition-all duration-200" style={{
-        background: state === 'blocked'
-          ? 'linear-gradient(180deg, rgba(248, 113, 113, 0.6), rgba(254, 202, 202, 0.4))'
-          : state === 'booked'
-          ? 'linear-gradient(180deg, rgba(148, 163, 184, 0.6), rgba(203, 213, 225, 0.4))'
-          : state === 'selected'
-          ? 'linear-gradient(180deg, rgba(251, 191, 36, 0.7), rgba(253, 230, 138, 0.5))'
-          : 'linear-gradient(180deg, rgba(16, 185, 129, 0.7), rgba(110, 231, 183, 0.5))',
-        borderColor: state === 'blocked'
-          ? 'rgba(248, 113, 113, 0.5)'
-          : state === 'booked'
-          ? 'rgba(148, 163, 184, 0.5)'
-          : state === 'selected'
-          ? 'rgba(251, 191, 36, 0.5)'
-          : 'rgba(16, 185, 129, 0.5)',
-      }}>
-        {/* Cushion highlight */}
-        <div className="absolute inset-x-1 top-0.5 h-1 rounded-full opacity-40 bg-white" />
+      <div
+        className={cn(
+          "relative mt-1.5 min-h-[18px] rounded-[14px] border",
+          compact ? "h-[22%]" : "h-[24%]",
+          theme.baseClassName
+        )}
+      >
+        <div className="absolute inset-x-2 top-1 h-1 rounded-full bg-white/60" />
+        <div
+          className={cn(
+            "absolute bottom-1 left-1/2 h-1.5 w-8 -translate-x-1/2 rounded-full",
+            theme.accentClassName
+          )}
+        />
       </div>
     </div>
   );
@@ -269,49 +366,58 @@ function SleeperSeat({
   state: SeatState;
   compact: boolean;
 }) {
+  const theme = getSeatTheme(state);
+
   return (
     <div
       className={cn(
-        "relative flex h-full min-h-0 flex-col items-center justify-between overflow-hidden rounded-2xl border-2 transition-all duration-200",
-        state === 'available' && "bg-white border-emerald-400 hover:border-emerald-500 hover:shadow-md",
-        state === 'selected' && "bg-emerald-500 border-emerald-600 shadow-lg",
-        state === 'booked' && "bg-slate-200 border-slate-300 cursor-not-allowed opacity-70",
-        state === 'blocked' && "bg-red-100 border-red-300 cursor-not-allowed opacity-80",
-        compact ? "py-2.5" : "py-3"
+        "relative flex h-full min-h-0 flex-col overflow-hidden rounded-[24px] border p-2 transition-all duration-200",
+        theme.shellClassName,
+        theme.glowClassName
       )}
     >
-      {/* Seat number at top */}
-      <div className="relative z-10 flex-1 flex items-center justify-center px-2">
-        <span className={cn(
-          "font-bold tracking-tight",
-          compact ? "text-sm" : "text-base",
-          state === 'selected' ? "text-white" : state === 'booked' ? "text-slate-500" : state === 'blocked' ? "text-red-700" : "text-emerald-700"
-        )}>
+      <SeatPatternOverlay state={state} />
+      <div className="pointer-events-none absolute inset-x-4 top-3 h-10 rounded-full bg-white/55 blur-xl" />
+
+      <div
+        className={cn(
+          "relative flex min-h-0 flex-1 flex-col items-center justify-center rounded-[18px] border px-2 py-3 text-center",
+          theme.innerClassName
+        )}
+      >
+        <span
+          className={cn(
+            "absolute right-2.5 top-2.5 size-2.5 rounded-full ring-4 ring-white/60",
+            theme.chipClassName
+          )}
+        />
+        <span
+          className={cn(
+            "relative z-10 font-semibold tracking-tight",
+            compact ? "text-sm" : "text-base",
+            theme.labelClassName
+          )}
+        >
           {label}
+        </span>
+        <span
+          className={cn(
+            "mt-2 text-[10px] font-semibold uppercase tracking-[0.24em]",
+            theme.captionClassName
+          )}
+        >
+          {theme.statusLabel}
         </span>
       </div>
 
-      {/* Pillow/blanket indicator at bottom */}
-      <div className={cn(
-        "w-full h-3 rounded-b-xl flex items-center justify-center",
-        state === 'selected' && "bg-emerald-600",
-        state === 'available' && "bg-emerald-100",
-        state === 'booked' && "bg-slate-300",
-        state === 'blocked' && "bg-red-200"
-      )}>
-        <div className={cn(
-          "w-8 h-1.5 rounded-full",
-          state === 'selected' && "bg-white/50",
-          state === 'available' && "bg-emerald-400",
-          state === 'booked' && "bg-slate-400",
-          state === 'blocked' && "bg-red-400"
-        )} />
+      <div
+        className={cn(
+          "relative mt-2 flex h-4 items-center justify-center rounded-full border",
+          theme.baseClassName
+        )}
+      >
+        <div className="h-1.5 w-10 rounded-full bg-white/65" />
       </div>
-
-      {/* Subtle top highlight for available seats */}
-      {state === 'available' && (
-        <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-emerald-50/60 to-transparent rounded-t-2xl" />
-      )}
     </div>
   );
 }
@@ -326,16 +432,16 @@ function StaticLayoutItem({
   switch (item.kind) {
     case "aisle":
       return (
-        <div className="relative h-full min-h-0">
-          <span className="absolute left-1/2 top-2 bottom-2 w-0.5 -translate-x-1/2 bg-gradient-to-b from-transparent via-slate-200 to-transparent" />
-          <span className="absolute left-1/2 top-2 bottom-2 w-px -translate-x-1/2 border-l-2 border-dashed border-slate-300/60" />
+        <div className="relative h-full min-h-0 rounded-[22px] bg-gradient-to-b from-transparent via-white/60 to-transparent">
+          <span className="absolute left-1/2 top-3 bottom-3 w-px -translate-x-1/2 bg-slate-200" />
+          <span className="absolute left-1/2 top-4 bottom-4 w-px -translate-x-1/2 border-l-2 border-dashed border-slate-300/70" />
         </div>
       );
     case "driver":
       return (
         <DecorativeBlock
           compact={compact}
-          className="border-sky-300 bg-gradient-to-br from-sky-50 to-sky-100/50 text-sky-700 shadow-sky-200/50 shadow-md"
+          className="border-sky-200 bg-gradient-to-br from-sky-50 via-white to-sky-100/70 text-sky-800 shadow-[0_16px_32px_-22px_rgba(14,165,233,0.75)]"
           eyebrow="Cabin"
           label={item.label ?? "Driver"}
         />
@@ -344,18 +450,20 @@ function StaticLayoutItem({
       return (
         <DecorativeBlock
           compact={compact}
-          className="border-amber-300 bg-gradient-to-br from-amber-50 to-amber-100/50 text-amber-800 shadow-amber-200/50 shadow-md"
+          className="border-amber-200 bg-gradient-to-br from-amber-50 via-white to-orange-100/70 text-amber-900 shadow-[0_16px_32px_-22px_rgba(251,191,36,0.65)]"
           eyebrow="Utility"
           label={item.label ?? "WC"}
         />
       );
     case "empty":
-      return <div className="h-full min-h-0 rounded-2xl border-2 border-transparent bg-slate-50/30" />;
+      return (
+        <div className="h-full min-h-0 rounded-[22px] border border-dashed border-slate-200 bg-white/50" />
+      );
     default:
       return (
         <DecorativeBlock
           compact={compact}
-          className="border-slate-300 bg-gradient-to-br from-slate-100 to-slate-200/50 text-slate-600 shadow-slate-200/50 shadow-md"
+          className="border-slate-200 bg-gradient-to-br from-slate-100 via-white to-slate-200/70 text-slate-700 shadow-[0_16px_32px_-24px_rgba(100,116,139,0.55)]"
           eyebrow="Zone"
           label={item.label ?? item.kind}
         />
@@ -377,42 +485,150 @@ function DecorativeBlock({
   return (
     <div
       className={cn(
-        "relative flex h-full min-h-0 items-center justify-center rounded-2xl border-2 text-center shadow-md overflow-hidden transition-all duration-200",
+        "relative flex h-full min-h-0 items-center justify-center overflow-hidden rounded-[24px] border px-3 py-3 text-center shadow-sm",
         compact ? "px-2 py-2" : "px-3 py-3",
         className
       )}
     >
-      {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-white/20 opacity-60" />
-
+      <div className="absolute inset-0 bg-gradient-to-br from-white/55 via-transparent to-white/15" />
       <div className="relative z-10">
-        <p className={cn(
-          "text-[9px] uppercase tracking-[0.28em] font-medium opacity-80",
-          compact ? "text-[8px]" : "text-[9px]"
-        )}>
+        <p
+          className={cn(
+            "text-[9px] font-semibold uppercase tracking-[0.28em] opacity-75",
+            compact ? "text-[8px]" : "text-[9px]"
+          )}
+        >
           {eyebrow}
         </p>
-        <p className={cn("font-bold tracking-tight", compact ? "text-xs" : "text-sm")}>{label}</p>
+        <p className={cn("mt-1 font-semibold tracking-tight", compact ? "text-xs" : "text-sm")}>
+          {label}
+        </p>
       </div>
-
-      {/* Decorative border effect */}
-      <div className="absolute inset-x-1.5 bottom-1.5 h-px bg-current/10" />
     </div>
   );
 }
 
-function getSeatTone(state: SeatState) {
+function SeatPatternOverlay({ state }: { state: SeatState }) {
+  const patternStyle = getSeatPatternStyle(state);
+
+  if (!patternStyle) {
+    return null;
+  }
+
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 opacity-60"
+      style={patternStyle}
+    />
+  );
+}
+
+function getSeatTheme(state: SeatState): SeatTheme {
   switch (state) {
     case "selected":
-      return "shadow-md shadow-amber-200/40 hover:shadow-lg hover:shadow-amber-300/50";
+      return {
+        shellClassName:
+          "border-amber-300 bg-gradient-to-b from-amber-50 via-white to-orange-100/80 ring-2 ring-amber-200/80",
+        innerClassName:
+          "border-white/90 bg-gradient-to-b from-white/80 to-amber-50/80",
+        baseClassName:
+          "border-amber-300/80 bg-gradient-to-r from-amber-200 to-orange-200",
+        labelClassName: "text-amber-950",
+        chipClassName: "bg-amber-500",
+        captionClassName: "text-amber-700",
+        accentClassName: "bg-amber-500/70",
+        glowClassName:
+          "shadow-[0_18px_40px_-24px_rgba(245,158,11,0.85)]",
+        statusLabel: "Chosen",
+      };
     case "booked":
-      return "shadow-sm shadow-slate-200/40";
+      return {
+        shellClassName:
+          "border-slate-200 bg-gradient-to-b from-slate-100 via-slate-50 to-slate-200/75",
+        innerClassName:
+          "border-white/70 bg-gradient-to-b from-slate-50 to-slate-100/80",
+        baseClassName:
+          "border-slate-300/80 bg-gradient-to-r from-slate-300 to-slate-200",
+        labelClassName: "text-slate-600",
+        chipClassName: "bg-slate-400",
+        captionClassName: "text-slate-500",
+        accentClassName: "bg-slate-400/70",
+        glowClassName:
+          "shadow-[0_16px_32px_-26px_rgba(148,163,184,0.9)]",
+        statusLabel: "Taken",
+      };
     case "blocked":
-      return "shadow-sm shadow-red-200/40";
+      return {
+        shellClassName:
+          "border-rose-200 bg-gradient-to-b from-rose-50 via-white to-rose-100/80",
+        innerClassName:
+          "border-white/80 bg-gradient-to-b from-white/85 to-rose-50/80",
+        baseClassName:
+          "border-rose-200/80 bg-gradient-to-r from-rose-200 to-rose-100",
+        labelClassName: "text-rose-800",
+        chipClassName: "bg-rose-400",
+        captionClassName: "text-rose-700",
+        accentClassName: "bg-rose-400/65",
+        glowClassName:
+          "shadow-[0_16px_32px_-26px_rgba(244,63,94,0.6)]",
+        statusLabel: "Blocked",
+      };
     case "available":
     default:
-      return "shadow-md shadow-emerald-200/40 hover:shadow-lg hover:shadow-emerald-300/50 hover:-translate-y-0.5";
+      return {
+        shellClassName:
+          "border-emerald-200 bg-gradient-to-b from-white via-emerald-50/90 to-emerald-100/85",
+        innerClassName:
+          "border-white/90 bg-gradient-to-b from-white/90 to-emerald-50/75",
+        baseClassName:
+          "border-emerald-200/80 bg-gradient-to-r from-emerald-200 to-emerald-100",
+        labelClassName: "text-emerald-950",
+        chipClassName: "bg-emerald-500",
+        captionClassName: "text-emerald-700",
+        accentClassName: "bg-emerald-500/70",
+        glowClassName:
+          "shadow-[0_18px_40px_-24px_rgba(16,185,129,0.7)]",
+        statusLabel: "Tap",
+      };
   }
+}
+
+function getSeatPatternStyle(state: SeatState): CSSProperties | undefined {
+  switch (state) {
+    case "booked":
+      return {
+        backgroundImage:
+          "repeating-linear-gradient(135deg, rgba(148,163,184,0.12) 0px, rgba(148,163,184,0.12) 8px, rgba(255,255,255,0) 8px, rgba(255,255,255,0) 16px)",
+      };
+    case "blocked":
+      return {
+        backgroundImage:
+          "repeating-linear-gradient(135deg, rgba(244,63,94,0.12) 0px, rgba(244,63,94,0.12) 8px, rgba(255,255,255,0) 8px, rgba(255,255,255,0) 16px)",
+      };
+    default:
+      return undefined;
+  }
+}
+
+function getSeatAriaLabel(
+  label: string,
+  state: SeatState,
+  isInteractive: boolean
+) {
+  if (state === "selected") {
+    return `Deselect seat ${label}`;
+  }
+
+  if (state === "booked") {
+    return `Seat ${label} is already booked`;
+  }
+
+  if (state === "blocked" && !isInteractive) {
+    return `Seat ${label} is blocked`;
+  }
+
+  return `Select seat ${label}`;
 }
 
 export function SeatMapLegend({
@@ -421,11 +637,27 @@ export function SeatMapLegend({
   className?: string;
 }) {
   return (
-    <div className={cn("flex flex-wrap items-center justify-center gap-5 text-sm rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/50 px-6 py-4 shadow-sm border border-slate-200/50", className)}>
+    <div
+      className={cn(
+        "flex flex-wrap gap-2.5 rounded-[24px] border border-slate-200 bg-white/90 p-4 shadow-sm",
+        className
+      )}
+    >
       {legendItems.map((item) => (
-        <div key={item.label} className="flex items-center gap-2.5">
-          <span className={cn("size-4 rounded-lg shadow-sm", item.className)} />
-          <span className="font-medium text-slate-700">{item.label}</span>
+        <div
+          key={item.label}
+          className={cn(
+            "inline-flex items-center gap-3 rounded-full border px-3 py-2 shadow-sm",
+            item.pillClassName
+          )}
+        >
+          <span
+            className={cn(
+              "size-3 rounded-full ring-4 shadow-sm",
+              item.dotClassName
+            )}
+          />
+          <span className="text-sm font-semibold">{item.label}</span>
         </div>
       ))}
     </div>
@@ -444,7 +676,7 @@ export function SeatStatePill({
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium",
+        "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-sm",
         className
       )}
     >
