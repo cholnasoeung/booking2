@@ -148,7 +148,6 @@ const BookingSchema = new Schema<IBooking>(
 BookingSchema.index({ user: 1, createdAt: -1 });
 BookingSchema.index({ bus: 1, status: 1 });
 BookingSchema.index({ status: 1, createdAt: -1 });
-BookingSchema.index({ promoCode: 1 });
 
 // Method to cancel booking with refund calculation
 BookingSchema.methods.cancel = async function(reason: string) {

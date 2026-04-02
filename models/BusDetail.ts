@@ -55,8 +55,6 @@ const BusDetailSchema = new Schema<IBusDetail>(
   }
 );
 
-BusDetailSchema.index({ registrationNumber: 1 });
-
 const BusDetailModel =
   (mongoose.models.BusDetail as mongoose.Model<IBusDetail>) ||
   mongoose.model<IBusDetail>("BusDetail", BusDetailSchema);
