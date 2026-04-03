@@ -57,9 +57,10 @@ export async function GET(
     );
 
     const pdfBuffer = await generateTicketPDF(ticketData);
+    const pdfBytes = new Uint8Array(pdfBuffer);
 
     // Return PDF as downloadable file
-    return new Response(pdfBuffer, {
+    return new Response(pdfBytes, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="ticket-${id}.pdf"`,

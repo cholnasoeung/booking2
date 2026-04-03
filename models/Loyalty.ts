@@ -34,8 +34,17 @@ export interface ILoyalty extends Document {
     consecutiveBookings: number;
     referralCount: number;
   };
+  calculateTier(points: number): LoyaltyTier;
+  checkAndUpdateTier(): Promise<ILoyalty>;
+  addPoints(points: number, description: string, bookingId?: string): Promise<ILoyalty>;
+  redeemPoints(points: number, description: string): Promise<ILoyalty>;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface LoyaltyModel extends mongoose.Model<ILoyalty> {
+  getOrCreate(userId: string): Promise<ILoyalty>;
+  processBooking(userId: string, bookingAmount: number, bookingId: string): Promise<ILoyalty>;
 }
 
 // Tier configurations
@@ -86,7 +95,7 @@ export const LOYALTY_TIERS: Record<LoyaltyTier, { name: string; points: number; 
   },
 };
 
-const LoyaltySchema = new Schema<ILoyalty>(
+const LoyaltySchema = new Schema<ILoyalty, LoyaltyModel>(
   {
     user: {
       type: Schema.Types.ObjectId,
@@ -160,6 +169,7 @@ LoyaltySchema.index({ tier: 1, points: -1 });
 
 // Instance method to add points
 LoyaltySchema.methods.addPoints = async function(
+  this: ILoyalty,
   points: number,
   description: string,
   bookingId?: string
@@ -173,7 +183,7 @@ LoyaltySchema.methods.addPoints = async function(
     points,
     type: "earned",
     description,
-    bookingId,
+    bookingId: bookingId ? new mongoose.Types.ObjectId(bookingId) : undefined,
     expiresAt: pointsExpiresAt,
     createdAt: new Date(),
   });
@@ -186,6 +196,7 @@ LoyaltySchema.methods.addPoints = async function(
 
 // Instance method to redeem points
 LoyaltySchema.methods.redeemPoints = async function(
+  this: ILoyalty,
   points: number,
   description: string
 ) {
@@ -207,7 +218,7 @@ LoyaltySchema.methods.redeemPoints = async function(
 };
 
 // Instance method to check and update tier
-LoyaltySchema.methods.checkAndUpdateTier = async function() {
+LoyaltySchema.methods.checkAndUpdateTier = async function(this: ILoyalty) {
   const newTier = this.calculateTier(this.lifetimePoints);
 
   if (newTier !== this.tier) {
@@ -240,7 +251,7 @@ LoyaltySchema.methods.checkAndUpdateTier = async function() {
 };
 
 // Helper method to calculate tier from points
-LoyaltySchema.methods.calculateTier = function(points: number): LoyaltyTier {
+LoyaltySchema.methods.calculateTier = function(this: ILoyalty, points: number): LoyaltyTier {
   if (points >= LOYALTY_TIERS.platinum.points) return "platinum";
   if (points >= LOYALTY_TIERS.gold.points) return "gold";
   if (points >= LOYALTY_TIERS.silver.points) return "silver";
@@ -248,7 +259,7 @@ LoyaltySchema.methods.calculateTier = function(points: number): LoyaltyTier {
 };
 
 // Static method to get or create loyalty account
-LoyaltySchema.statics.getOrCreate = async function(userId: string) {
+LoyaltySchema.statics.getOrCreate = async function(this: LoyaltyModel, userId: string) {
   let loyalty = await this.findOne({ user: userId });
 
   if (!loyalty) {
@@ -266,6 +277,7 @@ LoyaltySchema.statics.getOrCreate = async function(userId: string) {
 
 // Static method to process booking and award points
 LoyaltySchema.statics.processBooking = async function(
+  this: LoyaltyModel,
   userId: string,
   bookingAmount: number,
   bookingId: string
@@ -291,7 +303,7 @@ LoyaltySchema.statics.processBooking = async function(
 };
 
 const LoyaltyModel =
-  (mongoose.models.Loyalty as mongoose.Model<ILoyalty>) ||
-  mongoose.model<ILoyalty>("Loyalty", LoyaltySchema);
+  (mongoose.models.Loyalty as LoyaltyModel) ||
+  mongoose.model<ILoyalty, LoyaltyModel>("Loyalty", LoyaltySchema);
 
 export default LoyaltyModel;

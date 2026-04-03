@@ -1,7 +1,7 @@
 import { compare } from "bcryptjs";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
-import type { NextAuthOptions } from "next-auth";
+import type { NextAuthOptions, Session } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 import { connectToDatabase } from "@/lib/mongodb";
@@ -85,26 +85,32 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-export async function getCurrentSession() {
+export async function getCurrentSession(): Promise<Session | null> {
   return getServerSession(authOptions);
 }
 
-export async function getCurrentUser() {
+export type User = Session["user"] & {
+  address?: string;
+  createdAt?: string;
+};
+
+export async function getCurrentUser(): Promise<User | null> {
   const session = await getCurrentSession();
   return session?.user ?? null;
 }
 
-export async function requireUser(redirectTo = "/login") {
+export async function requireUser(redirectTo = "/login"): Promise<User> {
   const session = await getCurrentSession();
+  const user = session?.user;
 
-  if (!session?.user?.id) {
+  if (!user?.id) {
     redirect(redirectTo);
   }
 
-  return session.user;
+  return user;
 }
 
-export async function requireAdmin(redirectTo = "/") {
+export async function requireAdmin(redirectTo = "/"): Promise<User> {
   const user = await requireUser("/login");
 
   if (user.role !== "admin") {

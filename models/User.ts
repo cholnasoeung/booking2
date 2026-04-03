@@ -163,7 +163,7 @@ UserSchema.methods.addSavedPassenger = function(passenger: ISavedPassenger) {
 
   // Check for duplicate
   const isDuplicate = this.savedPassengers.some(
-    p => p.name === passenger.name && p.contactNumber === passenger.contactNumber
+    (p: ISavedPassenger) => p.name === passenger.name && p.contactNumber === passenger.contactNumber
   );
 
   if (isDuplicate) {

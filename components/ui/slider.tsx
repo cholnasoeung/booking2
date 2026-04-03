@@ -3,11 +3,13 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
+const DEFAULT_SLIDER_VALUE: [number, number] = [0, 100];
+
 const Slider = React.forwardRef<
   React.ElementRef<"div">,
   React.ComponentProps<"div"> & {
-    value?: number[];
-    onValueChange?: (value: number[]) => void;
+    value?: [number, number];
+    onValueChange?: (value: [number, number]) => void;
     min?: number;
     max?: number;
     step?: number;
@@ -15,7 +17,7 @@ const Slider = React.forwardRef<
   }
 >(
   (
-    { className, value = [0, 100], onValueChange, min = 0, max = 100, step = 1, disabled = false, ...props },
+    { className, value = DEFAULT_SLIDER_VALUE, onValueChange, min = 0, max = 100, step = 1, disabled = false, ...props },
     ref
   ) => {
     const percentage = (value[0] - min) / (max - min) * 100;

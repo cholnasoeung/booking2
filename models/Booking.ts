@@ -1,4 +1,6 @@
 import mongoose, { type Document, Schema } from "mongoose";
+import BusModel, { type IBus } from "@/models/Bus";
+import PromoCodeModel from "@/models/PromoCode";
 
 export type BookingStatus = "pending" | "confirmed" | "cancelled" | "refunded";
 export type PaymentStatus = "pending" | "paid" | "refunded" | "failed";
@@ -28,6 +30,7 @@ export interface IBooking extends Document {
   cancellationReason?: string;
   refundAmount?: number;
   refundStatus?: RefundStatus;
+  cancel(reason: string): Promise<IBooking>;
   metadata: {
     ipAddress?: string;
     userAgent?: string;
@@ -188,10 +191,13 @@ BookingSchema.methods.cancel = async function(reason: string) {
 
   await this.save();
 
-  // Increment promo code usage if applicable
+  // Decrement promo code usage if applicable
   if (this.promoCode) {
-    const PromoCode = mongoose.model("PromoCode");
-    await PromoCode.incrementUsage?.(this.promoCode);
+    const promo = await PromoCodeModel.findOne({ code: this.promoCode }).exec();
+    if (promo && promo.usedCount > 0) {
+      promo.usedCount -= 1;
+      await promo.save();
+    }
   }
 
   return this;
@@ -199,18 +205,17 @@ BookingSchema.methods.cancel = async function(reason: string) {
 
 // Static method to check real-time seat availability
 BookingSchema.statics.checkSeatAvailability = async function(busId: string, seats: string[]) {
-  const Bus = mongoose.model("Bus");
-  const bus = await Bus.findById(busId).lean();
+  const bus = (await BusModel.findById(busId).lean()) as IBus | null;
 
   if (!bus) {
     throw new Error("Bus not found");
   }
 
   // Get all booked seats from confirmed/pending bookings
-  const bookedBookings = await this.find({
+  const bookedBookings = (await this.find({
     bus: busId,
     status: { $in: ["confirmed", "pending"] },
-  }).select("seats");
+  }).select("seats")) as Pick<IBooking, "seats">[];
 
   const bookedSeats = bookedBookings.flatMap(b => b.seats);
   const blockedSeats = bus.blockedSeats || [];
@@ -226,8 +231,17 @@ BookingSchema.statics.checkSeatAvailability = async function(busId: string, seat
   };
 };
 
+export interface BookingModelStatic extends mongoose.Model<IBooking> {
+  checkSeatAvailability(busId: string, seats: string[]): Promise<{
+    available: boolean;
+    requestedSeats: string[];
+    availableSeats: string[];
+    unavailableSeats: string[];
+  }>;
+}
+
 const BookingModel =
-  (mongoose.models.Booking as mongoose.Model<IBooking>) ||
-  mongoose.model<IBooking>("Booking", BookingSchema);
+  (mongoose.models.Booking as BookingModelStatic) ||
+  mongoose.model<IBooking, BookingModelStatic>("Booking", BookingSchema);
 
 export default BookingModel;

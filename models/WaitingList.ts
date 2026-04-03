@@ -21,7 +21,25 @@ export interface IWaitingList extends Document {
   updatedAt: Date;
 }
 
-const WaitingListSchema = new Schema<IWaitingList>(
+export interface WaitingListEntryData {
+  userId: string;
+  busId: string;
+  routeId: string;
+  requestedSeats: number;
+  requestedDate: string;
+  requestedDepartureTime: string;
+  expiresAt?: Date;
+  priority?: number;
+}
+
+export interface WaitingListModelStatic extends mongoose.Model<IWaitingList> {
+  addToWaitingList(data: WaitingListEntryData): Promise<IWaitingList>;
+  getNextInLine(busId: string, seatsAvailable: number): Promise<IWaitingList[]>;
+  notifyUsers(busId: string, seatsAvailable: number): Promise<any[]>;
+  expireOldNotifications(): Promise<mongoose.UpdateWriteOpResult>;
+}
+
+const WaitingListSchema = new Schema<IWaitingList, WaitingListModelStatic>(
   {
     user: {
       type: Schema.Types.ObjectId,
@@ -91,16 +109,10 @@ WaitingListSchema.index({ user: 1, status: 1 });
 WaitingListSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 // Static method to add to waiting list
-WaitingListSchema.statics.addToWaitingList = async function(data: {
-  userId: string;
-  busId: string;
-  routeId: string;
-  requestedSeats: number;
-  requestedDate: string;
-  requestedDepartureTime: string;
-  expiresAt?: Date;
-  priority?: number;
-}) {
+WaitingListSchema.statics.addToWaitingList = async function(
+  this: WaitingListModelStatic,
+  data: WaitingListEntryData
+) {
   const expiresAt = data.expiresAt || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days default
 
   const entry = await this.create({
@@ -118,7 +130,11 @@ WaitingListSchema.statics.addToWaitingList = async function(data: {
 };
 
 // Static method to get next in line for a bus
-WaitingListSchema.statics.getNextInLine = async function(busId: string, seatsAvailable: number) {
+WaitingListSchema.statics.getNextInLine = async function(
+  this: WaitingListModelStatic,
+  busId: string,
+  seatsAvailable: number
+) {
   const entries = await this.find({
     bus: busId,
     status: "active",
@@ -133,7 +149,11 @@ WaitingListSchema.statics.getNextInLine = async function(busId: string, seatsAva
 };
 
 // Static method to notify waiting list users
-WaitingListSchema.statics.notifyUsers = async function(busId: string, seatsAvailable: number) {
+WaitingListSchema.statics.notifyUsers = async function(
+  this: WaitingListModelStatic,
+  busId: string,
+  seatsAvailable: number
+) {
   const usersToNotify = await this.getNextInLine(busId, seatsAvailable);
   const notified = [];
 
@@ -160,7 +180,9 @@ WaitingListSchema.statics.notifyUsers = async function(busId: string, seatsAvail
 };
 
 // Static method to expire old notifications
-WaitingListSchema.statics.expireOldNotifications = async function() {
+WaitingListSchema.statics.expireOldNotifications = async function(
+  this: WaitingListModelStatic
+) {
   const expired = await this.updateMany(
     {
       status: "notified",
@@ -175,7 +197,7 @@ WaitingListSchema.statics.expireOldNotifications = async function() {
 };
 
 const WaitingListModel =
-  (mongoose.models.WaitingList as mongoose.Model<IWaitingList>) ||
-  mongoose.model<IWaitingList>("WaitingList", WaitingListSchema);
+  (mongoose.models.WaitingList as WaitingListModelStatic) ||
+  mongoose.model<IWaitingList, WaitingListModelStatic>("WaitingList", WaitingListSchema);
 
 export default WaitingListModel;

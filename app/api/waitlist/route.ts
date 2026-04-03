@@ -2,6 +2,14 @@ import { getCurrentSession } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import { isValidObjectId } from "@/lib/validation";
 import WaitingListModel from "@/models/WaitingList";
+import LoyaltyModel, { type LoyaltyTier } from "@/models/Loyalty";
+
+const TIER_PRIORITY: Record<LoyaltyTier, number> = {
+  bronze: 1,
+  silver: 2,
+  gold: 3,
+  platinum: 4,
+};
 
 export const runtime = "nodejs";
 
@@ -79,9 +87,8 @@ export async function POST(request: Request) {
     }
 
     // Get user loyalty tier for priority
-    const Loyalty = require("@/models/Loyalty").default;
-    const loyalty = await Loyalty.findOne({ user: session.user.id });
-    const priority = loyalty ? { bronze: 1, silver: 2, gold: 3, platinum: 4 }[loyalty.tier] : 1;
+    const loyalty = await LoyaltyModel.findOne({ user: session.user.id });
+    const priority = loyalty ? TIER_PRIORITY[loyalty.tier] : 1;
 
     // Expires in 7 days
     const expiresAt = new Date();

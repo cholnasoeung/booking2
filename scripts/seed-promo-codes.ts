@@ -40,7 +40,7 @@ async function seedPromoCodes() {
         value: 5,
         maxUses: 200,
         minBookingAmount: 10,
-        maxDiscountAmount: null,
+        maxDiscountAmount: undefined,
         validFrom: new Date(),
         validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
         applicableBusTypes: [],
@@ -64,7 +64,7 @@ async function seedPromoCodes() {
         code: "BIGDISCOUNT",
         type: "percentage",
         value: 25,
-        maxUses: null, // Unlimited
+        maxUses: undefined, // Unlimited
         minBookingAmount: 100,
         maxDiscountAmount: 75,
         validFrom: new Date(),

@@ -57,8 +57,9 @@ export async function POST(request: Request) {
     const totalSeats = Number(body?.totalSeats);
     const amenities = Array.isArray(body?.amenities) ? body.amenities : [];
     const images =
-      Array.isArray(body?.images) && body.images.every((item) => typeof item === "string")
-        ? body.images.map((item) => item.trim()).filter(Boolean)
+      Array.isArray(body?.images) &&
+      body.images.every((item: unknown) => typeof item === "string")
+        ? (body.images as string[]).map((item) => item.trim()).filter(Boolean)
         : [];
 
     if (!name || !registrationNumber || !busType) {

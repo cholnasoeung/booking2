@@ -5,7 +5,7 @@ import RouteModel from "@/models/Route";
 export const runtime = "nodejs";
 
 export interface SeatLayoutRow {
-  busNumber: string;
+  busNumber?: string;
   seatNumber: string;
   seatType: "window" | "aisle" | "sleeper";
   status: "available" | "blocked" | "booked";
@@ -160,10 +160,11 @@ export async function importSeatLayouts(
   // Group rows by bus number for efficient processing
   const busGroups = new Map<string, SeatLayoutRow[]>();
   rows.forEach((row) => {
-    if (!busGroups.has(row.busNumber)) {
-      busGroups.set(row.busNumber, []);
+    const busKey = row.busNumber ?? "unknown";
+    if (!busGroups.has(busKey)) {
+      busGroups.set(busKey, []);
     }
-    busGroups.get(row.busNumber)!.push(row);
+    busGroups.get(busKey)!.push(row);
   });
 
   // Process each bus
@@ -175,7 +176,7 @@ export async function importSeatLayouts(
       seatRows.forEach((row, index) => {
         result.errors.push({
           row: rows.indexOf(row) + 1,
-          busNumber: row.busNumber,
+          busNumber: row.busNumber ?? "unknown",
           seatNumber: row.seatNumber,
           error: `Bus ${busNumber} not found`,
         });
@@ -192,7 +193,7 @@ export async function importSeatLayouts(
       if (!validation.valid) {
         result.errors.push({
           row: rows.indexOf(seatRow) + 1,
-          busNumber: seatRow.busNumber,
+          busNumber: seatRow.busNumber ?? "unknown",
           seatNumber: seatRow.seatNumber,
           error: validation.error!,
         });
@@ -251,7 +252,7 @@ export async function importSeatLayouts(
       } catch (error) {
         result.errors.push({
           row: rows.indexOf(seatRow) + 1,
-          busNumber: seatRow.busNumber,
+          busNumber: seatRow.busNumber ?? "unknown",
           seatNumber: seatRow.seatNumber,
           error:
             error instanceof Error

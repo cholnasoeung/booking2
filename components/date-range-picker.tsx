@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover } from "@base-ui/react/popover";
 import { cn } from "@/lib/utils";
 
 export type DateRangePreset = "today" | "yesterday" | "last7days" | "last30days" | "custom";
@@ -62,8 +62,8 @@ export default function DateRangePicker({ value, onChange }: DateRangePickerProp
   }
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
+    <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
+      <Popover.Trigger>
         <Button
           variant="outline"
           className={cn(
@@ -80,8 +80,8 @@ export default function DateRangePicker({ value, onChange }: DateRangePickerProp
             <span>Pick a date range</span>
           )}
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-2" align="start">
+      </Popover.Trigger>
+      <Popover.Popup className="w-auto p-2">
         <div className="space-y-1">
           {presets.map((presetOption) => (
             <button
@@ -96,7 +96,7 @@ export default function DateRangePicker({ value, onChange }: DateRangePickerProp
             </button>
           ))}
         </div>
-      </PopoverContent>
-    </Popover>
+      </Popover.Popup>
+    </Popover.Root>
   );
 }

@@ -163,8 +163,8 @@ export async function checkSeatAvailability(
     status: { $in: ["confirmed", "pending"] },
   }).select("seats");
 
-  const bookedSeats = bookings.flatMap(b => b.seats || []);
-  const blockedSeats = bus.blockedSeats || [];
+  const bookedSeats = bookings.flatMap(b => (b.seats || []).map(String));
+  const blockedSeats = (bus.blockedSeats || []).map(String);
 
   const unavailableSeats = [...new Set([...bookedSeats, ...blockedSeats])];
   const availableSeats = seats.filter(seat => !unavailableSeats.includes(seat));

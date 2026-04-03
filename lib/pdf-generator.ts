@@ -1,6 +1,6 @@
 import { jsPDF } from 'jspdf';
 import QRCode from 'qrcode';
-import type { BookingSummary } from './queries';
+import type { AdminBookingSummary } from './queries';
 
 interface TicketData {
   bookingId: string;
@@ -204,7 +204,7 @@ export async function generateTicketPDF(data: TicketData): Promise<Buffer> {
  * Create a ticket data object from booking summary
  */
 export function createTicketDataFromBooking(
-  booking: BookingSummary,
+  booking: AdminBookingSummary,
   userEmail: string,
   userName: string
 ): TicketData {

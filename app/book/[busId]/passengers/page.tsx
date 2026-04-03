@@ -64,11 +64,7 @@ export default async function PassengersPage({ params, searchParams }: Passenger
   const query = await searchParams;
   const user = await requireUser(`/login?callbackUrl=${encodeURIComponent(`/book/${busId}/passengers`)}`);
 
-  const bus = await getBusSummary(busId);
-
-  if (!bus) {
-    notFound();
-  }
+  const bus = (await getBusSummary(busId)) ?? notFound();
 
   // Get selected seats from query params
   const rawSeats = query.seats;

@@ -63,7 +63,7 @@ async function backfillSeatLayouts() {
   let updatedBookings = 0;
 
   for (const booking of bookings) {
-    const seatLayout = seatLayoutMap.get(String(booking.busId));
+    const seatLayout = seatLayoutMap.get(String(booking.bus));
 
     if (!seatLayout) {
       continue;

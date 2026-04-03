@@ -9,6 +9,7 @@ export interface IBusDetail extends Document {
   totalSeats: number;
   seatLayoutTemplate?: SeatLayout | null;
   amenities: string[];
+  images: string[];
   createdAt: Date;
   updatedAt: Date;
 }

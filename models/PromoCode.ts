@@ -17,6 +17,13 @@ export interface IPromoCode extends Document {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  isValid(): boolean;
+  calculateDiscount(bookingAmount: number): {
+    valid: boolean;
+    discount: number;
+    message: string;
+  };
+  incrementUsage(): Promise<IPromoCode>;
 }
 
 const PromoCodeSchema = new Schema<IPromoCode>(

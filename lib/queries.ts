@@ -68,7 +68,10 @@ type BusDetailRecord = {
   images: string[];
 };
 
-type NormalizedBusRecord = Omit<StoredBusRecord, "bookedSeats" | "seatLayout" | "busType" | "blockedSeats" | "amenities"> &
+type NormalizedBusRecord = Omit<
+  StoredBusRecord,
+  "bookedSeats" | "seatLayout" | "busType" | "blockedSeats" | "amenities" | "driverId" | "busDetailId"
+> &
   NormalizedSeatLayout & {
     blockedSeats: string[];
     stops: BusStop[];
@@ -115,8 +118,8 @@ export type RouteSummary = {
   distance: number;
 };
 
-export type BusSummary = {
-  id: string;
+  export type BusSummary = {
+    id: string;
   routeId: string;
   from: string;
   to: string;
@@ -141,14 +144,16 @@ export type BusSummary = {
     phone: string;
     vehicleNumber?: string;
   } | null;
-  busDetail?: {
-    id: string;
-    name: string;
-    registrationNumber: string;
-    busType: BusType;
-    totalSeats: number;
-    amenities: string[];
-  } | null;
+    busDetail?: {
+      id: string;
+      name: string;
+      registrationNumber: string;
+      busType: BusType;
+      totalSeats: number;
+      amenities: string[];
+      seatLayoutTemplate?: SeatLayout | null;
+      images: string[];
+    } | null;
 };
 
 export type UserSummary = {
@@ -218,9 +223,10 @@ function serializeRoute(route: RouteRecord): RouteSummary {
 
 function normalizeBusRecord(bus: StoredBusRecord): NormalizedBusRecord {
   const normalized = normalizeBusSeatLayout(bus);
+  const { driverId, busDetailId, bookedSeats, blockedSeats, amenities, ...rest } = bus;
 
   return {
-    ...bus,
+    ...rest,
     busType: normalized.busType,
     seatLayout: normalized.seatLayout,
     templateStatus: normalized.templateStatus,
@@ -233,8 +239,10 @@ function normalizeBusRecord(bus: StoredBusRecord): NormalizedBusRecord {
       dropping: stop.dropping,
       order: stop.order,
     })),
-    driverId: bus.driverId ? String(bus.driverId) : null,
-    busDetailId: bus.busDetailId ? String(bus.busDetailId) : null,
+    driverId: driverId ? String(driverId) : null,
+    busDetailId: busDetailId ? String(busDetailId) : null,
+    blockedSeats: (blockedSeats || []).map(String),
+    amenities: amenities ?? [],
   };
 }
 
@@ -270,7 +278,7 @@ function serializeBus(
     blockedSeats: bus.blockedSeats ?? [],
     seatsLeft: Math.max(bus.totalSeats - bus.bookedSeats.length - (bus.blockedSeats?.length ?? 0), 0),
     pricePerSeat: bus.pricePerSeat,
-    amenities: bus.amenities ?? [],
+    amenities: bus.amenities,
     stops,
     driver: driver
       ? {

@@ -125,7 +125,14 @@ export async function POST(
       }
 
       // Check seat availability on new bus
-      const normalizedSeats = normalizeStoredSeatCodes(booking.seats, newBus.seatLayout);
+        if (!newBus.seatLayout) {
+          return Response.json(
+            { message: "Seat layout data missing for the target bus" },
+            { status: 400 }
+          );
+        }
+
+        const normalizedSeats = normalizeStoredSeatCodes(booking.seats, newBus.seatLayout);
       const unavailableSeats = normalizedSeats.filter(seat =>
         newBus.bookedSeats.includes(seat)
       );

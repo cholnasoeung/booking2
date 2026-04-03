@@ -136,7 +136,7 @@ export default function CancellationPolicyDisplay({
 
             {/* View Full Policy */}
             <Dialog>
-              <DialogTrigger asChild>
+            <DialogTrigger>
                 <Button type="button" variant="outline" size="sm" className="w-full">
                   <Clock className="w-4 h-4 mr-1" />
                   View Full Policy

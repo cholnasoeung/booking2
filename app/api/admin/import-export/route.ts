@@ -153,11 +153,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      message: "Import completed successfully",
-      ...result,
-    });
+      const { success: _success, ...resultDetails } = result;
+
+      return NextResponse.json({
+        success: true,
+        message: "Import completed successfully",
+        ...resultDetails,
+      });
   } catch (error) {
     console.error("Error importing seat layouts:", error);
     return NextResponse.json(

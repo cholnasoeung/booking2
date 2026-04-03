@@ -88,7 +88,7 @@ export async function createBooking(input: CreateBookingInput) {
   // Apply promo code discount if provided
   let discountAmount = 0;
   let finalPrice = input.totalPrice;
-  let appliedPromoCode = null;
+  let appliedPromoCode: string | undefined;
 
   if (input.promoCode) {
     const PromoCodeModel = (await import("@/models/PromoCode")).default;
@@ -194,15 +194,9 @@ export async function cancelBooking(input: CancelBookingInput) {
   const bus = await BusModel.findById(booking.bus);
 
   if (bus) {
-    bus.bookedSeats = bus.bookedSeats.filter(
-      seat => !input.bookingId || !booking.seats.includes(seat)
+    bus.bookedSeats = bus.bookedSeats.filter(seat => 
+      typeof seat !== "string" || !booking.seats.includes(seat)
     );
-
-    // Re-filter properly
-    bus.bookedSeats = bus.bookedSeats.filter(
-      seat => !booking.seats.includes(seat)
-    );
-
     await bus.save();
   }
 

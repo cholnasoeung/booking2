@@ -58,7 +58,7 @@ export default function PassengerDetailsForm({
   const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const paramBusId = searchParams.get("busId") || busId;
+  const paramBusId = searchParams?.get("busId") ?? busId;
 
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});

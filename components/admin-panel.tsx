@@ -47,7 +47,7 @@ export default function AdminPanel({
   busDetails,
 }: AdminPanelProps) {
   const searchParams = useSearchParams();
-  const activeTab = searchParams.get("tab") || "overview";
+  const activeTab = searchParams?.get("tab") ?? "overview";
   const [managerFeedback, setManagerFeedback] = useState<FeedbackState>(null);
 
   return (

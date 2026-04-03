@@ -23,6 +23,20 @@ export interface IRating extends Document {
   updatedAt: Date;
 }
 
+export interface BusRatingSummary {
+  averageRating: number;
+  totalRatings: number;
+  rating5: number;
+  rating4: number;
+  rating3: number;
+  rating2: number;
+  rating1: number;
+}
+
+export interface RatingModelStatic extends mongoose.Model<IRating> {
+  getBusRatingSummary(busId: string): Promise<BusRatingSummary>;
+}
+
 const RatingSchema = new Schema<IRating>(
   {
     user: {
@@ -190,7 +204,7 @@ RatingSchema.methods.markHelpful = async function(userId: string) {
 };
 
 const RatingModel =
-  (mongoose.models.Rating as mongoose.Model<IRating>) ||
-  mongoose.model<IRating>("Rating", RatingSchema);
+  (mongoose.models.Rating as RatingModelStatic) ||
+  mongoose.model<IRating, RatingModelStatic>("Rating", RatingSchema);
 
 export default RatingModel;

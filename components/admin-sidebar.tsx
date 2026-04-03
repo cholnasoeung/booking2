@@ -138,11 +138,11 @@ type AdminSidebarProps = {
 };
 
 export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
-  const activeTab = searchParams.get("tab") || "overview";
+    const activeTab = searchParams?.get("tab") ?? "overview";
   const userInitials = userName
     .split(" ")
     .map((part) => part[0] ?? "")

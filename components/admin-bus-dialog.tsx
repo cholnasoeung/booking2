@@ -43,20 +43,20 @@ type AdminBusDialogProps = {
 };
 
 type BusFormState = {
-  routeId: string;
-  date: string;
-  departureTime: string;
-  arrivalTime: string;
-  busType: BusType;
-  pricePerSeat: string;
-  seatLayout: BusSummary["seatLayout"];
-  amenities: AmenityValue[];
-  blockedSeats: string[];
-  stops: StopEntry[];
-  driverId: string;
-  busDetailId: string;
-  endDate: string;
-};
+    routeId: string;
+    date: string;
+    departureTime: string;
+    arrivalTime: string;
+    busType: BusType;
+    pricePerSeat: string;
+    seatLayout: BusSummary["seatLayout"];
+    amenities: AmenityValue[];
+    blockedSeats: string[];
+    stops: StopEntry[];
+    driverId: string | null;
+    busDetailId: string | null;
+    endDate: string;
+  };
 
 type StopEntry = BusStop & {
   id: string;
@@ -840,8 +840,8 @@ function createFormState(routes: RouteSummary[], bus?: BusSummary | null): BusFo
       blockedSeats: bus.blockedSeats ?? [],
       stops: mapBusStops(bus.stops),
       endDate: bus.travelDate,
-      driverId: bus.driver?.id ?? "",
-      busDetailId: bus.busDetail?.id ?? "",
+        driverId: bus.driver?.id ?? null,
+        busDetailId: bus.busDetail?.id ?? null,
     };
   }
 
@@ -860,8 +860,8 @@ function createFormState(routes: RouteSummary[], bus?: BusSummary | null): BusFo
     blockedSeats: [],
     stops: getDefaultStopEntries(defaultRoute),
     endDate: "",
-    driverId: "",
-    busDetailId: "",
+      driverId: null,
+      busDetailId: null,
   };
 }
 

@@ -2,7 +2,7 @@ import { getCurrentSession } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import { normalizeBusSeatLayout } from "@/lib/seat-layout";
 import { parseSeatSelection, isValidObjectId } from "@/lib/validation";
-import BookingModel from "@/models/Booking";
+import BookingModel, { type IPassenger } from "@/models/Booking";
 import BusModel from "@/models/Bus";
 import PromoCodeModel from "@/models/PromoCode";
 import { sendBookingConfirmationEmail } from "@/lib/email-service";
@@ -123,15 +123,15 @@ export async function POST(request: Request) {
     const booking = await BookingModel.create({
       user: session.user.id,
       bus: busId,
-      seats,
-      passengers,
-      totalPrice,
-      discountAmount,
-      finalPrice,
-      promoCode: appliedPromoCode,
-      boardingStop,
-      droppingStop,
-      status: "confirmed",
+        seats,
+        passengers,
+        totalPrice,
+        discountAmount,
+        finalPrice,
+        ...(appliedPromoCode ? { promoCode: appliedPromoCode } : {}),
+        boardingStop,
+        droppingStop,
+        status: "confirmed",
       paymentStatus: "paid",
       metadata: {
         bookingSource: "web",
@@ -156,7 +156,7 @@ export async function POST(request: Request) {
         departureTime: busDocument.departureTime,
         arrivalTime: busDocument.arrivalTime,
         seats,
-        passengers: passengers.map(p => ({
+        passengers: passengers.map((p: IPassenger) => ({
           name: p.name,
           age: p.age,
           gender: p.gender,

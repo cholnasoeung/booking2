@@ -16,9 +16,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Image file is required." }, { status: 400 });
     }
 
-    const arrayBuffer = await (file as Blob).arrayBuffer();
+    if (typeof file === "string") {
+      return NextResponse.json({ message: "Image file is required." }, { status: 400 });
+    }
+
+    const uploadedFile = file as File;
+    const arrayBuffer = await uploadedFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const ext = file.name?.split(".").pop()?.toLowerCase() || "jpg";
+    const ext = uploadedFile.name?.split(".").pop()?.toLowerCase() || "jpg";
     const filename = `${Date.now()}-${randomUUID()}.${ext}`;
 
     await mkdir(UPLOAD_FOLDER, { recursive: true });

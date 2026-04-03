@@ -48,6 +48,29 @@ export interface KPIs {
   activeBuses: number;
 }
 
+type RouteStats = {
+  routeId: string;
+  routeName: string;
+  from: string;
+  to: string;
+  distance: number;
+  totalBookings: number;
+  totalRevenue: number;
+  totalSeats: number;
+  bookedSeats: number;
+  cancellations: number;
+  seatFrequency: Map<string, number>;
+};
+
+type RevenueRouteStats = {
+  routeId: string;
+  routeName: string;
+  revenue: number;
+  bookings: number;
+  totalSeats: number;
+  bookedSeats: number;
+};
+
 export interface RoutePerformance {
   routeId: string;
   routeName: string;
@@ -65,7 +88,7 @@ export interface RoutePerformance {
 
 export interface OccupancyReport {
   busId: string;
-  busNumber: string;
+  busNumber?: string;
   routeName: string;
   departureDate: Date;
   totalSeats: number;
@@ -112,7 +135,7 @@ export async function getRevenueMetrics(
     totalBookings > 0 ? totalRevenue / totalBookings : 0;
 
   // Group revenue by route
-  const routeMap = new Map<string, any>();
+  const routeMap = new Map<string, RevenueRouteStats>();
 
   for (const booking of bookings) {
     const bus = booking.bus as any;
@@ -132,6 +155,9 @@ export async function getRevenueMetrics(
     }
 
     const route = routeMap.get(routeId);
+    if (!route) {
+      continue;
+    }
     route.revenue += booking.finalPrice || 0;
     route.bookings += 1;
     route.totalSeats += bus.totalSeats || 40;
@@ -305,7 +331,7 @@ export async function getRoutePerformance(
   const bookings = await BookingModel.find(matchQuery).populate("bus").lean();
 
   // Group by route
-  const routeMap = new Map<string, any>();
+  const routeMap = new Map<string, RouteStats>();
 
   for (const booking of bookings) {
     const bus = booking.bus as any;
@@ -330,6 +356,9 @@ export async function getRoutePerformance(
     }
 
     const route = routeMap.get(routeId);
+    if (!route) {
+      continue;
+    }
     route.totalBookings += 1;
     route.totalRevenue += booking.finalPrice || 0;
     route.totalSeats += bus.totalSeats || 40;

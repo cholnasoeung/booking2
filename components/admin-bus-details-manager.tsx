@@ -139,12 +139,12 @@ export default function AdminBusDetailsManager({ busDetails }: AdminBusDetailsMa
               </div>
               <div className="space-y-2">
                 <Label htmlFor="bus-detail-type">Bus type</Label>
-                <Select
-                  value={form.busType}
-                  onValueChange={(value) =>
-                    setForm((current) => ({ ...current, busType: value as AmenityValue }))
-                  }
-                >
+                    <Select
+                      value={form.busType}
+                      onValueChange={(value) =>
+                        setForm((current) => ({ ...current, busType: value as BusType }))
+                      }
+                    >
                   <SelectTrigger id="bus-detail-type" className="h-11 rounded-xl">
                     <SelectValue placeholder="Choose bus type" />
                   </SelectTrigger>

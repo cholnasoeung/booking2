@@ -14,6 +14,8 @@ export interface IBus extends Document {
   departureTime: string;
   arrivalTime: string;
   busType: BusType;
+  busNumber?: string;
+  hasUpperDeck?: boolean;
   seatLayout?: SeatLayout | null;
   totalSeats: number;
   bookedSeats: Array<string | number>;
@@ -22,6 +24,7 @@ export interface IBus extends Document {
   pricePerSeat: number;
   amenities?: string[];
   driverId?: mongoose.Types.ObjectId | null;
+  busDetailId?: mongoose.Types.ObjectId | null;
 }
 
 const BusSchema = new Schema<IBus>({
@@ -44,6 +47,10 @@ const BusSchema = new Schema<IBus>({
     required: true,
     trim: true,
   },
+  busNumber: {
+    type: String,
+    trim: true,
+  },
   busType: {
     type: String,
     enum: ["bus_45", "mini_bus", "car"],
@@ -53,6 +60,10 @@ const BusSchema = new Schema<IBus>({
   seatLayout: {
     type: Schema.Types.Mixed,
     default: null,
+  },
+  hasUpperDeck: {
+    type: Boolean,
+    default: false,
   },
   totalSeats: {
     type: Number,
