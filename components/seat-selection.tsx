@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import SeatMap from "@/components/seat-map";
+import SleeperSeatMap from "@/components/sleeper-seat-map";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -390,14 +391,25 @@ export default function SeatSelection({
             </div>
           </div>
 
-          <SeatMap
-            layout={bus.seatLayout}
-            bookedSeats={bus.bookedSeats}
-            blockedSeats={bus.blockedSeats}
-            selectedSeats={selectedSeats}
-            onSeatToggle={toggleSeat}
-            showLegend
-          />
+          {bus.busType === "sleeper_bus" ? (
+            <SleeperSeatMap
+              layout={bus.seatLayout}
+              bookedSeats={bus.bookedSeats}
+              blockedSeats={bus.blockedSeats}
+              selectedSeats={selectedSeats}
+              onSeatToggle={toggleSeat}
+              showLegend
+            />
+          ) : (
+            <SeatMap
+              layout={bus.seatLayout}
+              bookedSeats={bus.bookedSeats}
+              blockedSeats={bus.blockedSeats}
+              selectedSeats={selectedSeats}
+              onSeatToggle={toggleSeat}
+              showLegend
+            />
+          )}
         </CardContent>
       </Card>
 

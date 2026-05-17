@@ -105,10 +105,6 @@ export default function SeatLayoutEditor({
 
   function addItem() {
     applyChange((layout) => {
-      if (nextItemKind === "sleeper" && layout.grid.cols < 2) {
-        layout.grid.cols = 2;
-      }
-
       const placement = findNextPlacement(layout, nextItemKind);
 
       if (placement.shouldGrowRows) {
@@ -527,7 +523,6 @@ function normalizeLayout(layout: SeatLayout) {
 
     if (nextItem.kind === "sleeper") {
       nextItem.rowSpan = 1;
-      nextItem.colSpan = Math.max(2, nextItem.colSpan ?? 2);
     }
 
     if (isBookableItemKind(nextItem.kind)) {
@@ -561,7 +556,7 @@ function normalizeLayout(layout: SeatLayout) {
 
 function findNextPlacement(layout: SeatLayout, kind: SeatLayoutItemKind) {
   const rowSpan = 1;
-  const colSpan = kind === "sleeper" ? 2 : 1;
+  const colSpan = 1;
 
   for (let row = 1; row <= layout.grid.rows; row += 1) {
     for (let col = 1; col <= layout.grid.cols; col += 1) {

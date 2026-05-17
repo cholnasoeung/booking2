@@ -182,6 +182,8 @@ export function getBusTypeLabel(busType: BusType) {
       return "Mini Bus";
     case "car":
       return "Car";
+    case "sleeper_bus":
+      return "Sleeper Bus";
     default:
       return "Bus";
   }
@@ -286,6 +288,41 @@ function createBus45Template(): SeatLayout {
   };
 }
 
+function createSleeperBusTemplate(): SeatLayout {
+  const items: SeatLayoutItem[] = [];
+
+  // Driver row spans all 4 cols
+  items.push(buildItem("driver", 1, 1, { colSpan: 4, label: "Driver" }));
+
+  // Lower deck: rows 2–5 (seat codes L1A/B/C … L4A/B/C)
+  for (let row = 2; row <= 5; row++) {
+    const seatRow = row - 1;
+    items.push(buildItem("sleeper", row, 1, { seatCode: `L${seatRow}A`, label: `L${seatRow}A` }));
+    items.push(buildItem("sleeper", row, 2, { seatCode: `L${seatRow}B`, label: `L${seatRow}B` }));
+    items.push(buildItem("aisle", row, 3, { label: "Aisle" }));
+    items.push(buildItem("sleeper", row, 4, { seatCode: `L${seatRow}C`, label: `L${seatRow}C` }));
+  }
+
+  // Visual gap between decks
+  items.push(buildItem("empty", 6, 1, { colSpan: 4 }));
+
+  // Upper deck: rows 7–10 (seat codes U1A/B/C … U4A/B/C)
+  for (let row = 7; row <= 10; row++) {
+    const seatRow = row - 6;
+    items.push(buildItem("sleeper", row, 1, { seatCode: `U${seatRow}A`, label: `U${seatRow}A` }));
+    items.push(buildItem("sleeper", row, 2, { seatCode: `U${seatRow}B`, label: `U${seatRow}B` }));
+    items.push(buildItem("aisle", row, 3, { label: "Aisle" }));
+    items.push(buildItem("sleeper", row, 4, { seatCode: `U${seatRow}C`, label: `U${seatRow}C` }));
+  }
+
+  return {
+    version: LAYOUT_VERSION,
+    template: "sleeper_bus",
+    grid: { rows: 10, cols: 4 },
+    items,
+  };
+}
+
 export function getSeatLayoutTemplate(busType: BusType): SeatLayout {
   switch (busType) {
     case "bus_45":
@@ -294,6 +331,8 @@ export function getSeatLayoutTemplate(busType: BusType): SeatLayout {
       return createMiniBusTemplate();
     case "car":
       return createCarTemplate();
+    case "sleeper_bus":
+      return createSleeperBusTemplate();
     default:
       return createMiniBusTemplate();
   }
