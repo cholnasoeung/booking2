@@ -161,6 +161,33 @@ export async function sendAdminAlertEmail(
 }
 
 /**
+ * Send waitlist availability notification email
+ */
+export async function sendWaitlistNotificationEmail(
+  to: string,
+  data: { userName: string; from: string; to: string; travelDate: string; departureTime: string; seatsAvailable: number; busId: string }
+): Promise<{ success: boolean; error?: string }> {
+  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const html = `
+    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px">
+      <h2 style="color:#4f46e5">Seats Available — Book Now!</h2>
+      <p>Hi ${data.userName},</p>
+      <p>Good news! Seats on a bus you were waiting for are now available.</p>
+      <table style="width:100%;border-collapse:collapse;margin:16px 0">
+        <tr><td style="padding:6px;color:#64748b">Route</td><td style="padding:6px;font-weight:600">${data.from} → ${data.to}</td></tr>
+        <tr><td style="padding:6px;color:#64748b">Date</td><td style="padding:6px;font-weight:600">${data.travelDate}</td></tr>
+        <tr><td style="padding:6px;color:#64748b">Departure</td><td style="padding:6px;font-weight:600">${data.departureTime}</td></tr>
+        <tr><td style="padding:6px;color:#64748b">Available seats</td><td style="padding:6px;font-weight:600">${data.seatsAvailable}</td></tr>
+      </table>
+      <p>Act fast — seats may fill up quickly!</p>
+      <a href="${baseUrl}/book/${data.busId}" style="display:inline-block;background:#4f46e5;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:8px">Book your seat</a>
+      <p style="color:#94a3b8;font-size:12px;margin-top:24px">This notification expires in 24 hours.</p>
+    </div>
+  `;
+  return sendEmail({ to, subject: `Seats available: ${data.from} → ${data.to} on ${data.travelDate}`, html });
+}
+
+/**
  * Send structured admin alert email with detailed alert information
  */
 export async function sendDetailedAdminAlertEmail(

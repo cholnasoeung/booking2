@@ -117,6 +117,8 @@ export default function DashboardBookings({
             booking.status === "confirmed" &&
             isPastTrip(booking.bus?.travelDate) &&
             !ratedIds.has(booking.id);
+          const isCancelled = booking.status === "cancelled";
+          const canRebook = !!booking.bus;
 
           return (
             <Card
@@ -160,6 +162,22 @@ export default function DashboardBookings({
                   <p className="text-sm text-muted-foreground">
                     Seats {formatSeatList(booking.seats)}
                   </p>
+
+                  {/* Refund tracker */}
+                  {isCancelled && (
+                    <div className={`mt-2 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${
+                      booking.refundStatus === "processed"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                        : booking.refundAmount && booking.refundAmount > 0
+                        ? "border-amber-200 bg-amber-50 text-amber-700"
+                        : "border-slate-200 bg-slate-50 text-slate-600"
+                    }`}>
+                      {booking.refundStatus === "processed" ? "✓ Refund processed" :
+                       booking.refundAmount && booking.refundAmount > 0
+                         ? `⏳ Refund ${formatCurrency(booking.refundAmount)} pending`
+                         : "No refund applicable"}
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -200,6 +218,16 @@ export default function DashboardBookings({
                   >
                     View
                   </Link>
+
+                  {/* Rebook */}
+                  {canRebook && (isCancelled || isPastTrip(booking.bus?.travelDate)) && (
+                    <Link
+                      href={`/book/${booking.bus!.id}?passengers=${booking.seats.length}`}
+                      className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-700 transition hover:bg-indigo-100"
+                    >
+                      Rebook
+                    </Link>
+                  )}
 
                   {/* Modify seats */}
                   {canModify && (

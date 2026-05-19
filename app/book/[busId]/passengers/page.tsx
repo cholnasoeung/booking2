@@ -17,7 +17,7 @@ type PassengersPageProps = {
   }>;
 };
 
-async function createBooking(
+async function createBookingAction(
   busId: string,
   userId: string,
   selectedSeats: string[],
@@ -25,12 +25,15 @@ async function createBooking(
   pricePerSeat: number,
   promoCode?: string,
   boardingStop?: string,
-  droppingStop?: string
+  droppingStop?: string,
+  addOns?: { zeroCancellation: boolean; travelInsurance: boolean }
 ) {
   "use server";
 
   const { createBooking } = await import("@/lib/actions");
-  const totalPrice = passengers.length * pricePerSeat;
+  const BASE_PRICE = passengers.length * pricePerSeat;
+  const addOnFee = (addOns?.zeroCancellation ? 2 : 0) + (addOns?.travelInsurance ? 3 : 0);
+  const totalPrice = BASE_PRICE + addOnFee;
 
   try {
     const booking = await createBooking({
@@ -42,6 +45,7 @@ async function createBooking(
       promoCode,
       boardingStop,
       droppingStop,
+      addOns,
     });
 
     return { success: true, bookingId: booking.id };
@@ -92,10 +96,14 @@ export default async function PassengersPage({ params, searchParams }: Passenger
     redirect(`/book/${busId}?error=seats_unavailable`);
   }
 
-  async function handlePassengerSubmit(passengers: Passenger[], promoCode?: string) {
+  async function handlePassengerSubmit(
+    passengers: Passenger[],
+    promoCode?: string,
+    addOns?: { zeroCancellation: boolean; travelInsurance: boolean }
+  ) {
     "use server";
 
-    const result = await createBooking(
+    const result = await createBookingAction(
       busId,
       user.id,
       selectedSeats,
@@ -103,7 +111,8 @@ export default async function PassengersPage({ params, searchParams }: Passenger
       bus.pricePerSeat,
       promoCode,
       boardingStop,
-      droppingStop
+      droppingStop,
+      addOns
     );
     return result;
   }

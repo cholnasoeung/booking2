@@ -38,6 +38,7 @@ export interface IBooking extends Document {
   };
   boardingStop?: string;
   droppingStop?: string;
+  addOns?: { zeroCancellation: boolean; travelInsurance: boolean };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -90,6 +91,10 @@ const BookingSchema = new Schema<IBooking>(
     },
     boardingStop: String,
     droppingStop: String,
+    addOns: {
+      zeroCancellation: { type: Boolean, default: false },
+      travelInsurance: { type: Boolean, default: false },
+    },
     discountAmount: {
       type: Number,
       default: 0,
@@ -171,11 +176,13 @@ BookingSchema.methods.cancel = async function(reason: string) {
     throw new Error("Bus not found");
   }
 
-  // Calculate refund based on timing before departure
+  // Zero-cancellation protection guarantees 100% refund
   const hoursUntilDeparture = (bus.date.getTime() - now.getTime()) / (1000 * 60 * 60);
   let refundPercentage = 0;
 
-  if (hoursUntilDeparture > 48) {
+  if (this.addOns?.zeroCancellation) {
+    refundPercentage = 100;
+  } else if (hoursUntilDeparture > 48) {
     refundPercentage = 100;
   } else if (hoursUntilDeparture > 24) {
     refundPercentage = 75;

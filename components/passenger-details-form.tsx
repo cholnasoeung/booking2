@@ -23,7 +23,7 @@ type PassengerDetailsFormProps = {
   selectedSeats: string[];
   seatLabels?: string[];
   pricePerSeat?: number;
-  onSubmit: (passengers: Passenger[], promoCode?: string) => Promise<{ success: boolean; bookingId?: string; error?: string }>;
+  onSubmit: (passengers: Passenger[], promoCode?: string, addOns?: { zeroCancellation: boolean; travelInsurance: boolean }) => Promise<{ success: boolean; bookingId?: string; error?: string }>;
   onCancel?: () => void;
   isSubmitting?: boolean;
   busId?: string;
@@ -70,6 +70,12 @@ export default function PassengerDetailsForm({
   const [promoValidation, setPromoValidation] = useState<PromoCodeValidation | null>(null);
   const [validatingPromo, setValidatingPromo] = useState(false);
   const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
+
+  // Add-on state
+  const [zeroCancellation, setZeroCancellation] = useState(false);
+  const [travelInsurance, setTravelInsurance] = useState(false);
+  const ZERO_CANCELLATION_FEE = 2;
+  const TRAVEL_INSURANCE_FEE = 3;
 
   // Initialize passengers based on selected seats
   useEffect(() => {
@@ -234,7 +240,7 @@ export default function PassengerDetailsForm({
 
     setSubmitError("");
 
-    const result = await onSubmit(passengers, appliedPromo || undefined);
+    const result = await onSubmit(passengers, appliedPromo || undefined, { zeroCancellation, travelInsurance });
 
     // If successful, redirect to confirmation page
     if (result.success && result.bookingId) {
@@ -254,7 +260,8 @@ export default function PassengerDetailsForm({
 
   const baseTotal = passengers.length * pricePerSeat;
   const discountAmount = promoValidation?.valid ? promoValidation.discount : 0;
-  const totalPrice = baseTotal - discountAmount;
+  const addOnTotal = (zeroCancellation ? ZERO_CANCELLATION_FEE : 0) + (travelInsurance ? TRAVEL_INSURANCE_FEE : 0);
+  const totalPrice = baseTotal - discountAmount + addOnTotal;
 
   return (
     <div className="w-full">
@@ -425,6 +432,39 @@ export default function PassengerDetailsForm({
           </CardContent>
         </Card>
 
+        {/* Add-ons */}
+        <Card className="border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50">
+          <CardContent className="p-5 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-indigo-700">Optional add-ons</p>
+            <label className="flex items-center gap-3 rounded-xl border border-indigo-200 bg-white p-3 cursor-pointer hover:bg-indigo-50 transition-colors">
+              <input
+                type="checkbox"
+                checked={zeroCancellation}
+                onChange={(e) => setZeroCancellation(e.target.checked)}
+                className="h-4 w-4 accent-indigo-600"
+              />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-slate-900">Zero-Cancellation Protection</p>
+                <p className="text-xs text-slate-500">100% refund if you cancel, anytime.</p>
+              </div>
+              <span className="text-sm font-semibold text-indigo-700">+${ZERO_CANCELLATION_FEE}.00</span>
+            </label>
+            <label className="flex items-center gap-3 rounded-xl border border-indigo-200 bg-white p-3 cursor-pointer hover:bg-indigo-50 transition-colors">
+              <input
+                type="checkbox"
+                checked={travelInsurance}
+                onChange={(e) => setTravelInsurance(e.target.checked)}
+                className="h-4 w-4 accent-indigo-600"
+              />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-slate-900">Travel Insurance</p>
+                <p className="text-xs text-slate-500">Coverage for delays, accidents &amp; medical.</p>
+              </div>
+              <span className="text-sm font-semibold text-indigo-700">+${TRAVEL_INSURANCE_FEE}.00</span>
+            </label>
+          </CardContent>
+        </Card>
+
         {/* Submit Error */}
         {submitError && (
           <Card className="border-red-200 bg-red-50">
@@ -456,7 +496,10 @@ export default function PassengerDetailsForm({
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
               <p className="text-xs text-slate-500">Total Amount</p>
-              <p className="text-xl font-bold text-slate-900">${totalPrice}</p>
+              <p className="text-xl font-bold text-slate-900">${totalPrice.toFixed(2)}</p>
+              {addOnTotal > 0 && (
+                <p className="text-xs text-indigo-600">incl. add-ons +${addOnTotal.toFixed(2)}</p>
+              )}
             </div>
 
             <Button

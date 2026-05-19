@@ -16,6 +16,7 @@ import AdminBusDetailsManager from "@/components/admin-bus-details-manager";
 import AdminDriversManager from "@/components/admin-drivers-manager";
 import AdminSecurityTab from "@/components/admin-security-tab";
 import AdminSystemStatusTab from "@/components/admin-system-status-tab";
+import AdminRatingsTab from "@/components/admin-ratings-tab";
 import type {
   AdminBookingSummary,
   BusDetailSummary,
@@ -110,6 +111,8 @@ export default function AdminPanel({
       {activeTab === "security" ? <AdminSecurityTab /> : null}
 
       {activeTab === "system-status" ? <AdminSystemStatusTab /> : null}
+
+      {activeTab === "ratings" ? <AdminRatingsTab /> : null}
     </div>
   );
 }

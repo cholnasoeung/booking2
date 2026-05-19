@@ -4,7 +4,9 @@ import { normalizeBusSeatLayout, normalizeStoredSeatCodes } from "@/lib/seat-lay
 import { isValidObjectId } from "@/lib/validation";
 import BookingModel from "@/models/Booking";
 import BusModel from "@/models/Bus";
-import { sendCancellationEmail } from "@/lib/email-service";
+import WaitingListModel from "@/models/WaitingList";
+import RouteModel from "@/models/Route";
+import { sendCancellationEmail, sendWaitlistNotificationEmail } from "@/lib/email-service";
 
 export const runtime = "nodejs";
 
@@ -81,8 +83,8 @@ export async function DELETE(
 
     // Send cancellation email
     if (existingBooking.user) {
-      const route = (bus as any)?.routeId;
-      const routeStr = route ? `${route.from} to ${route.to}` : "Unknown Route";
+      const routeDoc = bus?.routeId ? await RouteModel.findById(bus.routeId).lean() : null;
+      const routeStr = routeDoc ? `${(routeDoc as any).from} to ${(routeDoc as any).to}` : "Unknown Route";
 
       await sendCancellationEmail((existingBooking.user as any).email, {
         customerName: (existingBooking.user as any).name,
@@ -93,6 +95,26 @@ export async function DELETE(
         refundAmount: cancelledBooking.refundAmount || undefined,
         refundStatus: cancelledBooking.refundStatus || undefined,
       }).catch(err => console.error('Failed to send cancellation email:', err));
+
+      // Notify next waitlisted users that seats are available
+      if (bus) {
+        const seatsFreed = cancelledBooking.seats.length;
+        const updatedBus = await BusModel.findById(bus.id).lean();
+        const seatsLeft = bus.totalSeats - ((updatedBus as any)?.bookedSeats?.length ?? 0);
+        const notified = await WaitingListModel.notifyUsers(String(bus._id), seatsLeft).catch(() => []);
+        const travelDate = bus.date.toISOString().split("T")[0];
+        for (const entry of notified) {
+          sendWaitlistNotificationEmail(entry.userEmail, {
+            userName: entry.userName,
+            from: (routeDoc as any)?.from ?? "—",
+            to: (routeDoc as any)?.to ?? "—",
+            travelDate,
+            departureTime: bus.departureTime,
+            seatsAvailable: entry.seatsAvailable ?? seatsFreed,
+            busId: String(bus._id),
+          }).catch(err => console.error("Waitlist notify error:", err));
+        }
+      }
     }
 
     return Response.json({

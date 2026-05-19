@@ -231,6 +231,13 @@ export default function SearchPageClient({
                               Fully booked
                             </Badge>
                           )}
+                          {bus.averageRating != null && bus.totalRatings != null && bus.totalRatings > 0 && (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800">
+                              {"★".repeat(Math.round(bus.averageRating))}{"☆".repeat(5 - Math.round(bus.averageRating))}
+                              <span className="ml-0.5">{bus.averageRating}</span>
+                              <span className="font-normal text-amber-600">({bus.totalRatings})</span>
+                            </span>
+                          )}
                           {bus.amenities && bus.amenities.length > 0 && (
                             <div className="flex gap-1">
                               {bus.amenities.slice(0, 2).map((amenity) => (

@@ -11,14 +11,16 @@ import { Label } from "@/components/ui/label";
 
 type RegisterFormProps = {
   callbackUrl?: string;
+  referralCode?: string;
 };
 
-export default function RegisterForm({ callbackUrl }: RegisterFormProps) {
+export default function RegisterForm({ callbackUrl, referralCode: initialRefCode }: RegisterFormProps) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [refCode, setRefCode] = useState(initialRefCode ?? "");
   const [error, setError] = useState("");
   const [isPending, setIsPending] = useState(false);
 
@@ -51,11 +53,20 @@ export default function RegisterForm({ callbackUrl }: RegisterFormProps) {
         }),
       });
 
-      const payload = (await response.json()) as { message?: string };
+      const payload = (await response.json()) as { message?: string; user?: { id: string } };
 
       if (!response.ok) {
         setError(payload.message || "Unable to create your account.");
         return;
+      }
+
+      // Apply referral code if provided
+      if (refCode.trim() && payload.user?.id) {
+        fetch("/api/user/referral", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: refCode.trim().toUpperCase(), newUserId: payload.user.id }),
+        }).catch(() => {});
       }
 
       const loginResult = await signIn("credentials", {
@@ -173,6 +184,23 @@ export default function RegisterForm({ callbackUrl }: RegisterFormProps) {
             placeholder="Repeat your password"
             required
             className="h-12 rounded-2xl border border-slate-200 bg-white/90 px-4 text-slate-900 placeholder:text-slate-400 shadow-inner"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <Label
+            htmlFor="register-ref"
+            className="text-sm uppercase tracking-[0.3em] text-slate-500"
+          >
+            Referral code <span className="normal-case text-xs text-slate-400">(optional)</span>
+          </Label>
+          <Input
+            id="register-ref"
+            type="text"
+            value={refCode}
+            onChange={(e) => setRefCode(e.target.value.toUpperCase())}
+            placeholder="e.g. JOHN1A2B"
+            className="h-12 rounded-2xl border border-slate-200 bg-white/90 px-4 text-slate-900 placeholder:text-slate-400 shadow-inner font-mono tracking-widest"
           />
         </div>
 

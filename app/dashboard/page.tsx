@@ -30,7 +30,21 @@ export default async function DashboardPage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link
+              href="/dashboard/referral"
+              className="flex items-center gap-2 rounded-full border-2 border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-medium text-indigo-800 hover:bg-indigo-100 transition-all shadow-sm"
+            >
+              <span>🎁</span>
+              <span>Refer &amp; Earn</span>
+            </Link>
+            <Link
+              href="/dashboard/waitlist"
+              className="flex items-center gap-2 rounded-full border-2 border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-800 hover:bg-amber-100 transition-all shadow-sm"
+            >
+              <span>🔔</span>
+              <span>Waitlist</span>
+            </Link>
             <Link
               href="/dashboard/profile"
               className="flex items-center gap-2 rounded-full border-2 border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"

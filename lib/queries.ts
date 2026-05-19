@@ -17,6 +17,7 @@ import BookingModel, { type BookingStatus } from "@/models/Booking";
 import BusDetailModel from "@/models/BusDetail";
 import BusModel from "@/models/Bus";
 import DriverModel from "@/models/Driver";
+import RatingModel from "@/models/Rating";
 import RouteModel from "@/models/Route";
 import UserModel, { type UserRole } from "@/models/User";
 
@@ -154,6 +155,8 @@ export type RouteSummary = {
       seatLayoutTemplate?: SeatLayout | null;
       images: string[];
     } | null;
+  averageRating?: number;
+  totalRatings?: number;
 };
 
 export type UserSummary = {
@@ -194,6 +197,9 @@ export type BookingSummary = {
   bus: BusSummary | null;
   boardingStop?: string;
   droppingStop?: string;
+  refundAmount?: number;
+  refundStatus?: string;
+  cancelledAt?: string;
 };
 
 export type PassengerSummary = {
@@ -445,18 +451,34 @@ export async function searchBuses(filters: {
   const routeMap = new Map(routes.map((route) => [String(route._id), route]));
   const passengers = parsePassengerCount(filters.passengers);
 
+  // Batch-fetch avg ratings for all buses in one aggregation
+  const busIds = buses.map((bus) => bus._id);
+  const ratingRows = busIds.length > 0
+    ? await RatingModel.aggregate([
+        { $match: { bus: { $in: busIds }, status: "approved" } },
+        { $group: { _id: "$bus", avg: { $avg: "$rating" }, count: { $sum: 1 } } },
+      ])
+    : [];
+  const ratingMap = new Map<string, { avg: number; count: number }>(
+    ratingRows.map((r) => [String(r._id), { avg: Math.round(r.avg * 10) / 10, count: r.count }])
+  );
+
   return buses
       .map((bus) => {
         const route = routeMap.get(String(bus.routeId));
-        if (!route) {
-          return null;
-        }
+        if (!route) return null;
 
         const busDetail = bus.busDetailId
           ? busDetailMap.get(String(bus.busDetailId)) ?? null
           : null;
 
-        return serializeBus(normalizeBusRecord(bus), route, null, busDetail);
+        const rating = ratingMap.get(String(bus._id));
+        const serialized = serializeBus(normalizeBusRecord(bus), route, null, busDetail);
+        return {
+          ...serialized,
+          averageRating: rating?.avg,
+          totalRatings: rating?.count,
+        };
       })
     .filter((bus): bus is BusSummary => bus !== null)
     .filter((bus) => bus.seatsLeft >= passengers)
@@ -525,6 +547,11 @@ export async function getUserBookings(userId: string) {
       totalPrice: summary.totalPrice,
       createdAt: summary.createdAt,
       bus: summary.bus,
+      boardingStop: booking.boardingStop,
+      droppingStop: booking.droppingStop,
+      refundAmount: (booking as any).refundAmount,
+      refundStatus: (booking as any).refundStatus,
+      cancelledAt: booking.cancelledAt?.toISOString(),
     } satisfies BookingSummary;
   });
 }

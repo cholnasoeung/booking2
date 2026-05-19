@@ -20,6 +20,7 @@ import {
   ChevronDown,
   Users,
   LogOut,
+  Star,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
@@ -101,6 +102,12 @@ const navSections = [
         icon: FileSpreadsheet,
         color: "from-amber-500 to-orange-600",
         badge: "New",
+      },
+      {
+        title: "Ratings",
+        href: "/admin?tab=ratings",
+        icon: Star,
+        color: "from-yellow-500 to-amber-600",
       },
     ],
   },

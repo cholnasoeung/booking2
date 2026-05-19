@@ -14,6 +14,7 @@ export default async function RegisterPage({
 }: RegisterPageProps) {
   const params = await searchParams;
   const callbackUrl = getFirstSearchParam(params.callbackUrl);
+  const ref = getFirstSearchParam(params.ref);
   const user = await getCurrentUser();
 
   if (user) {
@@ -38,7 +39,7 @@ export default async function RegisterPage({
       </div>
 
       <div className="flex items-center">
-        <RegisterForm callbackUrl={callbackUrl} />
+        <RegisterForm callbackUrl={callbackUrl} referralCode={ref} />
       </div>
     </div>
     </>

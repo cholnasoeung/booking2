@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import SeatMap from "@/components/seat-map";
@@ -71,6 +71,45 @@ export default function SeatSelection({
   const [droppingStop, setDroppingStop] = useState(
     droppingOptions[0]?.location ?? bus.to
   );
+
+  const LOCK_SECONDS = 10 * 60; // 10 minutes
+  const [secondsLeft, setSecondsLeft] = useState(LOCK_SECONDS);
+  const [timerActive, setTimerActive] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (selectedSeats.length > 0 && !timerActive) {
+      setSecondsLeft(LOCK_SECONDS);
+      setTimerActive(true);
+    }
+    if (selectedSeats.length === 0 && timerActive) {
+      setTimerActive(false);
+      setSecondsLeft(LOCK_SECONDS);
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+  }, [selectedSeats.length, timerActive]);
+
+  useEffect(() => {
+    if (!timerActive) return;
+    timerRef.current = setInterval(() => {
+      setSecondsLeft((s) => {
+        if (s <= 1) {
+          clearInterval(timerRef.current!);
+          setSelectedSeats([]);
+          setTimerActive(false);
+          setError("Your seat hold expired. Please re-select your seats.");
+          return LOCK_SECONDS;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [timerActive]);
+
+  const timerMins = Math.floor(secondsLeft / 60);
+  const timerSecs = secondsLeft % 60;
+  const timerStr = `${timerMins}:${String(timerSecs).padStart(2, "0")}`;
+  const timerUrgent = secondsLeft < 120;
 
   const totalPrice = selectedSeats.length * bus.pricePerSeat;
   const validSeatCodes = useMemo(
@@ -422,6 +461,20 @@ export default function SeatSelection({
         </CardHeader>
 
         <CardContent className="space-y-5">
+          {/* Seat hold timer */}
+          {timerActive && (
+            <div className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm font-medium ${
+              timerUrgent
+                ? "border-red-200 bg-red-50 text-red-700"
+                : "border-amber-200 bg-amber-50 text-amber-800"
+            }`}>
+              <span>{timerUrgent ? "⚠️ Hurry!" : "⏱️"} Seat hold expires in</span>
+              <span className={`font-mono text-lg font-bold ${timerUrgent ? "text-red-600" : "text-amber-700"}`}>
+                {timerStr}
+              </span>
+            </div>
+          )}
+
           <div className="rounded-[28px] border border-amber-100 bg-gradient-to-br from-amber-50 via-orange-50 to-white p-4 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div>

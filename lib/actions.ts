@@ -20,6 +20,7 @@ type CreateBookingInput = {
   promoCode?: string;
   boardingStop?: string;
   droppingStop?: string;
+  addOns?: { zeroCancellation: boolean; travelInsurance: boolean };
 };
 
 type CreateBookingResult = {
@@ -122,6 +123,7 @@ export async function createBooking(input: CreateBookingInput) {
       promoCode: appliedPromoCode,
       boardingStop: input.boardingStop,
       droppingStop: input.droppingStop,
+      addOns: input.addOns,
       status: "confirmed",
     });
 

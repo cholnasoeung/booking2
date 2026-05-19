@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import QRCode from "qrcode";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,22 +18,23 @@ type ConfirmationPageProps = {
   params: Promise<{ bookingId: string }>;
 };
 
-export default async function ConfirmationPage({
-  params,
-}: ConfirmationPageProps) {
+export default async function ConfirmationPage({ params }: ConfirmationPageProps) {
   const { bookingId } = await params;
   const user = await requireUser(
     `/login?callbackUrl=${encodeURIComponent(`/booking/confirmation/${bookingId}`)}`
   );
   const booking = await getBookingSummaryById(bookingId);
 
-  if (!booking) {
-    notFound();
-  }
+  if (!booking) notFound();
+  if (user.role !== "admin" && booking.user?.id !== user.id) redirect("/dashboard");
 
-  if (user.role !== "admin" && booking.user?.id !== user.id) {
-    redirect("/dashboard");
-  }
+  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const validationUrl = `${baseUrl}/api/validate-ticket/${bookingId}`;
+  const qrDataUrl = await QRCode.toDataURL(validationUrl, {
+    width: 200,
+    margin: 1,
+    color: { dark: "#0f172a", light: "#ffffff" },
+  });
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
@@ -44,8 +46,7 @@ export default async function ConfirmationPage({
           Your ticket is ready
         </h1>
         <p className="text-sm text-muted-foreground">
-          Keep this page handy at boarding time or revisit it from your dashboard
-          later.
+          Show the QR code at the boarding gate. Keep this page or download the PDF.
         </p>
       </div>
 
@@ -78,20 +79,18 @@ export default async function ConfirmationPage({
             ) : null}
           </div>
         </CardHeader>
+
         <CardContent className="grid gap-6 py-6 md:grid-cols-2">
+          {/* Trip details */}
           <div className="space-y-4 rounded-[28px] bg-secondary/70 p-5">
             <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                Travel date
-              </p>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Travel date</p>
               <p className="mt-2 text-lg font-medium text-foreground">
                 {booking.bus ? formatTravelDate(booking.bus.travelDate) : "Unavailable"}
               </p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                Schedule
-              </p>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Schedule</p>
               <p className="mt-2 text-lg font-medium text-foreground">
                 {booking.bus
                   ? `${booking.bus.departureTime} to ${booking.bus.arrivalTime}`
@@ -99,25 +98,19 @@ export default async function ConfirmationPage({
               </p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                Seats
-              </p>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Seats</p>
               <p className="mt-2 text-lg font-medium text-foreground">
                 {formatSeatList(booking.seats)}
               </p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                Boarding stop
-              </p>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Boarding stop</p>
               <p className="mt-2 text-lg font-medium text-foreground">
                 {booking.boardingStop ?? booking.bus?.from ?? "Unavailable"}
               </p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                Drop-off stop
-              </p>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Drop-off stop</p>
               <p className="mt-2 text-lg font-medium text-foreground">
                 {booking.droppingStop ?? booking.bus?.to ?? "Unavailable"}
               </p>
@@ -125,10 +118,9 @@ export default async function ConfirmationPage({
           </div>
 
           <div className="space-y-4">
+            {/* Passenger */}
             <div className="rounded-[28px] border border-border/80 bg-white p-5">
-              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                Passenger
-              </p>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Passenger</p>
               <p className="mt-2 text-lg font-medium text-foreground">
                 {booking.user?.name || user.name}
               </p>
@@ -137,15 +129,29 @@ export default async function ConfirmationPage({
               </p>
             </div>
 
+            {/* Fare */}
             <div className="rounded-[28px] border border-border/80 bg-white p-5">
-              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                Total fare
-              </p>
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Total fare</p>
               <p className="mt-2 font-heading text-3xl font-semibold text-foreground">
                 {formatCurrency(booking.totalPrice)}
               </p>
               <p className="mt-2 text-sm text-muted-foreground">
                 Booked on {formatDateTime(booking.createdAt)}
+              </p>
+            </div>
+
+            {/* QR code */}
+            <div className="flex flex-col items-center gap-3 rounded-[28px] border-2 border-dashed border-slate-200 bg-white p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                Boarding QR
+              </p>
+              <img
+                src={qrDataUrl}
+                alt="Boarding QR code"
+                className="h-36 w-36 rounded-xl"
+              />
+              <p className="text-center text-[10px] text-slate-400 leading-4">
+                Show this at the boarding gate.<br />Valid for this ticket only.
               </p>
             </div>
           </div>
