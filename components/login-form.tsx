@@ -33,7 +33,13 @@ export default function LoginForm({ callbackUrl }: LoginFormProps) {
       });
 
       if (!result || result.error) {
-        setError("Invalid email or password.");
+        if (result?.error === "BANNED") {
+          setError("Your account has been banned. Contact support for help.");
+        } else if (result?.error === "SUSPENDED") {
+          setError("Your account is temporarily suspended. Please try again later.");
+        } else {
+          setError("Invalid email or password.");
+        }
         return;
       }
 

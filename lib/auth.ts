@@ -52,6 +52,14 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        const status = (user as any).status ?? "active";
+        if (status === "banned") {
+          throw new Error("BANNED");
+        }
+        if (status === "suspended") {
+          throw new Error("SUSPENDED");
+        }
+
         return {
           id: String(user._id),
           name: user.name,
@@ -110,12 +118,22 @@ export async function requireUser(redirectTo = "/login"): Promise<User> {
   return user;
 }
 
+const STAFF_ROLES = ["admin", "support", "driver"] as const;
+
 export async function requireAdmin(redirectTo = "/"): Promise<User> {
   const user = await requireUser("/login");
 
-  if (user.role !== "admin") {
+  if (!STAFF_ROLES.includes(user.role as any)) {
     redirect(redirectTo);
   }
 
   return user;
+}
+
+export function isAdmin(role?: string): boolean {
+  return role === "admin";
+}
+
+export function isStaff(role?: string): boolean {
+  return STAFF_ROLES.includes(role as any);
 }

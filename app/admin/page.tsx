@@ -12,7 +12,7 @@ export default async function AdminPage() {
   return (
     <div className="flex min-h-screen w-full">
       {/* Sidebar - Fixed, doesn't move */}
-      <AdminSidebar userName={user?.name || "Admin"} userEmail={user?.email || "admin@example.com"} />
+      <AdminSidebar userName={user?.name || "Admin"} userEmail={user?.email || "admin@example.com"} userRole={user?.role} />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:ml-64">

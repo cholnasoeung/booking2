@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { compare } from "bcryptjs";
 import { getCurrentUser, requireUser } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
+import BookingModel from "@/models/Booking";
 
 export const runtime = "nodejs";
 
@@ -66,6 +68,55 @@ export async function PATCH(request: NextRequest) {
       { message: error instanceof Error ? error.message : "Failed to update profile" },
       { status: 500 }
     );
+  }
+}
+
+// DELETE — anonymize and remove account (GDPR-style)
+export async function DELETE(request: NextRequest) {
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    return NextResponse.json({ message: "Please log in" }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json().catch(() => ({}));
+    const password = typeof body?.password === "string" ? body.password : "";
+
+    if (!password) {
+      return NextResponse.json({ message: "Password confirmation required" }, { status: 400 });
+    }
+
+    await connectToDatabase();
+
+    const userDoc = await User.findById(currentUser.id).select("password").lean();
+    if (!userDoc?.password) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
+    const isValid = await compare(password, userDoc.password);
+    if (!isValid) {
+      return NextResponse.json({ message: "Incorrect password" }, { status: 400 });
+    }
+
+    // Anonymize instead of hard delete to preserve booking records
+    const anon = `deleted_${currentUser.id}`;
+    await User.findByIdAndUpdate(currentUser.id, {
+      name: "Deleted User",
+      email: `${anon}@deleted.invalid`,
+      password: "",
+      phone: undefined,
+      address: undefined,
+      status: "banned",
+      banReason: "Account deleted by user",
+      savedPassengers: [],
+      emailVerificationToken: undefined,
+      passwordResetToken: undefined,
+    });
+
+    return NextResponse.json({ message: "Account deleted successfully" });
+  } catch (error) {
+    console.error("Delete account error:", error);
+    return NextResponse.json({ message: "Unable to delete account" }, { status: 500 });
   }
 }
 

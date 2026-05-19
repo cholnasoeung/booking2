@@ -25,114 +25,45 @@ import {
 import { signOut } from "next-auth/react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { hasPermission } from "@/lib/permissions";
+import type { Permission } from "@/lib/permissions";
+import type { UserRole } from "@/models/User";
 
+// permission field maps each nav item to a required permission (undefined = visible to all staff)
 const navSections = [
   {
     title: "Main",
     items: [
-      {
-        title: "Dashboard",
-        href: "/admin",
-        icon: LayoutDashboard,
-        color: "from-indigo-500 to-purple-600",
-      },
-      {
-        title: "Routes",
-        href: "/admin?tab=routes",
-        icon: MapPinned,
-        color: "from-emerald-500 to-teal-600",
-      },
-      {
-        title: "Buses",
-        href: "/admin?tab=buses",
-        icon: BusFront,
-        color: "from-orange-500 to-red-600",
-      },
-      {
-        title: "Bookings",
-        href: "/admin?tab=bookings",
-        icon: Ticket,
-        color: "from-pink-500 to-rose-600",
-      },
+      { title: "Dashboard",  href: "/admin",               icon: LayoutDashboard, color: "from-indigo-500 to-purple-600", permission: "viewDashboard" },
+      { title: "Routes",     href: "/admin?tab=routes",    icon: MapPinned,       color: "from-emerald-500 to-teal-600", permission: "manageRoutes" },
+      { title: "Buses",      href: "/admin?tab=buses",     icon: BusFront,        color: "from-orange-500 to-red-600",   permission: "manageBuses" },
+      { title: "Bookings",   href: "/admin?tab=bookings",  icon: Ticket,          color: "from-pink-500 to-rose-600",    permission: "manageBookings" },
+      { title: "Users",      href: "/admin?tab=users",     icon: Users,           color: "from-violet-500 to-purple-600", permission: "manageUsers" },
     ],
   },
   {
     title: "Analytics & Insights",
     items: [
-      {
-        title: "Analytics",
-        href: "/admin?tab=analytics",
-        icon: BarChart3,
-        color: "from-cyan-500 to-blue-600",
-        badge: "New",
-      },
-      {
-        title: "System Status",
-        href: "/admin?tab=system-status",
-        icon: Activity,
-        color: "from-green-500 to-emerald-600",
-      },
+      { title: "Analytics",     href: "/admin?tab=analytics",    icon: BarChart3, color: "from-cyan-500 to-blue-600",     badge: "New", permission: "viewAnalytics" },
+      { title: "System Status", href: "/admin?tab=system-status", icon: Activity, color: "from-green-500 to-emerald-600",               permission: "viewAuditLogs" },
     ],
   },
   {
     title: "Management",
     items: [
-      {
-        title: "Drivers",
-        href: "/admin?tab=drivers",
-        icon: Users,
-        color: "from-cyan-500 to-blue-600",
-      },
-      {
-        title: "Bus Details",
-        href: "/admin?tab=bus-details",
-        icon: Package,
-        color: "from-slate-500 to-gray-600",
-      },
-      {
-        title: "Promo Codes",
-        href: "/admin?tab=promo-codes",
-        icon: Tags,
-        color: "from-violet-500 to-purple-600",
-        badge: "New",
-      },
-      {
-        title: "Import/Export",
-        href: "/admin?tab=import-export",
-        icon: FileSpreadsheet,
-        color: "from-amber-500 to-orange-600",
-        badge: "New",
-      },
-      {
-        title: "Ratings",
-        href: "/admin?tab=ratings",
-        icon: Star,
-        color: "from-yellow-500 to-amber-600",
-      },
+      { title: "Drivers",      href: "/admin?tab=drivers",      icon: Users,          color: "from-cyan-500 to-blue-600",    permission: "manageDrivers" },
+      { title: "Bus Details",  href: "/admin?tab=bus-details",  icon: Package,        color: "from-slate-500 to-gray-600",   permission: "manageBusDetails" },
+      { title: "Promo Codes",  href: "/admin?tab=promo-codes",  icon: Tags,           color: "from-violet-500 to-purple-600", badge: "New", permission: "managePromos" },
+      { title: "Import/Export",href: "/admin?tab=import-export",icon: FileSpreadsheet,color: "from-amber-500 to-orange-600", badge: "New", permission: "importExport" },
+      { title: "Ratings",      href: "/admin?tab=ratings",      icon: Star,           color: "from-yellow-500 to-amber-600", permission: "approveRatings" },
     ],
   },
   {
     title: "Security & Monitoring",
     items: [
-      {
-        title: "Alerts",
-        href: "/admin?tab=alerts",
-        icon: Bell,
-        color: "from-red-500 to-rose-600",
-        badge: "New",
-      },
-      {
-        title: "Audit Logs",
-        href: "/admin?tab=audit-logs",
-        icon: Shield,
-        color: "from-slate-500 to-gray-600",
-      },
-      {
-        title: "Security",
-        href: "/admin?tab=security",
-        icon: Shield,
-        color: "from-blue-500 to-indigo-600",
-      },
+      { title: "Alerts",     href: "/admin?tab=alerts",     icon: Bell,   color: "from-red-500 to-rose-600",    badge: "New", permission: "manageAlerts" },
+      { title: "Audit Logs", href: "/admin?tab=audit-logs", icon: Shield, color: "from-slate-500 to-gray-600",               permission: "viewAuditLogs" },
+      { title: "Security",   href: "/admin?tab=security",   icon: Shield, color: "from-blue-500 to-indigo-600",              permission: "manageSecurity" },
     ],
   },
 ];
@@ -142,9 +73,10 @@ const allNavItems = navSections.flatMap((section) => section.items);
 type AdminSidebarProps = {
   userName: string;
   userEmail: string;
+  userRole?: string;
 };
 
-export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
+export default function AdminSidebar({ userName, userEmail, userRole = "admin" }: AdminSidebarProps) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -215,6 +147,12 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
         {/* Navigation */}
         <nav className="flex-1 space-y-1 p-3 overflow-y-auto bg-gray-50">
           {navSections.map((section, sectionIndex) => {
+            const visibleItems = section.items.filter((item) => {
+              const perm = (item as any).permission as Permission | undefined;
+              if (!perm) return true;
+              return hasPermission(userRole as UserRole, perm);
+            });
+            if (visibleItems.length === 0) return null;
             const isCollapsed = collapsedSections.has(section.title);
             return (
               <div key={section.title} className={sectionIndex > 0 ? "mt-6" : ""}>
@@ -231,7 +169,7 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
                 </button>
 
                 {/* Section Items */}
-                {!isCollapsed && section.items.map((item) => {
+                {!isCollapsed && visibleItems.map((item) => {
                   const itemTab = item.href.split("?tab=")[1] || "overview";
                   const isActive = pathname === "/admin" && activeTab === itemTab;
                   return (
@@ -302,8 +240,8 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold leading-tight">{userName}</p>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">
-                  Admin
+                <p className="text-[10px] uppercase tracking-[0.2em] text-white/70 capitalize">
+                  {userRole}
                 </p>
               </div>
               <ChevronDown className="size-4 text-white/70" />

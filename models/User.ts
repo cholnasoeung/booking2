@@ -2,7 +2,8 @@ import mongoose, { type Document, Schema } from "mongoose";
 
 import { type BusType } from "@/lib/seat-layout";
 
-export type UserRole = "user" | "admin";
+export type UserRole = "user" | "support" | "driver" | "admin";
+export type UserStatus = "active" | "banned" | "suspended";
 
 export interface ISavedPassenger {
   name: string;
@@ -25,6 +26,8 @@ export interface IUser extends Document {
   phone?: string;
   address?: string;
   role: UserRole;
+  status: UserStatus;
+  banReason?: string;
   isEmailVerified: boolean;
   emailVerificationToken?: string;
   passwordResetToken?: string;
@@ -99,9 +102,19 @@ const UserSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "support", "driver", "admin"],
       default: "user",
       required: true,
+    },
+    status: {
+      type: String,
+      enum: ["active", "banned", "suspended"],
+      default: "active",
+      required: true,
+      index: true,
+    },
+    banReason: {
+      type: String,
     },
     isEmailVerified: {
       type: Boolean,
