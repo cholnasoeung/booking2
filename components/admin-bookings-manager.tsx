@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, Search, Ticket, XCircle } from "lucide-react";
 
 import {
   EmptyState,
+  PAGE_SIZE,
+  Paginator,
   StatusBadge,
   SummaryTile,
   passengerCountLabel,
@@ -146,6 +148,12 @@ export default function AdminBookingsManager({
           );
       }
     });
+
+  const [page, setPage] = useState(1);
+  const totalPages = Math.ceil(visibleBookings.length / PAGE_SIZE);
+  const pagedBookings = visibleBookings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  useEffect(() => { setPage(1); }, [bookingQuery, bookingStatusFilter, bookingRouteFilter, bookingTravelDateFilter, bookingSort]);
 
   async function confirmBookingCancellation() {
     if (!bookingToCancel) {
@@ -352,7 +360,7 @@ export default function AdminBookingsManager({
                       </TableCell>
                     </TableRow>
                   ) : (
-                    visibleBookings.map((booking) => (
+                    pagedBookings.map((booking) => (
                       <TableRow
                         key={booking.id}
                         className="transition-colors hover:bg-pink-50/50"
@@ -447,6 +455,13 @@ export default function AdminBookingsManager({
                   )}
                 </TableBody>
               </Table>
+              <Paginator
+                page={page}
+                totalPages={totalPages}
+                totalItems={visibleBookings.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={setPage}
+              />
             </div>
           </CardContent>
         </Card>

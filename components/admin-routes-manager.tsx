@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MapPinned, PencilLine, Plus, Search, Trash2 } from "lucide-react";
 
-import { EmptyState, SummaryTile, buildRouteUsage, emptyRouteUsage } from "@/components/admin-management-shared";
+import { EmptyState, PAGE_SIZE, Paginator, SummaryTile, buildRouteUsage, emptyRouteUsage } from "@/components/admin-management-shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,6 +79,8 @@ export default function AdminRoutesManager({
     bookings
   );
   const confirmedBookings = bookings.filter((booking) => booking.status === "confirmed");
+  const [page, setPage] = useState(1);
+
   const normalizedQuery = routeQuery.trim().toLowerCase();
   const visibleRoutes = routes.filter((route) => {
     if (!normalizedQuery) {
@@ -89,6 +91,11 @@ export default function AdminRoutesManager({
       .toLowerCase();
     return haystack.includes(normalizedQuery);
   });
+
+  const totalPages = Math.ceil(visibleRoutes.length / PAGE_SIZE);
+  const pagedRoutes = visibleRoutes.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  useEffect(() => { setPage(1); }, [routeQuery]);
 
   const isEditingRoute = Boolean(selectedRoute);
 
@@ -280,7 +287,7 @@ export default function AdminRoutesManager({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  visibleRoutes.map((route) => {
+                  pagedRoutes.map((route) => {
                     const usage = routeUsage.get(route.id) ?? emptyRouteUsage();
 
                     return (
@@ -338,6 +345,13 @@ export default function AdminRoutesManager({
                 )}
               </TableBody>
             </Table>
+            <Paginator
+              page={page}
+              totalPages={totalPages}
+              totalItems={visibleRoutes.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={setPage}
+            />
           </div>
         </CardContent>
       </Card>

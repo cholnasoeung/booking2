@@ -389,7 +389,12 @@ export default function AdminBusDialog({
                 }}
               >
                 <SelectTrigger id="bus-route" className="h-11 w-full rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20">
-                  <SelectValue placeholder="Select a route" />
+                  <SelectValue placeholder="Select a route">
+                    {(() => {
+                      const r = routes.find((route) => route.id === form.routeId);
+                      return r ? `${r.from} to ${r.to}` : undefined;
+                    })()}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {routes.map((route) => (

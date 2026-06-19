@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BusFront, Navigation, PencilLine, Plus, Search, Trash2 } from "lucide-react";
 
 import AdminBusDialog from "@/components/admin-bus-dialog";
-import { AvailabilityBadge, EmptyState, SummaryTile } from "@/components/admin-management-shared";
+import { AvailabilityBadge, EmptyState, PAGE_SIZE, Paginator, SummaryTile } from "@/components/admin-management-shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,6 +68,8 @@ export default function AdminBusesManager({
   const [newStatusNote, setNewStatusNote] = useState("");
   const [statusPending, setStatusPending] = useState(false);
 
+  const [page, setPage] = useState(1);
+
   const normalizedQuery = busQuery.trim().toLowerCase();
   const visibleBuses = buses.filter((bus) => {
     if (busRouteFilter !== "all" && bus.routeId !== busRouteFilter) {
@@ -86,6 +88,11 @@ export default function AdminBusesManager({
       .toLowerCase();
     return haystack.includes(normalizedQuery);
   });
+
+  const totalPages = Math.ceil(visibleBuses.length / PAGE_SIZE);
+  const pagedBuses = visibleBuses.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  useEffect(() => { setPage(1); }, [busQuery, busRouteFilter, busDateFilter]);
 
   async function confirmBusDelete() {
     if (!busToDelete) {
@@ -249,8 +256,12 @@ export default function AdminBusesManager({
                         />
                       </TableCell>
                     </TableRow>
+                  ) : pagedBuses.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} />
+                    </TableRow>
                   ) : (
-                    visibleBuses.map((bus) => (
+                    pagedBuses.map((bus) => (
                       <TableRow
                         key={bus.id}
                         className="transition-colors hover:bg-orange-50/50"
@@ -334,6 +345,13 @@ export default function AdminBusesManager({
                   )}
                 </TableBody>
               </Table>
+              <Paginator
+                page={page}
+                totalPages={totalPages}
+                totalItems={visibleBuses.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={setPage}
+              />
             </div>
           )}
         </CardContent>
@@ -383,7 +401,7 @@ export default function AdminBusesManager({
           <div className="space-y-4 py-2">
             <div className="space-y-1">
               <label className="text-sm font-medium">Status</label>
-              <Select value={newStatus} onValueChange={setNewStatus}>
+              <Select value={newStatus} onValueChange={(v) => { if (v) setNewStatus(v); }}>
                 <SelectTrigger className="rounded-xl">
                   <SelectValue />
                 </SelectTrigger>

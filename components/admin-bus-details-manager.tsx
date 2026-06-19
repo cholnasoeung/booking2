@@ -1,6 +1,7 @@
  "use client";
 
 import { useState, useTransition } from "react";
+import { PAGE_SIZE, Paginator } from "@/components/admin-management-shared";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,6 +44,9 @@ const initialState: BusDetailsFormState = {
 export default function AdminBusDetailsManager({ busDetails }: AdminBusDetailsManagerProps) {
   const [form, setForm] = useState(initialState);
   const [details, setDetails] = useState(busDetails);
+  const [detailPage, setDetailPage] = useState(1);
+  const detailTotalPages = Math.ceil(details.length / PAGE_SIZE);
+  const pagedDetails = details.slice((detailPage - 1) * PAGE_SIZE, detailPage * PAGE_SIZE);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -227,7 +231,7 @@ export default function AdminBusDetailsManager({ busDetails }: AdminBusDetailsMa
             <p className="text-sm text-slate-500">Add a vehicle to start assigning it to buses.</p>
           ) : (
             <div className="space-y-2">
-              {details.map((detail) => (
+              {pagedDetails.map((detail) => (
                 <div
                   key={detail.id}
                   className="flex flex-col gap-1 rounded-2xl border border-dashed border-slate-200 bg-white/80 px-4 py-3 shadow-sm"
@@ -252,6 +256,13 @@ export default function AdminBusDetailsManager({ busDetails }: AdminBusDetailsMa
                   )}
                 </div>
               ))}
+              <Paginator
+                page={detailPage}
+                totalPages={detailTotalPages}
+                totalItems={details.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={setDetailPage}
+              />
             </div>
           )}
         </CardContent>

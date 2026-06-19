@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PAGE_SIZE, Paginator } from "@/components/admin-management-shared";
 import type { DriverSummary } from "@/lib/queries";
 
 type AdminDriversManagerProps = {
@@ -28,6 +29,9 @@ const initialFormState: DriverFormState = {
 
 export default function AdminDriversManager({ drivers }: AdminDriversManagerProps) {
   const [driverList, setDriverList] = useState(drivers);
+  const [driverPage, setDriverPage] = useState(1);
+  const driverTotalPages = Math.ceil(driverList.length / PAGE_SIZE);
+  const pagedDrivers = driverList.slice((driverPage - 1) * PAGE_SIZE, driverPage * PAGE_SIZE);
   const [form, setForm] = useState(initialFormState);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -167,7 +171,7 @@ export default function AdminDriversManager({ drivers }: AdminDriversManagerProp
             <p className="text-sm text-slate-500">Add a driver to get started.</p>
           ) : (
             <div className="space-y-3">
-              {driverList.map((driver) => (
+              {pagedDrivers.map((driver) => (
                 <div
                   key={driver.id}
                   className="flex flex-col gap-2 rounded-2xl border border-slate-100 bg-white/80 px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between"
@@ -194,6 +198,13 @@ export default function AdminDriversManager({ drivers }: AdminDriversManagerProp
                   </div>
                 </div>
               ))}
+              <Paginator
+                page={driverPage}
+                totalPages={driverTotalPages}
+                totalItems={driverList.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={setDriverPage}
+              />
             </div>
           )}
         </CardContent>
