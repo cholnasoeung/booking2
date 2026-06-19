@@ -52,6 +52,10 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        if ((user as any).isSuspended) {
+          return null;
+        }
+
         return {
           id: String(user._id),
           name: user.name,

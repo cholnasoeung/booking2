@@ -26,6 +26,9 @@ export interface IUser extends Document {
   address?: string;
   role: UserRole;
   isEmailVerified: boolean;
+  isSuspended?: boolean;
+  suspendedAt?: Date;
+  suspendedReason?: string;
   emailVerificationToken?: string;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
@@ -105,6 +108,13 @@ const UserSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    isSuspended: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    suspendedAt: { type: Date },
+    suspendedReason: { type: String, trim: true },
     emailVerificationToken: {
       type: String,
       index: true,

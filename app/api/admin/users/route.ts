@@ -13,6 +13,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q") ?? "";
   const role = searchParams.get("role") ?? "";
+  const status = searchParams.get("status") ?? "";
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
   const limit = 20;
 
@@ -28,11 +29,14 @@ export async function GET(request: Request) {
   if (role === "admin" || role === "user") {
     filter.role = role;
   }
+  if (status === "suspended") {
+    filter.isSuspended = true;
+  }
 
   const [total, users] = await Promise.all([
     UserModel.countDocuments(filter),
     UserModel.find(filter)
-      .select("name email role phone isEmailVerified lastLoginAt createdAt")
+      .select("name email role phone isEmailVerified isSuspended suspendedAt lastLoginAt createdAt")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -47,6 +51,8 @@ export async function GET(request: Request) {
       role: u.role,
       phone: u.phone ?? null,
       isEmailVerified: u.isEmailVerified,
+      isSuspended: u.isSuspended ?? false,
+      suspendedAt: u.suspendedAt ?? null,
       lastLoginAt: u.lastLoginAt ?? null,
       createdAt: u.createdAt,
     })),

@@ -1,214 +1,540 @@
 "use client";
 
-import { type FormEvent, useState, useTransition } from "react";
-import { Badge } from "@/components/ui/badge";
+import { useState, useTransition } from "react";
+import {
+  Users, Plus, MoreVertical, Eye, Pencil, Ban, CircleCheck,
+  Trash2, Phone, FileText, Car, RefreshCw, X, AlertTriangle,
+  Calendar, CheckCircle2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PAGE_SIZE, Paginator } from "@/components/admin-management-shared";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import type { DriverSummary } from "@/lib/queries";
 
-type AdminDriversManagerProps = {
-  drivers: DriverSummary[];
-};
+type Driver = DriverSummary & { vehicleNumber?: string | null };
 
-type DriverFormState = {
+type DriverForm = {
   name: string;
   phone: string;
   licenseNumber: string;
   vehicleNumber: string;
 };
 
-const initialFormState: DriverFormState = {
-  name: "",
-  phone: "",
-  licenseNumber: "",
-  vehicleNumber: "",
-};
+const EMPTY_FORM: DriverForm = { name: "", phone: "", licenseNumber: "", vehicleNumber: "" };
 
-export default function AdminDriversManager({ drivers }: AdminDriversManagerProps) {
-  const [driverList, setDriverList] = useState(drivers);
-  const [driverPage, setDriverPage] = useState(1);
-  const driverTotalPages = Math.ceil(driverList.length / PAGE_SIZE);
-  const pagedDrivers = driverList.slice((driverPage - 1) * PAGE_SIZE, driverPage * PAGE_SIZE);
-  const [form, setForm] = useState(initialFormState);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+function formFromDriver(d: Driver): DriverForm {
+  return {
+    name: d.name,
+    phone: d.phone,
+    licenseNumber: d.licenseNumber,
+    vehicleNumber: d.vehicleNumber ?? "",
+  };
+}
+
+function DriverAvatar({ name, suspended }: { name: string; suspended?: boolean }) {
+  return (
+    <div className={cn(
+      "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white text-sm font-bold shadow-sm",
+      suspended
+        ? "bg-gradient-to-br from-orange-400 to-red-500"
+        : "bg-gradient-to-br from-indigo-500 to-violet-600"
+    )}>
+      {suspended ? <Ban className="h-4 w-4" /> : name.charAt(0).toUpperCase()}
+    </div>
+  );
+}
+
+function DriverFormFields({
+  form,
+  onChange,
+  disabled,
+}: {
+  form: DriverForm;
+  onChange: (f: DriverForm) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold text-slate-700">Full Name <span className="text-red-500">*</span></Label>
+          <div className="relative">
+            <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input className="pl-10 h-11 rounded-xl" placeholder="e.g. Sofia Santos"
+              value={form.name} disabled={disabled}
+              onChange={(e) => onChange({ ...form, name: e.target.value })} required />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold text-slate-700">Phone <span className="text-red-500">*</span></Label>
+          <div className="relative">
+            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input className="pl-10 h-11 rounded-xl" placeholder="+855 12 345 678"
+              value={form.phone} disabled={disabled}
+              onChange={(e) => onChange({ ...form, phone: e.target.value })} required />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold text-slate-700">License Number <span className="text-red-500">*</span></Label>
+          <div className="relative">
+            <FileText className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input className="pl-10 h-11 rounded-xl" placeholder="DL-1234-5678"
+              value={form.licenseNumber} disabled={disabled}
+              onChange={(e) => onChange({ ...form, licenseNumber: e.target.value })} required />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold text-slate-700">Vehicle Number <span className="text-slate-400 font-normal">(optional)</span></Label>
+          <div className="relative">
+            <Car className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input className="pl-10 h-11 rounded-xl" placeholder="AB 1234 C"
+              value={form.vehicleNumber} disabled={disabled}
+              onChange={(e) => onChange({ ...form, vehicleNumber: e.target.value })} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function AdminDriversManager({ drivers: initialDrivers }: { drivers: DriverSummary[] }) {
+  const [drivers, setDrivers] = useState<Driver[]>(initialDrivers as Driver[]);
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setMessage(null);
+  // Modal state
+  const [showAdd, setShowAdd] = useState(false);
+  const [editTarget, setEditTarget] = useState<Driver | null>(null);
+  const [detailTarget, setDetailTarget] = useState<Driver | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Driver | null>(null);
 
+  // Form state
+  const [addForm, setAddForm] = useState<DriverForm>(EMPTY_FORM);
+  const [editForm, setEditForm] = useState<DriverForm>(EMPTY_FORM);
+
+  // Feedback
+  const [feedback, setFeedback] = useState<{ msg: string; ok: boolean } | null>(null);
+  const [actionPendingId, setActionPendingId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  function showFeedback(msg: string, ok: boolean) {
+    setFeedback({ msg, ok });
+    setTimeout(() => setFeedback(null), 4000);
+  }
+
+  // ── Add driver ──
+  async function handleAdd(e: React.FormEvent) {
+    e.preventDefault();
     startTransition(async () => {
       try {
-        const response = await fetch("/api/admin/drivers", {
+        const res = await fetch("/api/admin/drivers", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name: form.name.trim(),
-            phone: form.phone.trim(),
-            licenseNumber: form.licenseNumber.trim(),
-            vehicleNumber: form.vehicleNumber.trim() || undefined,
+            name: addForm.name.trim(),
+            phone: addForm.phone.trim(),
+            licenseNumber: addForm.licenseNumber.trim(),
+            vehicleNumber: addForm.vehicleNumber.trim() || undefined,
           }),
         });
-
-        const payload = await response.json();
-
-        if (!response.ok) {
-          setMessage({
-            type: "error",
-            text: payload?.message ?? "Unable to add driver right now.",
-          });
-          return;
-        }
-
-        setDriverList((prev) => [payload.driver, ...prev]);
-        setForm(initialFormState);
-        setMessage({
-          type: "success",
-          text: payload.message ?? "Driver added successfully.",
-        });
-      } catch (error) {
-        setMessage({
-          type: "error",
-          text: "Something went wrong while saving the driver.",
-        });
+        const json = await res.json();
+        if (!res.ok) { showFeedback(json.message ?? "Failed to add driver", false); return; }
+        setDrivers((prev) => [json.driver, ...prev]);
+        setAddForm(EMPTY_FORM);
+        setShowAdd(false);
+        showFeedback("Driver added successfully!", true);
+      } catch {
+        showFeedback("Something went wrong", false);
       }
     });
-  };
+  }
+
+  // ── Edit driver ──
+  async function handleEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editTarget) return;
+    startTransition(async () => {
+      try {
+        const res = await fetch(`/api/admin/drivers/${editTarget.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: editForm.name.trim(),
+            phone: editForm.phone.trim(),
+            licenseNumber: editForm.licenseNumber.trim(),
+            vehicleNumber: editForm.vehicleNumber.trim() || "",
+          }),
+        });
+        const json = await res.json();
+        if (!res.ok) { showFeedback(json.message ?? "Failed to save", false); return; }
+        setDrivers((prev) => prev.map((d) => d.id === editTarget.id ? json.driver : d));
+        setEditTarget(null);
+        showFeedback("Driver updated successfully!", true);
+      } catch {
+        showFeedback("Something went wrong", false);
+      }
+    });
+  }
+
+  // ── Toggle status ──
+  async function toggleStatus(driver: Driver) {
+    setActionPendingId(driver.id);
+    const newStatus = driver.status === "active" ? "inactive" : "active";
+    try {
+      const res = await fetch(`/api/admin/drivers/${driver.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const json = await res.json();
+      if (!res.ok) { showFeedback(json.message ?? "Failed", false); return; }
+      setDrivers((prev) => prev.map((d) => d.id === driver.id ? json.driver : d));
+      showFeedback(
+        newStatus === "inactive"
+          ? `${driver.name} has been suspended`
+          : `${driver.name} has been reinstated`,
+        true
+      );
+    } catch {
+      showFeedback("Request failed", false);
+    } finally {
+      setActionPendingId(null);
+    }
+  }
+
+  // ── Delete driver ──
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/admin/drivers/${deleteTarget.id}`, { method: "DELETE" });
+      const json = await res.json();
+      if (!res.ok) { showFeedback(json.message ?? "Failed to delete", false); return; }
+      setDrivers((prev) => prev.filter((d) => d.id !== deleteTarget.id));
+      setDeleteTarget(null);
+      showFeedback("Driver removed from roster", true);
+    } catch {
+      showFeedback("Request failed", false);
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  const activeCount = drivers.filter((d) => d.status === "active").length;
+  const inactiveCount = drivers.filter((d) => d.status === "inactive").length;
 
   return (
     <div className="space-y-6">
-      <Card className="rounded-3xl border border-slate-200 shadow-xl">
-        <CardHeader className="space-y-1">
-          <CardTitle>Driver management</CardTitle>
-          <p className="text-sm text-slate-500">
-            Register drivers, track their status, and keep the dispatch roster up to date.
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-2">
-                <Label htmlFor="driver-name">Full name</Label>
-                <Input
-                  id="driver-name"
-                  value={form.name}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, name: event.target.value }))
-                  }
-                  placeholder="e.g. Sofia Santos"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="driver-phone">Phone</Label>
-                <Input
-                  id="driver-phone"
-                  value={form.phone}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, phone: event.target.value }))
-                  }
-                  placeholder="+62 812 3456 7890"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="driver-license">License number</Label>
-                <Input
-                  id="driver-license"
-                  value={form.licenseNumber}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, licenseNumber: event.target.value }))
-                  }
-                  placeholder="DL-1234-5678"
-                  required
-                />
-              </div>
-            </div>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900">Driver Management</h2>
+          <p className="text-sm text-slate-500 mt-1">Register drivers and keep the dispatch roster up to date</p>
+        </div>
+        <Button
+          onClick={() => { setAddForm(EMPTY_FORM); setShowAdd(true); }}
+          className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-xl h-11 px-5 shadow-md shadow-indigo-200"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Driver
+        </Button>
+      </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="driver-vehicle">Vehicle number (optional)</Label>
-              <Input
-                id="driver-vehicle"
-                value={form.vehicleNumber}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, vehicleNumber: event.target.value }))
-                }
-                placeholder="AB 1234 C"
-              />
-            </div>
+      {/* Feedback */}
+      {feedback && (
+        <div className={cn(
+          "rounded-xl px-4 py-3 text-sm font-medium flex items-center justify-between",
+          feedback.ok
+            ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
+            : "bg-red-50 border border-red-200 text-red-700"
+        )}>
+          <span>{feedback.msg}</span>
+          <button onClick={() => setFeedback(null)}><X className="h-4 w-4 opacity-60 hover:opacity-100" /></button>
+        </div>
+      )}
 
-            {message ? (
-              <p
-                className={`text-sm font-medium ${
-                  message.type === "success" ? "text-emerald-600" : "text-red-600"
-                }`}
-              >
-                {message.text}
-              </p>
-            ) : null}
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="rounded-2xl bg-indigo-50 border border-indigo-100 px-5 py-4">
+          <p className="text-xs uppercase tracking-wide text-indigo-500 font-semibold">Total</p>
+          <p className="text-3xl font-bold text-indigo-700 mt-1">{drivers.length}</p>
+        </div>
+        <div className="rounded-2xl bg-emerald-50 border border-emerald-100 px-5 py-4">
+          <p className="text-xs uppercase tracking-wide text-emerald-500 font-semibold">Active</p>
+          <p className="text-3xl font-bold text-emerald-700 mt-1">{activeCount}</p>
+        </div>
+        <div className="rounded-2xl bg-orange-50 border border-orange-100 px-5 py-4">
+          <p className="text-xs uppercase tracking-wide text-orange-500 font-semibold">Inactive</p>
+          <p className="text-3xl font-bold text-orange-700 mt-1">{inactiveCount}</p>
+        </div>
+      </div>
 
-            <Button type="submit" className="w-full max-w-sm rounded-xl" disabled={isPending}>
-              {isPending ? "Saving driver…" : "Add driver"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card className="rounded-3xl border border-slate-200 shadow-xl">
-        <CardHeader className="space-y-1">
-          <CardTitle>Current roster</CardTitle>
-          <p className="text-sm text-slate-500">
-            {driverList.length} driver{driverList.length === 1 ? "" : "s"} registered.
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {driverList.length === 0 ? (
-            <p className="text-sm text-slate-500">Add a driver to get started.</p>
-          ) : (
-            <div className="space-y-3">
-              {pagedDrivers.map((driver) => (
-                <div
+      {/* Driver list */}
+      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+        {drivers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+            <Users className="h-12 w-12 mb-3 opacity-30" />
+            <p className="font-medium">No drivers yet</p>
+            <p className="text-sm mt-1">Click "Add Driver" to register the first driver</p>
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Driver</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden sm:table-cell">Contact</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden md:table-cell">License</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden lg:table-cell">Vehicle</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</th>
+                <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {drivers.map((driver) => (
+                <tr
                   key={driver.id}
-                  className="flex flex-col gap-2 rounded-2xl border border-slate-100 bg-white/80 px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+                  className={cn(
+                    "transition-colors",
+                    driver.status === "inactive" ? "bg-orange-50/30 hover:bg-orange-50/60" : "hover:bg-slate-50"
+                  )}
                 >
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">{driver.name}</p>
-                    <p className="text-[11px] uppercase tracking-[0.35em] text-slate-400">
-                      {driver.createdAt.slice(0, 10)}
-                    </p>
-                  </div>
-                  <div className="flex flex-col gap-1 text-sm text-slate-600">
-                    <span>{driver.phone}</span>
-                    <span className="text-[13px] text-slate-500">{driver.licenseNumber}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={driver.status === "active" ? "secondary" : "outline"}>
-                      {driver.status}
-                    </Badge>
-                    {driver.vehicleNumber && (
-                      <span className="text-xs font-medium text-slate-400">
-                        {driver.vehicleNumber}
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-3">
+                      <DriverAvatar name={driver.name} suspended={driver.status === "inactive"} />
+                      <div>
+                        <p className="font-semibold text-slate-900">{driver.name}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          Joined {new Date(driver.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-5 py-4 hidden sm:table-cell">
+                    <p className="text-slate-700">{driver.phone}</p>
+                  </td>
+                  <td className="px-5 py-4 hidden md:table-cell">
+                    <span className="font-mono text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded-lg">
+                      {driver.licenseNumber}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4 hidden lg:table-cell text-slate-500 text-xs">
+                    {driver.vehicleNumber ?? "—"}
+                  </td>
+                  <td className="px-5 py-4">
+                    {driver.status === "active" ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 border border-emerald-200 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                        <CheckCircle2 className="h-3 w-3" />Active
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-100 border border-orange-200 px-2.5 py-1 text-xs font-semibold text-orange-700">
+                        <Ban className="h-3 w-3" />Inactive
                       </span>
                     )}
-                  </div>
-                </div>
+                  </td>
+                  <td className="px-5 py-4 text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        disabled={actionPendingId === driver.id}
+                        className={cn(
+                          "inline-flex items-center justify-center h-8 w-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors",
+                          actionPendingId === driver.id && "opacity-50 cursor-not-allowed"
+                        )}
+                      >
+                        {actionPendingId === driver.id
+                          ? <RefreshCw className="h-3.5 w-3.5 animate-spin text-slate-500" />
+                          : <MoreVertical className="h-3.5 w-3.5 text-slate-500" />
+                        }
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-44">
+                        <DropdownMenuItem
+                          className="gap-2 text-slate-700"
+                          onClick={() => setDetailTarget(driver)}
+                        >
+                          <Eye className="h-4 w-4" />View Detail
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="gap-2 text-indigo-700 focus:text-indigo-700 focus:bg-indigo-50"
+                          onClick={() => { setEditForm(formFromDriver(driver)); setEditTarget(driver); }}
+                        >
+                          <Pencil className="h-4 w-4" />Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        {driver.status === "active" ? (
+                          <DropdownMenuItem
+                            className="gap-2 text-orange-700 focus:text-orange-700 focus:bg-orange-50"
+                            onClick={() => toggleStatus(driver)}
+                          >
+                            <Ban className="h-4 w-4" />Suspend
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuItem
+                            className="gap-2 text-emerald-700 focus:text-emerald-700 focus:bg-emerald-50"
+                            onClick={() => toggleStatus(driver)}
+                          >
+                            <CircleCheck className="h-4 w-4" />Reinstate
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="gap-2 text-red-700 focus:text-red-700 focus:bg-red-50"
+                          onClick={() => setDeleteTarget(driver)}
+                        >
+                          <Trash2 className="h-4 w-4" />Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </td>
+                </tr>
               ))}
-              <Paginator
-                page={driverPage}
-                totalPages={driverTotalPages}
-                totalItems={driverList.length}
-                pageSize={PAGE_SIZE}
-                onPageChange={setDriverPage}
-              />
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* ── ADD DRIVER MODAL ── */}
+      <Dialog open={showAdd} onOpenChange={setShowAdd}>
+        <DialogContent className="sm:max-w-lg rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-slate-900">Add New Driver</DialogTitle>
+            <DialogDescription>Fill in the driver's details to register them on the roster.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleAdd} className="space-y-5 mt-2">
+            <DriverFormFields form={addForm} onChange={setAddForm} disabled={isPending} />
+            <div className="flex justify-end gap-3 pt-2">
+              <Button type="button" variant="outline" className="rounded-xl" onClick={() => setShowAdd(false)} disabled={isPending}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-xl px-6"
+              >
+                {isPending ? <><RefreshCw className="h-4 w-4 animate-spin mr-2" />Saving…</> : <><Plus className="h-4 w-4 mr-2" />Add Driver</>}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── EDIT DRIVER MODAL ── */}
+      <Dialog open={!!editTarget} onOpenChange={(o) => { if (!o) setEditTarget(null); }}>
+        <DialogContent className="sm:max-w-lg rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-slate-900">Edit Driver</DialogTitle>
+            <DialogDescription>Update the information for {editTarget?.name}.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEdit} className="space-y-5 mt-2">
+            <DriverFormFields form={editForm} onChange={setEditForm} disabled={isPending} />
+            <div className="flex justify-end gap-3 pt-2">
+              <Button type="button" variant="outline" className="rounded-xl" onClick={() => setEditTarget(null)} disabled={isPending}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-xl px-6"
+              >
+                {isPending ? <><RefreshCw className="h-4 w-4 animate-spin mr-2" />Saving…</> : <><Pencil className="h-4 w-4 mr-2" />Save Changes</>}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── DETAIL MODAL ── */}
+      <Dialog open={!!detailTarget} onOpenChange={(o) => { if (!o) setDetailTarget(null); }}>
+        <DialogContent className="sm:max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-slate-900">Driver Details</DialogTitle>
+          </DialogHeader>
+          {detailTarget && (
+            <div className="space-y-5 mt-2">
+              {/* Avatar + name */}
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <DriverAvatar name={detailTarget.name} suspended={detailTarget.status === "inactive"} />
+                <div>
+                  <p className="font-bold text-slate-900 text-lg">{detailTarget.name}</p>
+                  {detailTarget.status === "active" ? (
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 mt-1">
+                      <CheckCircle2 className="h-3 w-3" />Active
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-orange-700 mt-1">
+                      <Ban className="h-3 w-3" />Inactive
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Info grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { icon: Phone,    label: "Phone",          value: detailTarget.phone },
+                  { icon: FileText, label: "License No.",    value: detailTarget.licenseNumber },
+                  { icon: Car,      label: "Vehicle No.",    value: detailTarget.vehicleNumber ?? "Not assigned" },
+                  { icon: Calendar, label: "Joined",         value: new Date(detailTarget.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) },
+                ].map(({ icon: Icon, label, value }) => (
+                  <div key={label} className="rounded-xl bg-slate-50 border border-slate-200 p-3">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Icon className="h-3.5 w-3.5 text-slate-400" />
+                      <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400">{label}</p>
+                    </div>
+                    <p className="text-sm font-semibold text-slate-800">{value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-3 pt-1">
+                <Button variant="outline" className="rounded-xl" onClick={() => setDetailTarget(null)}>Close</Button>
+                <Button
+                  className="rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white"
+                  onClick={() => { setDetailTarget(null); setEditForm(formFromDriver(detailTarget)); setEditTarget(detailTarget); }}
+                >
+                  <Pencil className="h-4 w-4 mr-2" />Edit
+                </Button>
+              </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── DELETE CONFIRM MODAL ── */}
+      <Dialog open={!!deleteTarget} onOpenChange={(o) => { if (!o && !deleting) setDeleteTarget(null); }}>
+        <DialogContent className="sm:max-w-sm rounded-2xl">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-1">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-100">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+              </div>
+              <DialogTitle className="text-lg font-bold text-slate-900">Delete Driver</DialogTitle>
+            </div>
+            <DialogDescription className="text-slate-600">
+              Are you sure you want to remove <span className="font-semibold text-slate-800">{deleteTarget?.name}</span> from the roster?
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" className="rounded-xl" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button
+              className="rounded-xl bg-red-600 hover:bg-red-700 text-white"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? <><RefreshCw className="h-4 w-4 animate-spin mr-2" />Deleting…</> : <><Trash2 className="h-4 w-4 mr-2" />Delete Driver</>}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

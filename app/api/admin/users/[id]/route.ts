@@ -30,6 +30,16 @@ export async function PATCH(
     update.role = body.role;
   }
 
+  if (typeof body.isSuspended === "boolean") {
+    update.isSuspended = body.isSuspended;
+    update.suspendedAt = body.isSuspended ? new Date() : null;
+    if (body.isSuspended && typeof body.suspendedReason === "string") {
+      update.suspendedReason = body.suspendedReason.trim();
+    } else if (!body.isSuspended) {
+      update.suspendedReason = null;
+    }
+  }
+
   if (Object.keys(update).length === 0) {
     return Response.json({ message: "Nothing to update" }, { status: 400 });
   }
@@ -37,7 +47,7 @@ export async function PATCH(
   await connectToDatabase();
 
   const user = await UserModel.findByIdAndUpdate(id, { $set: update }, { new: true })
-    .select("name email role isEmailVerified lastLoginAt createdAt")
+    .select("name email role isEmailVerified isSuspended suspendedAt lastLoginAt createdAt")
     .lean() as any;
 
   if (!user) {
@@ -51,8 +61,37 @@ export async function PATCH(
       email: user.email,
       role: user.role,
       isEmailVerified: user.isEmailVerified,
+      isSuspended: user.isSuspended ?? false,
+      suspendedAt: user.suspendedAt ?? null,
       lastLoginAt: user.lastLoginAt ?? null,
       createdAt: user.createdAt,
     },
   });
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getCurrentSession();
+  if (session?.user?.role !== "admin") {
+    return Response.json({ message: "Forbidden" }, { status: 403 });
+  }
+
+  const { id } = await params;
+  if (!isValidObjectId(id)) {
+    return Response.json({ message: "Invalid user ID" }, { status: 400 });
+  }
+
+  if (id === session.user.id) {
+    return Response.json({ message: "Cannot delete your own account" }, { status: 400 });
+  }
+
+  await connectToDatabase();
+  const user = await UserModel.findByIdAndDelete(id);
+  if (!user) {
+    return Response.json({ message: "User not found" }, { status: 404 });
+  }
+
+  return Response.json({ message: "Account deleted successfully" });
 }

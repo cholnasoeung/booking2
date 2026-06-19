@@ -1,25 +1,32 @@
- "use client";
+"use client";
 
 import { useState, useTransition } from "react";
-import { PAGE_SIZE, Paginator } from "@/components/admin-management-shared";
-
+import {
+  Bus, Plus, MoreVertical, Eye, Pencil, Trash2, RefreshCw,
+  X, AlertTriangle, Hash, Users, Calendar, Layers, Image,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { BUS_TYPES } from "@/lib/constants";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import { BUS_TYPES, AMENITY_OPTIONS } from "@/lib/constants";
 import { type BusType } from "@/lib/seat-layout";
 import { type BusDetailSummary } from "@/lib/queries";
 
-type BusDetailsFormState = {
+type BusDetail = BusDetailSummary;
+
+type BusForm = {
   name: string;
   registrationNumber: string;
   busType: BusType;
@@ -28,11 +35,7 @@ type BusDetailsFormState = {
   imageUrls: string;
 };
 
-type AdminBusDetailsManagerProps = {
-  busDetails: BusDetailSummary[];
-};
-
-const initialState: BusDetailsFormState = {
+const EMPTY_FORM: BusForm = {
   name: "",
   registrationNumber: "",
   busType: "mini_bus",
@@ -41,232 +44,543 @@ const initialState: BusDetailsFormState = {
   imageUrls: "",
 };
 
-export default function AdminBusDetailsManager({ busDetails }: AdminBusDetailsManagerProps) {
-  const [form, setForm] = useState(initialState);
-  const [details, setDetails] = useState(busDetails);
-  const [detailPage, setDetailPage] = useState(1);
-  const detailTotalPages = Math.ceil(details.length / PAGE_SIZE);
-  const pagedDetails = details.slice((detailPage - 1) * PAGE_SIZE, detailPage * PAGE_SIZE);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+const BUS_TYPE_LABELS: Record<string, string> = {
+  bus_45: "45-Seat Bus",
+  mini_bus: "Mini Bus",
+  car: "Car",
+};
+
+const BUS_TYPE_COLORS: Record<string, string> = {
+  bus_45:   "from-indigo-500 to-violet-600",
+  mini_bus: "from-emerald-500 to-teal-600",
+  car:      "from-orange-500 to-amber-600",
+};
+
+function BusAvatar({ busType }: { busType: string }) {
+  return (
+    <div className={cn(
+      "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-sm bg-gradient-to-br",
+      BUS_TYPE_COLORS[busType] ?? "from-slate-400 to-slate-600"
+    )}>
+      <Bus className="h-5 w-5" />
+    </div>
+  );
+}
+
+function formFromDetail(d: BusDetail): BusForm {
+  return {
+    name: d.name,
+    registrationNumber: d.registrationNumber,
+    busType: d.busType,
+    totalSeats: String(d.totalSeats),
+    amenities: d.amenities.join(", "),
+    imageUrls: (d.images ?? []).join("\n"),
+  };
+}
+
+function BusFormFields({
+  form, onChange, disabled,
+}: {
+  form: BusForm;
+  onChange: (f: BusForm) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold text-slate-700">Bus Name <span className="text-red-500">*</span></Label>
+          <div className="relative">
+            <Bus className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input className="pl-10 h-11 rounded-xl" placeholder="e.g. Sunset Cruiser"
+              value={form.name} disabled={disabled} required
+              onChange={(e) => onChange({ ...form, name: e.target.value })} />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold text-slate-700">Registration No. <span className="text-red-500">*</span></Label>
+          <div className="relative">
+            <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input className="pl-10 h-11 rounded-xl uppercase" placeholder="AB 1234 C"
+              value={form.registrationNumber} disabled={disabled} required
+              onChange={(e) => onChange({ ...form, registrationNumber: e.target.value })} />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold text-slate-700">Bus Type <span className="text-red-500">*</span></Label>
+          <Select value={form.busType} onValueChange={(v) => onChange({ ...form, busType: v as BusType })} disabled={disabled}>
+            <SelectTrigger className="h-11 rounded-xl">
+              <SelectValue placeholder="Choose bus type" />
+            </SelectTrigger>
+            <SelectContent>
+              {BUS_TYPES.map((t) => (
+                <SelectItem key={t} value={t}>{BUS_TYPE_LABELS[t] ?? t}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold text-slate-700">Total Seats <span className="text-red-500">*</span></Label>
+          <div className="relative">
+            <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input className="pl-10 h-11 rounded-xl" type="number" min={1} max={100}
+              value={form.totalSeats} disabled={disabled} required
+              onChange={(e) => onChange({ ...form, totalSeats: e.target.value })} />
+          </div>
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-sm font-semibold text-slate-700">Amenities <span className="text-slate-400 font-normal">(comma separated)</span></Label>
+        <Input className="h-11 rounded-xl" placeholder="Wi-Fi, AC, USB Charging, Restroom"
+          value={form.amenities} disabled={disabled}
+          onChange={(e) => onChange({ ...form, amenities: e.target.value })} />
+        {/* Quick chips */}
+        <div className="flex flex-wrap gap-1.5">
+          {AMENITY_OPTIONS.slice(0, 6).map((a) => (
+            <button
+              key={a.value}
+              type="button"
+              disabled={disabled}
+              onClick={() => {
+                const existing = form.amenities.split(",").map((s) => s.trim()).filter(Boolean);
+                if (!existing.includes(a.label)) {
+                  onChange({ ...form, amenities: [...existing, a.label].join(", ") });
+                }
+              }}
+              className="text-[11px] px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 transition-colors"
+            >
+              {a.icon} {a.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-sm font-semibold text-slate-700">Image URLs <span className="text-slate-400 font-normal">(one per line)</span></Label>
+        <Textarea className="rounded-xl h-20 text-sm" placeholder="https://example.com/bus.jpg"
+          value={form.imageUrls} disabled={disabled}
+          onChange={(e) => onChange({ ...form, imageUrls: e.target.value })} />
+      </div>
+    </div>
+  );
+}
+
+export default function AdminBusDetailsManager({ busDetails: initial }: { busDetails: BusDetailSummary[] }) {
+  const [details, setDetails] = useState<BusDetail[]>(initial);
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setMessage(null);
+  // Modal state
+  const [showAdd, setShowAdd] = useState(false);
+  const [editTarget, setEditTarget] = useState<BusDetail | null>(null);
+  const [detailTarget, setDetailTarget] = useState<BusDetail | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<BusDetail | null>(null);
 
+  // Form state
+  const [addForm, setAddForm] = useState<BusForm>(EMPTY_FORM);
+  const [editForm, setEditForm] = useState<BusForm>(EMPTY_FORM);
+
+  // Feedback
+  const [feedback, setFeedback] = useState<{ msg: string; ok: boolean } | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  function showFeedback(msg: string, ok: boolean) {
+    setFeedback({ msg, ok });
+    setTimeout(() => setFeedback(null), 4000);
+  }
+
+  function buildPayload(form: BusForm) {
+    return {
+      name: form.name.trim(),
+      registrationNumber: form.registrationNumber.trim().toUpperCase(),
+      busType: form.busType,
+      totalSeats: Number(form.totalSeats),
+      amenities: form.amenities.split(",").map((s) => s.trim()).filter(Boolean),
+      images: form.imageUrls.split(/\s+/).map((s) => s.trim()).filter(Boolean),
+    };
+  }
+
+  // ── Add ──
+  async function handleAdd(e: React.FormEvent) {
+    e.preventDefault();
     startTransition(async () => {
       try {
-    const images = form.imageUrls
-      .split(/\s+/)
-      .map((value) => value.trim())
-      .filter((value) => value.length > 0);
-
-    const response = await fetch("/api/admin/bus-details", {
+        const res = await fetch("/api/admin/bus-details", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: form.name.trim(),
-            registrationNumber: form.registrationNumber.trim().toUpperCase(),
-            busType: form.busType,
-            totalSeats: Number(form.totalSeats),
-            amenities: form.amenities
-              .split(",")
-              .map((value) => value.trim())
-              .filter(Boolean),
-            images,
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(buildPayload(addForm)),
         });
-
-        const payload = await response.json();
-
-        if (!response.ok) {
-          setMessage({
-            type: "error",
-            text: payload?.message ?? "Unable to save the vehicle.",
-          });
-          return;
-        }
-
-        setDetails((current) => [payload.busDetail, ...current]);
-        setForm(initialState);
-        setMessage({
-          type: "success",
-          text: payload.message ?? "Vehicle added to fleet.",
-        });
+        const json = await res.json();
+        if (!res.ok) { showFeedback(json.message ?? "Failed to add vehicle", false); return; }
+        setDetails((prev) => [json.busDetail, ...prev]);
+        setAddForm(EMPTY_FORM);
+        setShowAdd(false);
+        showFeedback("Vehicle added to fleet!", true);
       } catch {
-        setMessage({
-          type: "error",
-          text: "Something went wrong while saving the vehicle.",
-        });
+        showFeedback("Something went wrong", false);
       }
     });
+  }
+
+  // ── Edit ──
+  async function handleEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editTarget) return;
+    startTransition(async () => {
+      try {
+        const res = await fetch(`/api/admin/bus-details/${editTarget.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(buildPayload(editForm)),
+        });
+        const json = await res.json();
+        if (!res.ok) { showFeedback(json.message ?? "Failed to save", false); return; }
+        setDetails((prev) => prev.map((d) => d.id === editTarget.id ? json.busDetail : d));
+        setEditTarget(null);
+        showFeedback("Vehicle updated successfully!", true);
+      } catch {
+        showFeedback("Something went wrong", false);
+      }
+    });
+  }
+
+  // ── Delete ──
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/admin/bus-details/${deleteTarget.id}`, { method: "DELETE" });
+      const json = await res.json();
+      if (!res.ok) { showFeedback(json.message ?? "Failed to delete", false); return; }
+      setDetails((prev) => prev.filter((d) => d.id !== deleteTarget.id));
+      setDeleteTarget(null);
+      showFeedback("Vehicle removed from fleet", true);
+    } catch {
+      showFeedback("Request failed", false);
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  const counts = {
+    total: details.length,
+    bus45: details.filter((d) => d.busType === "bus_45").length,
+    miniBus: details.filter((d) => d.busType === "mini_bus").length,
+    car: details.filter((d) => d.busType === "car").length,
   };
 
   return (
     <div className="space-y-6">
-      <Card className="rounded-3xl border border-slate-200 shadow-xl">
-        <CardHeader className="space-y-1">
-          <CardTitle>Fleet management</CardTitle>
-          <p className="text-sm text-slate-500">
-            Capture each vehicle's registration, capacity, and type so departures can be linked to a
-            verified bus.
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-2">
-                <Label htmlFor="bus-detail-name">Bus name</Label>
-                <Input
-                  id="bus-detail-name"
-                  value={form.name}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, name: event.target.value }))
-                  }
-                  placeholder="e.g. Sunset Cruiser"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bus-detail-registration">Registration</Label>
-                <Input
-                  id="bus-detail-registration"
-                  value={form.registrationNumber}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, registrationNumber: event.target.value }))
-                  }
-                  placeholder="AB1234CD"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bus-detail-type">Bus type</Label>
-                    <Select
-                      value={form.busType}
-                      onValueChange={(value) =>
-                        setForm((current) => ({ ...current, busType: value as BusType }))
-                      }
-                    >
-                  <SelectTrigger id="bus-detail-type" className="h-11 rounded-xl">
-                    <SelectValue placeholder="Choose bus type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BUS_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="bus-detail-seats">Total seats</Label>
-                <Input
-                  id="bus-detail-seats"
-                  type="number"
-                  min={1}
-                  value={form.totalSeats}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, totalSeats: event.target.value }))
-                  }
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bus-detail-amenities">Amenities (comma separated)</Label>
-                <Input
-                  id="bus-detail-amenities"
-                  value={form.amenities}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, amenities: event.target.value }))
-                  }
-                  placeholder="Wi-Fi, Restroom, USB Charging"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bus-detail-images">Image URLs (one per line)</Label>
-              <Textarea
-                id="bus-detail-images"
-                value={form.imageUrls}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, imageUrls: event.target.value }))
-                }
-                placeholder="https://example.com/bus1.jpg"
-                className="h-24 rounded-xl border border-slate-200 bg-slate-50"
-              />
-              <p className="text-[11px] text-slate-500">
-                Enter publicly accessible image URLs so passengers can preview the vehicle.
-              </p>
-            </div>
-            {message ? (
-              <p
-                className={`text-sm font-medium ${
-                  message.type === "success" ? "text-emerald-600" : "text-red-600"
-                }`}
-              >
-                {message.text}
-              </p>
-            ) : null}
-            <Button type="submit" className="w-full max-w-sm rounded-xl" disabled={isPending}>
-              {isPending ? "Saving…" : "Add vehicle"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900">Fleet Management</h2>
+          <p className="text-sm text-slate-500 mt-1">Register vehicles and link them to departures</p>
+        </div>
+        <Button
+          onClick={() => { setAddForm(EMPTY_FORM); setShowAdd(true); }}
+          className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-xl h-11 px-5 shadow-md shadow-indigo-200"
+        >
+          <Plus className="h-4 w-4 mr-2" />Add Vehicle
+        </Button>
+      </div>
 
-      <Card className="rounded-3xl border border-slate-200 shadow-xl">
-        <CardHeader className="space-y-1">
-          <CardTitle>Current fleet</CardTitle>
-          <p className="text-sm text-slate-500">
-            {details.length} vehicle{details.length === 1 ? "" : "s"} ready to be assigned.
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {details.length === 0 ? (
-            <p className="text-sm text-slate-500">Add a vehicle to start assigning it to buses.</p>
-          ) : (
-            <div className="space-y-2">
-              {pagedDetails.map((detail) => (
-                <div
-                  key={detail.id}
-                  className="flex flex-col gap-1 rounded-2xl border border-dashed border-slate-200 bg-white/80 px-4 py-3 shadow-sm"
-                >
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-slate-900">{detail.name}</p>
-                    <span className="text-[11px] uppercase tracking-[0.35em] text-slate-400">
-                      {detail.busType}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500">
-                    {detail.registrationNumber} · {detail.totalSeats} seats
-                  </p>
-                  {detail.amenities.length > 0 && (
-                    <div className="flex flex-wrap gap-2 text-[11px] text-slate-500">
-                      {detail.amenities.map((amenity) => (
-                        <span key={amenity} className="rounded-full border border-slate-200 px-2 py-0.5">
-                          {amenity}
-                        </span>
-                      ))}
+      {/* Feedback */}
+      {feedback && (
+        <div className={cn(
+          "rounded-xl px-4 py-3 text-sm font-medium flex items-center justify-between",
+          feedback.ok
+            ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
+            : "bg-red-50 border border-red-200 text-red-700"
+        )}>
+          <span>{feedback.msg}</span>
+          <button onClick={() => setFeedback(null)}><X className="h-4 w-4 opacity-60 hover:opacity-100" /></button>
+        </div>
+      )}
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[
+          { label: "Total", value: counts.total,   color: "indigo" },
+          { label: "45-Seat Bus", value: counts.bus45,   color: "violet" },
+          { label: "Mini Bus",    value: counts.miniBus, color: "emerald" },
+          { label: "Car",         value: counts.car,     color: "orange" },
+        ].map(({ label, value, color }) => (
+          <div key={label} className={`rounded-2xl bg-${color}-50 border border-${color}-100 px-5 py-4`}>
+            <p className={`text-xs uppercase tracking-wide text-${color}-500 font-semibold`}>{label}</p>
+            <p className={`text-3xl font-bold text-${color}-700 mt-1`}>{value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Fleet table */}
+      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+        {details.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+            <Bus className="h-12 w-12 mb-3 opacity-30" />
+            <p className="font-medium">No vehicles yet</p>
+            <p className="text-sm mt-1">Click "Add Vehicle" to register the first one</p>
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Vehicle</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden sm:table-cell">Reg. No.</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden md:table-cell">Type</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden md:table-cell">Seats</th>
+                <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide hidden lg:table-cell">Amenities</th>
+                <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {details.map((detail) => (
+                <tr key={detail.id} className="hover:bg-slate-50 transition-colors">
+                  {/* Vehicle name */}
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-3">
+                      <BusAvatar busType={detail.busType} />
+                      <div>
+                        <p className="font-semibold text-slate-900">{detail.name}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          Added {new Date(detail.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
+                        </p>
+                      </div>
                     </div>
-                  )}
-                </div>
+                  </td>
+                  {/* Reg No. */}
+                  <td className="px-5 py-4 hidden sm:table-cell">
+                    <span className="font-mono text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded-lg">
+                      {detail.registrationNumber}
+                    </span>
+                  </td>
+                  {/* Type */}
+                  <td className="px-5 py-4 hidden md:table-cell">
+                    <span className={cn(
+                      "inline-block text-xs font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r text-white",
+                      BUS_TYPE_COLORS[detail.busType] ?? "from-slate-400 to-slate-500"
+                    )}>
+                      {BUS_TYPE_LABELS[detail.busType] ?? detail.busType}
+                    </span>
+                  </td>
+                  {/* Seats */}
+                  <td className="px-5 py-4 hidden md:table-cell text-slate-700 font-semibold">
+                    {detail.totalSeats}
+                  </td>
+                  {/* Amenities */}
+                  <td className="px-5 py-4 hidden lg:table-cell">
+                    {detail.amenities.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {detail.amenities.slice(0, 3).map((a) => (
+                          <span key={a} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600">
+                            {a}
+                          </span>
+                        ))}
+                        {detail.amenities.length > 3 && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-500">
+                            +{detail.amenities.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-slate-400 text-xs">—</span>
+                    )}
+                  </td>
+                  {/* Actions */}
+                  <td className="px-5 py-4 text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 w-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors">
+                        <MoreVertical className="h-3.5 w-3.5 text-slate-500" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-44">
+                        <DropdownMenuItem
+                          className="gap-2 text-slate-700"
+                          onClick={() => setDetailTarget(detail)}
+                        >
+                          <Eye className="h-4 w-4" />View Detail
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="gap-2 text-indigo-700 focus:text-indigo-700 focus:bg-indigo-50"
+                          onClick={() => { setEditForm(formFromDetail(detail)); setEditTarget(detail); }}
+                        >
+                          <Pencil className="h-4 w-4" />Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="gap-2 text-red-700 focus:text-red-700 focus:bg-red-50"
+                          onClick={() => setDeleteTarget(detail)}
+                        >
+                          <Trash2 className="h-4 w-4" />Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </td>
+                </tr>
               ))}
-              <Paginator
-                page={detailPage}
-                totalPages={detailTotalPages}
-                totalItems={details.length}
-                pageSize={PAGE_SIZE}
-                onPageChange={setDetailPage}
-              />
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* ── ADD MODAL ── */}
+      <Dialog open={showAdd} onOpenChange={setShowAdd}>
+        <DialogContent className="sm:max-w-xl rounded-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-slate-900">Add New Vehicle</DialogTitle>
+            <DialogDescription>Register a new bus or vehicle to the fleet.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleAdd} className="space-y-5 mt-2">
+            <BusFormFields form={addForm} onChange={setAddForm} disabled={isPending} />
+            <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
+              <Button type="button" variant="outline" className="rounded-xl" onClick={() => setShowAdd(false)} disabled={isPending}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isPending}
+                className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-xl px-6">
+                {isPending
+                  ? <><RefreshCw className="h-4 w-4 animate-spin mr-2" />Saving…</>
+                  : <><Plus className="h-4 w-4 mr-2" />Add Vehicle</>}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── EDIT MODAL ── */}
+      <Dialog open={!!editTarget} onOpenChange={(o) => { if (!o) setEditTarget(null); }}>
+        <DialogContent className="sm:max-w-xl rounded-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-slate-900">Edit Vehicle</DialogTitle>
+            <DialogDescription>Update the details for {editTarget?.name}.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEdit} className="space-y-5 mt-2">
+            <BusFormFields form={editForm} onChange={setEditForm} disabled={isPending} />
+            <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
+              <Button type="button" variant="outline" className="rounded-xl" onClick={() => setEditTarget(null)} disabled={isPending}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isPending}
+                className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-xl px-6">
+                {isPending
+                  ? <><RefreshCw className="h-4 w-4 animate-spin mr-2" />Saving…</>
+                  : <><Pencil className="h-4 w-4 mr-2" />Save Changes</>}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── DETAIL MODAL ── */}
+      <Dialog open={!!detailTarget} onOpenChange={(o) => { if (!o) setDetailTarget(null); }}>
+        <DialogContent className="sm:max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-slate-900">Vehicle Details</DialogTitle>
+          </DialogHeader>
+          {detailTarget && (
+            <div className="space-y-4 mt-2">
+              {/* Hero */}
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <BusAvatar busType={detailTarget.busType} />
+                <div>
+                  <p className="font-bold text-slate-900 text-lg leading-tight">{detailTarget.name}</p>
+                  <p className="text-xs text-slate-500 mt-0.5 font-mono">{detailTarget.registrationNumber}</p>
+                </div>
+                <span className={cn(
+                  "ml-auto text-xs font-bold px-3 py-1 rounded-full text-white bg-gradient-to-r",
+                  BUS_TYPE_COLORS[detailTarget.busType] ?? "from-slate-400 to-slate-500"
+                )}>
+                  {BUS_TYPE_LABELS[detailTarget.busType] ?? detailTarget.busType}
+                </span>
+              </div>
+
+              {/* Info grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { icon: Hash,     label: "Reg. No.",   value: detailTarget.registrationNumber },
+                  { icon: Users,    label: "Total Seats", value: `${detailTarget.totalSeats} seats` },
+                  { icon: Layers,   label: "Bus Type",   value: BUS_TYPE_LABELS[detailTarget.busType] ?? detailTarget.busType },
+                  { icon: Calendar, label: "Added",       value: new Date(detailTarget.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) },
+                ].map(({ icon: Icon, label, value }) => (
+                  <div key={label} className="rounded-xl bg-slate-50 border border-slate-200 p-3">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Icon className="h-3.5 w-3.5 text-slate-400" />
+                      <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400">{label}</p>
+                    </div>
+                    <p className="text-sm font-semibold text-slate-800">{value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Amenities */}
+              {detailTarget.amenities.length > 0 && (
+                <div className="rounded-xl bg-slate-50 border border-slate-200 p-4">
+                  <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-2">Amenities</p>
+                  <div className="flex flex-wrap gap-2">
+                    {detailTarget.amenities.map((a) => (
+                      <span key={a} className="text-xs px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-700 font-medium">
+                        {a}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Images */}
+              {detailTarget.images && detailTarget.images.length > 0 && (
+                <div className="rounded-xl bg-slate-50 border border-slate-200 p-4">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Image className="h-3.5 w-3.5 text-slate-400" />
+                    <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400">Images</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {detailTarget.images.map((url, i) => (
+                      <a key={i} href={url} target="_blank" rel="noopener noreferrer"
+                        className="text-xs text-indigo-600 hover:underline truncate max-w-[180px]">
+                        Image {i + 1}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-1">
+                <Button variant="outline" className="rounded-xl" onClick={() => setDetailTarget(null)}>Close</Button>
+                <Button className="rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white"
+                  onClick={() => { setDetailTarget(null); setEditForm(formFromDetail(detailTarget)); setEditTarget(detailTarget); }}>
+                  <Pencil className="h-4 w-4 mr-2" />Edit
+                </Button>
+              </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── DELETE MODAL ── */}
+      <Dialog open={!!deleteTarget} onOpenChange={(o) => { if (!o && !deleting) setDeleteTarget(null); }}>
+        <DialogContent className="sm:max-w-sm rounded-2xl">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-1">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-100">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+              </div>
+              <DialogTitle className="text-lg font-bold text-slate-900">Delete Vehicle</DialogTitle>
+            </div>
+            <DialogDescription className="text-slate-600">
+              Are you sure you want to remove{" "}
+              <span className="font-semibold text-slate-800">{deleteTarget?.name}</span>{" "}
+              ({deleteTarget?.registrationNumber}) from the fleet? This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button variant="outline" className="rounded-xl" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button className="rounded-xl bg-red-600 hover:bg-red-700 text-white" onClick={handleDelete} disabled={deleting}>
+              {deleting
+                ? <><RefreshCw className="h-4 w-4 animate-spin mr-2" />Deleting…</>
+                : <><Trash2 className="h-4 w-4 mr-2" />Delete Vehicle</>}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
