@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BusFront, Navigation, PencilLine, Plus, Search, Trash2, UserCheck } from "lucide-react";
+import {
+  BusFront, Navigation, PencilLine, Plus, Search, Trash2, UserCheck, MoreVertical,
+} from "lucide-react";
 
 import AdminBusDialog from "@/components/admin-bus-dialog";
 import { AvailabilityBadge, EmptyState, PAGE_SIZE, Paginator, SummaryTile } from "@/components/admin-management-shared";
@@ -10,28 +12,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { formatBusType, formatCurrency, formatTravelDate } from "@/lib/formatters";
 import type { BusSummary, DriverSummary, RouteSummary } from "@/lib/queries";
@@ -236,26 +228,23 @@ export default function AdminBusesManager({
               </p>
             </div>
           ) : (
-            <div className="rounded-2xl border border-orange-200/50 bg-white/80">
+            <div className="rounded-2xl border border-orange-200/50 bg-white/80 overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gradient-to-r from-orange-50 to-red-50 hover:bg-transparent">
-                    <TableHead className="font-bold text-orange-900">Route</TableHead>
-                    <TableHead className="font-bold text-orange-900">Type</TableHead>
-                    <TableHead className="font-bold text-orange-900">Date</TableHead>
-                    <TableHead className="font-bold text-orange-900">Schedule</TableHead>
-                    <TableHead className="font-bold text-orange-900">Fare</TableHead>
-                    <TableHead className="font-bold text-orange-900">Seats</TableHead>
-                    <TableHead className="font-bold text-orange-900">Status</TableHead>
-                    <TableHead className="text-right font-bold text-orange-900">
-                      Actions
-                    </TableHead>
+                    <TableHead className="font-bold text-orange-900 w-[220px]">Route</TableHead>
+                    <TableHead className="font-bold text-orange-900 w-[90px]">Type</TableHead>
+                    <TableHead className="font-bold text-orange-900 w-[130px]">Date & Time</TableHead>
+                    <TableHead className="font-bold text-orange-900 w-[70px]">Fare</TableHead>
+                    <TableHead className="font-bold text-orange-900 w-[150px]">Seats</TableHead>
+                    <TableHead className="font-bold text-orange-900 w-[120px]">Status</TableHead>
+                    <TableHead className="w-[44px]" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {visibleBuses.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="py-10">
+                      <TableCell colSpan={7} className="py-10">
                         <EmptyState
                           icon={<BusFront className="size-10 text-orange-300" />}
                           title="No departures match these filters"
@@ -264,111 +253,135 @@ export default function AdminBusesManager({
                       </TableCell>
                     </TableRow>
                   ) : pagedBuses.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={8} />
-                    </TableRow>
+                    <TableRow><TableCell colSpan={7} /></TableRow>
                   ) : (
-                    pagedBuses.map((bus) => (
-                      <TableRow
-                        key={bus.id}
-                        className="transition-colors hover:bg-orange-50/50"
-                      >
-                        <TableCell className="whitespace-normal">
-                          <div className="space-y-1">
-                            <p className="font-medium text-foreground">
-                              {bus.from} to {bus.to}
+                    pagedBuses.map((bus) => {
+                      const bookedCount = bus.totalSeats - bus.seatsLeft;
+                      const fillPct = bus.totalSeats > 0
+                        ? Math.round((bookedCount / bus.totalSeats) * 100)
+                        : 0;
+                      return (
+                        <TableRow
+                          key={bus.id}
+                          className="transition-colors hover:bg-orange-50/40 group"
+                        >
+                          {/* Route */}
+                          <TableCell className="py-3">
+                            <p className="font-semibold text-sm text-gray-900 leading-tight">
+                              {bus.from} → {bus.to}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                              {bus.duration} • {bus.distance} km
+                            <p className="text-[11px] text-gray-400 mt-0.5">
+                              {bus.duration} · {bus.distance} km
                             </p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className="border-orange-200 bg-orange-100 text-orange-700">
-                            {formatBusType(bus.busType)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{formatTravelDate(bus.travelDate)}</TableCell>
-                        <TableCell>{`${bus.departureTime} to ${bus.arrivalTime}`}</TableCell>
-                        <TableCell className="font-semibold">
-                          {formatCurrency(bus.pricePerSeat)}
-                        </TableCell>
-                        <TableCell className="whitespace-normal">
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium text-foreground">
-                              {bus.seatsLeft} left / {bus.totalSeats}
+                          </TableCell>
+
+                          {/* Type */}
+                          <TableCell className="py-3">
+                            <Badge className="border-orange-200 bg-orange-100 text-orange-700 text-[11px]">
+                              {formatBusType(bus.busType)}
+                            </Badge>
+                          </TableCell>
+
+                          {/* Date & Time (combined) */}
+                          <TableCell className="py-3">
+                            <p className="text-sm font-medium text-gray-800">
+                              {formatTravelDate(bus.travelDate)}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                              {bus.bookedSeats.length} booked
+                            <p className="text-[11px] text-gray-400 mt-0.5">
+                              {bus.departureTime} – {bus.arrivalTime}
                             </p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
+                          </TableCell>
+
+                          {/* Fare */}
+                          <TableCell className="py-3 font-semibold text-sm">
+                            {formatCurrency(bus.pricePerSeat)}
+                          </TableCell>
+
+                          {/* Seats + fill bar */}
+                          <TableCell className="py-3">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm font-medium text-gray-800">
+                                {bus.seatsLeft}/{bus.totalSeats}
+                              </span>
+                              <span className="text-[10px] text-gray-400">
+                                ({fillPct}% full)
+                              </span>
+                            </div>
+                            <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all ${
+                                  fillPct >= 90 ? "bg-red-500"
+                                  : fillPct >= 70 ? "bg-amber-500"
+                                  : "bg-emerald-500"
+                                }`}
+                                style={{ width: `${fillPct}%` }}
+                              />
+                            </div>
+                          </TableCell>
+
+                          {/* Status + driver */}
+                          <TableCell className="py-3">
                             <AvailabilityBadge bus={bus} />
                             {bus.driver && (
-                              <p className="text-[11px] text-slate-400 truncate max-w-[120px]">
+                              <p className="text-[11px] text-gray-400 mt-1 truncate max-w-[110px]">
                                 {bus.driver.name}
                               </p>
                             )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2 flex-wrap">
-                            <Button
-                              type="button"
-                              size="sm"
-                              className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 transition-all hover:shadow-lg"
-                              onClick={() => {
-                                setSelectedBus(bus);
-                                setBusDialogOpen(true);
-                              }}
-                            >
-                              <PencilLine className="size-4" />
-                              Edit
-                            </Button>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              className="rounded-full border-indigo-200 text-indigo-700 hover:bg-indigo-50"
-                              onClick={() => {
-                                setDriverBus(bus);
-                                setSelectedDriverId((bus as any).driverId ?? "");
-                              }}
-                            >
-                              <UserCheck className="size-4" />
-                              Driver
-                            </Button>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              className="rounded-full border-blue-200 text-blue-700 hover:bg-blue-50"
-                              onClick={() => {
-                                setStatusBus(bus);
-                                setNewStatus((bus as any).departureStatus ?? "scheduled");
-                                setNewDelayMinutes((bus as any).delayMinutes ?? 0);
-                                setNewStatusNote((bus as any).statusNote ?? "");
-                              }}
-                            >
-                              <Navigation className="size-4" />
-                              Status
-                            </Button>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              className="rounded-full border-red-200 text-red-700 hover:bg-red-50"
-                              onClick={() => setBusToDelete(bus)}
-                            >
-                              <Trash2 className="size-4" />
-                              Delete
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                          </TableCell>
+
+                          {/* Actions — compact dropdown */}
+                          <TableCell className="py-3 pr-3">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-lg opacity-60 transition-opacity hover:bg-orange-100 hover:opacity-100 group-hover:opacity-100 focus:outline-none">
+                                <MoreVertical className="size-4" />
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-44">
+                                <DropdownMenuItem
+                                  className="gap-2 cursor-pointer"
+                                  onClick={() => {
+                                    setSelectedBus(bus);
+                                    setBusDialogOpen(true);
+                                  }}
+                                >
+                                  <PencilLine className="size-4 text-orange-500" />
+                                  Edit departure
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="gap-2 cursor-pointer"
+                                  onClick={() => {
+                                    setDriverBus(bus);
+                                    setSelectedDriverId((bus as any).driverId ?? "");
+                                  }}
+                                >
+                                  <UserCheck className="size-4 text-indigo-500" />
+                                  Assign driver
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="gap-2 cursor-pointer"
+                                  onClick={() => {
+                                    setStatusBus(bus);
+                                    setNewStatus((bus as any).departureStatus ?? "scheduled");
+                                    setNewDelayMinutes((bus as any).delayMinutes ?? 0);
+                                    setNewStatusNote((bus as any).statusNote ?? "");
+                                  }}
+                                >
+                                  <Navigation className="size-4 text-blue-500" />
+                                  Update status
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                                  onClick={() => setBusToDelete(bus)}
+                                >
+                                  <Trash2 className="size-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
