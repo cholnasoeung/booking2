@@ -1,5 +1,7 @@
 import Navbar from "@/components/navbar";
 import DashboardBookings from "@/components/dashboard-bookings";
+import LoyaltyCard from "@/components/loyalty-card";
+import WaitlistCard from "@/components/waitlist-card";
 import { requireUser } from "@/lib/auth";
 import { getUserBookings } from "@/lib/queries";
 import { User } from "lucide-react";
@@ -42,7 +44,13 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <DashboardBookings initialBookings={bookings} />
+        <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+          <DashboardBookings initialBookings={bookings} />
+          <div className="space-y-6">
+            <LoyaltyCard />
+            <WaitlistCard />
+          </div>
+        </div>
       </div>
     </>
   );

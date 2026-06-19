@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import LanguageToggle from "@/components/language-toggle";
 import LogoutButton from "@/components/logout-button";
 import { Badge } from "@/components/ui/badge";
 import { getCurrentUser } from "@/lib/auth";
@@ -38,6 +39,9 @@ export default async function Navbar() {
           <Link href="/" className={navLinkClass}>
             Home
           </Link>
+          <Link href="/support" className={navLinkClass}>
+            Support
+          </Link>
           {user ? (
             <>
               <Link href="/dashboard" className={navLinkClass}>
@@ -54,6 +58,7 @@ export default async function Navbar() {
             </Link>
           ) : null}
 
+          <LanguageToggle />
           <div className="ml-0 flex flex-wrap items-center gap-2 sm:ml-2">
             {user ? (
               <>

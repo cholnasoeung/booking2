@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { BusFront, PencilLine, Plus, Search, Trash2 } from "lucide-react";
+import { BusFront, Navigation, PencilLine, Plus, Search, Trash2 } from "lucide-react";
 
 import AdminBusDialog from "@/components/admin-bus-dialog";
 import { AvailabilityBadge, EmptyState, SummaryTile } from "@/components/admin-management-shared";
@@ -62,6 +62,11 @@ export default function AdminBusesManager({
   const [selectedBus, setSelectedBus] = useState<BusSummary | null>(null);
   const [busToDelete, setBusToDelete] = useState<BusSummary | null>(null);
   const [busDeletePending, setBusDeletePending] = useState(false);
+  const [statusBus, setStatusBus] = useState<BusSummary | null>(null);
+  const [newStatus, setNewStatus] = useState("");
+  const [newDelayMinutes, setNewDelayMinutes] = useState(0);
+  const [newStatusNote, setNewStatusNote] = useState("");
+  const [statusPending, setStatusPending] = useState(false);
 
   const normalizedQuery = busQuery.trim().toLowerCase();
   const visibleBuses = buses.filter((bus) => {
@@ -301,6 +306,21 @@ export default function AdminBusesManager({
                               type="button"
                               size="sm"
                               variant="outline"
+                              className="rounded-full border-blue-200 text-blue-700 hover:bg-blue-50"
+                              onClick={() => {
+                                setStatusBus(bus);
+                                setNewStatus((bus as any).departureStatus ?? "scheduled");
+                                setNewDelayMinutes((bus as any).delayMinutes ?? 0);
+                                setNewStatusNote((bus as any).statusNote ?? "");
+                              }}
+                            >
+                              <Navigation className="size-4" />
+                              Status
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
                               className="rounded-full border-red-200 text-red-700 hover:bg-red-50"
                               onClick={() => setBusToDelete(bus)}
                             >
@@ -346,6 +366,83 @@ export default function AdminBusesManager({
               onClick={confirmBusDelete}
             >
               {busDeletePending ? "Deleting..." : "Delete Departure"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Status update dialog */}
+      <Dialog open={Boolean(statusBus)} onOpenChange={(open) => !open && setStatusBus(null)}>
+        <DialogContent className="sm:max-w-sm border-2 border-blue-200/70 bg-white shadow-2xl">
+          <DialogHeader>
+            <DialogTitle>Update Departure Status</DialogTitle>
+            <DialogDescription>
+              {statusBus ? `${statusBus.from} → ${statusBus.to} · ${statusBus.departureTime}` : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Status</label>
+              <Select value={newStatus} onValueChange={setNewStatus}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {["scheduled","on_time","delayed","departed","arrived","cancelled"].map((s) => (
+                    <SelectItem key={s} value={s}>{s.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {newStatus === "delayed" && (
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Delay (minutes)</label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={newDelayMinutes}
+                  onChange={(e) => setNewDelayMinutes(Number(e.target.value))}
+                  className="rounded-xl"
+                />
+              </div>
+            )}
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Note (optional)</label>
+              <Input
+                value={newStatusNote}
+                onChange={(e) => setNewStatusNote(e.target.value)}
+                placeholder="e.g. Vehicle breakdown at pickup point"
+                className="rounded-xl"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-xl" onClick={() => setStatusBus(null)}>Cancel</Button>
+            <Button
+              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={statusPending}
+              onClick={async () => {
+                if (!statusBus) return;
+                setStatusPending(true);
+                try {
+                  const res = await fetch(`/api/admin/buses/${statusBus.id}/status`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ status: newStatus, delayMinutes: newDelayMinutes, statusNote: newStatusNote }),
+                  });
+                  if (res.ok) {
+                    onFeedback({ kind: "success", message: "Status updated successfully." });
+                    setStatusBus(null);
+                    router.refresh();
+                  } else {
+                    onFeedback({ kind: "error", message: "Failed to update status." });
+                  }
+                } finally {
+                  setStatusPending(false);
+                }
+              }}
+            >
+              {statusPending ? "Saving…" : "Save Status"}
             </Button>
           </DialogFooter>
         </DialogContent>

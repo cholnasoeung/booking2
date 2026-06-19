@@ -13,25 +13,27 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const rawFrom = getFirstSearchParam(params.from);
   const rawTo = getFirstSearchParam(params.to);
   const rawDate = getFirstSearchParam(params.date);
+  const rawReturnDate = getFirstSearchParam(params.returnDate);
   const rawPassengers = getFirstSearchParam(params.passengers);
   const fallbackDate = getTomorrowDateInput();
 
   const from = rawFrom ?? "Phnom Penh";
   const to = rawTo ?? "Siem Reap";
   const date = rawDate ?? fallbackDate;
+  const returnDate = rawReturnDate ?? undefined;
   const passengers = parsePassengerCount(rawPassengers);
   const hasSearch = Boolean(rawFrom || rawTo || rawDate);
   const invalidDate = Boolean(rawDate && !isValidDateInput(rawDate));
+  const invalidReturnDate = Boolean(rawReturnDate && !isValidDateInput(rawReturnDate));
 
-  const buses =
-    hasSearch && !invalidDate
-      ? await searchBuses({
-          from: rawFrom,
-          to: rawTo,
-          date: rawDate,
-          passengers,
-        })
-      : [];
+  const [buses, returnBuses] = hasSearch && !invalidDate
+    ? await Promise.all([
+        searchBuses({ from: rawFrom, to: rawTo, date: rawDate, passengers }),
+        returnDate && !invalidReturnDate
+          ? searchBuses({ from: rawTo, to: rawFrom, date: returnDate, passengers })
+          : Promise.resolve([] as Awaited<ReturnType<typeof searchBuses>>),
+      ])
+    : [[], []];
 
   // Show empty state if no search yet or invalid date
   if (!hasSearch || invalidDate) {
@@ -60,6 +62,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         to={to}
         date={date}
         passengers={passengers}
+        returnDate={returnDate}
+        returnBuses={returnBuses}
       />
     </>
   );

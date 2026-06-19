@@ -8,6 +8,8 @@ import {
 } from "@/lib/seat-layout";
 import { type BusStop } from "@/types/bus";
 
+export type BusDepartureStatus = "scheduled" | "on_time" | "delayed" | "departed" | "arrived" | "cancelled";
+
 export interface IBus extends Document {
   routeId: mongoose.Types.ObjectId;
   date: Date;
@@ -25,6 +27,9 @@ export interface IBus extends Document {
   amenities?: string[];
   driverId?: mongoose.Types.ObjectId | null;
   busDetailId?: mongoose.Types.ObjectId | null;
+  departureStatus: BusDepartureStatus;
+  delayMinutes?: number;
+  statusNote?: string;
 }
 
 const BusSchema = new Schema<IBus>({
@@ -107,6 +112,20 @@ const BusSchema = new Schema<IBus>({
     type: Schema.Types.ObjectId,
     ref: "BusDetail",
     default: null,
+  },
+  departureStatus: {
+    type: String,
+    enum: ["scheduled", "on_time", "delayed", "departed", "arrived", "cancelled"],
+    default: "scheduled",
+  },
+  delayMinutes: {
+    type: Number,
+    default: 0,
+  },
+  statusNote: {
+    type: String,
+    maxlength: 300,
+    default: "",
   },
 });
 

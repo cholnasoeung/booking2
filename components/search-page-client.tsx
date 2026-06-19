@@ -19,6 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Star } from "lucide-react";
+import DepartureStatusBadge from "@/components/departure-status-badge";
 import { formatBusType, formatCurrency, formatTravelDate } from "@/lib/formatters";
 import type { BusSummary } from "@/lib/queries";
 
@@ -28,6 +30,8 @@ type SearchPageClientProps = {
   to: string;
   date: string;
   passengers: number;
+  returnDate?: string;
+  returnBuses?: BusSummary[];
 };
 
 export default function SearchPageClient({
@@ -36,6 +40,8 @@ export default function SearchPageClient({
   to,
   date,
   passengers,
+  returnDate,
+  returnBuses = [],
 }: SearchPageClientProps) {
   const router = useRouter();
 
@@ -253,6 +259,14 @@ export default function SearchPageClient({
                         </div>
                       )}
                     </div>
+                    {bus.rating && bus.rating.count > 0 && (
+                      <div className="flex items-center gap-1">
+                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                        <span className="text-xs font-medium text-slate-700">{bus.rating.average}</span>
+                        <span className="text-xs text-slate-400">({bus.rating.count})</span>
+                      </div>
+                    )}
+                    <DepartureStatusBadge status={bus.departureStatus} delayMinutes={bus.delayMinutes} statusNote={bus.statusNote} />
                     {bus.busDetail && (
                       <p className="text-xs text-slate-500">
                         {bus.busDetail.name} · {bus.busDetail.registrationNumber}
@@ -331,6 +345,85 @@ export default function SearchPageClient({
           )}
         </div>
       </div>
+
+      {/* Return leg section */}
+      {returnDate && returnBuses.length > 0 && (
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Return trip</p>
+            <h2 className="font-heading text-2xl font-semibold tracking-tight text-slate-900">
+              {returnBuses.length} departure{returnBuses.length === 1 ? "" : "s"} for {to} to {from}
+            </h2>
+            <p className="text-sm text-slate-600">
+              {formatTravelDate(returnDate)} | {passengers} passenger{passengers === 1 ? "" : "s"}
+            </p>
+          </div>
+          <div className="space-y-4">
+            {returnBuses.map((bus) => {
+              const bookingHref = getBookingHref(bus.id);
+              const boardingStops = bus.stops.filter((s) => s.boarding).map((s) => s.location);
+              const droppingStops = bus.stops.filter((s) => s.dropping).map((s) => s.location);
+              return (
+                <Card
+                  key={bus.id}
+                  className="border-white/60 bg-white/90 shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-200 cursor-pointer"
+                  onClick={() => router.push(bookingHref)}
+                >
+                  <CardHeader className="space-y-3">
+                    <div className="flex items-start justify-between gap-6">
+                      <div className="flex-1 space-y-1">
+                        <CardTitle className="text-xl">{bus.from} → {bus.to}</CardTitle>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="secondary" className="bg-purple-100 text-purple-700">
+                            {formatBusType(bus.busType)}
+                          </Badge>
+                          {bus.rating && bus.rating.count > 0 && (
+                            <div className="flex items-center gap-1">
+                              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                              <span className="text-xs font-medium text-slate-700">{bus.rating.average}</span>
+                              <span className="text-xs text-slate-400">({bus.rating.count})</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right space-y-1">
+                        <p className="text-2xl font-bold text-purple-600">{formatCurrency(bus.pricePerSeat)}</p>
+                        <p className="text-xs text-slate-500">per seat</p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <div className="grid grid-cols-3 gap-4 text-sm px-6">
+                    <div><p className="text-slate-500">Date</p><p className="font-medium">{formatTravelDate(bus.travelDate)}</p></div>
+                    <div><p className="text-slate-500">Departure</p><p className="font-medium">{bus.departureTime}</p></div>
+                    <div><p className="text-slate-500">Arrival</p><p className="font-medium">{bus.arrivalTime}</p></div>
+                  </div>
+                  <CardContent className="space-y-4 mt-4">
+                    <div className="flex items-center justify-between rounded-xl bg-slate-100 px-4 py-3">
+                      <span className="text-sm text-slate-600">Seats Available</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-bold text-slate-900">{bus.seatsLeft}</span>
+                        <span className="text-xs text-slate-500">/ {bus.totalSeats}</span>
+                      </div>
+                    </div>
+                    <Button
+                      className="w-full h-11 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 shadow-md hover:shadow-lg transition-all"
+                      onClick={(e) => { e.stopPropagation(); router.push(bookingHref); }}
+                    >
+                      Select Seats
+                    </Button>
+                  </CardContent>
+                  {(boardingStops.length > 0 || droppingStops.length > 0) && (
+                    <div className="flex flex-wrap gap-2 text-xs text-slate-500 px-4 pb-4">
+                      {boardingStops.length > 0 && <span className="rounded-full border border-slate-200 px-3 py-1">Board at {boardingStops.join(", ")}</span>}
+                      {droppingStops.length > 0 && <span className="rounded-full border border-slate-200 px-3 py-1">Drop at {droppingStops.join(", ")}</span>}
+                    </div>
+                  )}
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

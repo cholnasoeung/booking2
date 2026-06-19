@@ -1,10 +1,10 @@
 import { getCurrentSession } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
-import { normalizeBusSeatLayout, normalizeStoredSeatCodes } from "@/lib/seat-layout";
 import { isValidObjectId } from "@/lib/validation";
 import BookingModel from "@/models/Booking";
 import BusModel from "@/models/Bus";
 import { sendCancellationEmail } from "@/lib/email-service";
+import { sendCancellationSMS } from "@/lib/sms-service";
 
 export const runtime = "nodejs";
 
@@ -84,8 +84,9 @@ export async function DELETE(
       const route = (bus as any)?.routeId;
       const routeStr = route ? `${route.from} to ${route.to}` : "Unknown Route";
 
-      await sendCancellationEmail((existingBooking.user as any).email, {
-        customerName: (existingBooking.user as any).name,
+      const userRef = existingBooking.user as any;
+      await sendCancellationEmail(userRef.email, {
+        customerName: userRef.name,
         bookingId: String(cancelledBooking._id),
         route: routeStr,
         date: bus ? bus.date.toISOString().split('T')[0] : "N/A",
@@ -93,6 +94,14 @@ export async function DELETE(
         refundAmount: cancelledBooking.refundAmount || undefined,
         refundStatus: cancelledBooking.refundStatus || undefined,
       }).catch(err => console.error('Failed to send cancellation email:', err));
+
+      if (userRef.phone) {
+        sendCancellationSMS(userRef.phone, {
+          customerName: userRef.name,
+          bookingId: String(cancelledBooking._id),
+          route: routeStr,
+        }).catch(() => {});
+      }
     }
 
     return Response.json({

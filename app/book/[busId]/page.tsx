@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 
+import DepartureStatusBadge from "@/components/departure-status-badge";
+import JoinWaitlistButton from "@/components/join-waitlist-button";
 import SeatSelection from "@/components/seat-selection";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,6 +61,11 @@ export default async function BookPage({
         <p className="text-sm text-muted-foreground">
           {formatTravelDate(bus.travelDate)} | {bus.departureTime} to {bus.arrivalTime}
         </p>
+        <DepartureStatusBadge
+          status={bus.departureStatus}
+          delayMinutes={bus.delayMinutes}
+          statusNote={bus.statusNote}
+        />
       </div>
 
       {bus.busDetail?.images && bus.busDetail.images.length > 0 && (
@@ -197,7 +204,17 @@ export default async function BookPage({
         </Card>
       </div>
 
-      <SeatSelection key={bus.id} bus={bus} selectionLimit={selectionLimit} />
+      {bus.seatsLeft === 0 ? (
+        <JoinWaitlistButton
+          busId={bus.id}
+          routeId={bus.routeId}
+          date={bus.travelDate}
+          departureTime={bus.departureTime}
+          requestedSeats={requestedSeats}
+        />
+      ) : (
+        <SeatSelection key={bus.id} bus={bus} selectionLimit={selectionLimit} />
+      )}
     </div>
   );
 }

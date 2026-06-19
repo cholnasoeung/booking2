@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRightLeft, CalendarDays, Search, Users } from "lucide-react";
+import { ArrowRightLeft, CalendarDays, RefreshCw, Search, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ type SearchFormProps = {
     from?: string;
     to?: string;
     date?: string;
+    returnDate?: string;
     passengers?: number;
   };
   compact?: boolean;
@@ -49,6 +50,8 @@ export default function SearchForm({
   const [passengers, setPassengers] = useState(
     String(initialValues?.passengers ?? 1)
   );
+  const [returnDate, setReturnDate] = useState(initialValues?.returnDate ?? "");
+  const [isRoundTrip, setIsRoundTrip] = useState(Boolean(initialValues?.returnDate));
   const [error, setError] = useState("");
   const fieldHeight = compact ? "h-11" : "h-10";
   const formPadding = compact ? "p-4" : "p-4 sm:p-5";
@@ -78,12 +81,14 @@ export default function SearchForm({
 
     setError("");
 
-    const query = new URLSearchParams({
-      from,
-      to,
-      date,
-      passengers,
-    });
+    const query = new URLSearchParams({ from, to, date, passengers });
+    if (isRoundTrip && returnDate) {
+      if (returnDate < date) {
+        setError("Return date must be on or after the departure date.");
+        return;
+      }
+      query.set("returnDate", returnDate);
+    }
 
     startTransition(() => {
       router.push(`/search?${query.toString()}`);
@@ -252,6 +257,44 @@ export default function SearchForm({
               />
             </div>
           </div>
+
+          {/* Round-trip toggle + return date */}
+          {!compact && (
+            <div className="space-y-1 lg:col-span-4">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setIsRoundTrip(!isRoundTrip); if (isRoundTrip) setReturnDate(""); }}
+                  className={cn(
+                    "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition",
+                    isRoundTrip
+                      ? "border-indigo-300 bg-indigo-100 text-indigo-700"
+                      : "border-slate-200 bg-white/60 text-slate-500 hover:border-indigo-200 hover:text-indigo-600"
+                  )}
+                >
+                  <RefreshCw className="size-3" />
+                  Round Trip
+                </button>
+              </div>
+              {isRoundTrip && (
+                <div className="relative max-w-xs">
+                  <Label htmlFor="return-date" className={cn("text-sm font-semibold mb-1 block", labelClasses)}>
+                    Return Date
+                  </Label>
+                  <CalendarDays className="pointer-events-none absolute bottom-[11px] left-4 size-4 text-muted-foreground" />
+                  <Input
+                    id="return-date"
+                    type="date"
+                    value={returnDate}
+                    onChange={(e) => setReturnDate(e.target.value)}
+                    min={date}
+                    className={cn(fieldHeight, "w-full rounded-2xl pl-11 text-sm", controlClasses)}
+                    required={isRoundTrip}
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           <div className={cn("flex items-end", compact ? "" : "lg:col-span-4")}>
             <Button

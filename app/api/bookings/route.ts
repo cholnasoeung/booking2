@@ -6,6 +6,7 @@ import BookingModel, { type IPassenger } from "@/models/Booking";
 import BusModel from "@/models/Bus";
 import PromoCodeModel from "@/models/PromoCode";
 import { sendBookingConfirmationEmail } from "@/lib/email-service";
+import { sendBookingConfirmationSMS } from "@/lib/sms-service";
 
 export const runtime = "nodejs";
 
@@ -165,6 +166,17 @@ export async function POST(request: Request) {
         discountAmount: discountAmount > 0 ? discountAmount : undefined,
         finalPrice,
       }).catch(err => console.error('Failed to send confirmation email:', err));
+
+      // SMS confirmation (fires-and-forgets; non-blocking)
+      if (user.phone) {
+        sendBookingConfirmationSMS(user.phone, {
+          customerName: user.name,
+          bookingId: String(booking._id),
+          route: routeStr,
+          departureTime: busDocument.departureTime,
+          seats,
+        }).catch(() => {});
+      }
     }
 
     return Response.json(

@@ -17,6 +17,7 @@ import BookingModel, { type BookingStatus } from "@/models/Booking";
 import BusDetailModel from "@/models/BusDetail";
 import BusModel from "@/models/Bus";
 import DriverModel from "@/models/Driver";
+import RatingModel from "@/models/Rating";
 import RouteModel from "@/models/Route";
 import UserModel, { type UserRole } from "@/models/User";
 
@@ -44,6 +45,9 @@ type StoredBusRecord = {
   stops?: BusStop[];
   driverId?: Types.ObjectId | null;
   busDetailId?: Types.ObjectId | null;
+  departureStatus?: string;
+  delayMinutes?: number;
+  statusNote?: string;
 };
 
 type DriverRecord = {
@@ -138,6 +142,10 @@ export type RouteSummary = {
   pricePerSeat: number;
   amenities: string[];
   stops: BusStop[];
+  departureStatus: string;
+  delayMinutes: number;
+  statusNote: string;
+  rating?: { average: number; count: number } | null;
   driver?: {
     id: string;
     name: string;
@@ -279,6 +287,9 @@ function serializeBus(
     seatsLeft: Math.max(bus.totalSeats - bus.bookedSeats.length - (bus.blockedSeats?.length ?? 0), 0),
     pricePerSeat: bus.pricePerSeat,
     amenities: bus.amenities,
+    departureStatus: bus.departureStatus ?? "scheduled",
+    delayMinutes: bus.delayMinutes ?? 0,
+    statusNote: bus.statusNote ?? "",
     stops,
     driver: driver
       ? {
@@ -445,6 +456,18 @@ export async function searchBuses(filters: {
   const routeMap = new Map(routes.map((route) => [String(route._id), route]));
   const passengers = parsePassengerCount(filters.passengers);
 
+  // Bulk-fetch ratings for all buses in results
+  const busObjectIds = buses.map((bus) => bus._id);
+  const ratingAggs = busObjectIds.length > 0
+    ? await RatingModel.aggregate([
+        { $match: { bus: { $in: busObjectIds }, status: "approved" } },
+        { $group: { _id: "$bus", average: { $avg: "$rating" }, count: { $sum: 1 } } },
+      ])
+    : [];
+  const ratingMap = new Map<string, { average: number; count: number }>(
+    ratingAggs.map((r) => [String(r._id), { average: Math.round(r.average * 10) / 10, count: r.count }])
+  );
+
   return buses
       .map((bus) => {
         const route = routeMap.get(String(bus.routeId));
@@ -456,7 +479,9 @@ export async function searchBuses(filters: {
           ? busDetailMap.get(String(bus.busDetailId)) ?? null
           : null;
 
-        return serializeBus(normalizeBusRecord(bus), route, null, busDetail);
+        const result = serializeBus(normalizeBusRecord(bus), route, null, busDetail);
+        result.rating = ratingMap.get(String(bus._id)) ?? null;
+        return result;
       })
     .filter((bus): bus is BusSummary => bus !== null)
     .filter((bus) => bus.seatsLeft >= passengers)
