@@ -22,6 +22,7 @@ import AdminRatingsManager from "@/components/admin-ratings-manager";
 import AdminTodayTab from "@/components/admin-today-tab";
 import AdminCounterBooking from "@/components/admin-counter-booking";
 import AdminCheckinTab from "@/components/admin-checkin-tab";
+import AdminSettingsTab from "@/components/admin-settings-tab";
 import type {
   AdminBookingSummary,
   BusDetailSummary,
@@ -129,6 +130,8 @@ export default function AdminPanel({
       {activeTab === "counter-booking" ? <AdminCounterBooking /> : null}
 
       {activeTab === "checkin" ? <AdminCheckinTab /> : null}
+
+      {activeTab === "settings" ? <AdminSettingsTab /> : null}
     </div>
   );
 }
