@@ -574,7 +574,7 @@ export default function AdminFuelLogsTab() {
 
       {/* ── Add Dialog ─────────────────────────────────────── */}
       <Dialog open={showAdd} onOpenChange={(o) => { if (!isPending) { setShowAdd(o); if (!o) setFormError(""); } }}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Fuel className="size-5 text-amber-500" /> Add Fuel Log
@@ -596,7 +596,7 @@ export default function AdminFuelLogsTab() {
 
       {/* ── Edit Dialog ────────────────────────────────────── */}
       <Dialog open={!!showEdit} onOpenChange={(o) => { if (!isPending && !o) { setShowEdit(null); setFormError(""); } }}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Pencil className="size-5 text-indigo-500" /> Edit Fuel Log

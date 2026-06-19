@@ -101,7 +101,7 @@ function EarningFormFields({ form, onChange, drivers, buses }: {
         <div className="space-y-1.5">
           <Label>Driver *</Label>
           <Select
-            value={form.driverId || undefined}
+            value={form.driverId}
             onValueChange={(v) => onChange("driverId", v)}
           >
             <SelectTrigger><SelectValue placeholder="Select driver" /></SelectTrigger>
@@ -608,7 +608,7 @@ export default function AdminDriverEarningsTab() {
 
       {/* ── Add Dialog ─────────────────────────────────────── */}
       <Dialog open={showAdd} onOpenChange={(o) => { if (!isPending) { setShowAdd(o); if (!o) setFormError(""); } }}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Wallet className="size-5 text-violet-500" /> Add Earning Entry
@@ -630,7 +630,7 @@ export default function AdminDriverEarningsTab() {
 
       {/* ── Edit Dialog ────────────────────────────────────── */}
       <Dialog open={!!showEdit} onOpenChange={(o) => { if (!isPending && !o) { setShowEdit(null); setFormError(""); } }}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Pencil className="size-5 text-indigo-500" /> Edit Earning Entry
