@@ -23,6 +23,7 @@ import AdminTodayTab from "@/components/admin-today-tab";
 import AdminCounterBooking from "@/components/admin-counter-booking";
 import AdminCheckinTab from "@/components/admin-checkin-tab";
 import AdminSettingsTab from "@/components/admin-settings-tab";
+import AdminFuelLogsTab from "@/components/admin-fuel-logs-tab";
 import type {
   AdminBookingSummary,
   BusDetailSummary,
@@ -132,6 +133,8 @@ export default function AdminPanel({
       {activeTab === "checkin" ? <AdminCheckinTab /> : null}
 
       {activeTab === "settings" ? <AdminSettingsTab /> : null}
+
+      {activeTab === "fuel-logs" ? <AdminFuelLogsTab /> : null}
     </div>
   );
 }
