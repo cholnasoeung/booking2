@@ -26,6 +26,7 @@ import AdminSettingsTab from "@/components/admin-settings-tab";
 import AdminFuelLogsTab from "@/components/admin-fuel-logs-tab";
 import AdminDriverEarningsTab from "@/components/admin-driver-earnings-tab";
 import AdminMaintenanceTab from "@/components/admin-maintenance-tab";
+import AdminDriverScheduleTab from "@/components/admin-driver-schedule-tab";
 import type {
   AdminBookingSummary,
   BusDetailSummary,
@@ -141,6 +142,8 @@ export default function AdminPanel({
       {activeTab === "driver-earnings" ? <AdminDriverEarningsTab /> : null}
 
       {activeTab === "maintenance" ? <AdminMaintenanceTab /> : null}
+
+      {activeTab === "driver-roster" ? <AdminDriverScheduleTab /> : null}
     </div>
   );
 }
