@@ -3,6 +3,7 @@ import { JetBrains_Mono, Plus_Jakarta_Sans, Space_Grotesk } from "next/font/goog
 
 import Navbar from "@/components/navbar";
 import Providers from "@/components/providers";
+import AnalyticsTracker from "@/components/analytics-tracker";
 import { APP_NAME } from "@/lib/constants";
 
 import "./globals.css";
@@ -43,6 +44,7 @@ export default function RootLayout({
     >
       <body>
         <Providers>
+          <AnalyticsTracker />
           <div className="relative min-h-screen overflow-x-clip">
             {/* Enhanced animated background */}
             <div className="pointer-events-none fixed inset-0 -z-10">

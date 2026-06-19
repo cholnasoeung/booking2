@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BarChart3, DollarSign, Download, MapPinned, TrendingUp, Users } from "lucide-react";
+import { BarChart3, DollarSign, Download, MapPinned, TrendingUp, Users, Globe2 } from "lucide-react";
+import AdminVisitorAnalytics from "@/components/admin-visitor-analytics";
 import {
   Area,
   AreaChart,
@@ -16,6 +17,7 @@ import {
 } from "recharts";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface KPIData {
   totalRevenue: number;
@@ -111,6 +113,7 @@ function exportAnalyticsCsv(data: AnalyticsData | null) {
 }
 
 export default function AdminAnalyticsTab() {
+  const [activeTab, setActiveTab] = useState<"bookings" | "visitors">("bookings");
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [dateRange, setDateRange] = useState("30");
@@ -196,6 +199,37 @@ export default function AdminAnalyticsTab() {
 
   return (
     <div className="space-y-6">
+      {/* Tab switcher */}
+      <div className="flex gap-1.5 bg-slate-100 rounded-2xl p-1.5 w-fit">
+        <button
+          onClick={() => setActiveTab("bookings")}
+          className={cn(
+            "flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all",
+            activeTab === "bookings"
+              ? "bg-white text-indigo-700 shadow-sm"
+              : "text-slate-500 hover:text-slate-700"
+          )}
+        >
+          <BarChart3 className="h-4 w-4" />Bookings
+        </button>
+        <button
+          onClick={() => setActiveTab("visitors")}
+          className={cn(
+            "flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all",
+            activeTab === "visitors"
+              ? "bg-white text-indigo-700 shadow-sm"
+              : "text-slate-500 hover:text-slate-700"
+          )}
+        >
+          <Globe2 className="h-4 w-4" />Visitors
+        </button>
+      </div>
+
+      {/* Visitor analytics section */}
+      {activeTab === "visitors" && <AdminVisitorAnalytics />}
+
+      {/* Booking analytics section */}
+      {activeTab === "bookings" && <>
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -433,6 +467,7 @@ export default function AdminAnalyticsTab() {
           </CardContent>
         </Card>
       </div>
+      </>}
     </div>
   );
 }
