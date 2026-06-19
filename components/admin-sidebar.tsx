@@ -24,6 +24,8 @@ import {
   MessageSquare,
   Star,
   CalendarClock,
+  MonitorCheck,
+  ScanLine,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
@@ -63,6 +65,18 @@ const navSections = [
         href: "/admin?tab=bookings",
         icon: Ticket,
         color: "from-pink-500 to-rose-600",
+      },
+      {
+        title: "Counter Booking",
+        href: "/admin?tab=counter-booking",
+        icon: MonitorCheck,
+        color: "from-teal-500 to-emerald-600",
+      },
+      {
+        title: "Check-in Board",
+        href: "/admin?tab=checkin",
+        icon: ScanLine,
+        color: "from-blue-500 to-cyan-600",
       },
     ],
   },

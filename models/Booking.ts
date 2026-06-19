@@ -5,6 +5,7 @@ import PromoCodeModel from "@/models/PromoCode";
 export type BookingStatus = "pending" | "confirmed" | "cancelled" | "refunded";
 export type PaymentStatus = "pending" | "paid" | "refunded" | "failed";
 export type RefundStatus = "pending" | "processed" | "failed";
+export type CheckInStatus = "pending" | "checked-in" | "boarded" | "no-show";
 
 export interface IPassenger {
   name: string;
@@ -34,10 +35,20 @@ export interface IBooking extends Document {
   metadata: {
     ipAddress?: string;
     userAgent?: string;
-    bookingSource?: "web" | "mobile" | "admin";
+    bookingSource?: string;
+    paymentMethod?: string;
+    agentId?: string;
+    agentName?: string;
+    guestName?: string;
+    guestPhone?: string;
+    guestEmail?: string;
+    note?: string;
   };
   boardingStop?: string;
   droppingStop?: string;
+  checkInStatus: CheckInStatus;
+  checkedInAt?: Date;
+  checkedInBy?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -135,12 +146,23 @@ const BookingSchema = new Schema<IBooking>(
     metadata: {
       ipAddress: String,
       userAgent: String,
-      bookingSource: {
-        type: String,
-        enum: ["web", "mobile", "admin"],
-        default: "web",
-      },
+      bookingSource: { type: String, default: "web" },
+      paymentMethod: String,
+      agentId: String,
+      agentName: String,
+      guestName: String,
+      guestPhone: String,
+      guestEmail: String,
+      note: String,
     },
+    checkInStatus: {
+      type: String,
+      enum: ["pending", "checked-in", "boarded", "no-show"],
+      default: "pending",
+      index: true,
+    },
+    checkedInAt: { type: Date },
+    checkedInBy: { type: String },
   },
   {
     timestamps: true,
