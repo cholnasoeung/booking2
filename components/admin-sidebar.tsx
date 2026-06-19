@@ -6,7 +6,7 @@ import {
   BusFront, Home, LayoutDashboard, MapPinned, Menu, Ticket, X,
   BarChart3, Tags, Bell, FileSpreadsheet, Shield, Activity, Package,
   ChevronDown, Users, LogOut, UserCog, MessageSquare, Star,
-  CalendarClock, MonitorCheck, ScanLine, Settings, Fuel,
+  CalendarClock, MonitorCheck, ScanLine, Settings, Fuel, Wallet,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
@@ -49,7 +49,8 @@ const navSections = [
     items: [
       { title: "Drivers",       href: "/admin?tab=drivers",       icon: Users,           gradient: "from-cyan-500 to-sky-600" },
       { title: "Bus Details",   href: "/admin?tab=bus-details",   icon: Package,         gradient: "from-slate-400 to-gray-500" },
-      { title: "Fuel Logs",     href: "/admin?tab=fuel-logs",     icon: Fuel,            gradient: "from-amber-500 to-orange-600" },
+      { title: "Fuel Logs",      href: "/admin?tab=fuel-logs",      icon: Fuel,   gradient: "from-amber-500 to-orange-600" },
+      { title: "Driver Earnings", href: "/admin?tab=driver-earnings", icon: Wallet, gradient: "from-violet-500 to-purple-600" },
       { title: "Promo Codes",   href: "/admin?tab=promo-codes",   icon: Tags,            gradient: "from-violet-500 to-purple-600" },
       { title: "Import/Export", href: "/admin?tab=import-export", icon: FileSpreadsheet, gradient: "from-amber-500 to-orange-600" },
       { title: "Settings",      href: "/admin?tab=settings",      icon: Settings,        gradient: "from-slate-500 to-slate-700" },

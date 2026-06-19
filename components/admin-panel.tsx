@@ -24,6 +24,7 @@ import AdminCounterBooking from "@/components/admin-counter-booking";
 import AdminCheckinTab from "@/components/admin-checkin-tab";
 import AdminSettingsTab from "@/components/admin-settings-tab";
 import AdminFuelLogsTab from "@/components/admin-fuel-logs-tab";
+import AdminDriverEarningsTab from "@/components/admin-driver-earnings-tab";
 import type {
   AdminBookingSummary,
   BusDetailSummary,
@@ -135,6 +136,8 @@ export default function AdminPanel({
       {activeTab === "settings" ? <AdminSettingsTab /> : null}
 
       {activeTab === "fuel-logs" ? <AdminFuelLogsTab /> : null}
+
+      {activeTab === "driver-earnings" ? <AdminDriverEarningsTab /> : null}
     </div>
   );
 }
