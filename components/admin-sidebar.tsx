@@ -23,6 +23,7 @@ import {
   UserCog,
   MessageSquare,
   Star,
+  CalendarClock,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
@@ -37,6 +38,13 @@ const navSections = [
         href: "/admin",
         icon: LayoutDashboard,
         color: "from-indigo-500 to-purple-600",
+      },
+      {
+        title: "Today",
+        href: "/admin?tab=today",
+        icon: CalendarClock,
+        color: "from-rose-500 to-pink-600",
+        badge: "Live",
       },
       {
         title: "Routes",

@@ -19,6 +19,7 @@ import AdminSystemStatusTab from "@/components/admin-system-status-tab";
 import AdminUsersManager from "@/components/admin-users-manager";
 import AdminSupportInbox from "@/components/admin-support-inbox";
 import AdminRatingsManager from "@/components/admin-ratings-manager";
+import AdminTodayTab from "@/components/admin-today-tab";
 import type {
   AdminBookingSummary,
   BusDetailSummary,
@@ -120,6 +121,8 @@ export default function AdminPanel({
       {activeTab === "support-inbox" ? <AdminSupportInbox /> : null}
 
       {activeTab === "ratings" ? <AdminRatingsManager /> : null}
+
+      {activeTab === "today" ? <AdminTodayTab /> : null}
     </div>
   );
 }
