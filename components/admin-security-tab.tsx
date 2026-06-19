@@ -1,21 +1,55 @@
 "use client";
 
-import { useState } from "react";
-import { Shield, AlertTriangle, CheckCircle, Search } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Shield, AlertTriangle, CheckCircle, Search, RefreshCw } from "lucide-react";
+
+interface UserOption {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
 
 export default function AdminSecurityTab() {
-  const [userId, setUserId] = useState("");
+  const [userQuery, setUserQuery] = useState("");
+  const [userOptions, setUserOptions] = useState<UserOption[]>([]);
+  const [selectedUser, setSelectedUser] = useState<UserOption | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [searching, setSearching] = useState(false);
   const [fraudCheck, setFraudCheck] = useState<any>(null);
   const [checking, setChecking] = useState(false);
   const [rateLimitStats, setRateLimitStats] = useState<any>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!userQuery.trim()) {
+      setUserOptions([]);
+      setDropdownOpen(false);
+      return;
+    }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const res = await fetch(`/api/admin/users?q=${encodeURIComponent(userQuery)}&page=1`);
+        const json = await res.json();
+        setUserOptions(json.users?.slice(0, 8) ?? []);
+        setDropdownOpen(true);
+      } catch {
+        setUserOptions([]);
+      } finally {
+        setSearching(false);
+      }
+    }, 300);
+  }, [userQuery]);
 
   const checkFraud = async () => {
-    if (!userId) return;
-
+    if (!selectedUser) return;
     setChecking(true);
+    setFraudCheck(null);
     try {
       const response = await fetch(
-        `/api/admin/security?action=check-fraud&userId=${userId}&ipAddress=unknown`
+        `/api/admin/security?action=check-fraud&userId=${selectedUser.id}&ipAddress=unknown`
       );
       const data = await response.json();
       setFraudCheck(data.fraudCheck);
@@ -56,22 +90,84 @@ export default function AdminSecurityTab() {
           cancellation rates, and multiple IP addresses.
         </p>
 
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            placeholder="Enter User ID"
-            className="flex-1 px-4 py-2 border rounded-lg"
-          />
-          <button
-            onClick={checkFraud}
-            disabled={checking || !userId}
-            className="flex items-center gap-2 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-          >
-            <Search className="w-4 h-4" />
-            Check
-          </button>
+        <div className="space-y-3 mb-4">
+          {/* User search */}
+          <div className="relative">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={selectedUser ? `${selectedUser.name} (${selectedUser.email})` : userQuery}
+                  onChange={(e) => {
+                    setSelectedUser(null);
+                    setUserQuery(e.target.value);
+                    setFraudCheck(null);
+                  }}
+                  onFocus={() => { if (userOptions.length > 0) setDropdownOpen(true); }}
+                  placeholder="Search user by name or email…"
+                  className="w-full pl-9 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                {searching && (
+                  <RefreshCw className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 animate-spin" />
+                )}
+              </div>
+              <button
+                onClick={checkFraud}
+                disabled={checking || !selectedUser}
+                className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 whitespace-nowrap"
+              >
+                {checking ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Shield className="w-4 h-4" />}
+                Check Risk
+              </button>
+            </div>
+
+            {/* Dropdown */}
+            {dropdownOpen && userOptions.length > 0 && !selectedUser && (
+              <div className="absolute z-20 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                {userOptions.map((u) => (
+                  <button
+                    key={u.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedUser(u);
+                      setUserQuery("");
+                      setDropdownOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-indigo-50 text-left transition-colors border-b border-gray-100 last:border-0"
+                  >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 text-sm font-bold">
+                      {u.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{u.name}</p>
+                      <p className="text-xs text-gray-500">{u.email}</p>
+                    </div>
+                    <span className={`ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full ${u.role === "admin" ? "bg-indigo-100 text-indigo-700" : "bg-gray-100 text-gray-600"}`}>
+                      {u.role}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Selected user chip */}
+          {selectedUser && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-indigo-50 border border-indigo-200 rounded-xl text-sm">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-white text-xs font-bold">
+                {selectedUser.name.charAt(0).toUpperCase()}
+              </div>
+              <span className="font-medium text-indigo-900">{selectedUser.name}</span>
+              <span className="text-indigo-500">{selectedUser.email}</span>
+              <button
+                onClick={() => { setSelectedUser(null); setFraudCheck(null); setUserQuery(""); }}
+                className="ml-auto text-indigo-400 hover:text-indigo-700 font-bold"
+              >
+                ×
+              </button>
+            </div>
+          )}
         </div>
 
         {fraudCheck && (

@@ -16,6 +16,9 @@ import AdminBusDetailsManager from "@/components/admin-bus-details-manager";
 import AdminDriversManager from "@/components/admin-drivers-manager";
 import AdminSecurityTab from "@/components/admin-security-tab";
 import AdminSystemStatusTab from "@/components/admin-system-status-tab";
+import AdminUsersManager from "@/components/admin-users-manager";
+import AdminSupportInbox from "@/components/admin-support-inbox";
+import AdminRatingsManager from "@/components/admin-ratings-manager";
 import type {
   AdminBookingSummary,
   BusDetailSummary,
@@ -81,6 +84,7 @@ export default function AdminPanel({
         <AdminBusesManager
           routes={routes}
           buses={buses}
+          drivers={drivers}
           onFeedback={setManagerFeedback}
         />
       ) : null}
@@ -110,6 +114,12 @@ export default function AdminPanel({
       {activeTab === "security" ? <AdminSecurityTab /> : null}
 
       {activeTab === "system-status" ? <AdminSystemStatusTab /> : null}
+
+      {activeTab === "users" ? <AdminUsersManager /> : null}
+
+      {activeTab === "support-inbox" ? <AdminSupportInbox /> : null}
+
+      {activeTab === "ratings" ? <AdminRatingsManager /> : null}
     </div>
   );
 }

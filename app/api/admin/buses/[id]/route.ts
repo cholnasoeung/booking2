@@ -195,6 +195,50 @@ export async function PUT(
   }
 }
 
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getCurrentSession();
+  if (session?.user?.role !== "admin") {
+    return Response.json({ message: "Admin access required" }, { status: 403 });
+  }
+
+  const { id } = await params;
+  if (!isValidObjectId(id)) {
+    return Response.json({ message: "Invalid bus ID" }, { status: 400 });
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const driverId =
+    typeof body?.driverId === "string" && body.driverId.trim() ? body.driverId.trim() : null;
+
+  if (driverId && !isValidObjectId(driverId)) {
+    return Response.json({ message: "Invalid driver ID" }, { status: 400 });
+  }
+
+  await connectToDatabase();
+
+  if (driverId) {
+    const driver = await DriverModel.findById(driverId).lean();
+    if (!driver) {
+      return Response.json({ message: "Driver not found" }, { status: 404 });
+    }
+  }
+
+  const bus = await BusModel.findByIdAndUpdate(
+    id,
+    { driverId: driverId || null },
+    { new: true }
+  ).select("driverId");
+
+  if (!bus) {
+    return Response.json({ message: "Bus not found" }, { status: 404 });
+  }
+
+  return Response.json({ driverId: bus.driverId ? String(bus.driverId) : null });
+}
+
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }

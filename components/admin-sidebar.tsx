@@ -20,6 +20,9 @@ import {
   ChevronDown,
   Users,
   LogOut,
+  UserCog,
+  MessageSquare,
+  Star,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
@@ -74,6 +77,29 @@ const navSections = [
     ],
   },
   {
+    title: "People",
+    items: [
+      {
+        title: "Users",
+        href: "/admin?tab=users",
+        icon: UserCog,
+        color: "from-violet-500 to-purple-600",
+      },
+      {
+        title: "Support Inbox",
+        href: "/admin?tab=support-inbox",
+        icon: MessageSquare,
+        color: "from-sky-500 to-blue-600",
+      },
+      {
+        title: "Ratings",
+        href: "/admin?tab=ratings",
+        icon: Star,
+        color: "from-amber-500 to-orange-600",
+      },
+    ],
+  },
+  {
     title: "Management",
     items: [
       {
@@ -93,14 +119,12 @@ const navSections = [
         href: "/admin?tab=promo-codes",
         icon: Tags,
         color: "from-violet-500 to-purple-600",
-        badge: "New",
       },
       {
         title: "Import/Export",
         href: "/admin?tab=import-export",
         icon: FileSpreadsheet,
         color: "from-amber-500 to-orange-600",
-        badge: "New",
       },
     ],
   },

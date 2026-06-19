@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, Search, Ticket, XCircle } from "lucide-react";
+import { CheckSquare, Download, Eye, Search, Square, Ticket, XCircle } from "lucide-react";
 
 import {
   EmptyState,
@@ -154,6 +154,102 @@ export default function AdminBookingsManager({
   const pagedBookings = visibleBookings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   useEffect(() => { setPage(1); }, [bookingQuery, bookingStatusFilter, bookingRouteFilter, bookingTravelDateFilter, bookingSort]);
+
+  // Bulk selection
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkCancelPending, setBulkCancelPending] = useState(false);
+
+  const visibleConfirmedIds = visibleBookings
+    .filter((b) => b.status === "confirmed")
+    .map((b) => b.id);
+  const allVisibleSelected =
+    visibleConfirmedIds.length > 0 &&
+    visibleConfirmedIds.every((id) => selectedIds.has(id));
+
+  function toggleSelectAll() {
+    if (allVisibleSelected) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        visibleConfirmedIds.forEach((id) => next.delete(id));
+        return next;
+      });
+    } else {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        visibleConfirmedIds.forEach((id) => next.add(id));
+        return next;
+      });
+    }
+  }
+
+  function toggleRow(id: string, status: string) {
+    if (status !== "confirmed") return;
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  async function bulkCancel() {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Cancel ${selectedIds.size} selected booking(s)?`)) return;
+    setBulkCancelPending(true);
+    setFeedback(null);
+    try {
+      const res = await fetch("/api/admin/bookings/bulk-cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingIds: [...selectedIds], reason: "Bulk cancelled by admin" }),
+      });
+      const payload = await res.json();
+      if (!res.ok) {
+        setFeedback({ kind: "error", message: payload.message ?? "Bulk cancel failed" });
+        return;
+      }
+      setFeedback({ kind: "success", message: `Cancelled ${payload.cancelled} booking(s).` });
+      setSelectedIds(new Set());
+      router.refresh();
+    } catch {
+      setFeedback({ kind: "error", message: "Bulk cancel failed." });
+    } finally {
+      setBulkCancelPending(false);
+    }
+  }
+
+  function exportCsv() {
+    const rows = visibleBookings.map((b) => [
+      b.id,
+      b.status,
+      b.user?.name ?? "",
+      b.user?.email ?? "",
+      b.bus ? `${b.bus.from} to ${b.bus.to}` : "",
+      b.bus?.travelDate ?? "",
+      b.bus?.departureTime ?? "",
+      formatSeatList(b.seats),
+      b.seats.length,
+      b.totalPrice,
+      b.createdAt,
+      b.cancelledAt ?? "",
+    ]);
+    const headers = [
+      "BookingID","Status","CustomerName","CustomerEmail","Route","TravelDate",
+      "DepartureTime","Seats","SeatCount","TotalPrice","BookedAt","CancelledAt",
+    ];
+    const escape = (v: any) => {
+      const s = String(v ?? "").replace(/"/g, '""');
+      return s.includes(",") || s.includes('"') || s.includes("\n") ? `"${s}"` : s;
+    };
+    const csv = [headers.join(","), ...rows.map((r) => r.map(escape).join(","))].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `bookings-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   async function confirmBookingCancellation() {
     if (!bookingToCancel) {
@@ -308,14 +404,10 @@ export default function AdminBookingsManager({
                 />
               </div>
 
-              <div className="flex justify-end">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <Select
                   value={bookingSort}
-                  onValueChange={(value) => {
-                    if (value) {
-                      setBookingSort(value);
-                    }
-                  }}
+                  onValueChange={(value) => { if (value) setBookingSort(value); }}
                 >
                   <SelectTrigger className="h-11 w-full max-w-xs rounded-xl border-pink-200/70 bg-white/90">
                     <SelectValue placeholder="Sort bookings" />
@@ -328,6 +420,33 @@ export default function AdminBookingsManager({
                     <SelectItem value="status">Status</SelectItem>
                   </SelectContent>
                 </Select>
+
+                <div className="flex items-center gap-2">
+                  {selectedIds.size > 0 && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="rounded-full border-red-200 text-red-700 hover:bg-red-50"
+                      disabled={bulkCancelPending}
+                      onClick={bulkCancel}
+                    >
+                      <XCircle className="size-4" />
+                      {bulkCancelPending ? "Cancelling…" : `Cancel ${selectedIds.size} selected`}
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                    onClick={exportCsv}
+                    disabled={visibleBookings.length === 0}
+                  >
+                    <Download className="size-4" />
+                    Export CSV ({visibleBookings.length})
+                  </Button>
+                </div>
               </div>
             </div>
           </CardHeader>
@@ -336,6 +455,19 @@ export default function AdminBookingsManager({
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gradient-to-r from-pink-50 to-rose-50 hover:bg-transparent">
+                    <TableHead className="w-10">
+                      <button
+                        type="button"
+                        onClick={toggleSelectAll}
+                        className="flex items-center justify-center"
+                        title={allVisibleSelected ? "Deselect all" : "Select all confirmed"}
+                      >
+                        {allVisibleSelected
+                          ? <CheckSquare className="size-4 text-pink-600" />
+                          : <Square className="size-4 text-pink-400" />
+                        }
+                      </button>
+                    </TableHead>
                     <TableHead className="font-bold text-pink-900">Booking</TableHead>
                     <TableHead className="font-bold text-pink-900">Customer</TableHead>
                     <TableHead className="font-bold text-pink-900">Trip</TableHead>
@@ -351,7 +483,7 @@ export default function AdminBookingsManager({
                 <TableBody>
                   {visibleBookings.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="py-10">
+                      <TableCell colSpan={9} className="py-10">
                         <EmptyState
                           icon={<Ticket className="size-10 text-pink-300" />}
                           title="No bookings match these filters"
@@ -363,8 +495,21 @@ export default function AdminBookingsManager({
                     pagedBookings.map((booking) => (
                       <TableRow
                         key={booking.id}
-                        className="transition-colors hover:bg-pink-50/50"
+                        className={`transition-colors hover:bg-pink-50/50 ${selectedIds.has(booking.id) ? "bg-pink-50" : ""}`}
                       >
+                        <TableCell>
+                          <button
+                            type="button"
+                            disabled={booking.status !== "confirmed"}
+                            onClick={() => toggleRow(booking.id, booking.status)}
+                            className="flex items-center justify-center disabled:opacity-30"
+                          >
+                            {selectedIds.has(booking.id)
+                              ? <CheckSquare className="size-4 text-pink-600" />
+                              : <Square className="size-4 text-pink-300" />
+                            }
+                          </button>
+                        </TableCell>
                         <TableCell className="whitespace-normal">
                           <div className="space-y-1">
                             <p className="font-mono text-xs text-foreground">

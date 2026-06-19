@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BusFront, Navigation, PencilLine, Plus, Search, Trash2 } from "lucide-react";
+import { BusFront, Navigation, PencilLine, Plus, Search, Trash2, UserCheck } from "lucide-react";
 
 import AdminBusDialog from "@/components/admin-bus-dialog";
 import { AvailabilityBadge, EmptyState, PAGE_SIZE, Paginator, SummaryTile } from "@/components/admin-management-shared";
@@ -34,7 +34,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatBusType, formatCurrency, formatTravelDate } from "@/lib/formatters";
-import type { BusSummary, RouteSummary } from "@/lib/queries";
+import type { BusSummary, DriverSummary, RouteSummary } from "@/lib/queries";
 
 type FeedbackState =
   | {
@@ -46,12 +46,14 @@ type FeedbackState =
 type AdminBusesManagerProps = {
   routes: RouteSummary[];
   buses: BusSummary[];
+  drivers?: DriverSummary[];
   onFeedback: (feedback: FeedbackState) => void;
 };
 
 export default function AdminBusesManager({
   routes,
   buses,
+  drivers = [],
   onFeedback,
 }: AdminBusesManagerProps) {
   const router = useRouter();
@@ -67,6 +69,11 @@ export default function AdminBusesManager({
   const [newDelayMinutes, setNewDelayMinutes] = useState(0);
   const [newStatusNote, setNewStatusNote] = useState("");
   const [statusPending, setStatusPending] = useState(false);
+
+  // Driver assignment
+  const [driverBus, setDriverBus] = useState<BusSummary | null>(null);
+  const [selectedDriverId, setSelectedDriverId] = useState<string>("");
+  const [driverPending, setDriverPending] = useState(false);
 
   const [page, setPage] = useState(1);
 
@@ -297,10 +304,17 @@ export default function AdminBusesManager({
                           </div>
                         </TableCell>
                         <TableCell>
-                          <AvailabilityBadge bus={bus} />
+                          <div className="space-y-1">
+                            <AvailabilityBadge bus={bus} />
+                            {bus.driver && (
+                              <p className="text-[11px] text-slate-400 truncate max-w-[120px]">
+                                {bus.driver.name}
+                              </p>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+                          <div className="flex justify-end gap-2 flex-wrap">
                             <Button
                               type="button"
                               size="sm"
@@ -312,6 +326,19 @@ export default function AdminBusesManager({
                             >
                               <PencilLine className="size-4" />
                               Edit
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="rounded-full border-indigo-200 text-indigo-700 hover:bg-indigo-50"
+                              onClick={() => {
+                                setDriverBus(bus);
+                                setSelectedDriverId((bus as any).driverId ?? "");
+                              }}
+                            >
+                              <UserCheck className="size-4" />
+                              Driver
                             </Button>
                             <Button
                               type="button"
@@ -461,6 +488,73 @@ export default function AdminBusesManager({
               }}
             >
               {statusPending ? "Saving…" : "Save Status"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Driver assignment dialog */}
+      <Dialog open={Boolean(driverBus)} onOpenChange={(open) => !open && setDriverBus(null)}>
+        <DialogContent className="sm:max-w-sm border-2 border-indigo-200/70 bg-white shadow-2xl">
+          <DialogHeader>
+            <DialogTitle>Assign Driver</DialogTitle>
+            <DialogDescription>
+              {driverBus ? `${driverBus.from} → ${driverBus.to} · ${driverBus.departureTime}` : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-2 space-y-3">
+            {drivers.length === 0 ? (
+              <p className="text-sm text-slate-500">No drivers registered. Add drivers first.</p>
+            ) : (
+              <Select value={selectedDriverId} onValueChange={(v) => { if (v) setSelectedDriverId(v); }}>
+                <SelectTrigger className="rounded-xl">
+                  <SelectValue placeholder="Select a driver" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— No driver —</SelectItem>
+                  {drivers.map((d) => (
+                    <SelectItem key={d.id} value={d.id}>
+                      {d.name} · {d.licenseNumber}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {driverBus?.driver && (
+              <p className="text-xs text-slate-500">
+                Currently assigned: <span className="font-medium">{driverBus.driver.name}</span>
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-xl" onClick={() => setDriverBus(null)}>Cancel</Button>
+            <Button
+              className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white"
+              disabled={driverPending || drivers.length === 0}
+              onClick={async () => {
+                if (!driverBus) return;
+                setDriverPending(true);
+                try {
+                  const driverId = selectedDriverId === "none" ? null : selectedDriverId;
+                  const res = await fetch(`/api/admin/buses/${driverBus.id}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ driverId }),
+                  });
+                  if (res.ok) {
+                    onFeedback({ kind: "success", message: driverId ? "Driver assigned." : "Driver removed." });
+                    setDriverBus(null);
+                    router.refresh();
+                  } else {
+                    const j = await res.json();
+                    onFeedback({ kind: "error", message: j.message ?? "Failed to assign driver." });
+                  }
+                } finally {
+                  setDriverPending(false);
+                }
+              }}
+            >
+              {driverPending ? "Saving…" : "Save"}
             </Button>
           </DialogFooter>
         </DialogContent>

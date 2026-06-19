@@ -1,11 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { Upload, Download, FileSpreadsheet, CheckCircle, XCircle } from "lucide-react";
+import { Upload, Download, FileSpreadsheet, CheckCircle, XCircle, BookOpen, MapPinned } from "lucide-react";
 
 export default function AdminImportExportTab() {
   const [importResult, setImportResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [dataExporting, setDataExporting] = useState<string | null>(null);
+
+  const handleDataExport = async (action: "bookings" | "routes") => {
+    setDataExporting(action);
+    try {
+      const res = await fetch(`/api/admin/export?action=${action}`);
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${action}-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert(`Failed to export ${action}`);
+    } finally {
+      setDataExporting(null);
+    }
+  };
 
   const handleImport = async (file: File) => {
     setLoading(true);
@@ -81,6 +101,47 @@ export default function AdminImportExportTab() {
         <h2 className="text-2xl font-bold text-gray-900">Import / Export</h2>
         <p className="text-sm text-gray-600">Bulk manage seat layouts</p>
       </div>
+
+      {/* Data Exports */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <h3 className="font-semibold text-lg mb-1">Data Exports</h3>
+        <p className="text-sm text-gray-500 mb-4">Download your business data as CSV for reporting and accounting.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <button
+            onClick={() => handleDataExport("bookings")}
+            disabled={dataExporting === "bookings"}
+            className="flex items-center gap-4 p-5 rounded-xl border-2 border-dashed border-pink-200 hover:border-pink-400 hover:bg-pink-50 transition-all disabled:opacity-50"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-100 text-pink-600">
+              <BookOpen className="w-6 h-6" />
+            </div>
+            <div className="text-left">
+              <p className="font-semibold text-gray-900">Export Bookings</p>
+              <p className="text-xs text-gray-500">All booking records with customer & trip info</p>
+            </div>
+            <Download className={`ml-auto w-5 h-5 text-pink-400 ${dataExporting === "bookings" ? "animate-bounce" : ""}`} />
+          </button>
+
+          <button
+            onClick={() => handleDataExport("routes")}
+            disabled={dataExporting === "routes"}
+            className="flex items-center gap-4 p-5 rounded-xl border-2 border-dashed border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50 transition-all disabled:opacity-50"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+              <MapPinned className="w-6 h-6" />
+            </div>
+            <div className="text-left">
+              <p className="font-semibold text-gray-900">Export Routes</p>
+              <p className="text-xs text-gray-500">All routes with distance and duration</p>
+            </div>
+            <Download className={`ml-auto w-5 h-5 text-emerald-400 ${dataExporting === "routes" ? "animate-bounce" : ""}`} />
+          </button>
+        </div>
+      </div>
+
+      <hr className="border-gray-200" />
+
+      <h3 className="text-lg font-semibold text-gray-800">Seat Layout Import / Export</h3>
 
       {/* Instructions */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
