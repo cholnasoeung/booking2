@@ -23,6 +23,20 @@ export interface IEmployee extends Document {
   allowanceHousing: number;
   allowanceOther: number;
   notes?: string;
+  // Leave metadata
+  leaveType?: string;
+  leaveStartDate?: Date;
+  leaveReturnDate?: Date;
+  leaveNote?: string;
+  // Resignation metadata
+  resignDate?: Date;
+  lastWorkingDay?: Date;
+  resignReason?: string;
+  resignNote?: string;
+  // Termination metadata
+  terminationDate?: Date;
+  terminationReason?: string;
+  terminationNote?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -46,6 +60,17 @@ const EmployeeSchema = new Schema<IEmployee>(
     allowanceHousing:   { type: Number, default: 0, min: 0 },
     allowanceOther:     { type: Number, default: 0, min: 0 },
     notes:              { type: String, trim: true },
+    leaveType:          { type: String, trim: true },
+    leaveStartDate:     { type: Date },
+    leaveReturnDate:    { type: Date },
+    leaveNote:          { type: String, trim: true },
+    resignDate:         { type: Date },
+    lastWorkingDay:     { type: Date },
+    resignReason:       { type: String, trim: true },
+    resignNote:         { type: String, trim: true },
+    terminationDate:    { type: Date },
+    terminationReason:  { type: String, trim: true },
+    terminationNote:    { type: String, trim: true },
   },
   { timestamps: true }
 );

@@ -3,7 +3,8 @@
 import { useState, useCallback, useEffect, useTransition } from "react";
 import {
   Users, Plus, Search, Pencil, Trash2, MoreHorizontal,
-  UserCheck, UserX, UserMinus, Clock,
+  UserCheck, UserX, UserMinus,
+  AlertTriangle, ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +28,40 @@ type Emp = {
   baseSalary: number; allowanceTransport: number; allowanceMeal: number;
   allowanceHousing: number; allowanceOther: number; totalAllowances: number;
   grossMonthly: number; notes: string | null; createdAt: string;
+  resignDate: string | null; lastWorkingDay: string | null; resignReason: string | null; resignNote: string | null;
+  terminationDate: string | null; terminationReason: string | null; terminationNote: string | null;
 };
+
+type StatusMode = "resigned" | "terminated";
+
+const RESIGN_REASONS: Record<string, string> = {
+  better_opportunity:  "Better Opportunity",
+  personal_reasons:    "Personal Reasons",
+  salary:              "Salary Dissatisfaction",
+  relocation:          "Relocation",
+  retirement:          "Retirement",
+  other:               "Other",
+};
+
+const TERM_REASONS: Record<string, string> = {
+  misconduct:          "Misconduct",
+  performance:         "Poor Performance",
+  redundancy:          "Redundancy / Restructure",
+  contract_end:        "Contract Ended",
+  absence:             "Unexplained Absence",
+  other:               "Other",
+};
+
+function fmtDate(d: string | null | undefined) {
+  if (!d) return null;
+  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function fmtShort(d: string | null | undefined) {
+  if (!d) return null;
+  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
 
 type EmpForm = {
   name: string; phone: string; email: string;
@@ -57,7 +91,6 @@ const DEPTS: Record<string, { label: string; color: string; bg: string }> = {
 
 const STATUSES: Record<string, { label: string; color: string; bg: string }> = {
   active:     { label: "Active",     color: "text-emerald-400", bg: "bg-emerald-500/15 border border-emerald-500/30" },
-  on_leave:   { label: "On Leave",   color: "text-amber-400",   bg: "bg-amber-500/15   border border-amber-500/30"   },
   resigned:   { label: "Resigned",   color: "text-slate-400",   bg: "bg-slate-500/15   border border-slate-500/30"   },
   terminated: { label: "Terminated", color: "text-red-400",     bg: "bg-red-500/15     border border-red-500/30"     },
 };
@@ -131,7 +164,7 @@ function EmployeeFormContent({
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label className="text-slate-300 text-xs">Role <span className="text-red-400">*</span></Label>
-            <Select value={form.role} onValueChange={v => onChange("role", v)}>
+            <Select value={form.role} onValueChange={v => v !== null && onChange("role", v)}>
               <SelectTrigger className="bg-white/5 border-white/10 text-white"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {Object.entries(ROLES).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
@@ -140,7 +173,7 @@ function EmployeeFormContent({
           </div>
           <div className="space-y-1.5">
             <Label className="text-slate-300 text-xs">Department <span className="text-red-400">*</span></Label>
-            <Select value={form.department} onValueChange={v => onChange("department", v)}>
+            <Select value={form.department} onValueChange={v => v !== null && onChange("department", v)}>
               <SelectTrigger className="bg-white/5 border-white/10 text-white"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {Object.entries(DEPTS).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
@@ -153,7 +186,7 @@ function EmployeeFormContent({
           </div>
           <div className="space-y-1.5">
             <Label className="text-slate-300 text-xs">Employment Status</Label>
-            <Select value={form.status} onValueChange={v => onChange("status", v)}>
+            <Select value={form.status} onValueChange={v => v !== null && onChange("status", v)}>
               <SelectTrigger className="bg-white/5 border-white/10 text-white"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {Object.entries(STATUSES).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
@@ -169,7 +202,7 @@ function EmployeeFormContent({
         <div className="grid grid-cols-3 gap-4">
           <div className="space-y-1.5">
             <Label className="text-slate-300 text-xs">Salary Type</Label>
-            <Select value={form.salaryType} onValueChange={v => onChange("salaryType", v)}>
+            <Select value={form.salaryType} onValueChange={v => v !== null && onChange("salaryType", v)}>
               <SelectTrigger className="bg-white/5 border-white/10 text-white"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="monthly">Monthly Fixed</SelectItem>
@@ -250,6 +283,14 @@ export default function AdminEmployeesTab() {
   const [form,         setForm]         = useState<EmpForm>(emptyForm);
   const [formErr,      setFormErr]      = useState("");
   const [isPending,    startTransition] = useTransition();
+
+  const [scOpen,   setScOpen]   = useState(false);
+  const [scMode,   setScMode]   = useState<StatusMode>("resigned");
+  const [scTarget, setScTarget] = useState<Emp | null>(null);
+  const [scForm,   setScForm]   = useState({
+    resignDate: "", lastWorkingDay: "", resignReason: "personal_reasons", resignNote: "",
+    terminationDate: "", terminationReason: "misconduct", terminationNote: "",
+  });
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -346,6 +387,45 @@ export default function AdminEmployeesTab() {
     });
   };
 
+  const openStatusChange = (emp: Emp, mode: StatusMode) => {
+    setScTarget(emp);
+    setScMode(mode);
+    setScForm({
+      resignDate:        emp.resignDate       ? new Date(emp.resignDate).toISOString().slice(0, 10)       : "",
+      lastWorkingDay:    emp.lastWorkingDay   ? new Date(emp.lastWorkingDay).toISOString().slice(0, 10)   : "",
+      resignReason:      emp.resignReason     ?? "personal_reasons",
+      resignNote:        emp.resignNote       ?? "",
+      terminationDate:   emp.terminationDate  ? new Date(emp.terminationDate).toISOString().slice(0, 10)  : "",
+      terminationReason: emp.terminationReason ?? "misconduct",
+      terminationNote:   emp.terminationNote  ?? "",
+    });
+    setScOpen(true);
+  };
+
+  const handleStatusChangeSave = () => {
+    if (!scTarget) return;
+    const body: Record<string, string | undefined> = { status: scMode };
+    if (scMode === "resigned") {
+      body.resignDate      = scForm.resignDate      || undefined;
+      body.lastWorkingDay  = scForm.lastWorkingDay  || undefined;
+      body.resignReason    = scForm.resignReason    || undefined;
+      body.resignNote      = scForm.resignNote      || undefined;
+    } else {
+      body.terminationDate   = scForm.terminationDate   || undefined;
+      body.terminationReason = scForm.terminationReason || undefined;
+      body.terminationNote   = scForm.terminationNote   || undefined;
+    }
+    startTransition(async () => {
+      await fetch(`/api/admin/employees/${scTarget.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      setScOpen(false);
+      fetchData();
+    });
+  };
+
   const totalAll = Object.values(stats).reduce((a, b) => a + b, 0);
 
   return (
@@ -372,12 +452,11 @@ export default function AdminEmployeesTab() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         {([
-          { key: "active",     label: "Active",     gradient: "from-emerald-500 to-teal-600",   shadow: "shadow-emerald-500/30", Icon: UserCheck  },
-          { key: "on_leave",   label: "On Leave",   gradient: "from-amber-500 to-orange-600",   shadow: "shadow-amber-500/30",   Icon: Clock      },
-          { key: "resigned",   label: "Resigned",   gradient: "from-slate-500 to-slate-700",    shadow: "shadow-slate-500/20",   Icon: UserMinus  },
-          { key: "terminated", label: "Terminated", gradient: "from-red-500 to-rose-600",       shadow: "shadow-red-500/30",     Icon: UserX      },
+          { key: "active",     label: "Active",     gradient: "from-emerald-500 to-teal-600", shadow: "shadow-emerald-500/30", Icon: UserCheck },
+          { key: "resigned",   label: "Resigned",   gradient: "from-slate-500 to-slate-700",  shadow: "shadow-slate-500/20",   Icon: UserMinus },
+          { key: "terminated", label: "Terminated", gradient: "from-red-500 to-rose-600",     shadow: "shadow-red-500/30",     Icon: UserX     },
         ] as const).map(({ key, label, gradient, shadow, Icon }) => {
           const count = stats[key] ?? 0;
           const pct = totalAll > 0 ? Math.round((count / totalAll) * 100) : 0;
@@ -403,10 +482,10 @@ export default function AdminEmployeesTab() {
       <div className="flex flex-wrap gap-3 items-center">
         <div className="relative flex-1 min-w-[180px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name…" className="pl-9 bg-slate-800/60 border-white/8 text-white placeholder:text-slate-500" />
+          <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name…" className="pl-9 bg-white border-slate-200 text-slate-900 placeholder:text-slate-400" />
         </div>
-        <Select value={filterRole} onValueChange={setFilterRole}>
-          <SelectTrigger className="w-36 bg-slate-800/60 border-white/8 text-white">
+        <Select value={filterRole} onValueChange={v => setFilterRole(v ?? "_all")}>
+          <SelectTrigger className="w-36 bg-white border-slate-200 text-slate-700">
             <SelectValue>{filterRole === "_all" ? "All Roles" : (ROLES[filterRole]?.label ?? "All Roles")}</SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -414,8 +493,8 @@ export default function AdminEmployeesTab() {
             {Object.entries(ROLES).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
           </SelectContent>
         </Select>
-        <Select value={filterDept} onValueChange={setFilterDept}>
-          <SelectTrigger className="w-44 bg-slate-800/60 border-white/8 text-white">
+        <Select value={filterDept} onValueChange={v => setFilterDept(v ?? "_all")}>
+          <SelectTrigger className="w-44 bg-white border-slate-200 text-slate-700">
             <SelectValue>{filterDept === "_all" ? "All Departments" : (DEPTS[filterDept]?.label ?? "All Departments")}</SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -423,8 +502,8 @@ export default function AdminEmployeesTab() {
             {Object.entries(DEPTS).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
           </SelectContent>
         </Select>
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-36 bg-slate-800/60 border-white/8 text-white">
+        <Select value={filterStatus} onValueChange={v => setFilterStatus(v ?? "_all")}>
+          <SelectTrigger className="w-36 bg-white border-slate-200 text-slate-700">
             <SelectValue>{filterStatus === "_all" ? "All Status" : (STATUSES[filterStatus]?.label ?? "All Status")}</SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -456,16 +535,16 @@ export default function AdminEmployeesTab() {
           </Button>
         </div>
       ) : (
-        <div className="rounded-2xl border border-white/8 overflow-x-auto">
+        <div className="rounded-2xl border border-slate-200 overflow-x-auto shadow-sm">
           <table className="w-full text-sm min-w-[800px]">
             <thead>
-              <tr className="border-b border-white/8 bg-gradient-to-r from-slate-800/80 to-slate-800/40">
+              <tr className="border-b border-slate-200 bg-slate-50">
                 {["Employee", "Role", "Department", "Hire Date", "Base Salary", "Monthly Package", "Status", ""].map((h, i) => (
-                  <th key={i} className={cn("px-4 py-3.5 text-left text-[10px] uppercase tracking-widest text-slate-400 font-bold whitespace-nowrap", i === 7 && "w-12")}>{h}</th>
+                  <th key={i} className={cn("px-4 py-3.5 text-left text-[10px] uppercase tracking-widest text-slate-500 font-bold whitespace-nowrap", i === 7 && "w-12")}>{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-slate-100">
               {employees.map((emp) => {
                 const role       = ROLES[emp.role]       ?? ROLES.other;
                 const dept       = DEPTS[emp.department] ?? DEPTS.operations;
@@ -473,15 +552,15 @@ export default function AdminEmployeesTab() {
                 const avatarGrad = DEPT_GRAD[emp.department] ?? "from-indigo-500 to-violet-600";
                 const initials   = emp.name.split(" ").map((p: string) => p[0] ?? "").join("").slice(0, 2).toUpperCase();
                 return (
-                  <tr key={emp.id} className="hover:bg-white/3 transition-colors group">
+                  <tr key={emp.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
                         <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white text-sm font-black shadow-lg bg-gradient-to-br", avatarGrad)}>
                           {initials}
                         </div>
                         <div>
-                          <p className="text-white font-semibold leading-tight">{emp.name}</p>
-                          <p className="text-slate-400 text-[11px] mt-0.5">{emp.email ?? emp.phone}</p>
+                          <p className="text-slate-900 font-semibold leading-tight">{emp.name}</p>
+                          <p className="text-slate-500 text-[11px] mt-0.5">{emp.email ?? emp.phone}</p>
                         </div>
                       </div>
                     </td>
@@ -491,20 +570,47 @@ export default function AdminEmployeesTab() {
                     <td className="px-4 py-3.5">
                       <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold", dept.bg, dept.color)}>{dept.label}</span>
                     </td>
-                    <td className="px-4 py-3.5 text-slate-300 text-xs whitespace-nowrap">
+                    <td className="px-4 py-3.5 text-slate-600 text-xs whitespace-nowrap font-medium">
                       {emp.hireDate ? new Date(emp.hireDate).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "—"}
                     </td>
-                    <td className="px-4 py-3.5 text-slate-300 font-mono">{fmt(emp.baseSalary)}</td>
+                    <td className="px-4 py-3.5 text-slate-700 font-mono font-semibold">{fmt(emp.baseSalary)}</td>
                     <td className="px-4 py-3.5">
-                      <p className="text-white font-mono font-bold">{fmt(emp.grossMonthly)}</p>
-                      {emp.totalAllowances > 0 && <p className="text-slate-500 text-[11px] mt-0.5">+{fmt(emp.totalAllowances)} allow.</p>}
+                      <p className="text-slate-900 font-mono font-bold">{fmt(emp.grossMonthly)}</p>
+                      {emp.totalAllowances > 0 && <p className="text-slate-400 text-[11px] mt-0.5">+{fmt(emp.totalAllowances)} allow.</p>}
                     </td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-4 py-3.5 min-w-[160px]">
                       <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold", status.bg, status.color)}>{status.label}</span>
+
+                      {/* ── Resigned ── */}
+                      {emp.status === "resigned" && (emp.resignDate || emp.resignReason) && (
+                        <div className="mt-1.5 space-y-0.5">
+                          <p className="text-[10px] font-semibold text-slate-500">
+                            {RESIGN_REASONS[emp.resignReason ?? ""] ?? "Resigned"}
+                          </p>
+                          {emp.resignDate && (
+                            <p className="text-[10px] text-slate-400">Resigned {fmtShort(emp.resignDate)}</p>
+                          )}
+                          {emp.lastWorkingDay && (
+                            <p className="text-[10px] text-slate-400">LWD {fmtShort(emp.lastWorkingDay)}</p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* ── Terminated ── */}
+                      {emp.status === "terminated" && (emp.terminationDate || emp.terminationReason) && (
+                        <div className="mt-1.5 space-y-0.5">
+                          <p className="text-[10px] font-semibold text-red-500">
+                            {TERM_REASONS[emp.terminationReason ?? ""] ?? "Terminated"}
+                          </p>
+                          {emp.terminationDate && (
+                            <p className="text-[10px] text-slate-400">{fmtDate(emp.terminationDate)}</p>
+                          )}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="inline-flex items-center justify-center size-8 rounded-lg hover:bg-white/8 text-slate-400 hover:text-white transition-colors">
+                        <DropdownMenuTrigger className="inline-flex items-center justify-center size-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors">
                           <MoreHorizontal className="size-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-slate-800 border-white/10 text-slate-200 w-48">
@@ -513,9 +619,8 @@ export default function AdminEmployeesTab() {
                           </DropdownMenuItem>
                           <DropdownMenuSeparator className="bg-white/8" />
                           {emp.status !== "active"     && <DropdownMenuItem onClick={() => handleStatusChange(emp.id, "active")}     className="gap-2 cursor-pointer text-emerald-400">→ Set Active</DropdownMenuItem>}
-                          {emp.status !== "on_leave"   && <DropdownMenuItem onClick={() => handleStatusChange(emp.id, "on_leave")}   className="gap-2 cursor-pointer text-amber-400">→ Set On Leave</DropdownMenuItem>}
-                          {emp.status !== "resigned"   && <DropdownMenuItem onClick={() => handleStatusChange(emp.id, "resigned")}   className="gap-2 cursor-pointer text-slate-300">→ Set Resigned</DropdownMenuItem>}
-                          {emp.status !== "terminated" && <DropdownMenuItem onClick={() => handleStatusChange(emp.id, "terminated")} className="gap-2 cursor-pointer text-red-400">→ Set Terminated</DropdownMenuItem>}
+                          {emp.status !== "resigned"   && <DropdownMenuItem onClick={() => openStatusChange(emp, "resigned")}   className="gap-2 cursor-pointer text-slate-300"><ArrowRight className="size-3.5" /> Set Resigned…</DropdownMenuItem>}
+                          {emp.status !== "terminated" && <DropdownMenuItem onClick={() => openStatusChange(emp, "terminated")} className="gap-2 cursor-pointer text-red-400"><AlertTriangle className="size-3.5" /> Set Terminated…</DropdownMenuItem>}
                           <DropdownMenuSeparator className="bg-white/8" />
                           <DropdownMenuItem onClick={() => openDelete(emp)} className="gap-2 cursor-pointer text-red-400">
                             <Trash2 className="size-3.5" /> Delete
@@ -580,6 +685,112 @@ export default function AdminEmployeesTab() {
             <Button variant="ghost" onClick={() => setDeleteOpen(false)} className="text-slate-300 hover:text-white">Cancel</Button>
             <Button onClick={handleDelete} disabled={isPending} className="bg-red-600 hover:bg-red-700 text-white">
               {isPending ? "Deleting…" : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Status Change Dialog */}
+      <Dialog open={scOpen} onOpenChange={setScOpen}>
+        <DialogContent className="sm:max-w-lg bg-slate-900 border-white/10 text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {scMode === "resigned"   && <><ArrowRight className="size-5 text-slate-400" /> Record Resignation</>}
+              {scMode === "terminated" && <><AlertTriangle className="size-5 text-red-400" /> Record Termination</>}
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              {scTarget?.name} ·{" "}
+              {scMode === "resigned" ? "Record the resignation details." : "Record the termination details."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-1">
+            {/* ── Resigned fields ── */}
+            {scMode === "resigned" && (
+              <>
+                <div className="space-y-1.5">
+                  <Label className="text-slate-300 text-xs">Resignation Reason</Label>
+                  <Select value={scForm.resignReason} onValueChange={v => v !== null && setScForm(p => ({ ...p, resignReason: v }))}>
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                      <SelectValue>{RESIGN_REASONS[scForm.resignReason] ?? "Select reason"}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(RESIGN_REASONS).map(([k, label]) => <SelectItem key={k} value={k}>{label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-slate-300 text-xs">Resignation Date</Label>
+                    <Input type="date" value={scForm.resignDate} onChange={e => setScForm(p => ({ ...p, resignDate: e.target.value }))} className="bg-white/5 border-white/10 text-white" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-slate-300 text-xs">Last Working Day</Label>
+                    <Input type="date" value={scForm.lastWorkingDay} onChange={e => setScForm(p => ({ ...p, lastWorkingDay: e.target.value }))} className="bg-white/5 border-white/10 text-white" />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-slate-300 text-xs">Notes</Label>
+                  <textarea
+                    value={scForm.resignNote}
+                    onChange={e => setScForm(p => ({ ...p, resignNote: e.target.value }))}
+                    placeholder="Any additional context…"
+                    rows={2}
+                    className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 resize-none focus:outline-none focus:ring-2 focus:ring-slate-500/40"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* ── Terminated fields ── */}
+            {scMode === "terminated" && (
+              <>
+                <div className="space-y-1.5">
+                  <Label className="text-slate-300 text-xs">Termination Reason</Label>
+                  <Select value={scForm.terminationReason} onValueChange={v => v !== null && setScForm(p => ({ ...p, terminationReason: v }))}>
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                      <SelectValue>{TERM_REASONS[scForm.terminationReason] ?? "Select reason"}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(TERM_REASONS).map(([k, label]) => <SelectItem key={k} value={k}>{label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-slate-300 text-xs">Termination Date</Label>
+                  <Input type="date" value={scForm.terminationDate} onChange={e => setScForm(p => ({ ...p, terminationDate: e.target.value }))} className="bg-white/5 border-white/10 text-white" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-slate-300 text-xs">Notes</Label>
+                  <textarea
+                    value={scForm.terminationNote}
+                    onChange={e => setScForm(p => ({ ...p, terminationNote: e.target.value }))}
+                    placeholder="Documentation / HR notes…"
+                    rows={2}
+                    className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 resize-none focus:outline-none focus:ring-2 focus:ring-red-500/40"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setScOpen(false)} className="text-slate-300 hover:text-white">Cancel</Button>
+            <Button
+              onClick={handleStatusChangeSave}
+              disabled={isPending}
+              className={cn(
+                "text-white shadow-lg",
+                scMode === "resigned"
+                  ? "bg-gradient-to-r from-slate-500 to-slate-700 hover:from-slate-600 hover:to-slate-800 shadow-slate-500/20"
+                  : "bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 shadow-red-500/30"
+              )}
+            >
+              {isPending
+                ? "Saving…"
+                : scMode === "resigned"
+                ? "Record Resignation"
+                : "Record Termination"}
             </Button>
           </DialogFooter>
         </DialogContent>

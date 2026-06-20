@@ -19,20 +19,22 @@ export async function PATCH(
   const body   = await request.json().catch(() => ({}));
   const update: Record<string, unknown> = {};
 
-  const fields = ["name","phone","email","role","department","idNumber",
-    "emergencyContact","emergencyPhone","status","salaryType",
-    "baseSalary","allowanceTransport","allowanceMeal","allowanceHousing","allowanceOther","notes"];
+  const strFields = ["name","phone","email","role","department","idNumber",
+    "emergencyContact","emergencyPhone","status","salaryType","notes",
+    "leaveType","leaveNote","resignReason","resignNote","terminationReason","terminationNote"];
+  const numFields = ["baseSalary","allowanceTransport","allowanceMeal","allowanceHousing","allowanceOther"];
+  const dateFields = ["hireDate","leaveStartDate","leaveReturnDate","resignDate","lastWorkingDay","terminationDate"];
 
-  for (const f of fields) {
-    if (body[f] !== undefined) {
-      if (["baseSalary","allowanceTransport","allowanceMeal","allowanceHousing","allowanceOther"].includes(f)) {
-        update[f] = Number(body[f]) || 0;
-      } else {
-        update[f] = typeof body[f] === "string" ? body[f].trim() || undefined : body[f];
-      }
-    }
+  for (const f of strFields) {
+    if (body[f] !== undefined)
+      update[f] = typeof body[f] === "string" ? body[f].trim() || undefined : body[f];
   }
-  if (body.hireDate !== undefined) update.hireDate = new Date(body.hireDate);
+  for (const f of numFields) {
+    if (body[f] !== undefined) update[f] = Number(body[f]) || 0;
+  }
+  for (const f of dateFields) {
+    if (body[f] !== undefined) update[f] = body[f] ? new Date(body[f]) : undefined;
+  }
 
   const emp = await EmployeeModel.findByIdAndUpdate(id, { $set: update }, { new: true }).lean() as any;
   if (!emp) return Response.json({ message: "Employee not found" }, { status: 404 });
@@ -58,7 +60,18 @@ export async function PATCH(
       allowanceOther:     emp.allowanceOther,
       totalAllowances:    emp.allowanceTransport + emp.allowanceMeal + emp.allowanceHousing + emp.allowanceOther,
       grossMonthly:       emp.baseSalary + emp.allowanceTransport + emp.allowanceMeal + emp.allowanceHousing + emp.allowanceOther,
-      notes:              emp.notes ?? null,
+      notes:              emp.notes             ?? null,
+      leaveType:          emp.leaveType         ?? null,
+      leaveStartDate:     emp.leaveStartDate    ?? null,
+      leaveReturnDate:    emp.leaveReturnDate   ?? null,
+      leaveNote:          emp.leaveNote         ?? null,
+      resignDate:         emp.resignDate        ?? null,
+      lastWorkingDay:     emp.lastWorkingDay    ?? null,
+      resignReason:       emp.resignReason      ?? null,
+      resignNote:         emp.resignNote        ?? null,
+      terminationDate:    emp.terminationDate   ?? null,
+      terminationReason:  emp.terminationReason ?? null,
+      terminationNote:    emp.terminationNote   ?? null,
     },
   });
 }

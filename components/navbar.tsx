@@ -1,92 +1,120 @@
 import Link from "next/link";
+import { Shield, LogIn, UserPlus, Ticket } from "lucide-react";
 
 import LanguageToggle from "@/components/language-toggle";
 import LogoutButton from "@/components/logout-button";
-import { Badge } from "@/components/ui/badge";
 import { getCurrentUser } from "@/lib/auth";
-
-const navLinkClass =
-  "rounded-full px-4 py-2 text-sm font-medium text-foreground/80 transition hover:bg-white/70 hover:text-foreground";
 
 export default async function Navbar() {
   const user = await getCurrentUser();
+  const initials = user?.name
+    ? user.name
+        .split(" ")
+        .map((p: string) => p[0] ?? "")
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "?";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/60 bg-white/80 backdrop-blur-xl">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-        <div className="flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25">
+    <header className="sticky top-0 z-40">
+      {/* Gradient accent line */}
+      <div className="h-[3px] w-full bg-gradient-to-r from-rose-500 via-orange-400 to-amber-400" />
+
+      <div className="bg-white/92 backdrop-blur-xl border-b border-slate-200/70 shadow-sm shadow-slate-900/[0.04]">
+        <div className="mx-auto flex h-[62px] w-full max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+
+          {/* ── Logo ── */}
+          <Link href="/" className="flex items-center gap-3 shrink-0 group">
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-orange-600 text-[13px] font-black text-white shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/50 group-hover:scale-105 transition-all duration-200 select-none">
               RM
             </div>
-            <div>
-              <p className="font-heading text-base font-semibold tracking-tight text-foreground">
-                RedMiles Cambodia
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Bus tickets with live seat maps
-              </p>
+            <div className="hidden sm:block leading-none">
+              <p className="text-[14px] font-bold tracking-tight text-slate-900">RedMiles Cambodia</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Bus tickets with live seat maps</p>
             </div>
           </Link>
-          {user?.role === "admin" ? (
-            <Badge variant="secondary" className="hidden sm:inline-flex">
-              Admin access
-            </Badge>
-          ) : null}
-        </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Link href="/" className={navLinkClass}>
-            Home
-          </Link>
-          <Link href="/support" className={navLinkClass}>
-            Support
-          </Link>
-          {user ? (
-            <>
-              <Link href="/dashboard" className={navLinkClass}>
-                My Bookings
-              </Link>
-              <Link href="/dashboard/profile" className={navLinkClass}>
-                Profile
-              </Link>
-            </>
-          ) : null}
-          {user?.role === "admin" ? (
-            <Link href="/admin" className={navLinkClass}>
-              Admin
-            </Link>
-          ) : null}
-
-          <LanguageToggle />
-          <div className="ml-0 flex flex-wrap items-center gap-2 sm:ml-2">
-            {user ? (
+          {/* ── Centre nav ── */}
+          <nav className="hidden md:flex flex-1 items-center justify-center gap-0.5">
+            <NavLink href="/">Home</NavLink>
+            <NavLink href="/support">Support</NavLink>
+            {user && (
               <>
-                <div className="rounded-full border border-white/70 bg-white/85 px-4 py-2 text-sm">
-                  <span className="text-muted-foreground">Signed in as </span>
-                  <span className="font-medium text-foreground">{user.name}</span>
+                <NavLink href="/dashboard">
+                  <Ticket className="size-3.5" />
+                  My Bookings
+                </NavLink>
+                <NavLink href="/dashboard/profile">Profile</NavLink>
+              </>
+            )}
+            {user?.role === "admin" && (
+              <Link
+                href="/admin"
+                className="flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-all duration-150"
+              >
+                <Shield className="size-3.5" />
+                Admin Panel
+              </Link>
+            )}
+          </nav>
+
+          {/* ── Right: lang + user ── */}
+          <div className="flex items-center gap-2 shrink-0">
+            <LanguageToggle />
+
+            {user ? (
+              <div className="flex items-center gap-2">
+                {/* User chip */}
+                <div className="hidden sm:flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50/80 pl-1.5 pr-3 py-1 shadow-sm">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-orange-600 text-[11px] font-black text-white shadow shadow-rose-500/30 shrink-0">
+                    {initials}
+                  </div>
+                  <span className="text-[13px] font-semibold text-slate-700 max-w-[130px] truncate leading-none">
+                    {user.name}
+                  </span>
                 </div>
                 <LogoutButton />
-              </>
+              </div>
             ) : (
-              <>
+              <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="rounded-full border border-white/70 bg-white/85 px-4 py-2 text-sm font-medium text-foreground transition hover:bg-white"
+                  className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-[13px] font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
                 >
-                  Login
+                  <LogIn className="size-3.5" />
+                  <span className="hidden sm:inline">Login</span>
                 </Link>
                 <Link
                   href="/register"
-                  className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition hover:opacity-90"
+                  className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-rose-500 to-orange-600 px-4 py-2 text-[13px] font-semibold text-white shadow-md shadow-rose-500/30 hover:from-rose-600 hover:to-orange-700 hover:shadow-rose-500/40 transition-all duration-200"
                 >
-                  Register
+                  <UserPlus className="size-3.5" />
+                  <span className="hidden sm:inline">Register</span>
                 </Link>
-              </>
+              </div>
             )}
           </div>
+
         </div>
       </div>
     </header>
+  );
+}
+
+function NavLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-[13px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 transition-all duration-150"
+    >
+      {children}
+    </Link>
   );
 }
