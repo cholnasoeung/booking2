@@ -2,7 +2,9 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { SlidersHorizontal } from "lucide-react";
+import {
+  SlidersHorizontal, ArrowRight, MapPin, Star, Zap,
+} from "lucide-react";
 
 import SearchFilters, {
   type FilterState,
@@ -10,8 +12,6 @@ import SearchFilters, {
 } from "@/components/search-filters";
 import { Button } from "@/components/ui/button";
 import SearchForm from "@/components/search-form";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -19,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Star } from "lucide-react";
 import DepartureStatusBadge from "@/components/departure-status-badge";
 import { formatBusType, formatCurrency, formatTravelDate } from "@/lib/formatters";
 import type { BusSummary } from "@/lib/queries";
@@ -45,385 +44,378 @@ export default function SearchPageClient({
 }: SearchPageClientProps) {
   const router = useRouter();
 
-  // Calculate price range from available buses
-  const prices = initialBuses.map((bus) => bus.pricePerSeat);
+  const prices = initialBuses.map((b) => b.pricePerSeat);
   const minPrice = Math.min(...prices, 0);
   const maxPrice = Math.max(...prices, 100);
 
-  // Filter state
   const [filters, setFilters] = useState<FilterState>({
     busType: "all",
     priceRange: [minPrice, maxPrice],
     timeSlots: [],
     amenities: [],
   });
-
-  // Sort state
   const [sortBy, setSortBy] = useState<"price-asc" | "price-desc" | "departure">("departure");
 
-  // Apply filters to buses
   const filteredBuses = useMemo(() => {
-    let filtered = [...initialBuses];
-
-    // Bus type filter
-    if (filters.busType !== "all") {
-      filtered = filtered.filter((bus) => bus.busType === filters.busType);
-    }
-
-    // Price range filter
-    filtered = filtered.filter(
-      (bus) =>
-        bus.pricePerSeat >= filters.priceRange[0] &&
-        bus.pricePerSeat <= filters.priceRange[1]
-    );
-
-    // Time slot filter
+    let f = [...initialBuses];
+    if (filters.busType !== "all") f = f.filter((b) => b.busType === filters.busType);
+    f = f.filter((b) => b.pricePerSeat >= filters.priceRange[0] && b.pricePerSeat <= filters.priceRange[1]);
     if (filters.timeSlots.length > 0) {
-      filtered = filtered.filter((bus) => {
-        const hour = Number.parseInt(bus.departureTime.split(":")[0]);
-        return filters.timeSlots.some((slotId) => {
-          const slot = TIME_SLOTS.find((s) => s.id === slotId);
+      f = f.filter((b) => {
+        const h = Number.parseInt(b.departureTime.split(":")[0]);
+        return filters.timeSlots.some((id) => {
+          const slot = TIME_SLOTS.find((s) => s.id === id);
           if (!slot) return false;
-          const [start, end] = slot.hours;
-          if (start < end) {
-            return hour >= start && hour < end;
-          } else {
-            return hour >= start || hour < end;
-          }
+          const [s, e] = slot.hours;
+          return s < e ? h >= s && h < e : h >= s || h < e;
         });
       });
     }
-
-    // Amenities filter
     if (filters.amenities.length > 0) {
-      filtered = filtered.filter((bus) => {
-        if (!bus.amenities || bus.amenities.length === 0) return false;
-        return filters.amenities.every((amenity) =>
-          bus.amenities?.includes(amenity)
-        );
-      });
+      f = f.filter((b) =>
+        b.amenities?.length && filters.amenities.every((a) => b.amenities?.includes(a))
+      );
     }
-
-    return filtered;
+    return f;
   }, [initialBuses, filters]);
 
-  // Sort buses
   const sortedBuses = useMemo(() => {
-    const sorted = [...filteredBuses];
-    switch (sortBy) {
-      case "price-asc":
-        return sorted.sort((a, b) => a.pricePerSeat - b.pricePerSeat);
-      case "price-desc":
-        return sorted.sort((a, b) => b.pricePerSeat - a.pricePerSeat);
-      case "departure":
-        return sorted.sort((a, b) =>
-          a.departureTime.localeCompare(b.departureTime)
-        );
-      default:
-        return sorted;
-    }
+    const s = [...filteredBuses];
+    if (sortBy === "price-asc") return s.sort((a, b) => a.pricePerSeat - b.pricePerSeat);
+    if (sortBy === "price-desc") return s.sort((a, b) => b.pricePerSeat - a.pricePerSeat);
+    return s.sort((a, b) => a.departureTime.localeCompare(b.departureTime));
   }, [filteredBuses, sortBy]);
 
-  function handleFiltersChange(newFilters: FilterState) {
-    setFilters(newFilters);
-  }
-
   function handleClearFilters() {
-    setFilters({
-      busType: "all",
-      priceRange: [minPrice, maxPrice],
-      timeSlots: [],
-      amenities: [],
-    });
+    setFilters({ busType: "all", priceRange: [minPrice, maxPrice], timeSlots: [], amenities: [] });
   }
 
   function getBookingHref(busId: string) {
-    const params = new URLSearchParams({
-      passengers: String(passengers),
-    });
-
-    return `/book/${busId}?${params.toString()}`;
+    return `/book/${busId}?passengers=${passengers}`;
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-      {/* Search Form */}
-      <SearchForm
-        compact
-        initialValues={{ from, to, date, passengers }}
-        title="Refine your journey"
-        description="Update your route, date, or passenger count and compare departures."
-        tone="light"
-      />
+    <div className="min-h-screen bg-slate-50/80">
 
-      {/* Results Header with Sort */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <p className="text-sm uppercase tracking-[0.22em] text-slate-500">
-            Search results
-          </p>
-          <h1 className="font-heading text-3xl sm:text-4xl font-semibold tracking-tight text-slate-900">
-            {sortedBuses.length} departure{sortedBuses.length === 1 ? "" : "s"} for {from} to {to}
-          </h1>
-          <p className="text-sm text-slate-600">
-            {formatTravelDate(date)} | {passengers} passenger{passengers === 1 ? "" : "s"}
-          </p>
-        </div>
-
-        {/* Sort Dropdown */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-slate-600 hidden sm:inline">Sort by:</span>
-          <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
-            <SelectTrigger className="w-[180px] h-10 rounded-xl">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="departure">Departure Time</SelectItem>
-              <SelectItem value="price-asc">Price: Low to High</SelectItem>
-              <SelectItem value="price-desc">Price: High to Low</SelectItem>
-            </SelectContent>
-          </Select>
+      {/* ── Route banner ── */}
+      <div className="bg-gradient-to-r from-indigo-600 via-indigo-600 to-violet-700 text-white shadow-lg">
+        <div className="w-full px-4 sm:px-6 lg:px-10 py-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 text-xl font-bold tracking-tight">
+                <span>{from}</span>
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
+                  <ArrowRight className="h-4 w-4" />
+                </div>
+                <span>{to}</span>
+              </div>
+              <div className="hidden sm:flex items-center gap-3 text-sm text-indigo-200 ml-2">
+                <span className="h-1 w-1 rounded-full bg-indigo-400" />
+                <span>{formatTravelDate(date)}</span>
+                <span className="h-1 w-1 rounded-full bg-indigo-400" />
+                <span>{passengers} passenger{passengers > 1 ? "s" : ""}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="rounded-full bg-white/15 px-3 py-1 font-semibold">
+                {sortedBuses.length} departure{sortedBuses.length !== 1 ? "s" : ""} found
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
-        {/* Filters Sidebar - Left Side */}
-        <div>
-          <SearchFilters
-            filters={filters}
-            onFiltersChange={handleFiltersChange}
-            onClear={handleClearFilters}
-            resultCount={sortedBuses.length}
-            minPrice={minPrice}
-            maxPrice={maxPrice}
+      {/* ── Compact search bar ── */}
+      <div className="border-b border-slate-200 bg-white shadow-sm">
+        <div className="w-full px-4 sm:px-6 lg:px-10 py-3">
+          <SearchForm
+            compact
+            initialValues={{ from, to, date, passengers }}
+            title="Refine your journey"
+            description="Update your route, date, or passenger count and compare departures."
+            tone="light"
           />
         </div>
+      </div>
 
-        {/* Bus Cards - Right Side */}
-        <div className="space-y-4">
-          {sortedBuses.length === 0 ? (
-            <Card className="border-slate-200 bg-slate-50">
-              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                <SlidersHorizontal className="h-12 w-12 text-slate-400 mb-4" />
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                  No buses match your filters
-                </h3>
-                <p className="text-sm text-slate-600 mb-4">
-                  Try adjusting your filters or search for different dates
+      {/* ── Main layout ── */}
+      <div className="w-full px-4 sm:px-6 lg:px-10 py-8">
+        <div className="grid gap-6 lg:grid-cols-[268px_1fr]">
+
+          {/* ── Filter sidebar ── */}
+          <div className="shrink-0">
+            <SearchFilters
+              filters={filters}
+              onFiltersChange={setFilters}
+              onClear={handleClearFilters}
+              resultCount={sortedBuses.length}
+              minPrice={minPrice}
+              maxPrice={maxPrice}
+            />
+          </div>
+
+          {/* ── Results ── */}
+          <div className="min-w-0 space-y-5">
+
+            {/* Sort row */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                  {sortedBuses.length} departure{sortedBuses.length !== 1 ? "s" : ""} · {from} → {to}
+                </h1>
+                <p className="mt-0.5 text-sm text-slate-500">
+                  {formatTravelDate(date)} · {passengers} passenger{passengers !== 1 ? "s" : ""}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-sm text-slate-500 hidden sm:inline">Sort by:</span>
+                <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+                  <SelectTrigger className="w-[180px] h-9 rounded-xl text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="departure">Departure Time</SelectItem>
+                    <SelectItem value="price-asc">Price: Low → High</SelectItem>
+                    <SelectItem value="price-desc">Price: High → Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Bus cards */}
+            {sortedBuses.length === 0 ? (
+              <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white py-20 text-center">
+                <SlidersHorizontal className="h-12 w-12 text-slate-300 mb-4" />
+                <h3 className="text-lg font-semibold text-slate-900">No buses match your filters</h3>
+                <p className="mt-1 text-sm text-slate-500 max-w-xs">
+                  Try adjusting your filters or search for a different date.
                 </p>
                 <Button
                   variant="outline"
                   onClick={handleClearFilters}
-                  className="rounded-xl"
+                  className="mt-5 rounded-xl"
                 >
                   Clear All Filters
                 </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            sortedBuses.map((bus) => {
-              const bookingHref = getBookingHref(bus.id);
-              const boardingStops = bus.stops
-                .filter((stop) => stop.boarding)
-                .map((stop) => stop.location);
-              const droppingStops = bus.stops
-                .filter((stop) => stop.dropping)
-                .map((stop) => stop.location);
-
-              return (
-                <Card
+              </div>
+            ) : (
+              sortedBuses.map((bus) => (
+                <BusCard
                   key={bus.id}
-                  className="border-white/60 bg-white/90 shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-200 cursor-pointer"
-                  onClick={() => router.push(bookingHref)}
-                >
-              <CardHeader className="space-y-3">
-                <div className="flex items-start justify-between gap-6">
-                  <div className="flex-1 space-y-1">
-                    <CardTitle className="text-xl">{bus.from} → {bus.to}</CardTitle>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">
-                        {formatBusType(bus.busType)}
-                      </Badge>
-                      {bus.amenities && bus.amenities.length > 0 && (
-                        <div className="flex gap-1">
-                          {bus.amenities.slice(0, 2).map((amenity) => (
-                            <Badge
-                              key={amenity}
-                              variant="outline"
-                              className="text-xs border-slate-300 text-slate-600"
-                            >
-                              {amenity}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    {bus.rating && bus.rating.count > 0 && (
-                      <div className="flex items-center gap-1">
-                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                        <span className="text-xs font-medium text-slate-700">{bus.rating.average}</span>
-                        <span className="text-xs text-slate-400">({bus.rating.count})</span>
-                      </div>
-                    )}
-                    <DepartureStatusBadge status={bus.departureStatus} delayMinutes={bus.delayMinutes} statusNote={bus.statusNote} />
-                    {bus.busDetail && (
-                      <p className="text-xs text-slate-500">
-                        {bus.busDetail.name} · {bus.busDetail.registrationNumber}
-                      </p>
-                    )}
-                  </div>
-                  <div className="text-right space-y-1">
-                    <p className="text-2xl font-bold text-indigo-600">
-                      {formatCurrency(bus.pricePerSeat)}
-                    </p>
-                    <p className="text-xs text-slate-500">per seat</p>
-                  </div>
-                </div>
-              </CardHeader>
-
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <p className="text-slate-500">Date</p>
-                      <p className="font-medium text-slate-900">{formatTravelDate(bus.travelDate)}</p>
-                    </div>
-                    <div>
-                      <p className="text-slate-500">Departure</p>
-                      <p className="font-medium text-slate-900">{bus.departureTime}</p>
-                    </div>
-                    <div>
-                      <p className="text-slate-500">Arrival</p>
-                      <p className="font-medium text-slate-900">{bus.arrivalTime}</p>
-                    </div>
-                  </div>
-
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between rounded-xl bg-slate-100 px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-slate-600">Seats Available</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-slate-900">{bus.seatsLeft}</span>
-                        <span className="text-xs text-slate-500">/ {bus.totalSeats}</span>
-                      </div>
-                    </div>
-
-                    {bus.seatsLeft <= 5 && (
-                      <div className="rounded-xl bg-amber-50 px-4 py-2 text-center">
-                        <p className="text-sm font-medium text-amber-700">
-                          ⚡ Fast filling - Only {bus.seatsLeft} seats left!
-                        </p>
-                      </div>
-                    )}
-
-                    <Button
-                      className="w-full h-11 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 shadow-md hover:shadow-lg transition-all"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        router.push(bookingHref);
-                      }}
-                    >
-                      Select Seats
-                    </Button>
-                  </CardContent>
-
-                  <div className="flex flex-wrap gap-2 text-xs text-slate-500 mt-2 px-4 pb-4">
-                    {boardingStops.length > 0 && (
-                      <span className="rounded-full border border-slate-200 px-3 py-1">
-                        Board at {boardingStops.join(", ")}
-                      </span>
-                    )}
-                    {droppingStops.length > 0 && (
-                      <span className="rounded-full border border-slate-200 px-3 py-1">
-                        Drop at {droppingStops.join(", ")}
-                      </span>
-                    )}
-                  </div>
-                </Card>
-              );
-            })
-          )}
+                  bus={bus}
+                  bookingHref={getBookingHref(bus.id)}
+                  router={router}
+                />
+              ))
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Return leg section */}
-      {returnDate && returnBuses.length > 0 && (
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <p className="text-sm uppercase tracking-[0.22em] text-slate-500">Return trip</p>
-            <h2 className="font-heading text-2xl font-semibold tracking-tight text-slate-900">
-              {returnBuses.length} departure{returnBuses.length === 1 ? "" : "s"} for {to} to {from}
-            </h2>
-            <p className="text-sm text-slate-600">
-              {formatTravelDate(returnDate)} | {passengers} passenger{passengers === 1 ? "" : "s"}
+        {/* ── Return trip section ── */}
+        {returnDate && returnBuses.length > 0 && (
+          <div className="mt-12 space-y-5">
+            <div className="flex items-center gap-4">
+              <div className="h-px flex-1 bg-slate-200" />
+              <div className="flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-4 py-1.5">
+                <ArrowRight className="h-4 w-4 text-violet-600 rotate-180" />
+                <span className="text-sm font-semibold text-violet-700">Return: {to} → {from}</span>
+              </div>
+              <div className="h-px flex-1 bg-slate-200" />
+            </div>
+            <p className="text-sm text-slate-500 -mt-2">
+              {formatTravelDate(returnDate)} · {passengers} passenger{passengers !== 1 ? "s" : ""}
             </p>
+            {returnBuses.map((bus) => (
+              <BusCard
+                key={bus.id}
+                bus={bus}
+                bookingHref={getBookingHref(bus.id)}
+                router={router}
+                accent="violet"
+              />
+            ))}
           </div>
-          <div className="space-y-4">
-            {returnBuses.map((bus) => {
-              const bookingHref = getBookingHref(bus.id);
-              const boardingStops = bus.stops.filter((s) => s.boarding).map((s) => s.location);
-              const droppingStops = bus.stops.filter((s) => s.dropping).map((s) => s.location);
-              return (
-                <Card
-                  key={bus.id}
-                  className="border-white/60 bg-white/90 shadow-xl hover:shadow-2xl hover:scale-[1.01] transition-all duration-200 cursor-pointer"
-                  onClick={() => router.push(bookingHref)}
-                >
-                  <CardHeader className="space-y-3">
-                    <div className="flex items-start justify-between gap-6">
-                      <div className="flex-1 space-y-1">
-                        <CardTitle className="text-xl">{bus.from} → {bus.to}</CardTitle>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-                            {formatBusType(bus.busType)}
-                          </Badge>
-                          {bus.rating && bus.rating.count > 0 && (
-                            <div className="flex items-center gap-1">
-                              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                              <span className="text-xs font-medium text-slate-700">{bus.rating.average}</span>
-                              <span className="text-xs text-slate-400">({bus.rating.count})</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-right space-y-1">
-                        <p className="text-2xl font-bold text-purple-600">{formatCurrency(bus.pricePerSeat)}</p>
-                        <p className="text-xs text-slate-500">per seat</p>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <div className="grid grid-cols-3 gap-4 text-sm px-6">
-                    <div><p className="text-slate-500">Date</p><p className="font-medium">{formatTravelDate(bus.travelDate)}</p></div>
-                    <div><p className="text-slate-500">Departure</p><p className="font-medium">{bus.departureTime}</p></div>
-                    <div><p className="text-slate-500">Arrival</p><p className="font-medium">{bus.arrivalTime}</p></div>
-                  </div>
-                  <CardContent className="space-y-4 mt-4">
-                    <div className="flex items-center justify-between rounded-xl bg-slate-100 px-4 py-3">
-                      <span className="text-sm text-slate-600">Seats Available</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-slate-900">{bus.seatsLeft}</span>
-                        <span className="text-xs text-slate-500">/ {bus.totalSeats}</span>
-                      </div>
-                    </div>
-                    <Button
-                      className="w-full h-11 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 shadow-md hover:shadow-lg transition-all"
-                      onClick={(e) => { e.stopPropagation(); router.push(bookingHref); }}
-                    >
-                      Select Seats
-                    </Button>
-                  </CardContent>
-                  {(boardingStops.length > 0 || droppingStops.length > 0) && (
-                    <div className="flex flex-wrap gap-2 text-xs text-slate-500 px-4 pb-4">
-                      {boardingStops.length > 0 && <span className="rounded-full border border-slate-200 px-3 py-1">Board at {boardingStops.join(", ")}</span>}
-                      {droppingStops.length > 0 && <span className="rounded-full border border-slate-200 px-3 py-1">Drop at {droppingStops.join(", ")}</span>}
-                    </div>
-                  )}
-                </Card>
-              );
-            })}
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── Individual bus result card ── */
+function BusCard({
+  bus,
+  bookingHref,
+  router,
+  accent = "indigo",
+}: {
+  bus: BusSummary;
+  bookingHref: string;
+  router: ReturnType<typeof useRouter>;
+  accent?: "indigo" | "violet";
+}) {
+  const seatsPercent = bus.totalSeats > 0 ? Math.round((bus.seatsLeft / bus.totalSeats) * 100) : 0;
+  const isLow = bus.seatsLeft > 0 && bus.seatsLeft <= 5;
+  const isFull = bus.seatsLeft === 0;
+
+  const boardingStops = bus.stops.filter((s) => s.boarding).map((s) => s.location);
+  const droppingStops = bus.stops.filter((s) => s.dropping).map((s) => s.location);
+
+  const barColor = seatsPercent > 50
+    ? "bg-indigo-500"
+    : seatsPercent > 20
+    ? "bg-amber-400"
+    : "bg-red-500";
+
+  const priceColor = accent === "violet" ? "text-violet-600" : "text-indigo-600";
+  const stripe = accent === "violet"
+    ? "from-violet-500 to-purple-600"
+    : "from-indigo-500 to-violet-600";
+  const btnClass = accent === "violet"
+    ? "from-violet-500 to-purple-600 shadow-violet-200 hover:from-violet-600 hover:to-purple-700"
+    : "from-indigo-500 to-violet-600 shadow-indigo-200 hover:from-indigo-600 hover:to-violet-700";
+
+  return (
+    <div
+      className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-100 hover:shadow-xl hover:shadow-indigo-100/40 cursor-pointer"
+      onClick={() => router.push(bookingHref)}
+    >
+      {/* Accent stripe */}
+      <div className={`h-1 w-full bg-gradient-to-r ${stripe}`} />
+
+      <div className="p-5 sm:p-6">
+
+        {/* ── Row 1: badges + price ── */}
+        <div className="flex items-start justify-between gap-4 mb-5">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <span className="shrink-0 rounded-lg bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+              {formatBusType(bus.busType)}
+            </span>
+            {bus.amenities && bus.amenities.length > 0 && bus.amenities.map((a) => (
+              <span
+                key={a}
+                className="shrink-0 rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600"
+              >
+                {a}
+              </span>
+            ))}
+            {bus.rating && bus.rating.count > 0 && (
+              <span className="flex shrink-0 items-center gap-1 rounded-lg bg-amber-50 border border-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                {bus.rating.average}
+                <span className="font-normal text-amber-500">({bus.rating.count})</span>
+              </span>
+            )}
+            <DepartureStatusBadge
+              status={bus.departureStatus}
+              delayMinutes={bus.delayMinutes}
+              statusNote={bus.statusNote}
+            />
+          </div>
+
+          {/* Price */}
+          <div className="shrink-0 text-right">
+            <p className={`text-3xl font-extrabold leading-none ${priceColor}`}>
+              {formatCurrency(bus.pricePerSeat)}
+            </p>
+            <p className="mt-1 text-xs text-slate-400">per seat</p>
           </div>
         </div>
-      )}
+
+        {/* ── Row 2: journey timeline ── */}
+        <div className="mb-5 flex items-center gap-3 sm:gap-5">
+          {/* Departure */}
+          <div className="min-w-[72px] shrink-0">
+            <p className="text-2xl font-extrabold text-slate-900 leading-none">{bus.departureTime}</p>
+            <p className="mt-1 text-xs font-medium text-slate-500 truncate max-w-[90px]">{bus.from}</p>
+          </div>
+
+          {/* Line + duration */}
+          <div className="relative flex flex-1 items-center gap-0">
+            <div className="h-[2px] flex-1 bg-slate-200 group-hover:bg-indigo-200 transition-colors" />
+            <div className="shrink-0 flex flex-col items-center gap-1 px-3">
+              <span className="rounded-full bg-indigo-50 border border-indigo-200 px-3 py-1 text-[11px] font-bold text-indigo-600 whitespace-nowrap">
+                {bus.duration}
+              </span>
+              <span className="text-[10px] text-slate-400">
+                {bus.distance} km · Direct
+              </span>
+            </div>
+            <div className="h-[2px] flex-1 bg-slate-200 group-hover:bg-indigo-200 transition-colors" />
+          </div>
+
+          {/* Arrival */}
+          <div className="min-w-[72px] shrink-0 text-right">
+            <p className="text-2xl font-extrabold text-slate-900 leading-none">{bus.arrivalTime}</p>
+            <p className="mt-1 text-xs font-medium text-slate-500 truncate max-w-[90px] ml-auto">{bus.to}</p>
+          </div>
+        </div>
+
+        {/* ── Row 3: seat bar + CTA ── */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+          {/* Seat availability */}
+          <div className="flex-1 min-w-0">
+            <div className="mb-1.5 flex items-center justify-between text-xs">
+              <span className="text-slate-500">Seats available</span>
+              <span className={`font-bold ${isFull ? "text-red-600" : isLow ? "text-amber-600" : "text-slate-700"}`}>
+                {bus.seatsLeft} / {bus.totalSeats}
+              </span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+              <div
+                className={`h-2 rounded-full transition-all duration-300 ${barColor}`}
+                style={{ width: `${Math.max(seatsPercent, isFull ? 0 : 4)}%` }}
+              />
+            </div>
+            {(isLow || isFull) && (
+              <p className={`mt-1 text-[11px] font-semibold ${isFull ? "text-red-600" : "text-amber-600"}`}>
+                {isFull ? "🔴 Sold out" : `⚡ Only ${bus.seatsLeft} seat${bus.seatsLeft > 1 ? "s" : ""} left!`}
+              </p>
+            )}
+          </div>
+
+          {/* CTA */}
+          <Button
+            disabled={isFull}
+            className={`h-11 shrink-0 rounded-xl px-7 bg-gradient-to-r font-semibold text-white shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed sm:w-auto w-full ${btnClass}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push(bookingHref);
+            }}
+          >
+            {isFull ? "Sold Out" : (
+              <>Select Seats <ArrowRight className="ml-1.5 h-4 w-4" /></>
+            )}
+          </Button>
+        </div>
+
+        {/* ── Footer: operator + stops ── */}
+        {(bus.busDetail || boardingStops.length > 0 || droppingStops.length > 0) && (
+          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-dashed border-slate-100 pt-4">
+            {bus.busDetail && (
+              <span className="text-xs text-slate-400">
+                {bus.busDetail.name} · {bus.busDetail.registrationNumber}
+              </span>
+            )}
+            {boardingStops.map((s) => (
+              <span
+                key={s}
+                className="flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-500"
+              >
+                <MapPin className="h-3 w-3 shrink-0" /> Board at {s}
+              </span>
+            ))}
+            {droppingStops.map((s) => (
+              <span
+                key={s}
+                className="flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-500"
+              >
+                <MapPin className="h-3 w-3 shrink-0" /> Drop at {s}
+              </span>
+            ))}
+            <span className="ml-auto text-xs text-slate-400">{formatTravelDate(bus.travelDate)}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
