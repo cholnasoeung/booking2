@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   BusFront, Navigation, PencilLine, Plus, Search, Trash2, UserCheck, MoreVertical,
+  CheckSquare2, Square, X, AlertTriangle,
 } from "lucide-react";
 
 import AdminBusDialog from "@/components/admin-bus-dialog";
@@ -69,6 +70,11 @@ export default function AdminBusesManager({
 
   const [page, setPage] = useState(1);
 
+  // ── Bulk select ──
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkDeletePending, setBulkDeletePending] = useState(false);
+
   const normalizedQuery = busQuery.trim().toLowerCase();
   const visibleBuses = buses.filter((bus) => {
     if (busRouteFilter !== "all" && bus.routeId !== busRouteFilter) {
@@ -91,7 +97,57 @@ export default function AdminBusesManager({
   const totalPages = Math.ceil(visibleBuses.length / PAGE_SIZE);
   const pagedBuses = visibleBuses.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  useEffect(() => { setPage(1); }, [busQuery, busRouteFilter, busDateFilter]);
+  useEffect(() => { setPage(1); setSelectedIds(new Set()); }, [busQuery, busRouteFilter, busDateFilter]);
+
+  // Derived selection helpers
+  const allPageIds     = pagedBuses.map((b) => b.id);
+  const allPageSelected = allPageIds.length > 0 && allPageIds.every((id) => selectedIds.has(id));
+  const somePageSelected = allPageIds.some((id) => selectedIds.has(id));
+
+  function toggleSelectAll() {
+    if (allPageSelected) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        allPageIds.forEach((id) => next.delete(id));
+        return next;
+      });
+    } else {
+      setSelectedIds((prev) => new Set([...prev, ...allPageIds]));
+    }
+  }
+
+  function toggleOne(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  async function confirmBulkDelete() {
+    setBulkDeletePending(true);
+    onFeedback(null);
+    try {
+      const res = await fetch("/api/admin/buses/bulk-delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: [...selectedIds] }),
+      });
+      const payload = await res.json();
+      if (!res.ok) {
+        onFeedback({ kind: "error", message: payload.message ?? "Bulk delete failed." });
+        return;
+      }
+      onFeedback({ kind: "success", message: payload.message });
+      setSelectedIds(new Set());
+      setBulkDeleteOpen(false);
+      router.refresh();
+    } catch {
+      onFeedback({ kind: "error", message: "Request failed. Please try again." });
+    } finally {
+      setBulkDeletePending(false);
+    }
+  }
 
   async function confirmBusDelete() {
     if (!busToDelete) {
@@ -220,6 +276,32 @@ export default function AdminBusesManager({
             />
           </div>
 
+          {/* ── Bulk action bar ── */}
+          {selectedIds.size > 0 && (
+            <div className="flex items-center gap-3 rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 shadow-sm animate-in slide-in-from-top-2 duration-200">
+              <div className="flex items-center gap-2 text-sm font-semibold text-orange-800">
+                <CheckSquare2 className="size-4 text-orange-600" />
+                {selectedIds.size} departure{selectedIds.size !== 1 ? "s" : ""} selected
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedIds(new Set())}
+                  className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                >
+                  <X className="size-3" /> Clear selection
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBulkDeleteOpen(true)}
+                  className="flex items-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-700 px-4 py-1.5 text-xs font-bold text-white shadow-sm transition-colors"
+                >
+                  <Trash2 className="size-3.5" /> Delete {selectedIds.size} selected
+                </button>
+              </div>
+            </div>
+          )}
+
           {buses.length === 0 ? (
             <div className="rounded-2xl border-2 border-dashed border-orange-300/50 bg-gradient-to-br from-orange-50/50 to-orange-100/50 px-8 py-12 text-center">
               <BusFront className="mx-auto mb-4 size-12 text-orange-400" />
@@ -232,6 +314,22 @@ export default function AdminBusesManager({
               <Table>
                 <TableHeader>
                   <TableRow className="bg-gradient-to-r from-orange-50 to-red-50 hover:bg-transparent">
+                    {/* Select-all checkbox */}
+                    <TableHead className="w-[44px] pl-4">
+                      <button
+                        type="button"
+                        onClick={toggleSelectAll}
+                        className="flex items-center justify-center text-orange-400 hover:text-orange-600 transition-colors"
+                        title={allPageSelected ? "Deselect all on page" : "Select all on page"}
+                      >
+                        {allPageSelected
+                          ? <CheckSquare2 className="size-4 text-orange-600" />
+                          : somePageSelected
+                          ? <CheckSquare2 className="size-4 text-orange-400 opacity-60" />
+                          : <Square className="size-4" />
+                        }
+                      </button>
+                    </TableHead>
                     <TableHead className="font-bold text-orange-900 w-[220px]">Route</TableHead>
                     <TableHead className="font-bold text-orange-900 w-[90px]">Type</TableHead>
                     <TableHead className="font-bold text-orange-900 w-[130px]">Date & Time</TableHead>
@@ -244,7 +342,7 @@ export default function AdminBusesManager({
                 <TableBody>
                   {visibleBuses.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="py-10">
+                      <TableCell colSpan={8} className="py-10">
                         <EmptyState
                           icon={<BusFront className="size-10 text-orange-300" />}
                           title="No departures match these filters"
@@ -253,18 +351,32 @@ export default function AdminBusesManager({
                       </TableCell>
                     </TableRow>
                   ) : pagedBuses.length === 0 ? (
-                    <TableRow><TableCell colSpan={7} /></TableRow>
+                    <TableRow><TableCell colSpan={8} /></TableRow>
                   ) : (
                     pagedBuses.map((bus) => {
                       const bookedCount = bus.totalSeats - bus.seatsLeft;
                       const fillPct = bus.totalSeats > 0
                         ? Math.round((bookedCount / bus.totalSeats) * 100)
                         : 0;
+                      const isSelected = selectedIds.has(bus.id);
                       return (
                         <TableRow
                           key={bus.id}
-                          className="transition-colors hover:bg-orange-50/40 group"
+                          className={`transition-colors group ${isSelected ? "bg-orange-50/70" : "hover:bg-orange-50/40"}`}
                         >
+                          {/* Checkbox */}
+                          <TableCell className="py-3 pl-4">
+                            <button
+                              type="button"
+                              onClick={() => toggleOne(bus.id)}
+                              className="flex items-center justify-center text-slate-300 hover:text-orange-500 transition-colors"
+                            >
+                              {isSelected
+                                ? <CheckSquare2 className="size-4 text-orange-500" />
+                                : <Square className="size-4" />
+                              }
+                            </button>
+                          </TableCell>
                           {/* Route */}
                           <TableCell className="py-3">
                             <p className="font-semibold text-sm text-gray-900 leading-tight">
@@ -424,6 +536,49 @@ export default function AdminBusesManager({
               onClick={confirmBusDelete}
             >
               {busDeletePending ? "Deleting..." : "Delete Departure"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Bulk Delete Dialog ── */}
+      <Dialog open={bulkDeleteOpen} onOpenChange={(o) => !o && setBulkDeleteOpen(false)}>
+        <DialogContent className="sm:max-w-md border-2 border-red-200/70 bg-white shadow-2xl">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-1">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-100">
+                <AlertTriangle className="size-5 text-red-600" />
+              </div>
+              <DialogTitle className="text-xl">Delete {selectedIds.size} Departure{selectedIds.size !== 1 ? "s" : ""}</DialogTitle>
+            </div>
+            <DialogDescription className="text-slate-600">
+              This will permanently delete{" "}
+              <span className="font-semibold text-slate-800">{selectedIds.size} departure{selectedIds.size !== 1 ? "s" : ""}</span>.
+              Departures with active bookings will be skipped.
+              This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-3 mt-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl"
+              onClick={() => setBulkDeleteOpen(false)}
+              disabled={bulkDeletePending}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              className="rounded-xl"
+              disabled={bulkDeletePending}
+              onClick={confirmBulkDelete}
+            >
+              {bulkDeletePending
+                ? "Deleting…"
+                : `Delete ${selectedIds.size} Departure${selectedIds.size !== 1 ? "s" : ""}`
+              }
             </Button>
           </DialogFooter>
         </DialogContent>

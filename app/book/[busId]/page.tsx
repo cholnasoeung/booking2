@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 
 import Navbar from "@/components/navbar";
+import VehicleGallery from "@/components/vehicle-gallery";
 import DepartureStatusBadge from "@/components/departure-status-badge";
 import JoinWaitlistButton from "@/components/join-waitlist-button";
 import SeatSelection from "@/components/seat-selection";
@@ -114,29 +115,10 @@ export default async function BookPage({ params, searchParams }: BookPageProps) 
 
             {/* Vehicle gallery */}
             {bus.busDetail?.images && bus.busDetail.images.length > 0 && (
-              <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
-                <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5">
-                  <h2 className="text-sm font-bold text-slate-900">Vehicle Gallery</h2>
-                  <span className="text-xs font-medium text-slate-400">
-                    {bus.busDetail.images.length} photo{bus.busDetail.images.length !== 1 ? "s" : ""}
-                  </span>
-                </div>
-                <div className="grid gap-2 p-3 sm:grid-cols-2">
-                  {bus.busDetail.images.map((src, i) => (
-                    <div
-                      key={`${src}-${i}`}
-                      className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={src}
-                        alt={`${bus.busDetail?.name ?? "Vehicle"} ${i + 1}`}
-                        className="h-44 w-full object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <VehicleGallery
+                images={bus.busDetail.images}
+                vehicleName={bus.busDetail.name ?? "Vehicle"}
+              />
             )}
 
             {/* Seat map / waitlist */}

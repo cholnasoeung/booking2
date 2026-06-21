@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import {
   Bus, Plus, MoreVertical, Eye, Pencil, Trash2, RefreshCw,
   X, AlertTriangle, Hash, Users, Calendar, Layers, Image,
+  Upload, ImagePlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
@@ -32,7 +33,7 @@ type BusForm = {
   busType: BusType;
   totalSeats: string;
   amenities: string;
-  imageUrls: string;
+  images: string[];
 };
 
 const EMPTY_FORM: BusForm = {
@@ -41,7 +42,7 @@ const EMPTY_FORM: BusForm = {
   busType: "mini_bus",
   totalSeats: "30",
   amenities: "",
-  imageUrls: "",
+  images: [],
 };
 
 const BUS_TYPE_LABELS: Record<string, string> = {
@@ -74,8 +75,149 @@ function formFromDetail(d: BusDetail): BusForm {
     busType: d.busType,
     totalSeats: String(d.totalSeats),
     amenities: d.amenities.join(", "),
-    imageUrls: (d.images ?? []).join("\n"),
+    images: d.images ?? [],
   };
+}
+
+/* ── Image upload sub-component ──────────────────────────────── */
+function ImageUploadField({
+  images,
+  onChange,
+  disabled,
+}: {
+  images: string[];
+  onChange: (imgs: string[]) => void;
+  disabled?: boolean;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function uploadFiles(files: FileList | File[]) {
+    const list = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    if (list.length === 0) return;
+    setUploading(true);
+    setUploadError(null);
+    const urls: string[] = [];
+    try {
+      for (const file of list) {
+        const form = new FormData();
+        form.append("image", file);
+        const res = await fetch("/api/admin/upload-vehicle-image", { method: "POST", body: form });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message ?? "Upload failed");
+        urls.push(data.url);
+      }
+      onChange([...images, ...urls]);
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function removeImage(url: string) {
+    onChange(images.filter((u) => u !== url));
+  }
+
+  return (
+    <div className="space-y-3">
+      <Label className="text-sm font-semibold text-slate-700">
+        Vehicle Photos
+        <span className="ml-2 text-xs font-normal text-slate-400">({images.length} added)</span>
+      </Label>
+
+      {/* Thumbnail grid */}
+      {images.length > 0 && (
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+          {images.map((url, i) => (
+            <div
+              key={`${url}-${i}`}
+              className="group relative aspect-video overflow-hidden rounded-xl border border-slate-200 bg-slate-100"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={url}
+                alt={`Photo ${i + 1}`}
+                className="h-full w-full object-cover"
+              />
+              {!disabled && (
+                <button
+                  type="button"
+                  onClick={() => removeImage(url)}
+                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+              <span className="absolute bottom-1 left-1 rounded bg-black/40 px-1 text-[9px] font-bold text-white">
+                {i + 1}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Upload zone */}
+      {!disabled && (
+        <>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            multiple
+            className="hidden"
+            onChange={(e) => { if (e.target.files) uploadFiles(e.target.files); e.target.value = ""; }}
+          />
+          <div
+            onClick={() => !uploading && fileInputRef.current?.click()}
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setIsDragging(false);
+              uploadFiles(e.dataTransfer.files);
+            }}
+            className={cn(
+              "flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed py-5 transition-colors",
+              uploading && "cursor-not-allowed opacity-60",
+              isDragging
+                ? "border-indigo-400 bg-indigo-50"
+                : "border-slate-300 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50/40"
+            )}
+          >
+            {uploading ? (
+              <>
+                <RefreshCw className="h-5 w-5 animate-spin text-indigo-500" />
+                <p className="text-xs font-medium text-slate-500">Uploading…</p>
+              </>
+            ) : (
+              <>
+                <div className={cn(
+                  "flex h-9 w-9 items-center justify-center rounded-xl transition-colors",
+                  isDragging ? "bg-indigo-100" : "bg-white border border-slate-200"
+                )}>
+                  <ImagePlus className={cn("h-5 w-5", isDragging ? "text-indigo-600" : "text-slate-400")} />
+                </div>
+                <div className="text-center">
+                  <p className="text-xs font-semibold text-slate-700">
+                    {isDragging ? "Drop to add photos" : "Click or drag photos here"}
+                  </p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">PNG, JPG, WebP · Max 5 MB · Multiple allowed</p>
+                </div>
+              </>
+            )}
+          </div>
+          {uploadError && (
+            <p className="text-xs text-red-600 flex items-center gap-1">
+              <X className="h-3 w-3" /> {uploadError}
+            </p>
+          )}
+        </>
+      )}
+    </div>
+  );
 }
 
 function BusFormFields({
@@ -154,12 +296,11 @@ function BusFormFields({
           ))}
         </div>
       </div>
-      <div className="space-y-2">
-        <Label className="text-sm font-semibold text-slate-700">Image URLs <span className="text-slate-400 font-normal">(one per line)</span></Label>
-        <Textarea className="rounded-xl h-20 text-sm" placeholder="https://example.com/bus.jpg"
-          value={form.imageUrls} disabled={disabled}
-          onChange={(e) => onChange({ ...form, imageUrls: e.target.value })} />
-      </div>
+      <ImageUploadField
+        images={form.images}
+        onChange={(imgs) => onChange({ ...form, images: imgs })}
+        disabled={disabled}
+      />
     </div>
   );
 }
@@ -194,7 +335,7 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
       busType: form.busType,
       totalSeats: Number(form.totalSeats),
       amenities: form.amenities.split(",").map((s) => s.trim()).filter(Boolean),
-      images: form.imageUrls.split(/\s+/).map((s) => s.trim()).filter(Boolean),
+      images: form.images,
     };
   }
 
@@ -526,15 +667,27 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
               {/* Images */}
               {detailTarget.images && detailTarget.images.length > 0 && (
                 <div className="rounded-xl bg-slate-50 border border-slate-200 p-4">
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <Image className="h-3.5 w-3.5 text-slate-400" />
-                    <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400">Images</p>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <Image className="h-3.5 w-3.5 text-slate-400" />
+                      <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400">
+                        Photos ({detailTarget.images.length})
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {detailTarget.images.map((url, i) => (
-                      <a key={i} href={url} target="_blank" rel="noopener noreferrer"
-                        className="text-xs text-indigo-600 hover:underline truncate max-w-[180px]">
-                        Image {i + 1}
+                      <a
+                        key={i} href={url} target="_blank" rel="noopener noreferrer"
+                        className="group relative overflow-hidden rounded-lg border border-slate-200 bg-slate-100 aspect-video block"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={url}
+                          alt={`Photo ${i + 1}`}
+                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-200"
+                        />
+                        <span className="absolute bottom-1 left-1 rounded bg-black/40 px-1 text-[9px] font-bold text-white">{i + 1}</span>
                       </a>
                     ))}
                   </div>
