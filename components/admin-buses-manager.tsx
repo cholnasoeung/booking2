@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   BusFront, Navigation, PencilLine, Plus, Search, Trash2, UserCheck, MoreVertical,
-  CheckSquare2, Square, X, AlertTriangle,
+  CheckSquare2, Square, X, AlertTriangle, ChevronDown, ChevronRight,
+  LayoutList, Layers,
 } from "lucide-react";
 
 import AdminBusDialog from "@/components/admin-bus-dialog";
@@ -70,6 +71,10 @@ export default function AdminBusesManager({
 
   const [page, setPage] = useState(1);
 
+  // ── View mode ──
+  const [groupedView, setGroupedView] = useState(true);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
   // ── Bulk select ──
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
@@ -123,6 +128,42 @@ export default function AdminBusesManager({
       return next;
     });
   }
+
+  function toggleGroup(key: string) {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      next.has(key) ? next.delete(key) : next.add(key);
+      return next;
+    });
+  }
+
+  // Build route groups from all visible buses (not just current page)
+  type RouteGroup = {
+    key: string;
+    from: string;
+    to: string;
+    buses: BusSummary[];
+    seatsLeft: number;
+    totalSeats: number;
+    dateMin: string;
+    dateMax: string;
+  };
+  const routeGroups: RouteGroup[] = (() => {
+    const map = new Map<string, RouteGroup>();
+    for (const bus of visibleBuses) {
+      const key = `${bus.from}|||${bus.to}`;
+      if (!map.has(key)) {
+        map.set(key, { key, from: bus.from, to: bus.to, buses: [], seatsLeft: 0, totalSeats: 0, dateMin: bus.travelDate, dateMax: bus.travelDate });
+      }
+      const g = map.get(key)!;
+      g.buses.push(bus);
+      g.seatsLeft  += bus.seatsLeft;
+      g.totalSeats += bus.totalSeats;
+      if (bus.travelDate < g.dateMin) g.dateMin = bus.travelDate;
+      if (bus.travelDate > g.dateMax) g.dateMax = bus.travelDate;
+    }
+    return [...map.values()].sort((a, b) => a.from.localeCompare(b.from));
+  })();
 
   async function confirmBulkDelete() {
     setBulkDeletePending(true);
@@ -201,19 +242,40 @@ export default function AdminBusesManager({
                   </CardDescription>
                 </div>
               </div>
-              <Button
-                type="button"
-                size="lg"
-                className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 shadow-lg transition-all hover:shadow-xl"
-                disabled={routes.length === 0}
-                onClick={() => {
-                  setSelectedBus(null);
-                  setBusDialogOpen(true);
-                }}
-              >
-                <Plus className="size-4" />
-                Add Bus
-              </Button>
+              <div className="flex items-center gap-2">
+                {/* View toggle */}
+                <div className="flex rounded-xl border border-orange-200 bg-white overflow-hidden shadow-sm">
+                  <button
+                    type="button"
+                    onClick={() => setGroupedView(true)}
+                    className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors ${groupedView ? "bg-orange-500 text-white" : "text-slate-500 hover:bg-orange-50"}`}
+                    title="Group by route"
+                  >
+                    <Layers className="size-3.5" /> Grouped
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setGroupedView(false)}
+                    className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors ${!groupedView ? "bg-orange-500 text-white" : "text-slate-500 hover:bg-orange-50"}`}
+                    title="Flat list"
+                  >
+                    <LayoutList className="size-3.5" /> List
+                  </button>
+                </div>
+                <Button
+                  type="button"
+                  size="lg"
+                  className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 shadow-lg transition-all hover:shadow-xl"
+                  disabled={routes.length === 0}
+                  onClick={() => {
+                    setSelectedBus(null);
+                    setBusDialogOpen(true);
+                  }}
+                >
+                  <Plus className="size-4" />
+                  Add Bus
+                </Button>
+              </div>
             </div>
 
             <div className="grid gap-3 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_190px]">
@@ -309,7 +371,206 @@ export default function AdminBusesManager({
                 No buses yet. Create your first departure to start selling seats.
               </p>
             </div>
+          ) : groupedView ? (
+            /* ════════ GROUPED VIEW ════════ */
+            <div className="space-y-2">
+              {visibleBuses.length === 0 ? (
+                <EmptyState
+                  icon={<BusFront className="size-10 text-orange-300" />}
+                  title="No departures match these filters"
+                  description="Adjust the route, date, or search query to see more results."
+                />
+              ) : (
+                routeGroups.map((group) => {
+                  const isOpen    = expandedGroups.has(group.key);
+                  const groupIds  = group.buses.map((b) => b.id);
+                  const allSel    = groupIds.every((id) => selectedIds.has(id));
+                  const someSel   = groupIds.some((id)  => selectedIds.has(id));
+                  const fillPct   = group.totalSeats > 0
+                    ? Math.round(((group.totalSeats - group.seatsLeft) / group.totalSeats) * 100)
+                    : 0;
+
+                  function toggleGroupSel() {
+                    setSelectedIds((prev) => {
+                      const next = new Set(prev);
+                      if (allSel) groupIds.forEach((id) => next.delete(id));
+                      else        groupIds.forEach((id) => next.add(id));
+                      return next;
+                    });
+                  }
+
+                  const fmt = (d: string) =>
+                    new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+                  return (
+                    <div
+                      key={group.key}
+                      className={`rounded-2xl border overflow-hidden transition-shadow ${isOpen ? "border-orange-300 shadow-md" : "border-orange-200/70 shadow-sm"}`}
+                    >
+                      {/* Group header row */}
+                      <div
+                        className={`flex items-center gap-3 px-4 py-3 cursor-pointer select-none transition-colors ${isOpen ? "bg-orange-50" : "bg-white hover:bg-orange-50/60"}`}
+                        onClick={() => toggleGroup(group.key)}
+                      >
+                        {/* Group checkbox */}
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); toggleGroupSel(); }}
+                          className="shrink-0 text-slate-300 hover:text-orange-500 transition-colors"
+                        >
+                          {allSel
+                            ? <CheckSquare2 className="size-4 text-orange-500" />
+                            : someSel
+                            ? <CheckSquare2 className="size-4 text-orange-300" />
+                            : <Square className="size-4" />
+                          }
+                        </button>
+
+                        {/* Route name */}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-slate-900 text-sm leading-tight">
+                            {group.from} → {group.to}
+                          </p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">
+                            {fmt(group.dateMin)}{group.dateMin !== group.dateMax ? ` – ${fmt(group.dateMax)}` : ""}
+                          </p>
+                        </div>
+
+                        {/* Stats pills */}
+                        <div className="hidden sm:flex items-center gap-2 shrink-0">
+                          <span className="rounded-full bg-orange-100 border border-orange-200 px-2.5 py-0.5 text-[11px] font-bold text-orange-700">
+                            {group.buses.length} departure{group.buses.length !== 1 ? "s" : ""}
+                          </span>
+                          <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold border ${
+                            fillPct >= 90 ? "bg-red-50 border-red-200 text-red-700"
+                            : fillPct >= 60 ? "bg-amber-50 border-amber-200 text-amber-700"
+                            : "bg-emerald-50 border-emerald-200 text-emerald-700"
+                          }`}>
+                            {group.seatsLeft} seats free
+                          </span>
+                        </div>
+
+                        {/* Mini fill bar */}
+                        <div className="hidden md:flex flex-col gap-1 w-20 shrink-0">
+                          <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${fillPct >= 90 ? "bg-red-500" : fillPct >= 60 ? "bg-amber-500" : "bg-emerald-500"}`}
+                              style={{ width: `${fillPct}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] text-slate-400 text-right">{fillPct}% full</span>
+                        </div>
+
+                        {/* Expand icon */}
+                        <div className="shrink-0 text-slate-400">
+                          {isOpen
+                            ? <ChevronDown className="size-4" />
+                            : <ChevronRight className="size-4" />
+                          }
+                        </div>
+                      </div>
+
+                      {/* Expanded rows */}
+                      {isOpen && (
+                        <div className="border-t border-orange-100">
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="bg-orange-50/60 border-b border-orange-100">
+                                <th className="w-8 pl-12" />
+                                <th className="px-3 py-2 text-left text-[10px] font-bold text-orange-700 uppercase tracking-wider">Date</th>
+                                <th className="px-3 py-2 text-left text-[10px] font-bold text-orange-700 uppercase tracking-wider">Time</th>
+                                <th className="px-3 py-2 text-left text-[10px] font-bold text-orange-700 uppercase tracking-wider hidden sm:table-cell">Type</th>
+                                <th className="px-3 py-2 text-left text-[10px] font-bold text-orange-700 uppercase tracking-wider">Fare</th>
+                                <th className="px-3 py-2 text-left text-[10px] font-bold text-orange-700 uppercase tracking-wider">Seats</th>
+                                <th className="px-3 py-2 text-left text-[10px] font-bold text-orange-700 uppercase tracking-wider">Status</th>
+                                <th className="w-8" />
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-orange-50">
+                              {group.buses.map((bus) => {
+                                const isSel = selectedIds.has(bus.id);
+                                const booked = bus.totalSeats - bus.seatsLeft;
+                                const pct = bus.totalSeats > 0 ? Math.round((booked / bus.totalSeats) * 100) : 0;
+                                return (
+                                  <tr
+                                    key={bus.id}
+                                    className={`transition-colors group/row ${isSel ? "bg-orange-50/80" : "hover:bg-orange-50/40"}`}
+                                  >
+                                    {/* Row checkbox */}
+                                    <td className="pl-12 pr-2 py-2.5">
+                                      <button
+                                        type="button"
+                                        onClick={() => toggleOne(bus.id)}
+                                        className="text-slate-200 hover:text-orange-500 transition-colors"
+                                      >
+                                        {isSel
+                                          ? <CheckSquare2 className="size-3.5 text-orange-500" />
+                                          : <Square className="size-3.5" />
+                                        }
+                                      </button>
+                                    </td>
+                                    <td className="px-3 py-2.5 font-semibold text-slate-800 text-xs whitespace-nowrap">
+                                      {new Date(bus.travelDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+                                    </td>
+                                    <td className="px-3 py-2.5 text-xs text-slate-600 whitespace-nowrap">
+                                      {bus.departureTime} – {bus.arrivalTime}
+                                    </td>
+                                    <td className="px-3 py-2.5 hidden sm:table-cell">
+                                      <Badge className="border-orange-200 bg-orange-100 text-orange-700 text-[10px] py-0">
+                                        {formatBusType(bus.busType)}
+                                      </Badge>
+                                    </td>
+                                    <td className="px-3 py-2.5 text-xs font-semibold text-slate-700">
+                                      {formatCurrency(bus.pricePerSeat)}
+                                    </td>
+                                    <td className="px-3 py-2.5">
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="text-xs font-medium text-slate-700">{bus.seatsLeft}/{bus.totalSeats}</span>
+                                        <div className="h-1 w-12 rounded-full bg-slate-100 overflow-hidden">
+                                          <div className={`h-full rounded-full ${pct >= 90 ? "bg-red-500" : pct >= 60 ? "bg-amber-500" : "bg-emerald-500"}`}
+                                            style={{ width: `${pct}%` }} />
+                                        </div>
+                                      </div>
+                                    </td>
+                                    <td className="px-3 py-2.5">
+                                      <AvailabilityBadge bus={bus} />
+                                    </td>
+                                    <td className="pr-3 py-2.5">
+                                      <DropdownMenu>
+                                        <DropdownMenuTrigger className="inline-flex h-7 w-7 items-center justify-center rounded-lg opacity-0 group-hover/row:opacity-60 hover:!opacity-100 hover:bg-orange-100 transition-all focus:outline-none">
+                                          <MoreVertical className="size-3.5" />
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="w-44">
+                                          <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => { setSelectedBus(bus); setBusDialogOpen(true); }}>
+                                            <PencilLine className="size-4 text-orange-500" /> Edit departure
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => { setDriverBus(bus); setSelectedDriverId((bus as any).driverId ?? ""); }}>
+                                            <UserCheck className="size-4 text-indigo-500" /> Assign driver
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => { setStatusBus(bus); setNewStatus((bus as any).departureStatus ?? "scheduled"); setNewDelayMinutes((bus as any).delayMinutes ?? 0); setNewStatusNote((bus as any).statusNote ?? ""); }}>
+                                            <Navigation className="size-4 text-blue-500" /> Update status
+                                          </DropdownMenuItem>
+                                          <DropdownMenuSeparator />
+                                          <DropdownMenuItem className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50" onClick={() => setBusToDelete(bus)}>
+                                            <Trash2 className="size-4" /> Delete
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
           ) : (
+            /* ════════ FLAT LIST VIEW (existing) ════════ */
             <div className="rounded-2xl border border-orange-200/50 bg-white/80 overflow-hidden">
               <Table>
                 <TableHeader>
