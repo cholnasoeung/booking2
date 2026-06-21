@@ -196,7 +196,7 @@ export default async function PassengersPage({ params, searchParams }: Passenger
                   {selectedSeats.map((seat) => (
                     <span
                       key={seat}
-                      className="flex h-7 items-center justify-center rounded-full bg-emerald-100 px-2.5 text-xs font-semibold text-emerald-700"
+                      className="flex h-7 items-center justify-center rounded-full bg-indigo-100 px-2.5 text-xs font-semibold text-indigo-700"
                     >
                       {seat}
                     </span>
@@ -222,7 +222,7 @@ export default async function PassengersPage({ params, searchParams }: Passenger
 
                 <div className="flex items-center justify-between text-base font-bold">
                   <span className="text-slate-900">Total Amount</span>
-                  <span className="text-emerald-600">
+                  <span className="text-indigo-600">
                     {formatCurrency(bus.pricePerSeat * selectedSeats.length)}
                   </span>
                 </div>

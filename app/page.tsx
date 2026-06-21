@@ -34,7 +34,7 @@ export default function Home() {
           {/* Background layers */}
           <div className="pointer-events-none absolute inset-0">
             {/* Subtle gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/10 via-transparent to-slate-900/20" />
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 via-transparent to-slate-900/20" />
             {/* Grid pattern */}
             <div
               className="absolute inset-0 opacity-[0.03]"
@@ -48,8 +48,8 @@ export default function Home() {
           <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col px-5 pt-14 pb-20 lg:pt-20">
             {/* Eyebrow */}
             <div className="mb-8 flex items-center gap-3">
-              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-emerald-300">
-                <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-400/10 px-4 py-1.5 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-indigo-300">
+                <span className="size-1.5 rounded-full bg-indigo-400 animate-pulse" />
                 Live seat data · Cambodia
               </span>
             </div>
@@ -65,7 +65,7 @@ export default function Home() {
                     key={label}
                     className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm"
                   >
-                    <Icon className="size-4 text-emerald-400" />
+                    <Icon className="size-4 text-indigo-400" />
                     <div>
                       <p className="text-lg font-bold text-white">{value}</p>
                       <p className="text-[0.65rem] uppercase tracking-wider text-white/50">
@@ -88,7 +88,7 @@ export default function Home() {
             {/* Section header */}
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="mb-3 text-xs font-bold uppercase tracking-[0.3em] text-emerald-600">
+                <p className="mb-3 text-xs font-bold uppercase tracking-[0.3em] text-indigo-600">
                   Popular trips
                 </p>
                 <h2
@@ -108,10 +108,10 @@ export default function Home() {
                 <Link
                   key={`${route.from}-${route.to}`}
                   href={`/search?from=${encodeURIComponent(route.from)}&to=${encodeURIComponent(route.to)}&date=${tomorrow}&passengers=1`}
-                  className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50 to-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-100/40"
+                  className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50 to-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-100/40"
                 >
                   {/* Index number watermark */}
-                  <span className="pointer-events-none absolute right-6 top-5 font-serif text-6xl font-bold text-slate-100 select-none transition-colors duration-300 group-hover:text-emerald-50">
+                  <span className="pointer-events-none absolute right-6 top-5 font-serif text-6xl font-bold text-slate-100 select-none transition-colors duration-300 group-hover:text-indigo-50">
                     {String(i + 1).padStart(2, "0")}
                   </span>
 
@@ -124,8 +124,8 @@ export default function Home() {
                       <p className="mt-0.5 text-xl font-bold text-slate-900">{route.from}</p>
                     </div>
 
-                    <div className="flex size-9 items-center justify-center rounded-full bg-emerald-50 transition-all duration-300 group-hover:bg-emerald-500 group-hover:scale-110">
-                      <ArrowRight className="size-4 text-emerald-600 transition-colors duration-300 group-hover:text-white" />
+                    <div className="flex size-9 items-center justify-center rounded-full bg-indigo-50 transition-all duration-300 group-hover:bg-indigo-500 group-hover:scale-110">
+                      <ArrowRight className="size-4 text-indigo-600 transition-colors duration-300 group-hover:text-white" />
                     </div>
 
                     <div className="flex-1 text-right">
@@ -151,7 +151,7 @@ export default function Home() {
                     </div>
                     <p className="text-lg font-bold text-slate-900">
                       from{" "}
-                      <span className="text-emerald-600">{formatCurrency(route.fare)}</span>
+                      <span className="text-indigo-600">{formatCurrency(route.fare)}</span>
                     </p>
                   </div>
                 </Link>
@@ -182,8 +182,8 @@ export default function Home() {
                 },
               ].map(({ icon: Icon, title, body }) => (
                 <div key={title} className="flex gap-5">
-                  <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-100">
-                    <Icon className="size-5 text-emerald-600" />
+                  <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-100">
+                    <Icon className="size-5 text-indigo-600" />
                   </div>
                   <div>
                     <p className="font-semibold text-slate-900">{title}</p>

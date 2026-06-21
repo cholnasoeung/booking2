@@ -36,7 +36,7 @@ export default async function AdminPage() {
               <div className="flex items-center gap-2 sm:gap-3">
                 {/* Routes */}
                 <div className="flex items-center gap-2 rounded-xl bg-gray-50 border border-gray-200 px-3 py-2 hover:bg-gray-100 transition-colors">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 sm:h-9 sm:w-9">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 sm:h-9 sm:w-9">
                     <MapPinned className="size-4 sm:size-5" />
                   </div>
                   <div>
@@ -47,7 +47,7 @@ export default async function AdminPage() {
 
                 {/* Buses */}
                 <div className="flex items-center gap-2 rounded-xl bg-gray-50 border border-gray-200 px-3 py-2 hover:bg-gray-100 transition-colors">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-600 sm:h-9 sm:w-9">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-violet-600 sm:h-9 sm:w-9">
                     <BusFront className="size-4 sm:size-5" />
                   </div>
                   <div>
@@ -80,7 +80,7 @@ export default async function AdminPage() {
 
                 {/* Bookings */}
                 <div className="flex items-center gap-2 rounded-xl bg-gray-50 border border-gray-200 px-3 py-2 hover:bg-gray-100 transition-colors">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-pink-100 text-pink-600 sm:h-9 sm:w-9">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-100 text-purple-600 sm:h-9 sm:w-9">
                     <Ticket className="size-4 sm:size-5" />
                   </div>
                   <div>

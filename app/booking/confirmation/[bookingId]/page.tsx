@@ -213,7 +213,7 @@ export default async function ConfirmationPage({ params }: ConfirmationPageProps
             <a
               href={`/api/bookings/${bookingId}/ticket`}
               download
-              className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-600"
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:from-indigo-600 hover:to-violet-700"
             >
               <Download className="h-4 w-4" />
               Download Ticket (PDF)

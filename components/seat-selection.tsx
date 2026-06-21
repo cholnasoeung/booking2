@@ -514,7 +514,7 @@ export default function SeatSelection({
             type="button"
             size="lg"
             disabled={selectedSeats.length === 0 || bus.seatsLeft === 0}
-            className="h-12 w-full rounded-2xl bg-gradient-to-r from-rose-500 via-red-500 to-orange-500 text-white shadow-lg shadow-rose-200 transition hover:brightness-105"
+            className="h-12 w-full rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-200 transition hover:from-indigo-600 hover:to-violet-700"
             onClick={proceedToPassengerDetails}
           >
             Continue to Passenger Details

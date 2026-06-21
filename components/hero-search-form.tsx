@@ -21,8 +21,8 @@ export default function HeroSearchForm() {
         <h1 className="font-serif text-5xl font-bold leading-[1.1] tracking-tight text-white sm:text-6xl lg:text-7xl">
           Travel{" "}
           <span className="relative inline-block">
-            <span className="relative z-10 text-emerald-400">Cambodia</span>
-            <span className="absolute inset-x-0 bottom-1 h-[6px] -rotate-1 rounded bg-emerald-400/30" />
+            <span className="relative z-10 text-indigo-400">Cambodia</span>
+            <span className="absolute inset-x-0 bottom-1 h-[6px] -rotate-1 rounded bg-indigo-400/30" />
           </span>
           <br />
           <span className="text-white/90">in comfort & style</span>
@@ -36,7 +36,7 @@ export default function HeroSearchForm() {
         <div className="flex flex-wrap items-center gap-4">
           <Link
             href={searchHref}
-            className="group inline-flex items-center gap-2.5 rounded-xl bg-emerald-500 px-6 py-3.5 text-sm font-semibold text-slate-900 shadow-lg hover:bg-emerald-400 transition-all duration-200 hover:-translate-y-0.5"
+            className="group inline-flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg hover:from-indigo-600 hover:to-violet-700 transition-all duration-200 hover:-translate-y-0.5"
           >
             Search buses
             <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
@@ -53,14 +53,14 @@ export default function HeroSearchForm() {
       {/* Right: Enhanced search card */}
       <div className="relative">
         {/* Glow effect */}
-        <div className="pointer-events-none absolute -inset-1 rounded-3xl bg-emerald-500/10 blur-2xl" />
+        <div className="pointer-events-none absolute -inset-1 rounded-3xl bg-indigo-500/10 blur-2xl" />
 
         <div className="relative rounded-3xl border border-white/10 bg-white/10 backdrop-blur-xl overflow-hidden shadow-2xl">
           {/* Card header */}
           <div className="bg-white/5 border-b border-white/10 px-6 py-4">
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/20">
-                <MapPin className="size-5 text-emerald-400" />
+              <div className="flex size-10 items-center justify-center rounded-xl bg-indigo-500/20">
+                <MapPin className="size-5 text-indigo-400" />
               </div>
               <div>
                 <h3 className="text-base font-semibold text-white">
@@ -83,7 +83,7 @@ export default function HeroSearchForm() {
                   <select
                     value={fromCity}
                     onChange={(e) => setFromCity(e.target.value)}
-                    className="w-full rounded-xl border border-white/20 bg-slate-800 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all appearance-none cursor-pointer"
+                    className="w-full rounded-xl border border-white/20 bg-slate-800 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all appearance-none cursor-pointer"
                   >
                     {CITY_OPTIONS.map((city) => (
                       <option key={city} value={city} className="bg-slate-900 text-white">
@@ -98,7 +98,7 @@ export default function HeroSearchForm() {
                   <select
                     value={toCity}
                     onChange={(e) => setToCity(e.target.value)}
-                    className="w-full rounded-xl border border-white/20 bg-slate-800 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all appearance-none cursor-pointer"
+                    className="w-full rounded-xl border border-white/20 bg-slate-800 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all appearance-none cursor-pointer"
                   >
                     {CITY_OPTIONS.map((city) => (
                       <option key={city} value={city} className="bg-slate-900 text-white">
@@ -118,7 +118,7 @@ export default function HeroSearchForm() {
                     value={travelDate}
                     min={tomorrow}
                     onChange={(e) => setTravelDate(e.target.value)}
-                    className="w-full rounded-xl border border-white/20 bg-slate-800 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all [color-scheme:dark]"
+                    className="w-full rounded-xl border border-white/20 bg-slate-800 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all [color-scheme:dark]"
                   />
                 </div>
 
@@ -127,7 +127,7 @@ export default function HeroSearchForm() {
                   <select
                     value={passengers}
                     onChange={(e) => setPassengers(e.target.value)}
-                    className="w-full rounded-xl border border-white/20 bg-slate-800 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all appearance-none cursor-pointer"
+                    className="w-full rounded-xl border border-white/20 bg-slate-800 text-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all appearance-none cursor-pointer"
                   >
                     <option value="1" className="bg-slate-900 text-white">1 Passenger</option>
                     <option value="2" className="bg-slate-900 text-white">2 Passengers</option>
@@ -141,7 +141,7 @@ export default function HeroSearchForm() {
               {/* Search Button */}
               <Link
                 href={searchHref}
-                className="block w-full rounded-xl bg-emerald-500 text-slate-900 font-semibold px-6 py-3.5 text-center text-sm hover:bg-emerald-400 transition-all duration-200 shadow-lg hover:shadow-emerald-500/30"
+                className="block w-full rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold px-6 py-3.5 text-center text-sm hover:from-indigo-600 hover:to-violet-700 transition-all duration-200 shadow-lg hover:shadow-indigo-500/30"
               >
                 <div className="flex items-center justify-center gap-2">
                   <Search className="size-4" />
@@ -156,8 +156,8 @@ export default function HeroSearchForm() {
         <div className="mt-4 flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-5 py-3 backdrop-blur-sm">
           <div className="flex items-center gap-2.5">
             <span className="relative flex size-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex size-2.5 rounded-full bg-emerald-400" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75" />
+              <span className="relative inline-flex size-2.5 rounded-full bg-indigo-400" />
             </span>
             <p className="text-xs font-medium text-white/70">
               Live seat availability

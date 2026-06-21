@@ -10,7 +10,7 @@ const benefits = [
 
 export default function CTASection() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 py-16 sm:py-20 lg:py-24">
+    <section className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 py-16 sm:py-20 lg:py-24">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAzNGMwLTItMi00LTItNHMyLTItNCAyLTRzLTItMi00LTJjMCAwIDItMiAyLTRzLTItMi00LTJjMCAwIDItMiAyLTRzLTItMi00LTJjMCAwIDItMiAyLTR6IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz48L2c+PC9zdmc+')] opacity-10" />
 
@@ -37,7 +37,7 @@ export default function CTASection() {
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {benefits.map((benefit, index) => (
                 <div key={index} className="flex items-center justify-center gap-2 text-white">
-                  <CheckCircle2 className="h-5 w-5 text-green-300" />
+                  <CheckCircle2 className="h-5 w-5 text-indigo-200" />
                   <span className="text-sm font-medium">{benefit}</span>
                 </div>
               ))}

@@ -224,7 +224,7 @@ export default function DashboardBookings({ initialBookings }: DashboardBookings
                   <a
                     href={`/api/bookings/${booking.id}/ticket`}
                     download
-                    className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-emerald-200 transition hover:bg-emerald-600"
+                    className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-indigo-200 transition hover:from-indigo-600 hover:to-violet-700"
                   >
                     <Download className="h-4 w-4" /> Download
                   </a>
