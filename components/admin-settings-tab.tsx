@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Globe, BookOpen, Bell, Shield, Save, Check,
   Building2, Mail, Phone, Clock, Users, AlertTriangle,
-  Lock, Eye, EyeOff, RefreshCw,
+  Lock, Eye, EyeOff, RefreshCw, Palette, Upload,
+  Trash2, ImageIcon, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +42,7 @@ const DEFAULT: SettingsData = {
   notifications: { emailEnabled: true, smsEnabled: false, adminAlertEmail: "", notifyOnNewBooking: true, notifyOnCancellation: true },
 };
 
-type Tab = "general" | "booking" | "notifications" | "security";
+type Tab = "general" | "booking" | "notifications" | "security" | "branding";
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -118,15 +119,79 @@ export default function AdminSettingsTab() {
   const [pwError, setPwError] = useState<string | null>(null);
   const [pwSaved, setPwSaved] = useState(false);
 
+  // Branding
+  const [currentLogoUrl, setCurrentLogoUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoMsg, setLogoMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((r) => r.json())
       .then((data) => {
         if (data.general) setSettings(data);
+        if (data.logoUrl) setCurrentLogoUrl(data.logoUrl);
         setLoading(false);
       })
       .catch(() => setLoading(false));
   }, []);
+
+  function pickFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      setLogoMsg({ kind: "err", text: "Only image files are accepted." });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setLogoMsg({ kind: "err", text: "File exceeds 2 MB limit." });
+      return;
+    }
+    setSelectedFile(file);
+    setLogoMsg(null);
+    const reader = new FileReader();
+    reader.onload = (e) => setPreviewUrl(e.target?.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  async function uploadLogo() {
+    if (!selectedFile) return;
+    setLogoUploading(true);
+    setLogoMsg(null);
+    try {
+      const form = new FormData();
+      form.append("logo", selectedFile);
+      const res = await fetch("/api/admin/upload-logo", { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message ?? "Upload failed");
+      setCurrentLogoUrl(data.url + `?v=${Date.now()}`);
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      setLogoMsg({ kind: "ok", text: "Logo updated successfully!" });
+    } catch (e) {
+      setLogoMsg({ kind: "err", text: e instanceof Error ? e.message : "Upload failed." });
+    } finally {
+      setLogoUploading(false);
+    }
+  }
+
+  async function removeLogo() {
+    setLogoUploading(true);
+    setLogoMsg(null);
+    try {
+      const res = await fetch("/api/admin/upload-logo", { method: "DELETE" });
+      if (!res.ok) throw new Error("Delete failed");
+      setCurrentLogoUrl(null);
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      setLogoMsg({ kind: "ok", text: "Logo removed. Default initials badge will be shown." });
+    } catch {
+      setLogoMsg({ kind: "err", text: "Failed to remove logo." });
+    } finally {
+      setLogoUploading(false);
+    }
+  }
 
   async function saveSection(section: Exclude<Tab, "security">) {
     setSaving(true);
@@ -174,6 +239,7 @@ export default function AdminSettingsTab() {
 
   const tabs = [
     { id: "general" as Tab,       label: "General",       icon: Globe,     desc: "Business info & locale" },
+    { id: "branding" as Tab,      label: "Branding",      icon: Palette,   desc: "Logo & visual identity" },
     { id: "booking" as Tab,       label: "Booking Rules", icon: BookOpen,  desc: "Seats, timing & policy" },
     { id: "notifications" as Tab, label: "Notifications", icon: Bell,      desc: "Alerts & emails" },
     { id: "security" as Tab,      label: "Security",      icon: Shield,    desc: "Password & access" },
@@ -396,6 +462,159 @@ export default function AdminSettingsTab() {
                 />
               </div>
               <SaveBar saving={saving} saved={savedSection === "notifications"} error={saveError} onSave={() => saveSection("notifications")} />
+            </div>
+          )}
+
+          {/* ── BRANDING ── */}
+          {activeTab === "branding" && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">Branding</h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  Upload your company logo. It will appear in the navigation bar and on tickets.
+                </p>
+              </div>
+
+              {/* Current logo */}
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <p className="text-sm font-semibold text-slate-700 mb-3">Current Logo</p>
+                <div className="flex items-center gap-4">
+                  {currentLogoUrl ? (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={currentLogoUrl}
+                        alt="Current logo"
+                        className="h-16 w-16 rounded-2xl object-contain border border-slate-200 bg-white p-1 shadow-sm"
+                      />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-slate-800">Logo is set</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Showing in the navbar and on tickets.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={removeLogo}
+                        disabled={logoUploading}
+                        className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Remove
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-xl font-black text-white shadow-md">
+                        RM
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-700">Using default initials badge</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Upload a logo below to replace it.</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Upload zone */}
+              <div>
+                <p className="text-sm font-semibold text-slate-700 mb-2">Upload New Logo</p>
+
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+                  className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f); }}
+                />
+
+                {/* Drop zone */}
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                    const f = e.dataTransfer.files[0];
+                    if (f) pickFile(f);
+                  }}
+                  className={cn(
+                    "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-8 transition-colors",
+                    isDragging
+                      ? "border-indigo-400 bg-indigo-50"
+                      : "border-slate-300 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50/40"
+                  )}
+                >
+                  <div className={cn(
+                    "flex h-12 w-12 items-center justify-center rounded-2xl transition-colors",
+                    isDragging ? "bg-indigo-100" : "bg-white border border-slate-200"
+                  )}>
+                    <ImageIcon className={cn("h-6 w-6", isDragging ? "text-indigo-600" : "text-slate-400")} />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-slate-700">
+                      {isDragging ? "Drop to upload" : "Drop your logo here or click to browse"}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-400">PNG, JPG, WebP, SVG · Max 2 MB</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Preview of selected file */}
+              {previewUrl && selectedFile && (
+                <div className="flex items-center gap-4 rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
+                    className="h-14 w-14 rounded-xl object-contain border border-white bg-white p-1 shadow-sm"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-800 truncate">{selectedFile.name}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {(selectedFile.size / 1024).toFixed(0)} KB · {selectedFile.type}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedFile(null); setPreviewUrl(null); }}
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-500 hover:bg-slate-300 transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
+
+              {/* Feedback message */}
+              {logoMsg && (
+                <div className={cn(
+                  "flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium",
+                  logoMsg.kind === "ok"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-red-200 bg-red-50 text-red-700"
+                )}>
+                  {logoMsg.kind === "ok"
+                    ? <Check className="h-4 w-4 shrink-0" />
+                    : <X className="h-4 w-4 shrink-0" />
+                  }
+                  {logoMsg.text}
+                </div>
+              )}
+
+              {/* Upload button */}
+              <div className="border-t border-slate-100 pt-5">
+                <Button
+                  onClick={uploadLogo}
+                  disabled={!selectedFile || logoUploading}
+                  className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-xl h-11 px-7 shadow-md shadow-indigo-200 disabled:opacity-50"
+                >
+                  {logoUploading
+                    ? <><RefreshCw className="h-4 w-4 animate-spin mr-2" />Uploading…</>
+                    : <><Upload className="h-4 w-4 mr-2" />Upload Logo</>
+                  }
+                </Button>
+              </div>
             </div>
           )}
 

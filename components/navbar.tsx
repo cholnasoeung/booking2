@@ -1,12 +1,34 @@
+import { cache } from "react";
+
 import Link from "next/link";
 import { Shield, LogIn, UserPlus, Ticket } from "lucide-react";
 
 import LanguageToggle from "@/components/language-toggle";
 import LogoutButton from "@/components/logout-button";
+import NavbarLogo from "@/components/navbar-logo";
 import { getCurrentUser } from "@/lib/auth";
+import { connectToDatabase } from "@/lib/mongodb";
+import SettingsModel from "@/models/Settings";
+
+const getSiteBranding = cache(async () => {
+  try {
+    await connectToDatabase();
+    const s = await SettingsModel.findOne({}, { logoUrl: 1, "general.businessName": 1 }).lean() as any;
+    return {
+      logoUrl:      (s?.logoUrl as string | undefined) || null,
+      businessName: (s?.general?.businessName as string | undefined) || "RedMiles Cambodia",
+    };
+  } catch {
+    return { logoUrl: null, businessName: "RedMiles Cambodia" };
+  }
+});
 
 export default async function Navbar() {
-  const user = await getCurrentUser();
+  const [user, { logoUrl, businessName }] = await Promise.all([
+    getCurrentUser(),
+    getSiteBranding(),
+  ]);
+
   const initials = user?.name
     ? user.name
         .split(" ")
@@ -15,6 +37,13 @@ export default async function Navbar() {
         .slice(0, 2)
         .toUpperCase()
     : "?";
+
+  const brandInitials = businessName
+    .split(" ")
+    .map((w) => w[0] ?? "")
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <header className="sticky top-0 z-40">
@@ -26,13 +55,7 @@ export default async function Navbar() {
 
           {/* ── Logo ── */}
           <Link href="/" className="flex items-center gap-3 shrink-0 group">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-[13px] font-black text-white shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/50 group-hover:scale-105 transition-all duration-200 select-none">
-              RM
-            </div>
-            <div className="hidden sm:block leading-none">
-              <p className="text-[14px] font-bold tracking-tight text-slate-900">RedMiles Cambodia</p>
-              <p className="text-[11px] text-slate-400 mt-0.5">Bus tickets with live seat maps</p>
-            </div>
+            <NavbarLogo logoUrl={logoUrl} businessName={businessName} initials={brandInitials} />
           </Link>
 
           {/* ── Centre nav ── */}

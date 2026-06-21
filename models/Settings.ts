@@ -1,6 +1,7 @@
 import mongoose, { Schema, type Document } from "mongoose";
 
 export interface ISettings extends Document {
+  logoUrl?: string;
   general: {
     businessName: string;
     contactEmail: string;
@@ -26,6 +27,7 @@ export interface ISettings extends Document {
 
 const SettingsSchema = new Schema<ISettings>(
   {
+    logoUrl: { type: String, default: "" },
     general: {
       businessName: { type: String, default: "BusBooking" },
       contactEmail: { type: String, default: "" },
