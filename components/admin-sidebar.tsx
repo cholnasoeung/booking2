@@ -31,8 +31,9 @@ const navSections = [
     title: "Analytics & Insights",
     accent: "text-slate-400",
     items: [
-      { title: "Analytics",     href: "/admin?tab=analytics",     icon: BarChart3, gradient: "from-cyan-500 to-blue-600",    badge: "New" },
-      { title: "System Status", href: "/admin?tab=system-status", icon: Activity,  gradient: "from-green-500 to-emerald-600" },
+      { title: "Analytics",     href: "/admin?tab=analytics",     icon: BarChart3,      gradient: "from-cyan-500 to-blue-600",    badge: "New" },
+      { title: "Reports",       href: "/admin?tab=reports",       icon: FileSpreadsheet, gradient: "from-indigo-500 to-violet-600" },
+      { title: "System Status", href: "/admin?tab=system-status", icon: Activity,       gradient: "from-green-500 to-emerald-600" },
     ],
   },
   {
