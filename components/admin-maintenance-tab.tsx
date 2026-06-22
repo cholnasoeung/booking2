@@ -8,6 +8,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
+import { confirmDelete } from "@/lib/swal";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -305,8 +306,9 @@ export default function AdminMaintenanceTab() {
     });
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!showDelete) return;
+    if (!(await confirmDelete("this maintenance record"))) return;
     startTransition(async () => {
       const res = await fetch(`/api/admin/maintenance/${showDelete.id}`, { method: "DELETE" });
       if (res.ok) flash("success", "Record deleted.");

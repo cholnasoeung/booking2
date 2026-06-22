@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
+import { confirmDelete } from "@/lib/swal";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -356,8 +357,9 @@ export default function AdminDriverScheduleTab() {
     });
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!showDelete) return;
+    if (!(await confirmDelete("this schedule"))) return;
     startTransition(async () => {
       const res = await fetch(`/api/admin/driver-schedules/${showDelete.id}`, { method: "DELETE" });
       if (res.ok) flash("success", "Schedule deleted.");

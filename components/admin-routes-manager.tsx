@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { confirmDelete } from "@/lib/swal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -70,7 +71,6 @@ export default function AdminRoutesManager({
   const [routeForm, setRouteForm] = useState<RouteFormState>(emptyRouteForm);
   const [routePending, setRoutePending] = useState(false);
   const [routeError, setRouteError] = useState("");
-  const [routeToDelete, setRouteToDelete] = useState<RouteSummary | null>(null);
   const [routeDeletePending, setRouteDeletePending] = useState(false);
 
   const routeUsage = buildRouteUsage(
@@ -173,16 +173,15 @@ export default function AdminRoutesManager({
     }
   }
 
-  async function confirmRouteDelete() {
-    if (!routeToDelete) {
-      return;
-    }
+  async function handleRouteDelete(route: RouteSummary) {
+    const ok = await confirmDelete(`${route.from} → ${route.to}`);
+    if (!ok) return;
 
     setRouteDeletePending(true);
     onFeedback(null);
 
     try {
-      const response = await fetch(`/api/admin/routes/${routeToDelete.id}`, {
+      const response = await fetch(`/api/admin/routes/${route.id}`, {
         method: "DELETE",
       });
       const payload = (await response.json()) as { message?: string };
@@ -196,7 +195,6 @@ export default function AdminRoutesManager({
       }
 
       onFeedback({ kind: "success", message: "Route deleted successfully." });
-      setRouteToDelete(null);
       router.refresh();
     } catch {
       onFeedback({
@@ -332,7 +330,7 @@ export default function AdminRoutesManager({
                               size="sm"
                               variant="outline"
                               className="rounded-full border-red-200 text-red-700 hover:bg-red-50"
-                              onClick={() => setRouteToDelete(route)}
+                              onClick={() => handleRouteDelete(route)}
                             >
                               <Trash2 className="size-4" />
                               Delete
@@ -484,37 +482,6 @@ export default function AdminRoutesManager({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={Boolean(routeToDelete)} onOpenChange={(open) => !open && setRouteToDelete(null)}>
-        <DialogContent className="sm:max-w-md border-2 border-red-200/70 bg-white shadow-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl">Delete Route</DialogTitle>
-            <DialogDescription>
-              {routeToDelete
-                ? `Delete ${routeToDelete.from} to ${routeToDelete.to}? This only works when no departures are attached to the route.`
-                : "Delete this route?"}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-xl"
-              onClick={() => setRouteToDelete(null)}
-            >
-              Keep Route
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              className="rounded-xl"
-              disabled={routeDeletePending}
-              onClick={confirmRouteDelete}
-            >
-              {routeDeletePending ? "Deleting..." : "Delete Route"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

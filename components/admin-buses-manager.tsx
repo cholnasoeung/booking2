@@ -12,6 +12,7 @@ import AdminBusDialog from "@/components/admin-bus-dialog";
 import { AvailabilityBadge, EmptyState, PAGE_SIZE, Paginator, SummaryTile } from "@/components/admin-management-shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { confirmDelete, confirmBulkDelete as swalBulkDelete } from "@/lib/swal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
@@ -52,7 +53,6 @@ export default function AdminBusesManager({
   const [busDateFilter, setBusDateFilter] = useState("");
   const [busDialogOpen, setBusDialogOpen] = useState(false);
   const [selectedBus, setSelectedBus] = useState<BusSummary | null>(null);
-  const [busToDelete, setBusToDelete] = useState<BusSummary | null>(null);
   const [busDeletePending, setBusDeletePending] = useState(false);
   const [statusBus, setStatusBus] = useState<BusSummary | null>(null);
   const [newStatus, setNewStatus] = useState("");
@@ -73,7 +73,6 @@ export default function AdminBusesManager({
 
   // ── Bulk select ──
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [bulkDeletePending, setBulkDeletePending] = useState(false);
 
   const normalizedQuery = busQuery.trim().toLowerCase();
@@ -188,7 +187,8 @@ export default function AdminBusesManager({
     return result;
   })();
 
-  async function confirmBulkDelete() {
+  async function executeBulkDelete() {
+    if (!(await swalBulkDelete(selectedIds.size, "departure"))) return;
     setBulkDeletePending(true);
     onFeedback(null);
     try {
@@ -204,7 +204,6 @@ export default function AdminBusesManager({
       }
       onFeedback({ kind: "success", message: payload.message });
       setSelectedIds(new Set());
-      setBulkDeleteOpen(false);
       router.refresh();
     } catch {
       onFeedback({ kind: "error", message: "Request failed. Please try again." });
@@ -213,36 +212,21 @@ export default function AdminBusesManager({
     }
   }
 
-  async function confirmBusDelete() {
-    if (!busToDelete) {
-      return;
-    }
-
+  async function handleBusDelete(bus: BusSummary) {
+    if (!(await confirmDelete(`${bus.from} → ${bus.to} on ${bus.travelDate} at ${bus.departureTime}`))) return;
     setBusDeletePending(true);
     onFeedback(null);
-
     try {
-      const response = await fetch(`/api/admin/buses/${busToDelete.id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(`/api/admin/buses/${bus.id}`, { method: "DELETE" });
       const payload = (await response.json()) as { message?: string };
-
       if (!response.ok) {
-        onFeedback({
-          kind: "error",
-          message: payload.message || "Unable to delete the departure.",
-        });
+        onFeedback({ kind: "error", message: payload.message || "Unable to delete the departure." });
         return;
       }
-
       onFeedback({ kind: "success", message: "Departure deleted successfully." });
-      setBusToDelete(null);
       router.refresh();
     } catch {
-      onFeedback({
-        kind: "error",
-        message: "Unable to delete the departure right now.",
-      });
+      onFeedback({ kind: "error", message: "Unable to delete the departure right now." });
     } finally {
       setBusDeletePending(false);
     }
@@ -378,7 +362,7 @@ export default function AdminBusesManager({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setBulkDeleteOpen(true)}
+                  onClick={() => executeBulkDelete()}
                   className="flex items-center gap-1.5 rounded-xl bg-red-600 hover:bg-red-700 px-4 py-1.5 text-xs font-bold text-white shadow-sm transition-colors"
                 >
                   <Trash2 className="size-3.5" /> Delete {selectedIds.size} selected
@@ -656,7 +640,7 @@ export default function AdminBusesManager({
                                                 <Navigation className="size-3.5" />
                                               </button>
                                               <button type="button" title="Delete"
-                                                onClick={() => setBusToDelete(bus)}
+                                                onClick={() => handleBusDelete(bus)}
                                                 className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition-colors">
                                                 <Trash2 className="size-3.5" />
                                               </button>
@@ -829,7 +813,7 @@ export default function AdminBusesManager({
                                 <Navigation className="size-3.5" />
                               </button>
                               <button type="button" title="Delete"
-                                onClick={() => setBusToDelete(bus)}
+                                onClick={() => handleBusDelete(bus)}
                                 className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition-colors">
                                 <Trash2 className="size-3.5" />
                               </button>
@@ -853,80 +837,6 @@ export default function AdminBusesManager({
         </CardContent>
       </Card>
 
-      <Dialog open={Boolean(busToDelete)} onOpenChange={(open) => !open && setBusToDelete(null)}>
-        <DialogContent className="sm:max-w-md border-2 border-red-200/70 bg-white shadow-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl">Delete Departure</DialogTitle>
-            <DialogDescription>
-              {busToDelete
-                ? `Delete the ${busToDelete.from} to ${busToDelete.to} departure on ${formatTravelDate(busToDelete.travelDate)} at ${busToDelete.departureTime}?`
-                : "Delete this departure?"}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-xl"
-              onClick={() => setBusToDelete(null)}
-            >
-              Keep Departure
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              className="rounded-xl"
-              disabled={busDeletePending}
-              onClick={confirmBusDelete}
-            >
-              {busDeletePending ? "Deleting..." : "Delete Departure"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ── Bulk Delete Dialog ── */}
-      <Dialog open={bulkDeleteOpen} onOpenChange={(o) => !o && setBulkDeleteOpen(false)}>
-        <DialogContent className="sm:max-w-md border-2 border-red-200/70 bg-white shadow-2xl">
-          <DialogHeader>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-100">
-                <AlertTriangle className="size-5 text-red-600" />
-              </div>
-              <DialogTitle className="text-xl">Delete {selectedIds.size} Departure{selectedIds.size !== 1 ? "s" : ""}</DialogTitle>
-            </div>
-            <DialogDescription className="text-slate-600">
-              This will permanently delete{" "}
-              <span className="font-semibold text-slate-800">{selectedIds.size} departure{selectedIds.size !== 1 ? "s" : ""}</span>.
-              Departures with active bookings will be skipped.
-              This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-3 mt-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="rounded-xl"
-              onClick={() => setBulkDeleteOpen(false)}
-              disabled={bulkDeletePending}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              className="rounded-xl"
-              disabled={bulkDeletePending}
-              onClick={confirmBulkDelete}
-            >
-              {bulkDeletePending
-                ? "Deleting…"
-                : `Delete ${selectedIds.size} Departure${selectedIds.size !== 1 ? "s" : ""}`
-              }
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Status update dialog */}
       <Dialog open={Boolean(statusBus)} onOpenChange={(open) => !open && setStatusBus(null)}>

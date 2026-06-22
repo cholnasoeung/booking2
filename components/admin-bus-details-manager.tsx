@@ -7,6 +7,7 @@ import {
   Upload, ImagePlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { confirmDelete } from "@/lib/swal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -386,6 +387,7 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
   // ── Delete ──
   async function handleDelete() {
     if (!deleteTarget) return;
+    if (!(await confirmDelete(deleteTarget.plateNumber ?? "this bus"))) return;
     setDeleting(true);
     try {
       const res = await fetch(`/api/admin/bus-details/${deleteTarget.id}`, { method: "DELETE" });

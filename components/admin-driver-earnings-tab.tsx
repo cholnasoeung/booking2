@@ -8,6 +8,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
+import { confirmDelete } from "@/lib/swal";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -316,8 +317,9 @@ export default function AdminDriverEarningsTab() {
     });
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!showDelete) return;
+    if (!(await confirmDelete("this earnings entry"))) return;
     startTransition(async () => {
       const res = await fetch(`/api/admin/driver-earnings/${showDelete.id}`, { method: "DELETE" });
       if (res.ok) { flash("success", "Entry deleted."); fetchData(page); }

@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
+import { confirmDelete } from "@/lib/swal";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
@@ -372,8 +373,9 @@ export default function AdminEmployeesTab() {
     });
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteTarget) return;
+    if (!(await confirmDelete("this employee"))) return;
     startTransition(async () => {
       await fetch(`/api/admin/employees/${deleteTarget.id}`, { method: "DELETE" });
       setDeleteOpen(false); fetchData();

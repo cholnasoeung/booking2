@@ -16,6 +16,7 @@ import {
 } from "@/components/admin-management-shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { confirmAction } from "@/lib/swal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -194,7 +195,7 @@ export default function AdminBookingsManager({
 
   async function bulkCancel() {
     if (selectedIds.size === 0) return;
-    if (!confirm(`Cancel ${selectedIds.size} selected booking(s)?`)) return;
+    if (!(await confirmAction("Cancel Bookings", `Cancel ${selectedIds.size} selected booking(s)?`, "Yes, Cancel"))) return;
     setBulkCancelPending(true);
     setFeedback(null);
     try {

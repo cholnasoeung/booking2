@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useTransition } from "react";
 import {
   Banknote, Play, CheckCircle, DollarSign, MoreHorizontal,
-  Pencil, Trash2, ChevronLeft, ChevronRight, RefreshCw, Clock,
+  Pencil, Trash2, ChevronLeft, ChevronRight, RefreshCw, Clock, Users, TrendingUp,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
+import { confirmDelete } from "@/lib/swal";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
@@ -42,14 +43,14 @@ type DedForm = {
 };
 
 const ROLE_COLORS: Record<string, string> = {
-  driver: "text-cyan-400", mechanic: "text-orange-400", ticket_agent: "text-blue-400",
-  manager: "text-purple-400", accountant: "text-green-400", other: "text-slate-400",
+  driver: "text-cyan-300", mechanic: "text-orange-300", ticket_agent: "text-blue-300",
+  manager: "text-purple-300", accountant: "text-green-300", other: "text-slate-300",
 };
 
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {
-  draft:    { label: "Draft",    color: "text-slate-400",   bg: "bg-slate-500/15   border border-slate-500/30"   },
-  approved: { label: "Approved", color: "text-blue-400",    bg: "bg-blue-500/15    border border-blue-500/30"    },
-  paid:     { label: "Paid",     color: "text-emerald-400", bg: "bg-emerald-500/15 border border-emerald-500/30" },
+  draft:    { label: "Draft",    color: "text-slate-200",   bg: "bg-slate-500/25  border border-slate-400/40"   },
+  approved: { label: "Approved", color: "text-blue-200",    bg: "bg-blue-500/25   border border-blue-400/40"    },
+  paid:     { label: "Paid",     color: "text-emerald-200", bg: "bg-emerald-500/25 border border-emerald-400/40" },
 };
 
 const fmt = (n: number) => `$${n.toLocaleString()}`;
@@ -153,8 +154,9 @@ export default function AdminPayrollTab() {
     });
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteTarget) return;
+    if (!(await confirmDelete("this payroll record"))) return;
     startTransition(async () => {
       await fetch(`/api/admin/payroll/${deleteTarget.id}`, { method: "DELETE" });
       setDeleteOpen(false); fetchData();
@@ -182,14 +184,14 @@ export default function AdminPayrollTab() {
           </div>
           <div>
             <h2 className="text-xl font-bold text-white">Payroll</h2>
-            <p className="text-xs text-slate-400">{monthLabel(month)}</p>
+            <p className="text-xs text-slate-300">{monthLabel(month)}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           {/* Month nav */}
-          <div className="flex items-center gap-1 rounded-xl border border-white/8 bg-slate-800/60 p-1">
-            <button onClick={() => setMonth(prevMonth(month))} className="flex items-center justify-center size-7 rounded-lg hover:bg-white/8 text-slate-400 hover:text-white transition-colors">
+          <div className="flex items-center gap-1 rounded-xl border border-white/12 bg-slate-700/60 p-1">
+            <button onClick={() => setMonth(prevMonth(month))} className="flex items-center justify-center size-7 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors">
               <ChevronLeft className="size-4" />
             </button>
             <input
@@ -198,7 +200,7 @@ export default function AdminPayrollTab() {
               onChange={e => setMonth(e.target.value)}
               className="bg-transparent text-white text-sm px-2 focus:outline-none"
             />
-            <button onClick={() => setMonth(nextMonth(month))} disabled={month >= todayMonth} className="flex items-center justify-center size-7 rounded-lg hover:bg-white/8 text-slate-400 hover:text-white transition-colors disabled:opacity-30">
+            <button onClick={() => setMonth(nextMonth(month))} disabled={month >= todayMonth} className="flex items-center justify-center size-7 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors disabled:opacity-30">
               <ChevronRight className="size-4" />
             </button>
           </div>
@@ -219,38 +221,65 @@ export default function AdminPayrollTab() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="rounded-2xl border border-white/8 bg-slate-800/60 p-4">
-          <div className="text-xs text-slate-400 mb-1">Total Employees</div>
+        {/* Total Employees */}
+        <div className="rounded-2xl border border-indigo-500/30 bg-indigo-500/10 p-5">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/25">
+              <Users className="size-4.5 text-indigo-300" />
+            </div>
+            <span className="text-xs font-medium text-indigo-300/80 uppercase tracking-wider">Employees</span>
+          </div>
           <div className="text-3xl font-black text-white">{summary.total}</div>
-          <div className="flex items-center gap-2 mt-2 text-[11px] text-slate-500">
-            <span className="text-slate-400">{summary.countDraft} draft</span>
-            <span>·</span>
-            <span className="text-blue-400">{summary.countApproved} approved</span>
-            <span>·</span>
-            <span className="text-emerald-400">{summary.countPaid} paid</span>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2.5 text-[11px]">
+            <span className="px-1.5 py-0.5 rounded-md bg-slate-500/20 text-slate-300">{summary.countDraft} draft</span>
+            <span className="px-1.5 py-0.5 rounded-md bg-blue-500/20 text-blue-300">{summary.countApproved} approved</span>
+            <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300">{summary.countPaid} paid</span>
           </div>
         </div>
-        <div className="rounded-2xl border border-white/8 bg-slate-800/60 p-4">
-          <div className="text-xs text-slate-400 mb-1">Gross Payroll</div>
+        {/* Gross Payroll */}
+        <div className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-5">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/25">
+              <DollarSign className="size-4.5 text-blue-300" />
+            </div>
+            <span className="text-xs font-medium text-blue-300/80 uppercase tracking-wider">Gross Payroll</span>
+          </div>
           <div className="text-2xl font-black text-white font-mono">{fmt(summary.totalGross)}</div>
-          <div className="mt-2 h-1 w-8 rounded-full bg-gradient-to-r from-indigo-500 to-violet-600" />
+          <div className="mt-3 h-1.5 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600" />
         </div>
-        <div className="rounded-2xl border border-white/8 bg-slate-800/60 p-4">
-          <div className="text-xs text-slate-400 mb-1">Net Payroll</div>
-          <div className="text-2xl font-black text-emerald-400 font-mono">{fmt(summary.totalNet)}</div>
-          <div className="mt-2 h-1 w-8 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600" />
+        {/* Net Payroll */}
+        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/25">
+              <Banknote className="size-4.5 text-emerald-300" />
+            </div>
+            <span className="text-xs font-medium text-emerald-300/80 uppercase tracking-wider">Net Payroll</span>
+          </div>
+          <div className="text-2xl font-black text-emerald-300 font-mono">{fmt(summary.totalNet)}</div>
+          <div className="mt-3 h-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600" />
         </div>
-        <div className="rounded-2xl border border-white/8 bg-slate-800/60 p-4">
-          <div className="text-xs text-slate-400 mb-1">Total Bonuses</div>
-          <div className="text-2xl font-black text-amber-400 font-mono">{fmt(summary.totalBonus)}</div>
-          <div className="mt-2 h-1 w-8 rounded-full bg-gradient-to-r from-amber-500 to-orange-600" />
+        {/* Total Bonuses */}
+        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5">
+          <div className="flex items-center gap-2.5 mb-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/25">
+              <TrendingUp className="size-4.5 text-amber-300" />
+            </div>
+            <span className="text-xs font-medium text-amber-300/80 uppercase tracking-wider">Total Bonuses</span>
+          </div>
+          <div className="text-2xl font-black text-amber-300 font-mono">{fmt(summary.totalBonus)}</div>
+          <div className="mt-3 h-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-600" />
         </div>
       </div>
 
       {/* Chart */}
       {monthly.length > 0 && (
-        <div className="rounded-2xl border border-white/8 bg-slate-800/60 p-5">
-          <h3 className="text-sm font-semibold text-slate-300 mb-4">Monthly Net Payroll Trend</h3>
+        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/20">
+              <TrendingUp className="size-3.5 text-emerald-400" />
+            </div>
+            <h3 className="text-sm font-semibold text-emerald-300">Monthly Net Payroll Trend</h3>
+          </div>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={monthly} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
@@ -273,68 +302,68 @@ export default function AdminPayrollTab() {
       {loading ? (
         <div className="py-20 text-center text-slate-400 animate-pulse">Loading payroll…</div>
       ) : records.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-white/10 py-20 text-center text-slate-400">
-          <DollarSign className="size-10 mx-auto mb-3 opacity-30" />
-          <p className="text-base font-medium">No payroll records for {monthLabel(month)}.</p>
-          <p className="text-xs mt-1">Click "Generate Payroll" to create draft records for all active employees.</p>
+        <div className="rounded-2xl border border-dashed border-emerald-500/20 bg-emerald-500/3 py-20 text-center">
+          <DollarSign className="size-10 mx-auto mb-3 text-emerald-500/50" />
+          <p className="text-base font-semibold text-slate-200">No payroll records for {monthLabel(month)}.</p>
+          <p className="text-sm mt-1 text-slate-400">Click "Generate Payroll" to create draft records for all active employees.</p>
         </div>
       ) : (
-        <div className="rounded-2xl border border-white/8 overflow-x-auto">
+        <div className="rounded-2xl border border-white/10 overflow-x-auto">
           <table className="w-full text-sm min-w-[960px]">
             <thead>
-              <tr className="border-b border-white/8 bg-slate-800/40">
+              <tr className="border-b border-white/10 bg-gradient-to-r from-slate-700/60 to-slate-800/60">
                 {["Employee","Base","Allowances","Deductions","Bonus","Gross","Net Pay","Status",""].map((h, i) => (
-                  <th key={i} className="px-4 py-3 text-left text-[10px] uppercase tracking-wider text-slate-400 font-semibold whitespace-nowrap">{h}</th>
+                  <th key={i} className="px-4 py-3.5 text-left text-[10px] uppercase tracking-wider text-slate-300 font-bold whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-white/6">
               {records.map((rec) => {
                 const status = STATUS_MAP[rec.status] ?? STATUS_MAP.draft;
-                const roleColor = ROLE_COLORS[rec.employeeRole] ?? "text-slate-400";
+                const roleColor = ROLE_COLORS[rec.employeeRole] ?? "text-slate-300";
                 const initials = rec.employeeName.split(" ").map((p: string) => p[0] ?? "").join("").slice(0, 2).toUpperCase();
                 return (
-                  <tr key={rec.id} className="hover:bg-white/2 transition-colors">
-                    <td className="px-4 py-3">
+                  <tr key={rec.id} className="hover:bg-white/4 transition-colors">
+                    <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-indigo-500/20 bg-gradient-to-br from-indigo-500/25 to-violet-500/25 text-white text-xs font-bold">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-indigo-400/30 bg-gradient-to-br from-indigo-500/30 to-violet-500/30 text-indigo-200 text-xs font-bold">
                           {initials}
                         </div>
                         <div>
-                          <p className="text-white font-medium">{rec.employeeName}</p>
-                          <p className={cn("text-[11px] capitalize", roleColor)}>{rec.employeeRole.replace("_", " ")}</p>
+                          <p className="text-white font-semibold">{rec.employeeName}</p>
+                          <p className={cn("text-[11px] capitalize font-medium", roleColor)}>{rec.employeeRole.replace("_", " ")}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-slate-300 font-mono text-sm">{fmt(rec.baseSalary)}</td>
-                    <td className="px-4 py-3 text-slate-300 font-mono text-sm">
+                    <td className="px-4 py-3.5 text-slate-200 font-mono text-sm">{fmt(rec.baseSalary)}</td>
+                    <td className="px-4 py-3.5 text-slate-200 font-mono text-sm">
                       {fmt(rec.totalAllowances)}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3.5">
                       {rec.totalDeductions > 0 ? (
-                        <p className="text-red-400 font-mono text-sm">-{fmt(rec.totalDeductions)}</p>
+                        <p className="text-red-300 font-mono text-sm font-medium">-{fmt(rec.totalDeductions)}</p>
                       ) : (
                         <p className="text-slate-500 text-sm">—</p>
                       )}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3.5">
                       {rec.bonus > 0 ? (
-                        <p className="text-amber-400 font-mono text-sm">+{fmt(rec.bonus)}</p>
+                        <p className="text-amber-300 font-mono text-sm font-medium">+{fmt(rec.bonus)}</p>
                       ) : (
                         <p className="text-slate-500 text-sm">—</p>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-slate-200 font-mono text-sm">{fmt(rec.grossPay)}</td>
-                    <td className="px-4 py-3">
-                      <p className="text-emerald-400 font-mono font-semibold">{fmt(rec.netPay)}</p>
+                    <td className="px-4 py-3.5 text-white font-mono text-sm font-medium">{fmt(rec.grossPay)}</td>
+                    <td className="px-4 py-3.5">
+                      <p className="text-emerald-300 font-mono font-bold">{fmt(rec.netPay)}</p>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium", status.bg, status.color)}>{status.label}</span>
-                      {rec.paidAt && <p className="text-[10px] text-slate-500 mt-0.5">{new Date(rec.paidAt).toLocaleDateString()}</p>}
+                    <td className="px-4 py-3.5">
+                      <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold", status.bg, status.color)}>{status.label}</span>
+                      {rec.paidAt && <p className="text-[10px] text-slate-400 mt-1">{new Date(rec.paidAt).toLocaleDateString()}</p>}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3.5 text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="inline-flex items-center justify-center size-8 rounded-lg hover:bg-white/8 text-slate-400 hover:text-white transition-colors">
+                        <DropdownMenuTrigger className="inline-flex items-center justify-center size-8 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors">
                           <MoreHorizontal className="size-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-slate-800 border-white/10 text-slate-200 w-48">

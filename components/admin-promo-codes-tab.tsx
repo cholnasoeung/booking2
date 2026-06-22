@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Edit, Trash2, CheckCircle, XCircle, Tag, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { confirmDelete } from "@/lib/swal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -138,7 +139,7 @@ export default function AdminPromoCodesTab() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this promo code?")) return;
+    if (!(await confirmDelete("this promo code"))) return;
 
     try {
       const response = await fetch(`/api/admin/promo-codes/${id}`, {

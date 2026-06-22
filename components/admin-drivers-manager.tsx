@@ -7,6 +7,7 @@ import {
   Calendar, CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { confirmDelete } from "@/lib/swal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -213,6 +214,7 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
   // ── Delete driver ──
   async function handleDelete() {
     if (!deleteTarget) return;
+    if (!(await confirmDelete(deleteTarget.name ?? "this driver"))) return;
     setDeleting(true);
     try {
       const res = await fetch(`/api/admin/drivers/${deleteTarget.id}`, { method: "DELETE" });
