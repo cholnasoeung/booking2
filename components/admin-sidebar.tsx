@@ -73,13 +73,15 @@ const navSections = [
   },
 ];
 
-type AdminSidebarProps = { userName: string; userEmail: string };
+type AdminSidebarProps = { userName: string; userEmail?: string };
 
-export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
+export default function AdminSidebar({ userName }: AdminSidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
+    new Set(navSections.map((s) => s.title))
+  );
   const activeTab = searchParams?.get("tab") ?? "overview";
 
   const userInitials = userName
@@ -137,24 +139,29 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+        <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-0 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
           {navSections.map((section, si) => {
             const isCollapsed = collapsedSections.has(section.title);
             return (
-              <div key={section.title} className={si > 0 ? "mt-5" : ""}>
-                {/* Section label */}
+              <div key={section.title} className={si > 0 ? "mt-1.5" : ""}>
+                {/* Separator between sections */}
+                {si > 0 && <div className="mb-1.5 border-t border-white/10" />}
+
+                {/* Section header button */}
                 <button
                   onClick={() => toggleSection(section.title)}
                   className={cn(
-                    "w-full flex items-center justify-between px-3 mb-1.5",
-                    "text-[10px] font-bold uppercase tracking-widest transition-colors",
-                    section.accent, "hover:text-white/70"
+                    "w-full flex items-center justify-between px-3.5 py-3 rounded-xl mb-1 transition-all duration-200",
+                    "text-xs font-bold uppercase tracking-wider",
+                    isCollapsed
+                      ? "bg-white/5 text-slate-400 hover:bg-white/8 hover:text-slate-200"
+                      : "bg-white/10 text-white"
                   )}
                 >
                   <span>{section.title}</span>
                   <ChevronDown className={cn(
-                    "size-3 transition-transform duration-200",
-                    isCollapsed && "-rotate-90"
+                    "size-3.5 transition-transform duration-200",
+                    isCollapsed ? "-rotate-90" : "rotate-0"
                   )} />
                 </button>
 
@@ -168,7 +175,7 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
                       href={item.href}
                       onClick={() => setMobileMenuOpen(false)}
                       className={cn(
-                        "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 mb-0.5 transition-all duration-200",
+                        "group relative flex items-center gap-3 rounded-xl px-3 py-3.5 mb-1 transition-all duration-200",
                         isActive
                           ? "bg-white/10 text-white shadow-sm"
                           : "text-slate-400 hover:bg-white/5 hover:text-white"
@@ -177,20 +184,20 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
                       {/* Active left bar */}
                       {isActive && (
                         <div className={cn(
-                          "absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-gradient-to-b",
+                          "absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 rounded-r-full bg-gradient-to-b",
                           item.gradient
                         )} />
                       )}
 
                       {/* Icon with gradient */}
                       <div className={cn(
-                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200",
+                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-200",
                         isActive
                           ? `bg-gradient-to-br ${item.gradient} shadow-md`
                           : `bg-white/5 group-hover:bg-gradient-to-br group-hover:${item.gradient}`
                       )}>
                         <item.icon className={cn(
-                          "size-4 transition-colors",
+                          "size-5 transition-colors",
                           isActive ? "text-white" : "text-slate-400 group-hover:text-white"
                         )} />
                       </div>
