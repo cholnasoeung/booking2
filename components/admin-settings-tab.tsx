@@ -193,7 +193,7 @@ export default function AdminSettingsTab() {
     }
   }
 
-  async function saveSection(section: Exclude<Tab, "security">) {
+  async function saveSection(section: keyof SettingsData) {
     setSaving(true);
     setSaveError(null);
     try {

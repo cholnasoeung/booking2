@@ -256,7 +256,7 @@ export default function AdminPayrollTab() {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
               <XAxis dataKey="label" tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `$${(v/1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#f1f5f9", fontSize: 12 }} formatter={(v: number) => [`$${v.toLocaleString()}`, "Net Pay"]} />
+              <Tooltip contentStyle={{ background: "#1e293b", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#f1f5f9", fontSize: 12 }} formatter={(v) => [`$${Number(v ?? 0).toLocaleString()}`, "Net Pay"]} />
               <Bar dataKey="totalNet" name="Net Pay" fill="url(#payrollGradient)" radius={[6, 6, 0, 0]} maxBarSize={40} />
               <defs>
                 <linearGradient id="payrollGradient" x1="0" y1="0" x2="0" y2="1">

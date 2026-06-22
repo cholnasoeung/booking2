@@ -102,7 +102,7 @@ function EarningFormFields({ form, onChange, drivers, buses }: {
           <Label>Driver *</Label>
           <Select
             value={form.driverId}
-            onValueChange={(v) => onChange("driverId", v)}
+            onValueChange={(v) => onChange("driverId", v ?? "")}
           >
             <SelectTrigger><SelectValue placeholder="Select driver" /></SelectTrigger>
             <SelectContent>
@@ -114,7 +114,7 @@ function EarningFormFields({ form, onChange, drivers, buses }: {
           <Label>Vehicle <span className="text-slate-400 font-normal">(optional)</span></Label>
           <Select
             value={form.busDetailId}
-            onValueChange={(v) => onChange("busDetailId", v)}
+            onValueChange={(v) => onChange("busDetailId", v ?? "")}
           >
             <SelectTrigger><SelectValue placeholder="Not specified" /></SelectTrigger>
             <SelectContent>
@@ -171,7 +171,7 @@ function EarningFormFields({ form, onChange, drivers, buses }: {
         </div>
         <div className="space-y-1.5">
           <Label>Overtime Multiplier</Label>
-          <Select value={form.overtimeRate} onValueChange={(v) => onChange("overtimeRate", v)}>
+          <Select value={form.overtimeRate} onValueChange={(v) => onChange("overtimeRate", v ?? "")}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="1.25">1.25× (25% extra)</SelectItem>
@@ -235,7 +235,7 @@ export default function AdminDriverEarningsTab() {
   const [formError, setFormError] = useState("");
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback]   = useState<{ kind: "success" | "error"; msg: string } | null>(null);
-  const fbTimer = useRef<ReturnType<typeof setTimeout>>();
+  const fbTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const flash = (kind: "success" | "error", msg: string) => {
     clearTimeout(fbTimer.current);
@@ -426,7 +426,7 @@ export default function AdminDriverEarningsTab() {
                 <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#94a3b8" }} />
                 <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickFormatter={(v) => `$${v}`} />
                 <Tooltip
-                  formatter={(v: number, name: string) => [`$${v.toFixed(2)}`, name === "regular" ? "Regular" : "Overtime"]}
+                  formatter={(v, name) => [`$${Number(v ?? 0).toFixed(2)}`, name === "regular" ? "Regular" : "Overtime"]}
                   contentStyle={{ borderRadius: 10, border: "1px solid #e2e8f0", fontSize: 12 }}
                 />
                 <Legend formatter={(v) => v === "regular" ? "Regular" : "Overtime"} />
@@ -468,7 +468,7 @@ export default function AdminDriverEarningsTab() {
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <ListFilter className="size-4 text-slate-400 shrink-0" />
 
-        <Select value={filterDriver} onValueChange={(v) => { setFD(v === "_all" ? "" : v); setPage(1); }}>
+        <Select value={filterDriver} onValueChange={(v) => { setFD(v == null || v === "_all" ? "" : v); setPage(1); }}>
           <SelectTrigger className="h-9 w-44">
             <SelectValue placeholder="All drivers" />
           </SelectTrigger>
@@ -564,10 +564,8 @@ export default function AdminDriverEarningsTab() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-700">
-                            <MoreVertical className="size-4" />
-                          </Button>
+                        <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none">
+                          <MoreVertical className="size-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-36">
                           <DropdownMenuItem onClick={() => openEdit(e)} className="gap-2">

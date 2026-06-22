@@ -90,7 +90,7 @@ function FuelFormFields({
       {/* Vehicle */}
       <div className="col-span-2 sm:col-span-1 space-y-1.5">
         <Label>Vehicle *</Label>
-        <Select value={form.busDetailId} onValueChange={(v) => onChange("busDetailId", v)}>
+        <Select value={form.busDetailId} onValueChange={(v) => onChange("busDetailId", v ?? "")}>
           <SelectTrigger><SelectValue placeholder="Select vehicle" /></SelectTrigger>
           <SelectContent>
             {buses.map((b) => (
@@ -105,7 +105,7 @@ function FuelFormFields({
       {/* Driver */}
       <div className="col-span-2 sm:col-span-1 space-y-1.5">
         <Label>Driver *</Label>
-        <Select value={form.driverId} onValueChange={(v) => onChange("driverId", v)}>
+        <Select value={form.driverId} onValueChange={(v) => onChange("driverId", v ?? "")}>
           <SelectTrigger><SelectValue placeholder="Select driver" /></SelectTrigger>
           <SelectContent>
             {drivers.map((d) => (
@@ -212,7 +212,7 @@ export default function AdminFuelLogsTab() {
   const [formError, setFormError] = useState("");
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<{ kind: "success" | "error"; msg: string } | null>(null);
-  const feedbackTimer = useRef<ReturnType<typeof setTimeout>>();
+  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const showFeedback = (kind: "success" | "error", msg: string) => {
     clearTimeout(feedbackTimer.current);
@@ -408,7 +408,7 @@ export default function AdminFuelLogsTab() {
               <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#94a3b8" }} />
               <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickFormatter={(v) => `$${v}`} />
               <Tooltip
-                formatter={(v: number) => [`$${v.toFixed(2)}`, "Cost"]}
+                formatter={(v) => [`$${Number(v ?? 0).toFixed(2)}`, "Cost"]}
                 contentStyle={{ borderRadius: 10, border: "1px solid #e2e8f0", fontSize: 12 }}
               />
               <Bar dataKey="totalCost" fill="url(#fuelGrad)" radius={[6, 6, 0, 0]} />
@@ -427,7 +427,7 @@ export default function AdminFuelLogsTab() {
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <ListFilter className="size-4 text-slate-400 shrink-0" />
 
-        <Select value={filterBus} onValueChange={(v) => { setFilterBus(v === "_all" ? "" : v); setPage(1); }}>
+        <Select value={filterBus} onValueChange={(v) => { setFilterBus(v == null || v === "_all" ? "" : v); setPage(1); }}>
           <SelectTrigger className="h-9 w-52">
             <SelectValue placeholder="All vehicles" />
           </SelectTrigger>
@@ -437,7 +437,7 @@ export default function AdminFuelLogsTab() {
           </SelectContent>
         </Select>
 
-        <Select value={filterDriver} onValueChange={(v) => { setFilterDriver(v === "_all" ? "" : v); setPage(1); }}>
+        <Select value={filterDriver} onValueChange={(v) => { setFilterDriver(v == null || v === "_all" ? "" : v); setPage(1); }}>
           <SelectTrigger className="h-9 w-44">
             <SelectValue placeholder="All drivers" />
           </SelectTrigger>
@@ -527,10 +527,8 @@ export default function AdminFuelLogsTab() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-700">
-                            <MoreVertical className="size-4" />
-                          </Button>
+                        <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none">
+                          <MoreVertical className="size-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-36">
                           <DropdownMenuItem onClick={() => openEdit(log)} className="gap-2">

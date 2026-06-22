@@ -105,7 +105,7 @@ function MaintenanceFormFields({ form, onChange, buses }: {
       <div className="grid grid-cols-3 gap-4">
         <div className="space-y-1.5">
           <Label>Vehicle *</Label>
-          <Select value={form.busDetailId} onValueChange={(v) => onChange("busDetailId", v)}>
+          <Select value={form.busDetailId} onValueChange={(v) => onChange("busDetailId", v ?? "")}>
             <SelectTrigger><SelectValue placeholder="Select vehicle" /></SelectTrigger>
             <SelectContent>
               {buses.map((b) => (
@@ -116,7 +116,7 @@ function MaintenanceFormFields({ form, onChange, buses }: {
         </div>
         <div className="space-y-1.5">
           <Label>Type *</Label>
-          <Select value={form.maintenanceType} onValueChange={(v) => onChange("maintenanceType", v)}>
+          <Select value={form.maintenanceType} onValueChange={(v) => onChange("maintenanceType", v ?? "")}>
             <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
             <SelectContent>
               {Object.entries(TYPES).map(([k, v]) => (
@@ -127,7 +127,7 @@ function MaintenanceFormFields({ form, onChange, buses }: {
         </div>
         <div className="space-y-1.5">
           <Label>Status *</Label>
-          <Select value={form.status} onValueChange={(v) => onChange("status", v)}>
+          <Select value={form.status} onValueChange={(v) => onChange("status", v ?? "")}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="completed">Completed</SelectItem>
@@ -229,7 +229,7 @@ export default function AdminMaintenanceTab() {
   const [formError, setFormError] = useState("");
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback]   = useState<{ kind: "success" | "error"; msg: string } | null>(null);
-  const fbTimer = useRef<ReturnType<typeof setTimeout>>();
+  const fbTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const flash = (kind: "success" | "error", msg: string) => {
     clearTimeout(fbTimer.current);
@@ -402,7 +402,7 @@ export default function AdminMaintenanceTab() {
                 <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#94a3b8" }} />
                 <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickFormatter={(v) => `$${v}`} />
                 <Tooltip
-                  formatter={(v: number) => [`$${v.toFixed(2)}`, "Cost"]}
+                  formatter={(v) => [`$${Number(v ?? 0).toFixed(2)}`, "Cost"]}
                   contentStyle={{ borderRadius: 10, border: "1px solid #e2e8f0", fontSize: 12 }}
                 />
                 <Bar dataKey="total" fill="url(#maintGrad)" radius={[6, 6, 0, 0]} />
@@ -479,14 +479,14 @@ export default function AdminMaintenanceTab() {
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <ListFilter className="size-4 text-slate-400 shrink-0" />
-        <Select value={filterBus} onValueChange={(v) => { setFB(v === "_all" ? "" : v); setPage(1); }}>
+        <Select value={filterBus} onValueChange={(v) => { setFB(v == null || v === "_all" ? "" : v); setPage(1); }}>
           <SelectTrigger className="h-9 w-52"><SelectValue placeholder="All vehicles" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="_all">All vehicles</SelectItem>
             {buses.map((b) => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}
           </SelectContent>
         </Select>
-        <Select value={filterType} onValueChange={(v) => { setFT(v === "_all" ? "" : v); setPage(1); }}>
+        <Select value={filterType} onValueChange={(v) => { setFT(v == null || v === "_all" ? "" : v); setPage(1); }}>
           <SelectTrigger className="h-9 w-44"><SelectValue placeholder="All types" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="_all">All types</SelectItem>
@@ -579,10 +579,8 @@ export default function AdminMaintenanceTab() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-700">
-                              <MoreVertical className="size-4" />
-                            </Button>
+                          <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none">
+                            <MoreVertical className="size-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-36">
                             <DropdownMenuItem onClick={() => openEdit(r)} className="gap-2">

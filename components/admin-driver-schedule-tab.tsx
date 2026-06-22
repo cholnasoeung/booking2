@@ -144,10 +144,8 @@ function ScheduleCard({
 
         {/* Actions */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0 -mt-0.5 -mr-0.5 text-slate-400 hover:text-slate-700">
-              <MoreVertical className="size-3.5" />
-            </Button>
+          <DropdownMenuTrigger className="inline-flex h-6 w-6 shrink-0 -mt-0.5 -mr-0.5 items-center justify-center rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none">
+            <MoreVertical className="size-3.5" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
             <DropdownMenuItem onClick={() => onStatus(schedule.id, "active")}
@@ -201,7 +199,7 @@ function ScheduleFormFields({ form, onChange, drivers, buses, trips }: {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label>Driver *</Label>
-          <Select value={form.driverId} onValueChange={(v) => onChange("driverId", v)}>
+          <Select value={form.driverId} onValueChange={(v) => onChange("driverId", v ?? "")}>
             <SelectTrigger><SelectValue placeholder="Select driver" /></SelectTrigger>
             <SelectContent>
               {drivers.map((d) => (
@@ -215,7 +213,7 @@ function ScheduleFormFields({ form, onChange, drivers, buses, trips }: {
         </div>
         <div className="space-y-1.5">
           <Label>Vehicle *</Label>
-          <Select value={form.busDetailId} onValueChange={(v) => onChange("busDetailId", v)}>
+          <Select value={form.busDetailId} onValueChange={(v) => onChange("busDetailId", v ?? "")}>
             <SelectTrigger><SelectValue placeholder="Select vehicle" /></SelectTrigger>
             <SelectContent>
               {buses.map((b) => (
@@ -246,7 +244,7 @@ function ScheduleFormFields({ form, onChange, drivers, buses, trips }: {
       {trips.length > 0 && (
         <div className="space-y-1.5">
           <Label>Link to Trip <span className="text-slate-400 font-normal">(optional)</span></Label>
-          <Select value={form.busId} onValueChange={(v) => onChange("busId", v === "_none" ? "" : v)}>
+          <Select value={form.busId} onValueChange={(v) => onChange("busId", v == null || v === "_none" ? "" : v)}>
             <SelectTrigger><SelectValue placeholder="No specific trip" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="_none">No specific trip</SelectItem>
@@ -282,7 +280,7 @@ export default function AdminDriverScheduleTab() {
   const [formError, setFormError] = useState("");
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback]   = useState<{ kind: "success" | "error"; msg: string } | null>(null);
-  const fbTimer = useRef<ReturnType<typeof setTimeout>>();
+  const fbTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const flash = (kind: "success" | "error", msg: string) => {
     clearTimeout(fbTimer.current);
@@ -631,10 +629,8 @@ export default function AdminDriverScheduleTab() {
                         </td>
                         <td className="px-4 py-3 text-right">
                           <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-700">
-                                <MoreVertical className="size-4" />
-                              </Button>
+                            <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors focus:outline-none">
+                              <MoreVertical className="size-4" />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-40">
                               <DropdownMenuItem onClick={() => handleStatus(s.id, "active")} className="gap-2 text-emerald-700">
