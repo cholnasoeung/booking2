@@ -174,23 +174,43 @@ export async function POST(request: Request) {
       blockedSeats,
       amenities,
     });
-    const conflictingBuses = await BusModel.find({
-      routeId,
-      departureTime,
-      date: { $in: travelDates },
-    }).lean();
+    // Only block if the same vehicle or driver is already assigned at an overlapping time.
+    // Multiple buses on the same route at the same time are allowed as long as
+    // each uses a different vehicle and a different driver.
+    if (busDetailReference) {
+      const vehicleConflict = await BusModel.findOne({
+        busDetailId: busDetailReference,
+        date: { $in: travelDates },
+        departureTime: { $lt: arrivalTime },
+        arrivalTime: { $gt: departureTime },
+      }).lean();
 
-    if (conflictingBuses.length > 0) {
-      const conflictDates = conflictingBuses
-        .map((conflict) => formatDateInput(conflict.date))
-        .join(", ");
+      if (vehicleConflict) {
+        return Response.json(
+          {
+            message: `This vehicle is already assigned to another departure on ${formatDateInput(vehicleConflict.date)} at ${vehicleConflict.departureTime}.`,
+          },
+          { status: 409 }
+        );
+      }
+    }
 
-      return Response.json(
-        {
-          message: `A bus already exists for ${conflictDates} at that departure time.`,
-        },
-        { status: 409 }
-      );
+    if (driverReference) {
+      const driverConflict = await BusModel.findOne({
+        driverId: driverReference,
+        date: { $in: travelDates },
+        departureTime: { $lt: arrivalTime },
+        arrivalTime: { $gt: departureTime },
+      }).lean();
+
+      if (driverConflict) {
+        return Response.json(
+          {
+            message: `This driver is already assigned to another departure on ${formatDateInput(driverConflict.date)} at ${driverConflict.departureTime}.`,
+          },
+          { status: 409 }
+        );
+      }
     }
 
     const createdBuses = await BusModel.insertMany(

@@ -83,6 +83,10 @@ export default function AdminBusDialog({
     text: string;
   } | null>(null);
   const [form, setForm] = useState<BusFormState>(() => createFormState(routes, bus));
+  const [busyBusDetailIds, setBusyBusDetailIds] = useState<Set<string>>(new Set());
+  const [busyDriverIds, setBusyDriverIds] = useState<Set<string>>(new Set());
+  const [conflictInfo, setConflictInfo] = useState<Record<string, string>>({});
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -94,6 +98,9 @@ export default function AdminBusDialog({
     setIsPending(false);
     setIsSavingTemplate(false);
     setTemplateSaveState(null);
+    setBusyBusDetailIds(new Set());
+    setBusyDriverIds(new Set());
+    setConflictInfo({});
   }, [bus, open, routes]);
 
   useEffect(() => {
@@ -177,7 +184,57 @@ export default function AdminBusDialog({
     };
   }, []);
 
+  // Fetch availability whenever date/time changes
+  useEffect(() => {
+    if (!form.date || !form.departureTime || !form.arrivalTime) {
+      setBusyBusDetailIds(new Set());
+      setBusyDriverIds(new Set());
+      setConflictInfo({});
+      return;
+    }
+
+    let mounted = true;
+    const controller = new AbortController();
+    setAvailabilityLoading(true);
+
+    const params = new URLSearchParams({
+      date: form.date,
+      departureTime: form.departureTime,
+      arrivalTime: form.arrivalTime,
+    });
+    if (form.endDate && form.endDate >= form.date) {
+      params.set("endDate", form.endDate);
+    }
+    if (bus?.id) {
+      params.set("excludeId", bus.id);
+    }
+
+    fetch(`/api/admin/buses/availability?${params.toString()}`, {
+      signal: controller.signal,
+    })
+      .then((r) => (r.ok ? r.json() : { busyBusDetailIds: [], busyDriverIds: [], conflictInfo: {} }))
+      .then((data) => {
+        if (mounted) {
+          setBusyBusDetailIds(new Set(data.busyBusDetailIds ?? []));
+          setBusyDriverIds(new Set(data.busyDriverIds ?? []));
+          setConflictInfo(data.conflictInfo ?? {});
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (mounted) setAvailabilityLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+      controller.abort();
+    };
+  }, [form.date, form.endDate, form.departureTime, form.arrivalTime, bus?.id]);
+
   const layoutValidation = getLayoutValidation(form.seatLayout, bus?.bookedSeats ?? []);
+  const hasConflict =
+    (Boolean(form.busDetailId) && busyBusDetailIds.has(form.busDetailId!)) ||
+    (Boolean(form.driverId) && busyDriverIds.has(form.driverId!));
   const isEditing = Boolean(bus);
   const selectedBusDetail =
     busDetails.find((detail) => detail.id === form.busDetailId) ?? null;
@@ -484,7 +541,8 @@ export default function AdminBusDialog({
             <div className="flex items-center justify-between">
               <Label className="text-sm font-semibold">Assigned Bus Detail</Label>
               <span className="text-xs text-slate-400">
-                {busDetails.length} vehicle{busDetails.length === 1 ? "" : "s"} available
+                {busDetails.length - busyBusDetailIds.size} of {busDetails.length} vehicle{busDetails.length === 1 ? "" : "s"} free
+                {availabilityLoading && " · checking…"}
               </span>
             </div>
             <Select
@@ -518,22 +576,40 @@ export default function AdminBusDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">Unassigned</SelectItem>
-                {busDetails.map((detail) => (
-                  <SelectItem key={detail.id} value={detail.id}>
-                    {detail.name} · {detail.registrationNumber}
-                  </SelectItem>
-                ))}
+                {busDetails.map((detail) => {
+                  const isBusy = busyBusDetailIds.has(detail.id);
+                  return (
+                    <SelectItem key={detail.id} value={detail.id} disabled={isBusy}>
+                      {detail.name} · {detail.registrationNumber}
+                      {isBusy && (
+                        <span className="ml-2 text-[10px] font-bold text-red-500">
+                          · Busy{conflictInfo[detail.id] ? ` ${conflictInfo[detail.id]}` : ""}
+                        </span>
+                      )}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
+            {form.busDetailId && busyBusDetailIds.has(form.busDetailId) && (
+              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[11px] font-medium text-red-700">
+                ⚠ This vehicle is already assigned to another departure at this time. Change the time or select a different vehicle.
+              </p>
+            )}
+            {busyBusDetailIds.size > 0 && !busyBusDetailIds.has(form.busDetailId ?? "") && (
+              <p className="text-[11px] font-medium text-amber-600">
+                {busyBusDetailIds.size} vehicle{busyBusDetailIds.size !== 1 ? "s are" : " is"} unavailable at this time slot
+              </p>
+            )}
             {busDetailsLoading ? (
               <p className="text-[11px] text-slate-500">Loading vehicles…</p>
             ) : busDetailsError ? (
               <p className="text-[11px] text-red-600">{busDetailsError}</p>
-            ) : (
+            ) : busyBusDetailIds.size === 0 ? (
               <p className="text-[11px] text-slate-500">
                 Pick a saved vehicle so passengers see a consistent fleet.
               </p>
-            )}
+            ) : null}
           </div>
 
           {/* Bus Type and Price */}
@@ -589,9 +665,15 @@ export default function AdminBusDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="bus-driver" className="text-sm font-semibold">
-              Assigned driver
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="bus-driver" className="text-sm font-semibold">
+                Assigned driver
+              </Label>
+              <span className="text-xs text-slate-400">
+                {drivers.length - busyDriverIds.size} of {drivers.length} driver{drivers.length === 1 ? "" : "s"} free
+                {availabilityLoading && " · checking…"}
+              </span>
+            </div>
             <Select
               value={form.driverId}
               onValueChange={(value) =>
@@ -609,13 +691,31 @@ export default function AdminBusDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">Unassigned</SelectItem>
-                {drivers.map((driver) => (
-                  <SelectItem key={driver.id} value={driver.id}>
-                    {driver.name} · {driver.phone}
-                  </SelectItem>
-                ))}
+                {drivers.map((driver) => {
+                  const isBusy = busyDriverIds.has(driver.id);
+                  return (
+                    <SelectItem key={driver.id} value={driver.id} disabled={isBusy}>
+                      {driver.name} · {driver.phone}
+                      {isBusy && (
+                        <span className="ml-2 text-[10px] font-bold text-red-500">
+                          · Busy{conflictInfo[driver.id] ? ` ${conflictInfo[driver.id]}` : ""}
+                        </span>
+                      )}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
+            {form.driverId && busyDriverIds.has(form.driverId) && (
+              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[11px] font-medium text-red-700">
+                ⚠ This driver is already assigned to another departure at this time. Change the time or select a different driver.
+              </p>
+            )}
+            {busyDriverIds.size > 0 && !busyDriverIds.has(form.driverId ?? "") && (
+              <p className="text-[11px] font-medium text-amber-600">
+                {busyDriverIds.size} driver{busyDriverIds.size !== 1 ? "s are" : " is"} unavailable at this time slot
+              </p>
+            )}
             <p className="text-[11px] text-slate-500">
               {driversLoading
                 ? "Loading driver roster…"
@@ -814,7 +914,7 @@ export default function AdminBusDialog({
             <Button
               type="submit"
               className="h-11 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 shadow-lg hover:shadow-xl transition-all"
-              disabled={isPending || Boolean(layoutValidation)}
+              disabled={isPending || Boolean(layoutValidation) || hasConflict}
             >
               {isPending
                 ? isEditing

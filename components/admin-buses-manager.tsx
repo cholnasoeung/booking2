@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  BusFront, Navigation, PencilLine, Plus, Search, Trash2, UserCheck, MoreVertical,
+  BusFront, Navigation, PencilLine, Plus, Search, Trash2, UserCheck,
   CheckSquare2, Square, X, AlertTriangle, ChevronDown, ChevronRight,
-  LayoutList, Layers,
+  LayoutList, Layers, Clock, Bus, User,
 } from "lucide-react";
 
 import AdminBusDialog from "@/components/admin-bus-dialog";
@@ -16,10 +16,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -137,32 +133,59 @@ export default function AdminBusesManager({
     });
   }
 
-  // Build route groups from all visible buses (not just current page)
+  // Build route → time-slot groups from all visible buses
+  type TimeSlotGroup = {
+    slotKey: string;       // "08:00|||14:00"
+    departureTime: string;
+    arrivalTime: string;
+    buses: BusSummary[];
+  };
   type RouteGroup = {
     key: string;
     from: string;
     to: string;
-    buses: BusSummary[];
+    timeSlots: TimeSlotGroup[];
     seatsLeft: number;
     totalSeats: number;
+    totalBuses: number;
     dateMin: string;
     dateMax: string;
   };
   const routeGroups: RouteGroup[] = (() => {
-    const map = new Map<string, RouteGroup>();
+    const routeMap = new Map<string, RouteGroup>();
     for (const bus of visibleBuses) {
-      const key = `${bus.from}|||${bus.to}`;
-      if (!map.has(key)) {
-        map.set(key, { key, from: bus.from, to: bus.to, buses: [], seatsLeft: 0, totalSeats: 0, dateMin: bus.travelDate, dateMax: bus.travelDate });
+      const routeKey = `${bus.from}|||${bus.to}`;
+      if (!routeMap.has(routeKey)) {
+        routeMap.set(routeKey, {
+          key: routeKey, from: bus.from, to: bus.to,
+          timeSlots: [], seatsLeft: 0, totalSeats: 0, totalBuses: 0,
+          dateMin: bus.travelDate, dateMax: bus.travelDate,
+        });
       }
-      const g = map.get(key)!;
-      g.buses.push(bus);
-      g.seatsLeft  += bus.seatsLeft;
-      g.totalSeats += bus.totalSeats;
-      if (bus.travelDate < g.dateMin) g.dateMin = bus.travelDate;
-      if (bus.travelDate > g.dateMax) g.dateMax = bus.travelDate;
+      const rg = routeMap.get(routeKey)!;
+      rg.seatsLeft  += bus.seatsLeft;
+      rg.totalSeats += bus.totalSeats;
+      rg.totalBuses += 1;
+      if (bus.travelDate < rg.dateMin) rg.dateMin = bus.travelDate;
+      if (bus.travelDate > rg.dateMax) rg.dateMax = bus.travelDate;
+
+      const slotKey = `${bus.departureTime}|||${bus.arrivalTime}`;
+      let slot = rg.timeSlots.find((s) => s.slotKey === slotKey);
+      if (!slot) {
+        slot = { slotKey, departureTime: bus.departureTime, arrivalTime: bus.arrivalTime, buses: [] };
+        rg.timeSlots.push(slot);
+      }
+      slot.buses.push(bus);
     }
-    return [...map.values()].sort((a, b) => a.from.localeCompare(b.from));
+    // Sort: route groups by from city; time slots by departure time; buses by date
+    const result = [...routeMap.values()].sort((a, b) => a.from.localeCompare(b.from));
+    for (const rg of result) {
+      rg.timeSlots.sort((a, b) => a.departureTime.localeCompare(b.departureTime));
+      for (const slot of rg.timeSlots) {
+        slot.buses.sort((a, b) => a.travelDate.localeCompare(b.travelDate));
+      }
+    }
+    return result;
   })();
 
   async function confirmBulkDelete() {
@@ -372,8 +395,8 @@ export default function AdminBusesManager({
               </p>
             </div>
           ) : groupedView ? (
-            /* ════════ GROUPED VIEW ════════ */
-            <div className="space-y-2">
+            /* ════════ GROUPED VIEW: Route → Time Slot → Buses ════════ */
+            <div className="space-y-3">
               {visibleBuses.length === 0 ? (
                 <EmptyState
                   icon={<BusFront className="size-10 text-orange-300" />}
@@ -382,37 +405,36 @@ export default function AdminBusesManager({
                 />
               ) : (
                 routeGroups.map((group) => {
-                  const isOpen    = expandedGroups.has(group.key);
-                  const groupIds  = group.buses.map((b) => b.id);
-                  const allSel    = groupIds.every((id) => selectedIds.has(id));
-                  const someSel   = groupIds.some((id)  => selectedIds.has(id));
-                  const fillPct   = group.totalSeats > 0
+                  const isOpen   = expandedGroups.has(group.key);
+                  const groupIds: string[] = group.timeSlots.flatMap((s: TimeSlotGroup) => s.buses.map((b: BusSummary) => b.id));
+                  const allSel   = groupIds.length > 0 && groupIds.every((id: string) => selectedIds.has(id));
+                  const someSel  = groupIds.some((id: string) => selectedIds.has(id));
+                  const fillPct  = group.totalSeats > 0
                     ? Math.round(((group.totalSeats - group.seatsLeft) / group.totalSeats) * 100)
                     : 0;
 
                   function toggleGroupSel() {
                     setSelectedIds((prev) => {
                       const next = new Set(prev);
-                      if (allSel) groupIds.forEach((id) => next.delete(id));
-                      else        groupIds.forEach((id) => next.add(id));
+                      if (allSel) groupIds.forEach((id: string) => next.delete(id));
+                      else        groupIds.forEach((id: string) => next.add(id));
                       return next;
                     });
                   }
 
-                  const fmt = (d: string) =>
-                    new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                  const fmtDate = (d: string) =>
+                    new Date(d + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 
                   return (
                     <div
                       key={group.key}
-                      className={`rounded-2xl border overflow-hidden transition-shadow ${isOpen ? "border-orange-300 shadow-md" : "border-orange-200/70 shadow-sm"}`}
+                      className={`rounded-2xl border overflow-hidden transition-shadow ${isOpen ? "border-orange-300 shadow-lg" : "border-orange-200/70 shadow-sm"}`}
                     >
-                      {/* Group header row */}
+                      {/* ── Route header ── */}
                       <div
-                        className={`flex items-center gap-3 px-4 py-3 cursor-pointer select-none transition-colors ${isOpen ? "bg-orange-50" : "bg-white hover:bg-orange-50/60"}`}
+                        className={`flex items-center gap-3 px-4 py-3.5 cursor-pointer select-none transition-colors ${isOpen ? "bg-gradient-to-r from-orange-50 to-red-50" : "bg-white hover:bg-orange-50/60"}`}
                         onClick={() => toggleGroup(group.key)}
                       >
-                        {/* Group checkbox */}
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); toggleGroupSel(); }}
@@ -422,35 +444,35 @@ export default function AdminBusesManager({
                             ? <CheckSquare2 className="size-4 text-orange-500" />
                             : someSel
                             ? <CheckSquare2 className="size-4 text-orange-300" />
-                            : <Square className="size-4" />
-                          }
+                            : <Square className="size-4" />}
                         </button>
 
-                        {/* Route name */}
+                        {/* Route label */}
                         <div className="flex-1 min-w-0">
                           <p className="font-bold text-slate-900 text-sm leading-tight">
                             {group.from} → {group.to}
                           </p>
                           <p className="text-[11px] text-slate-400 mt-0.5">
-                            {fmt(group.dateMin)}{group.dateMin !== group.dateMax ? ` – ${fmt(group.dateMax)}` : ""}
+                            {fmtDate(group.dateMin)}{group.dateMin !== group.dateMax ? ` – ${fmtDate(group.dateMax)}` : ""}
+                            {" · "}{group.timeSlots.length} time slot{group.timeSlots.length !== 1 ? "s" : ""}
                           </p>
                         </div>
 
-                        {/* Stats pills */}
+                        {/* Stat pills */}
                         <div className="hidden sm:flex items-center gap-2 shrink-0">
                           <span className="rounded-full bg-orange-100 border border-orange-200 px-2.5 py-0.5 text-[11px] font-bold text-orange-700">
-                            {group.buses.length} departure{group.buses.length !== 1 ? "s" : ""}
+                            {group.totalBuses} dep{group.totalBuses !== 1 ? "s" : ""}
                           </span>
                           <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold border ${
                             fillPct >= 90 ? "bg-red-50 border-red-200 text-red-700"
                             : fillPct >= 60 ? "bg-amber-50 border-amber-200 text-amber-700"
                             : "bg-emerald-50 border-emerald-200 text-emerald-700"
                           }`}>
-                            {group.seatsLeft} seats free
+                            {group.seatsLeft} free
                           </span>
                         </div>
 
-                        {/* Mini fill bar */}
+                        {/* Fill bar */}
                         <div className="hidden md:flex flex-col gap-1 w-20 shrink-0">
                           <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
                             <div
@@ -461,107 +483,193 @@ export default function AdminBusesManager({
                           <span className="text-[10px] text-slate-400 text-right">{fillPct}% full</span>
                         </div>
 
-                        {/* Expand icon */}
                         <div className="shrink-0 text-slate-400">
-                          {isOpen
-                            ? <ChevronDown className="size-4" />
-                            : <ChevronRight className="size-4" />
-                          }
+                          {isOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
                         </div>
                       </div>
 
-                      {/* Expanded rows */}
+                      {/* ── Expanded: time-slot sections ── */}
                       {isOpen && (
-                        <div className="border-t border-orange-100">
-                          <table className="w-full text-sm">
-                            <thead>
-                              <tr className="bg-orange-50/60 border-b border-orange-100">
-                                <th className="w-8 pl-12" />
-                                <th className="px-3 py-2 text-left text-[10px] font-bold text-orange-700 uppercase tracking-wider">Date</th>
-                                <th className="px-3 py-2 text-left text-[10px] font-bold text-orange-700 uppercase tracking-wider">Time</th>
-                                <th className="px-3 py-2 text-left text-[10px] font-bold text-orange-700 uppercase tracking-wider hidden sm:table-cell">Type</th>
-                                <th className="px-3 py-2 text-left text-[10px] font-bold text-orange-700 uppercase tracking-wider">Fare</th>
-                                <th className="px-3 py-2 text-left text-[10px] font-bold text-orange-700 uppercase tracking-wider">Seats</th>
-                                <th className="px-3 py-2 text-left text-[10px] font-bold text-orange-700 uppercase tracking-wider">Status</th>
-                                <th className="w-8" />
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-orange-50">
-                              {group.buses.map((bus) => {
-                                const isSel = selectedIds.has(bus.id);
-                                const booked = bus.totalSeats - bus.seatsLeft;
-                                const pct = bus.totalSeats > 0 ? Math.round((booked / bus.totalSeats) * 100) : 0;
-                                return (
-                                  <tr
-                                    key={bus.id}
-                                    className={`transition-colors group/row ${isSel ? "bg-orange-50/80" : "hover:bg-orange-50/40"}`}
+                        <div className="border-t border-orange-100 divide-y divide-orange-100/70">
+                          {group.timeSlots.map((slot) => {
+                            const slotIds = slot.buses.map((b) => b.id);
+                            const slotAllSel = slotIds.every((id) => selectedIds.has(id));
+                            const slotSomeSel = slotIds.some((id) => selectedIds.has(id));
+
+                            return (
+                              <div key={slot.slotKey}>
+                                {/* Time slot header */}
+                                <div className="flex items-center gap-3 bg-slate-50/80 px-4 py-2 border-b border-orange-100/60">
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedIds((prev) => {
+                                      const next = new Set(prev);
+                                      if (slotAllSel) slotIds.forEach((id) => next.delete(id));
+                                      else slotIds.forEach((id) => next.add(id));
+                                      return next;
+                                    })}
+                                    className="shrink-0 text-slate-300 hover:text-orange-500 transition-colors"
                                   >
-                                    {/* Row checkbox */}
-                                    <td className="pl-12 pr-2 py-2.5">
-                                      <button
-                                        type="button"
-                                        onClick={() => toggleOne(bus.id)}
-                                        className="text-slate-200 hover:text-orange-500 transition-colors"
-                                      >
-                                        {isSel
-                                          ? <CheckSquare2 className="size-3.5 text-orange-500" />
-                                          : <Square className="size-3.5" />
-                                        }
-                                      </button>
-                                    </td>
-                                    <td className="px-3 py-2.5 font-semibold text-slate-800 text-xs whitespace-nowrap">
-                                      {new Date(bus.travelDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
-                                    </td>
-                                    <td className="px-3 py-2.5 text-xs text-slate-600 whitespace-nowrap">
-                                      {bus.departureTime} – {bus.arrivalTime}
-                                    </td>
-                                    <td className="px-3 py-2.5 hidden sm:table-cell">
-                                      <Badge className="border-orange-200 bg-orange-100 text-orange-700 text-[10px] py-0">
-                                        {formatBusType(bus.busType)}
-                                      </Badge>
-                                    </td>
-                                    <td className="px-3 py-2.5 text-xs font-semibold text-slate-700">
-                                      {formatCurrency(bus.pricePerSeat)}
-                                    </td>
-                                    <td className="px-3 py-2.5">
-                                      <div className="flex items-center gap-1.5">
-                                        <span className="text-xs font-medium text-slate-700">{bus.seatsLeft}/{bus.totalSeats}</span>
-                                        <div className="h-1 w-12 rounded-full bg-slate-100 overflow-hidden">
-                                          <div className={`h-full rounded-full ${pct >= 90 ? "bg-red-500" : pct >= 60 ? "bg-amber-500" : "bg-emerald-500"}`}
-                                            style={{ width: `${pct}%` }} />
-                                        </div>
-                                      </div>
-                                    </td>
-                                    <td className="px-3 py-2.5">
-                                      <AvailabilityBadge bus={bus} />
-                                    </td>
-                                    <td className="pr-3 py-2.5">
-                                      <DropdownMenu>
-                                        <DropdownMenuTrigger className="inline-flex h-7 w-7 items-center justify-center rounded-lg opacity-0 group-hover/row:opacity-60 hover:!opacity-100 hover:bg-orange-100 transition-all focus:outline-none">
-                                          <MoreVertical className="size-3.5" />
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="w-44">
-                                          <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => { setSelectedBus(bus); setBusDialogOpen(true); }}>
-                                            <PencilLine className="size-4 text-orange-500" /> Edit departure
-                                          </DropdownMenuItem>
-                                          <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => { setDriverBus(bus); setSelectedDriverId((bus as any).driverId ?? ""); }}>
-                                            <UserCheck className="size-4 text-indigo-500" /> Assign driver
-                                          </DropdownMenuItem>
-                                          <DropdownMenuItem className="gap-2 cursor-pointer" onClick={() => { setStatusBus(bus); setNewStatus((bus as any).departureStatus ?? "scheduled"); setNewDelayMinutes((bus as any).delayMinutes ?? 0); setNewStatusNote((bus as any).statusNote ?? ""); }}>
-                                            <Navigation className="size-4 text-blue-500" /> Update status
-                                          </DropdownMenuItem>
-                                          <DropdownMenuSeparator />
-                                          <DropdownMenuItem className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50" onClick={() => setBusToDelete(bus)}>
-                                            <Trash2 className="size-4" /> Delete
-                                          </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                      </DropdownMenu>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
+                                    {slotAllSel
+                                      ? <CheckSquare2 className="size-3.5 text-orange-500" />
+                                      : slotSomeSel
+                                      ? <CheckSquare2 className="size-3.5 text-orange-300" />
+                                      : <Square className="size-3.5" />}
+                                  </button>
+                                  <Clock className="size-3.5 text-orange-500 shrink-0" />
+                                  <span className="text-xs font-bold text-slate-700">
+                                    {slot.departureTime} – {slot.arrivalTime}
+                                  </span>
+                                  <span className="ml-1 rounded-full bg-orange-100 border border-orange-200 px-2 py-0.5 text-[10px] font-bold text-orange-600">
+                                    {slot.buses.length} bus{slot.buses.length !== 1 ? "es" : ""}
+                                  </span>
+                                </div>
+
+                                {/* Buses table inside time slot */}
+                                <table className="w-full text-sm">
+                                  <thead>
+                                    <tr className="bg-white border-b border-slate-100">
+                                      <th className="w-9 pl-10" />
+                                      <th className="px-3 py-2 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date</th>
+                                      <th className="px-3 py-2 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                        <span className="flex items-center gap-1"><Bus className="size-3" /> Vehicle</span>
+                                      </th>
+                                      <th className="px-3 py-2 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">
+                                        <span className="flex items-center gap-1"><User className="size-3" /> Driver</span>
+                                      </th>
+                                      <th className="px-3 py-2 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider hidden sm:table-cell">Type</th>
+                                      <th className="px-3 py-2 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Fare</th>
+                                      <th className="px-3 py-2 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Seats</th>
+                                      <th className="px-3 py-2 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
+                                      <th className="w-9" />
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-50">
+                                    {slot.buses.map((bus) => {
+                                      const isSel  = selectedIds.has(bus.id);
+                                      const booked = bus.totalSeats - bus.seatsLeft;
+                                      const pct    = bus.totalSeats > 0 ? Math.round((booked / bus.totalSeats) * 100) : 0;
+                                      const vehicleName = (bus as any).busDetail?.name ?? null;
+                                      const driverName  = bus.driver?.name ?? null;
+
+                                      return (
+                                        <tr
+                                          key={bus.id}
+                                          className={`transition-colors group/row ${isSel ? "bg-orange-50/70" : "hover:bg-orange-50/30"}`}
+                                        >
+                                          {/* Checkbox */}
+                                          <td className="pl-10 pr-2 py-2.5">
+                                            <button type="button" onClick={() => toggleOne(bus.id)}
+                                              className="text-slate-200 hover:text-orange-500 transition-colors">
+                                              {isSel
+                                                ? <CheckSquare2 className="size-3.5 text-orange-500" />
+                                                : <Square className="size-3.5" />}
+                                            </button>
+                                          </td>
+
+                                          {/* Date */}
+                                          <td className="px-3 py-2.5 whitespace-nowrap">
+                                            <p className="text-xs font-semibold text-slate-800">
+                                              {new Date(bus.travelDate + "T00:00:00Z").toLocaleDateString("en-US", {
+                                                weekday: "short", month: "short", day: "numeric", timeZone: "UTC",
+                                              })}
+                                            </p>
+                                            <p className="text-[10px] text-slate-400 mt-0.5">
+                                              {new Date(bus.travelDate + "T00:00:00Z").toLocaleDateString("en-US", { year: "numeric", timeZone: "UTC" })}
+                                            </p>
+                                          </td>
+
+                                          {/* Vehicle */}
+                                          <td className="px-3 py-2.5">
+                                            {vehicleName ? (
+                                              <div className="flex items-center gap-1.5">
+                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-orange-100">
+                                                  <Bus className="size-3 text-orange-600" />
+                                                </div>
+                                                <span className="text-xs font-semibold text-slate-800 truncate max-w-[120px]">{vehicleName}</span>
+                                              </div>
+                                            ) : (
+                                              <span className="text-[11px] text-slate-300 italic">No vehicle</span>
+                                            )}
+                                          </td>
+
+                                          {/* Driver */}
+                                          <td className="px-3 py-2.5 hidden md:table-cell">
+                                            {driverName ? (
+                                              <div className="flex items-center gap-1.5">
+                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-indigo-100">
+                                                  <User className="size-3 text-indigo-600" />
+                                                </div>
+                                                <span className="text-xs font-semibold text-slate-800 truncate max-w-[110px]">{driverName}</span>
+                                              </div>
+                                            ) : (
+                                              <span className="text-[11px] text-slate-300 italic">No driver</span>
+                                            )}
+                                          </td>
+
+                                          {/* Bus type */}
+                                          <td className="px-3 py-2.5 hidden sm:table-cell">
+                                            <Badge className="border-orange-200 bg-orange-100 text-orange-700 text-[10px] py-0 whitespace-nowrap">
+                                              {formatBusType(bus.busType)}
+                                            </Badge>
+                                          </td>
+
+                                          {/* Fare */}
+                                          <td className="px-3 py-2.5 text-xs font-semibold text-slate-700 whitespace-nowrap">
+                                            {formatCurrency(bus.pricePerSeat)}
+                                          </td>
+
+                                          {/* Seats */}
+                                          <td className="px-3 py-2.5">
+                                            <div className="flex items-center gap-1.5">
+                                              <span className="text-xs font-medium text-slate-700 whitespace-nowrap">
+                                                {bus.seatsLeft}/{bus.totalSeats}
+                                              </span>
+                                              <div className="h-1 w-10 rounded-full bg-slate-100 overflow-hidden">
+                                                <div className={`h-full rounded-full ${pct >= 90 ? "bg-red-500" : pct >= 60 ? "bg-amber-500" : "bg-emerald-500"}`}
+                                                  style={{ width: `${pct}%` }} />
+                                              </div>
+                                            </div>
+                                          </td>
+
+                                          {/* Status */}
+                                          <td className="px-3 py-2.5">
+                                            <AvailabilityBadge bus={bus} />
+                                          </td>
+
+                                          {/* Actions — inline buttons */}
+                                          <td className="pr-3 py-2.5">
+                                            <div className="flex items-center gap-1">
+                                              <button type="button" title="Edit departure"
+                                                onClick={() => { setSelectedBus(bus); setBusDialogOpen(true); }}
+                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-500 transition-colors">
+                                                <PencilLine className="size-3.5" />
+                                              </button>
+                                              <button type="button" title="Assign driver"
+                                                onClick={() => { setDriverBus(bus); setSelectedDriverId((bus as any).driverId ?? ""); }}
+                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-500 transition-colors">
+                                                <UserCheck className="size-3.5" />
+                                              </button>
+                                              <button type="button" title="Update status"
+                                                onClick={() => { setStatusBus(bus); setNewStatus((bus as any).departureStatus ?? "scheduled"); setNewDelayMinutes((bus as any).delayMinutes ?? 0); setNewStatusNote((bus as any).statusNote ?? ""); }}
+                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-500 transition-colors">
+                                                <Navigation className="size-3.5" />
+                                              </button>
+                                              <button type="button" title="Delete"
+                                                onClick={() => setBusToDelete(bus)}
+                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition-colors">
+                                                <Trash2 className="size-3.5" />
+                                              </button>
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
@@ -702,55 +810,30 @@ export default function AdminBusesManager({
                             )}
                           </TableCell>
 
-                          {/* Actions — compact dropdown */}
+                          {/* Actions — inline buttons */}
                           <TableCell className="py-3 pr-3">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger className="inline-flex h-8 w-8 items-center justify-center rounded-lg opacity-60 transition-opacity hover:bg-orange-100 hover:opacity-100 group-hover:opacity-100 focus:outline-none">
-                                <MoreVertical className="size-4" />
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-44">
-                                <DropdownMenuItem
-                                  className="gap-2 cursor-pointer"
-                                  onClick={() => {
-                                    setSelectedBus(bus);
-                                    setBusDialogOpen(true);
-                                  }}
-                                >
-                                  <PencilLine className="size-4 text-orange-500" />
-                                  Edit departure
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="gap-2 cursor-pointer"
-                                  onClick={() => {
-                                    setDriverBus(bus);
-                                    setSelectedDriverId((bus as any).driverId ?? "");
-                                  }}
-                                >
-                                  <UserCheck className="size-4 text-indigo-500" />
-                                  Assign driver
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="gap-2 cursor-pointer"
-                                  onClick={() => {
-                                    setStatusBus(bus);
-                                    setNewStatus((bus as any).departureStatus ?? "scheduled");
-                                    setNewDelayMinutes((bus as any).delayMinutes ?? 0);
-                                    setNewStatusNote((bus as any).statusNote ?? "");
-                                  }}
-                                >
-                                  <Navigation className="size-4 text-blue-500" />
-                                  Update status
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  className="gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
-                                  onClick={() => setBusToDelete(bus)}
-                                >
-                                  <Trash2 className="size-4" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                            <div className="flex items-center gap-1">
+                              <button type="button" title="Edit departure"
+                                onClick={() => { setSelectedBus(bus); setBusDialogOpen(true); }}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-500 transition-colors">
+                                <PencilLine className="size-3.5" />
+                              </button>
+                              <button type="button" title="Assign driver"
+                                onClick={() => { setDriverBus(bus); setSelectedDriverId((bus as any).driverId ?? ""); }}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-500 transition-colors">
+                                <UserCheck className="size-3.5" />
+                              </button>
+                              <button type="button" title="Update status"
+                                onClick={() => { setStatusBus(bus); setNewStatus((bus as any).departureStatus ?? "scheduled"); setNewDelayMinutes((bus as any).delayMinutes ?? 0); setNewStatusNote((bus as any).statusNote ?? ""); }}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-500 transition-colors">
+                                <Navigation className="size-3.5" />
+                              </button>
+                              <button type="button" title="Delete"
+                                onClick={() => setBusToDelete(bus)}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition-colors">
+                                <Trash2 className="size-3.5" />
+                              </button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
