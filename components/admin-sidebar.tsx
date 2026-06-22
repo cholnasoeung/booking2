@@ -7,7 +7,7 @@ import {
   BarChart3, Tags, Bell, FileSpreadsheet, Shield, Activity, Package,
   ChevronDown, Users, LogOut, UserCog, MessageSquare, Star,
   CalendarClock, MonitorCheck, ScanLine, Settings, Fuel, Wallet, Wrench, CalendarDays,
-  Briefcase, Banknote,
+  Briefcase, Banknote, PackageSearch,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
@@ -40,10 +40,11 @@ const navSections = [
     title: "People",
     accent: "text-slate-400",
     items: [
-      { title: "Users",         href: "/admin?tab=users",         icon: UserCog,     gradient: "from-violet-500 to-purple-600" },
+      { title: "Users",         href: "/admin?tab=users",         icon: UserCog,       gradient: "from-violet-500 to-purple-600" },
       { title: "Support Inbox", href: "/admin?tab=support-inbox", icon: MessageSquare, gradient: "from-sky-500 to-blue-600" },
-      { title: "Ratings",       href: "/admin?tab=ratings",       icon: Star,        gradient: "from-amber-500 to-orange-600" },
-      { title: "Employees",     href: "/admin?tab=employees",     icon: Briefcase,   gradient: "from-emerald-500 to-teal-600" },
+      { title: "Ratings",       href: "/admin?tab=ratings",       icon: Star,          gradient: "from-amber-500 to-orange-600" },
+      { title: "Employees",     href: "/admin?tab=employees",     icon: Briefcase,     gradient: "from-emerald-500 to-teal-600" },
+      { title: "Lost & Found",  href: "/admin?tab=lost-found",    icon: PackageSearch, gradient: "from-teal-500 to-cyan-600" },
     ],
   },
   {

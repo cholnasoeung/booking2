@@ -30,6 +30,7 @@ import AdminDriverScheduleTab from "@/components/admin-driver-schedule-tab";
 import AdminEmployeesTab from "@/components/admin-employees-tab";
 import AdminPayrollTab from "@/components/admin-payroll-tab";
 import AdminReportsTab from "@/components/admin-reports-tab";
+import AdminLostFoundTab from "@/components/admin-lost-found-tab";
 import type {
   AdminBookingSummary,
   BusDetailSummary,
@@ -152,7 +153,8 @@ export default function AdminPanel({
 
       {activeTab === "payroll" ? <AdminPayrollTab /> : null}
 
-      {activeTab === "reports" ? <AdminReportsTab /> : null}
+      {activeTab === "reports"    ? <AdminReportsTab />    : null}
+      {activeTab === "lost-found" ? <AdminLostFoundTab /> : null}
     </div>
   );
 }
