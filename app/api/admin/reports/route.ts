@@ -1,6 +1,10 @@
 import { getCurrentSession } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import BookingModel from "@/models/Booking";
+import FuelLogModel from "@/models/FuelLog";
+import MaintenanceModel from "@/models/Maintenance";
+import DriverEarningModel from "@/models/DriverEarning";
+import PayrollModel from "@/models/Payroll";
 
 export const runtime = "nodejs";
 
@@ -27,14 +31,15 @@ export async function GET(request: Request) {
 
   await connectToDatabase();
 
-  const matchRange = { $match: { createdAt: { $gte: start, $lte: end } } };
+  const matchRange    = { $match: { createdAt: { $gte: start, $lte: end } } };
+  const matchDateRange = { $match: { date: { $gte: start, $lte: end } } };
 
   // ── 1. Daily revenue breakdown ──────────────────────────────────────
   const dailyRevenue = await BookingModel.aggregate([
     matchRange,
     {
       $group: {
-        _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+        _id:       { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
         gross:     { $sum: "$finalPrice" },
         refunds:   { $sum: { $cond: [{ $eq: ["$status", "cancelled"] }, { $ifNull: ["$refundAmount", 0] }, 0] } },
         discounts: { $sum: { $ifNull: ["$discountAmount", 0] } },
@@ -52,14 +57,14 @@ export async function GET(request: Request) {
     {
       $group: {
         _id: null,
-        totalBookings:    { $sum: 1 },
-        confirmedCount:   { $sum: { $cond: [{ $eq: ["$status", "confirmed"] }, 1, 0] } },
-        cancelledCount:   { $sum: { $cond: [{ $eq: ["$status", "cancelled"] }, 1, 0] } },
-        pendingCount:     { $sum: { $cond: [{ $eq: ["$status", "pending"] }, 1, 0] } },
-        grossRevenue:     { $sum: "$finalPrice" },
-        totalRefunds:     { $sum: { $ifNull: ["$refundAmount", 0] } },
-        totalDiscounts:   { $sum: { $ifNull: ["$discountAmount", 0] } },
-        totalPassengers:  { $sum: { $size: "$seats" } },
+        totalBookings:   { $sum: 1 },
+        confirmedCount:  { $sum: { $cond: [{ $eq: ["$status", "confirmed"] }, 1, 0] } },
+        cancelledCount:  { $sum: { $cond: [{ $eq: ["$status", "cancelled"] }, 1, 0] } },
+        pendingCount:    { $sum: { $cond: [{ $eq: ["$status", "pending"] }, 1, 0] } },
+        grossRevenue:    { $sum: "$finalPrice" },
+        totalRefunds:    { $sum: { $ifNull: ["$refundAmount", 0] } },
+        totalDiscounts:  { $sum: { $ifNull: ["$discountAmount", 0] } },
+        totalPassengers: { $sum: { $size: "$seats" } },
       },
     },
   ]);
@@ -72,27 +77,13 @@ export async function GET(request: Request) {
   // ── 3. Route performance ─────────────────────────────────────────────
   const routePerformance = await BookingModel.aggregate([
     matchRange,
-    {
-      $lookup: {
-        from: "buses",
-        localField: "bus",
-        foreignField: "_id",
-        as: "busInfo",
-      },
-    },
-    { $unwind: { path: "$busInfo", preserveNullAndEmptyArrays: false } },
-    {
-      $lookup: {
-        from: "routes",
-        localField: "busInfo.routeId",
-        foreignField: "_id",
-        as: "routeInfo",
-      },
-    },
+    { $lookup: { from: "buses",  localField: "bus",         foreignField: "_id", as: "busInfo"   } },
+    { $unwind: { path: "$busInfo",   preserveNullAndEmptyArrays: false } },
+    { $lookup: { from: "routes", localField: "busInfo.routeId", foreignField: "_id", as: "routeInfo" } },
     { $unwind: { path: "$routeInfo", preserveNullAndEmptyArrays: false } },
     {
       $group: {
-        _id: "$busInfo.routeId",
+        _id:               "$busInfo.routeId",
         from:              { $first: "$routeInfo.from" },
         to:                { $first: "$routeInfo.to" },
         totalBookings:     { $sum: 1 },
@@ -106,20 +97,96 @@ export async function GET(request: Request) {
     { $sort: { revenue: -1 } },
   ]);
 
-  // ── 4. Top routes by booking count ───────────────────────────────────
   const busiest = [...routePerformance]
     .sort((a, b) => b.totalBookings - a.totalBookings)
     .slice(0, 10)
     .map((r) => ({
-      route:             `${r.from} → ${r.to}`,
-      confirmed:         r.confirmedBookings,
-      cancelled:         r.cancelledBookings,
-      total:             r.totalBookings,
-      revenue:           r.revenue,
+      route:     `${r.from} → ${r.to}`,
+      confirmed: r.confirmedBookings,
+      cancelled: r.cancelledBookings,
+      total:     r.totalBookings,
+      revenue:   r.revenue,
     }));
 
-  // Build response
+  // ── 4. Fuel expenses ─────────────────────────────────────────────────
+  const [fuelOverall, fuelByDay] = await Promise.all([
+    FuelLogModel.aggregate([
+      matchDateRange,
+      { $group: { _id: null, total: { $sum: "$totalCost" }, liters: { $sum: "$liters" }, count: { $sum: 1 } } },
+    ]),
+    FuelLogModel.aggregate([
+      matchDateRange,
+      {
+        $group: {
+          _id:    { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
+          cost:   { $sum: "$totalCost" },
+          liters: { $sum: "$liters" },
+          count:  { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]),
+  ]);
+
+  // ── 5. Maintenance expenses ──────────────────────────────────────────
+  const [maintOverall, maintByType] = await Promise.all([
+    MaintenanceModel.aggregate([
+      { $match: { date: { $gte: start, $lte: end }, status: "completed" } },
+      { $group: { _id: null, total: { $sum: "$cost" }, count: { $sum: 1 } } },
+    ]),
+    MaintenanceModel.aggregate([
+      { $match: { date: { $gte: start, $lte: end }, status: "completed" } },
+      {
+        $group: {
+          _id:   "$maintenanceType",
+          total: { $sum: "$cost" },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { total: -1 } },
+    ]),
+  ]);
+
+  // ── 6. Driver earnings ───────────────────────────────────────────────
+  const earningsOverall = await DriverEarningModel.aggregate([
+    matchDateRange,
+    {
+      $group: {
+        _id:             null,
+        total:           { $sum: "$totalEarnings" },
+        regularEarnings: { $sum: "$regularEarnings" },
+        otEarnings:      { $sum: "$overtimeEarnings" },
+        count:           { $sum: 1 },
+      },
+    },
+  ]);
+
+  // ── 7. Payroll (approved + paid, months within range) ───────────────
+  const startMonth = startDate.slice(0, 7); // "2026-01"
+  const endMonth   = endDate.slice(0, 7);
+
+  const payrollOverall = await PayrollModel.aggregate([
+    { $match: { month: { $gte: startMonth, $lte: endMonth }, status: { $in: ["approved", "paid"] } } },
+    {
+      $group: {
+        _id:             null,
+        grossPay:        { $sum: "$grossPay" },
+        netPay:          { $sum: "$netPay" },
+        totalDeductions: { $sum: "$totalDeductions" },
+        count:           { $sum: 1 },
+      },
+    },
+  ]);
+
+  // ── Build totals ─────────────────────────────────────────────────────
+  const fuelTotal    = fuelOverall[0]?.total        ?? 0;
+  const maintTotal   = maintOverall[0]?.total       ?? 0;
+  const earningsTotal = earningsOverall[0]?.total   ?? 0;
+  const payrollTotal = payrollOverall[0]?.netPay    ?? 0;
+  const totalExpenses = fuelTotal + maintTotal + earningsTotal + payrollTotal;
+
   const net = stats.grossRevenue - stats.totalRefunds;
+  const profitLoss = net - totalExpenses;
 
   return Response.json({
     dateRange: { start: startDate, end: endDate },
@@ -145,14 +212,11 @@ export async function GET(request: Request) {
       cancelled:        stats.cancelledCount,
       pending:          stats.pendingCount,
       confirmedRate:    stats.totalBookings > 0
-        ? Math.round((stats.confirmedCount / stats.totalBookings) * 1000) / 10
-        : 0,
+        ? Math.round((stats.confirmedCount / stats.totalBookings) * 1000) / 10 : 0,
       cancellationRate: stats.totalBookings > 0
-        ? Math.round((stats.cancelledCount / stats.totalBookings) * 1000) / 10
-        : 0,
+        ? Math.round((stats.cancelledCount / stats.totalBookings) * 1000) / 10 : 0,
       avgTicketValue:   stats.confirmedCount > 0
-        ? Math.round((stats.grossRevenue / stats.confirmedCount) * 100) / 100
-        : 0,
+        ? Math.round((stats.grossRevenue / stats.confirmedCount) * 100) / 100 : 0,
       totalPassengers:  stats.totalPassengers,
       byRoute:          busiest,
     },
@@ -166,7 +230,34 @@ export async function GET(request: Request) {
       revenue:           r.revenue,
       refunds:           r.refunds,
       totalSeats:        r.totalSeats,
-      occupancyNote:     `${r.confirmedBookings} confirmed bookings · ${r.totalSeats} seats sold`,
+      occupancyNote:     `${r.confirmedBookings} confirmed · ${r.totalSeats} seats`,
     })),
+    expenses: {
+      fuel: {
+        total:  fuelTotal,
+        liters: fuelOverall[0]?.liters ?? 0,
+        count:  fuelOverall[0]?.count  ?? 0,
+        byDay:  fuelByDay.map((d) => ({ date: d._id, cost: d.cost, liters: d.liters, count: d.count })),
+      },
+      maintenance: {
+        total: maintTotal,
+        count: maintOverall[0]?.count ?? 0,
+        byType: maintByType.map((t) => ({ type: t._id as string, total: t.total, count: t.count })),
+      },
+      driverPay: {
+        total:           earningsTotal,
+        regularEarnings: earningsOverall[0]?.regularEarnings ?? 0,
+        otEarnings:      earningsOverall[0]?.otEarnings      ?? 0,
+        count:           earningsOverall[0]?.count           ?? 0,
+      },
+      payroll: {
+        grossPay:        payrollOverall[0]?.grossPay        ?? 0,
+        netPay:          payrollTotal,
+        totalDeductions: payrollOverall[0]?.totalDeductions ?? 0,
+        count:           payrollOverall[0]?.count           ?? 0,
+      },
+      totalExpenses,
+      profitLoss,
+    },
   });
 }
