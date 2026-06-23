@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Clock } from "lucide-react";
 
 import SeatMap from "@/components/seat-map";
 import { Badge } from "@/components/ui/badge";
@@ -64,6 +65,10 @@ export default function SeatSelection({
   const [templateMessage, setTemplateMessage] = useState<TemplateMessage | null>(null);
   const [isSavingTemplate, setIsSavingTemplate] = useState(false);
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(true);
+  const [holdExpiresAt, setHoldExpiresAt] = useState<Date | null>(null);
+  const [holdSecondsLeft, setHoldSecondsLeft] = useState(0);
+  const heldSeatsRef = useRef<string[]>([]);
+  const holdDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const boardingOptions = bus.stops.filter((stop) => stop.boarding);
   const droppingOptions = bus.stops.filter((stop) => stop.dropping);
   const [boardingStop, setBoardingStop] = useState(
@@ -95,6 +100,90 @@ export default function SeatSelection({
     };
     return () => es.close();
   }, [bus.id]);
+
+  // Hold selected seats via API (debounced 600ms to avoid rapid calls)
+  useEffect(() => {
+    if (holdDebounceRef.current) clearTimeout(holdDebounceRef.current);
+
+    if (selectedSeats.length === 0) {
+      // Release any previously held seats
+      if (heldSeatsRef.current.length > 0) {
+        fetch(`/api/buses/${bus.id}/hold`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ seats: heldSeatsRef.current }),
+        }).catch(() => {});
+        heldSeatsRef.current = [];
+      }
+      setHoldExpiresAt(null);
+      return;
+    }
+
+    holdDebounceRef.current = setTimeout(async () => {
+      // Release old hold if different seats
+      if (heldSeatsRef.current.length > 0) {
+        await fetch(`/api/buses/${bus.id}/hold`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ seats: heldSeatsRef.current }),
+        }).catch(() => {});
+      }
+
+      const res = await fetch(`/api/buses/${bus.id}/hold`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ seats: selectedSeats }),
+      }).catch(() => null);
+
+      if (res?.ok) {
+        const data = await res.json().catch(() => ({}));
+        heldSeatsRef.current = selectedSeats;
+        if (data.expiresAt) setHoldExpiresAt(new Date(data.expiresAt));
+      } else if (res?.status === 409) {
+        // One or more seats already taken — deselect them
+        const data = await res.json().catch(() => ({}));
+        if (data.message) setError(data.message + " Please choose different seats.");
+        setSelectedSeats([]);
+        heldSeatsRef.current = [];
+        setHoldExpiresAt(null);
+      }
+    }, 600);
+
+    return () => { if (holdDebounceRef.current) clearTimeout(holdDebounceRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSeats.join(","), bus.id]);
+
+  // Release hold on unmount
+  useEffect(() => {
+    return () => {
+      if (heldSeatsRef.current.length > 0) {
+        fetch(`/api/buses/${bus.id}/hold`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ seats: heldSeatsRef.current }),
+        }).catch(() => {});
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bus.id]);
+
+  // Countdown ticker
+  useEffect(() => {
+    if (!holdExpiresAt) { setHoldSecondsLeft(0); return; }
+    const tick = () => {
+      const s = Math.max(0, Math.round((holdExpiresAt.getTime() - Date.now()) / 1000));
+      setHoldSecondsLeft(s);
+      if (s === 0) {
+        setSelectedSeats([]);
+        heldSeatsRef.current = [];
+        setHoldExpiresAt(null);
+        setError("Your seat hold expired. Please select seats again.");
+      }
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [holdExpiresAt]);
 
   useEffect(() => {
     let mounted = true;
@@ -504,6 +593,25 @@ export default function SeatSelection({
             </div>
           </div>
 
+          {/* Hold timer */}
+          {holdExpiresAt && holdSecondsLeft > 0 && (
+            <div className={`flex items-center gap-2.5 rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors ${
+              holdSecondsLeft <= 60
+                ? "border-red-200 bg-red-50 text-red-700"
+                : "border-amber-200 bg-amber-50 text-amber-800"
+            }`}>
+              <Clock className="h-4 w-4 shrink-0 animate-pulse" />
+              <span>
+                Seats held for{" "}
+                <span className="font-mono">
+                  {String(Math.floor(holdSecondsLeft / 60)).padStart(2, "0")}:
+                  {String(holdSecondsLeft % 60).padStart(2, "0")}
+                </span>
+                {holdSecondsLeft <= 60 ? " — almost expired!" : ""}
+              </span>
+            </div>
+          )}
+
           {error ? (
             <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
@@ -521,8 +629,7 @@ export default function SeatSelection({
           </Button>
 
           <p className="text-xs leading-5 text-muted-foreground">
-            Seats are confirmed on reservation. If another customer books the same
-            seat first, we&apos;ll ask you to pick again before checkout is finished.
+            Selected seats are held for 10 minutes while you complete checkout. Your hold starts when you select seats.
           </p>
         </CardContent>
       </Card>

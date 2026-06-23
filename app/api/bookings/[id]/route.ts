@@ -3,7 +3,8 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { isValidObjectId } from "@/lib/validation";
 import BookingModel from "@/models/Booking";
 import BusModel from "@/models/Bus";
-import { sendCancellationEmail } from "@/lib/email-service";
+import WaitingListModel from "@/models/WaitingList";
+import { sendCancellationEmail, sendWaitlistNotificationEmail } from "@/lib/email-service";
 import { sendCancellationSMS } from "@/lib/sms-service";
 
 export const runtime = "nodejs";
@@ -72,11 +73,29 @@ export async function DELETE(
     const cancelledBooking = await existingBooking.cancel(cancellationReason || "Customer requested cancellation");
 
     // Release seats back to inventory
-    const bus = await BusModel.findById(cancelledBooking.bus);
+    const bus = await BusModel.findById(cancelledBooking.bus).populate("routeId");
     if (bus) {
       await BusModel.findByIdAndUpdate(cancelledBooking.bus, {
         $pullAll: { bookedSeats: cancelledBooking.seats },
       });
+
+      // Notify waitlisted users now that seats are free
+      const seatsFreed = cancelledBooking.seats.length;
+      const notified = await WaitingListModel.notifyUsers(String(bus._id), seatsFreed).catch(() => []);
+      if (notified.length > 0) {
+        const route = (bus as any).routeId;
+        const routeStr = route ? `${route.from} → ${route.to}` : "your waitlisted route";
+        const travelDate = bus.date ? new Date(bus.date).toLocaleDateString("en-US", { dateStyle: "medium" }) : "";
+        for (const n of notified) {
+          sendWaitlistNotificationEmail(n.userEmail, {
+            userName: n.userName,
+            route: routeStr,
+            date: travelDate,
+            seatsAvailable: seatsFreed,
+            busId: String(bus._id),
+          }).catch(() => {});
+        }
+      }
     }
 
     // Send cancellation email

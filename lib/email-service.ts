@@ -161,6 +161,40 @@ export async function sendAdminAlertEmail(
 }
 
 /**
+ * Send waitlist seat-available notification email
+ */
+export async function sendWaitlistNotificationEmail(
+  to: string,
+  data: { userName: string; route: string; date: string; seatsAvailable: number; busId: string }
+): Promise<{ success: boolean; error?: string }> {
+  const bookUrl = `${process.env.NEXTAUTH_URL ?? 'http://localhost:3000'}/book/${data.busId}`;
+  const html = `
+    <!DOCTYPE html><html><head><meta charset="utf-8">
+    <style>body{font-family:'Segoe UI',sans-serif;background:#f3f4f6;margin:0;padding:20px;}
+    .card{max-width:560px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08);}
+    .header{background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:28px 32px;color:#fff;}
+    .body{padding:28px 32px;} .btn{display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff!important;text-decoration:none;padding:12px 28px;border-radius:40px;font-weight:700;font-size:15px;margin-top:20px;}
+    .footer{padding:16px 32px;background:#f9fafb;font-size:12px;color:#9ca3af;}</style>
+    </head><body><div class="card">
+    <div class="header"><h2 style="margin:0;font-size:22px;">🎉 A seat just opened up!</h2>
+    <p style="margin:8px 0 0;opacity:.85;">Your waitlist spot is available</p></div>
+    <div class="body">
+    <p style="color:#374151;font-size:16px;">Hi <strong>${data.userName}</strong>,</p>
+    <p style="color:#6b7280;">Great news — <strong>${data.seatsAvailable} seat${data.seatsAvailable > 1 ? 's' : ''}</strong> just became available on your waitlisted journey:</p>
+    <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;padding:16px 20px;margin:20px 0;">
+      <p style="margin:0;font-size:18px;font-weight:700;color:#4f46e5;">${data.route}</p>
+      <p style="margin:6px 0 0;color:#7c3aed;font-size:14px;">📅 ${data.date}</p>
+    </div>
+    <p style="color:#6b7280;font-size:14px;">⏰ <strong>Act fast</strong> — this notification expires in 24 hours and will be offered to the next person on the list.</p>
+    <a href="${bookUrl}" class="btn">Book Now →</a>
+    </div>
+    <div class="footer">You are receiving this because you joined the waitlist for this trip. <a href="${process.env.NEXTAUTH_URL ?? ''}/dashboard" style="color:#6366f1;">Manage your waitlist</a></div>
+    </div></body></html>
+  `;
+  return sendEmail({ to, subject: `Seat Available: ${data.route} on ${data.date}`, html });
+}
+
+/**
  * Send structured admin alert email with detailed alert information
  */
 export async function sendDetailedAdminAlertEmail(

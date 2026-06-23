@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { User, Bus, MapPin } from "lucide-react";
+import { User, Bus, MapPin, Star } from "lucide-react";
 
 import DashboardBookings from "@/components/dashboard-bookings";
 import LoyaltyCard from "@/components/loyalty-card";
@@ -49,6 +49,13 @@ export default async function DashboardPage() {
               >
                 <User className="h-4 w-4" />
                 Profile
+              </Link>
+              <Link
+                href="/dashboard/loyalty"
+                className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2.5 text-sm font-medium text-white backdrop-blur transition hover:bg-white/25"
+              >
+                <Star className="h-4 w-4" />
+                Loyalty
               </Link>
               <Link
                 href="/"

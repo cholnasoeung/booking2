@@ -387,7 +387,7 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
   // ── Delete ──
   async function handleDelete() {
     if (!deleteTarget) return;
-    if (!(await confirmDelete(deleteTarget.plateNumber ?? "this bus"))) return;
+    if (!(await confirmDelete(deleteTarget.registrationNumber ?? "this bus"))) return;
     setDeleting(true);
     try {
       const res = await fetch(`/api/admin/bus-details/${deleteTarget.id}`, { method: "DELETE" });

@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import {
   BusFront, Navigation, PencilLine, Plus, Search, Trash2, UserCheck,
   CheckSquare2, Square, X, AlertTriangle, ChevronDown, ChevronRight,
-  LayoutList, Layers, Clock, Bus, User,
+  LayoutList, Layers, Clock, Bus, User, Users,
 } from "lucide-react";
 
 import AdminBusDialog from "@/components/admin-bus-dialog";
+import AdminManifestDialog from "@/components/admin-manifest-dialog";
 import { AvailabilityBadge, EmptyState, PAGE_SIZE, Paginator, SummaryTile } from "@/components/admin-management-shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -74,6 +75,11 @@ export default function AdminBusesManager({
   // ── Bulk select ──
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeletePending, setBulkDeletePending] = useState(false);
+
+  // ── Manifest ──
+  const [manifestBusId,    setManifestBusId]    = useState<string | null>(null);
+  const [manifestBusLabel, setManifestBusLabel] = useState("");
+  const [manifestOpen,     setManifestOpen]     = useState(false);
 
   const normalizedQuery = busQuery.trim().toLowerCase();
   const visibleBuses = buses.filter((bus) => {
@@ -639,6 +645,11 @@ export default function AdminBusesManager({
                                                 className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-500 transition-colors">
                                                 <Navigation className="size-3.5" />
                                               </button>
+                                              <button type="button" title="Passenger manifest"
+                                                onClick={() => { setManifestBusId(bus.id); setManifestBusLabel(`${bus.from} → ${bus.to}`); setManifestOpen(true); }}
+                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-500 transition-colors">
+                                                <Users className="size-3.5" />
+                                              </button>
                                               <button type="button" title="Delete"
                                                 onClick={() => handleBusDelete(bus)}
                                                 className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition-colors">
@@ -811,6 +822,11 @@ export default function AdminBusesManager({
                                 onClick={() => { setStatusBus(bus); setNewStatus((bus as any).departureStatus ?? "scheduled"); setNewDelayMinutes((bus as any).delayMinutes ?? 0); setNewStatusNote((bus as any).statusNote ?? ""); }}
                                 className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-500 transition-colors">
                                 <Navigation className="size-3.5" />
+                              </button>
+                              <button type="button" title="Passenger manifest"
+                                onClick={() => { setManifestBusId(bus.id); setManifestBusLabel(`${bus.from} → ${bus.to}`); setManifestOpen(true); }}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-500 transition-colors">
+                                <Users className="size-3.5" />
                               </button>
                               <button type="button" title="Delete"
                                 onClick={() => handleBusDelete(bus)}
@@ -993,6 +1009,13 @@ export default function AdminBusesManager({
             setSelectedBus(null);
           }
         }}
+      />
+
+      <AdminManifestDialog
+        busId={manifestBusId}
+        busLabel={manifestBusLabel}
+        open={manifestOpen}
+        onClose={() => { setManifestOpen(false); setManifestBusId(null); }}
       />
     </>
   );

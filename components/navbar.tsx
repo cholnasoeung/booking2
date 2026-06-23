@@ -62,6 +62,7 @@ export default async function Navbar() {
           <nav className="hidden md:flex flex-1 items-center justify-center gap-0.5">
             <NavLink href="/">Home</NavLink>
             <NavLink href="/support">Support</NavLink>
+            <NavLink href="/lost-found">Lost & Found</NavLink>
             {user && (
               <>
                 <NavLink href="/dashboard">
