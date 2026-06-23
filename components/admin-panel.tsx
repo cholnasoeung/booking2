@@ -31,6 +31,7 @@ import AdminEmployeesTab from "@/components/admin-employees-tab";
 import AdminPayrollTab from "@/components/admin-payroll-tab";
 import AdminReportsTab from "@/components/admin-reports-tab";
 import AdminLostFoundTab from "@/components/admin-lost-found-tab";
+import AdminRefundTab from "@/components/admin-refund-tab";
 import type {
   AdminBookingSummary,
   BusDetailSummary,
@@ -155,6 +156,7 @@ export default function AdminPanel({
 
       {activeTab === "reports"    ? <AdminReportsTab />    : null}
       {activeTab === "lost-found" ? <AdminLostFoundTab /> : null}
+      {activeTab === "refunds"    ? <AdminRefundTab />    : null}
     </div>
   );
 }
