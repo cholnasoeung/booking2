@@ -26,18 +26,18 @@ export default async function DashboardPage() {
       <Navbar />
 
       {/* Hero banner */}
-      <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-700 text-white">
+      <div className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             {/* Identity */}
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-xl font-bold text-white backdrop-blur">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-indigo-100 text-xl font-bold text-indigo-600">
                 {initials}
               </div>
               <div>
-                <p className="text-sm font-medium text-indigo-200">Welcome back</p>
-                <h1 className="text-2xl font-bold tracking-tight">{user.name}</h1>
-                <p className="text-sm text-indigo-200">{user.email}</p>
+                <p className="text-sm font-medium text-slate-500">Welcome back</p>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900">{user.name}</h1>
+                <p className="text-sm text-slate-500">{user.email}</p>
               </div>
             </div>
 
@@ -45,21 +45,21 @@ export default async function DashboardPage() {
             <div className="flex items-center gap-2">
               <Link
                 href="/dashboard/profile"
-                className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2.5 text-sm font-medium text-white backdrop-blur transition hover:bg-white/25"
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
               >
                 <User className="h-4 w-4" />
                 Profile
               </Link>
               <Link
                 href="/dashboard/loyalty"
-                className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2.5 text-sm font-medium text-white backdrop-blur transition hover:bg-white/25"
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
               >
                 <Star className="h-4 w-4" />
                 Loyalty
               </Link>
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2.5 text-sm font-medium text-white backdrop-blur transition hover:bg-white/25"
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
               >
                 <Bus className="h-4 w-4" />
                 Book a trip
@@ -68,13 +68,13 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* Quick nav pills */}
+          {/* Quick stat pills */}
           <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-indigo-100">
-              <MapPin className="h-3 w-3" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
+              <MapPin className="h-3 w-3 text-indigo-500" />
               {bookings.length} trip{bookings.length !== 1 ? "s" : ""}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-indigo-100">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
               {bookings.filter((b) => b.status === "confirmed").length} confirmed
             </span>
           </div>

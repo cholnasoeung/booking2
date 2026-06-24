@@ -98,26 +98,26 @@ export default function SearchPageClient({
     <div className="min-h-screen bg-slate-50/80">
 
       {/* ── Route banner ── */}
-      <div className="bg-gradient-to-r from-indigo-600 via-indigo-600 to-violet-700 text-white shadow-lg">
-        <div className="w-full px-4 sm:px-6 lg:px-10 py-5">
+      <div className="border-b border-slate-200 bg-white shadow-sm">
+        <div className="w-full px-4 sm:px-6 lg:px-10 py-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-3 text-xl font-bold tracking-tight">
+              <div className="flex items-center gap-3 text-xl font-bold tracking-tight text-slate-900">
                 <span>{from}</span>
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
-                  <ArrowRight className="h-4 w-4" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-slate-100">
+                  <ArrowRight className="h-4 w-4 text-slate-600" />
                 </div>
                 <span>{to}</span>
               </div>
-              <div className="hidden sm:flex items-center gap-3 text-sm text-indigo-200 ml-2">
-                <span className="h-1 w-1 rounded-full bg-indigo-400" />
+              <div className="hidden sm:flex items-center gap-3 text-sm text-slate-500 ml-2">
+                <span className="h-1 w-1 rounded-full bg-slate-300" />
                 <span>{formatTravelDate(date)}</span>
-                <span className="h-1 w-1 rounded-full bg-indigo-400" />
+                <span className="h-1 w-1 rounded-full bg-slate-300" />
                 <span>{passengers} passenger{passengers > 1 ? "s" : ""}</span>
               </div>
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <span className="rounded-full bg-white/15 px-3 py-1 font-semibold">
+              <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 font-semibold text-slate-700">
                 {sortedBuses.length} departure{sortedBuses.length !== 1 ? "s" : ""} found
               </span>
             </div>
