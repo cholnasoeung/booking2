@@ -410,420 +410,353 @@ export default function AdminBusDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-6xl border-2 border-orange-200/60 bg-gradient-to-br from-white to-orange-50/50 shadow-2xl backdrop-blur-xl">
-        <DialogHeader className="border-b-2 border-dashed border-orange-200/60 pb-4 bg-gradient-to-r from-orange-50 to-red-50 -mx-6 px-6 -mt-6 pt-6 rounded-t-2xl">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-600 text-white shadow-lg">
-              <svg className="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-6xl bg-white shadow-2xl border border-slate-200 p-0 gap-0">
+
+        {/* ── Header ── */}
+        <DialogHeader className="px-6 py-5 border-b border-slate-100 bg-slate-50/60 rounded-t-2xl">
+          <div className="flex items-center gap-4">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-md">
+              <svg className="size-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
             </div>
             <div>
-              <DialogTitle className="text-2xl">{isEditing ? "Edit Bus Departure" : "Add New Bus"}</DialogTitle>
-              <DialogDescription className="text-sm">
-                Choose a bus type, fine-tune the seat map, and publish the departure
+              <DialogTitle className="text-xl font-bold text-slate-900">
+                {isEditing ? "Edit Bus Departure" : "Add New Bus"}
+              </DialogTitle>
+              <DialogDescription className="text-sm text-slate-500 mt-0.5">
+                Configure route, timing, vehicle, and seat layout for this departure
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <form onSubmit={submitBus} className="space-y-5 pt-4">
-          {/* Route and Date/Time Grid */}
-          <div className="grid gap-4 xl:grid-cols-6">
-            <div className="space-y-2 xl:col-span-2">
-              <Label htmlFor="bus-route" className="text-sm font-semibold">Route</Label>
-              <Select
-                value={form.routeId}
-                onValueChange={(value) => {
-                  if (!value) {
-                    return;
-                  }
+        <form onSubmit={submitBus} className="px-6 py-6 space-y-6">
 
-                  setForm((current) => ({
-                    ...current,
-                    routeId: value,
-                  }));
-                }}
-              >
-                <SelectTrigger id="bus-route" className="h-11 w-full rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20">
-                  <SelectValue placeholder="Select a route">
-                    {(() => {
-                      const r = routes.find((route) => route.id === form.routeId);
-                      return r ? `${r.from} to ${r.to}` : undefined;
-                    })()}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {routes.map((route) => (
-                    <SelectItem key={route.id} value={route.id}>
-                      {route.from} to {route.to}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {/* ── Section 1: Route & Schedule ── */}
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Route & Schedule</p>
             </div>
+            <div className="p-4 grid gap-4 xl:grid-cols-6">
+              <div className="space-y-1.5 xl:col-span-2">
+                <Label htmlFor="bus-route" className="text-sm font-semibold text-slate-700">Route <span className="text-red-500">*</span></Label>
+                <Select
+                  value={form.routeId}
+                  onValueChange={(value) => {
+                    if (!value) return;
+                    setForm((current) => ({ ...current, routeId: value }));
+                  }}
+                >
+                  <SelectTrigger id="bus-route" className="h-10 w-full rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20">
+                    <SelectValue placeholder="Select a route">
+                      {(() => {
+                        const r = routes.find((route) => route.id === form.routeId);
+                        return r ? `${r.from} → ${r.to}` : undefined;
+                      })()}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {routes.map((route) => (
+                      <SelectItem key={route.id} value={route.id}>
+                        {route.from} → {route.to}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="bus-date" className="text-sm font-semibold">Date</Label>
-              <Input
-                id="bus-date"
-                type="date"
-                value={form.date}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    date: event.target.value,
-                  }))
-                }
-                className="h-11 rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
-                required
-              />
-            </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="bus-date" className="text-sm font-semibold text-slate-700">Start Date <span className="text-red-500">*</span></Label>
+                <Input
+                  id="bus-date"
+                  type="date"
+                  value={form.date}
+                  onChange={(event) => setForm((current) => ({ ...current, date: event.target.value }))}
+                  className="h-10 rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="bus-end-date" className="text-sm font-semibold">
-                End date
-              </Label>
-              <Input
-                id="bus-end-date"
-                type="date"
-                value={form.endDate}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    endDate: event.target.value,
-                  }))
-                }
-                className="h-11 rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
-              />
-              <p className="text-xs text-muted-foreground">
-                Set an end date to publish this departure every day until that date.
-                Leave empty for a single departure.
-              </p>
-            </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="bus-end-date" className="text-sm font-semibold text-slate-700">
+                  End Date <span className="text-xs font-normal text-slate-400">(optional)</span>
+                </Label>
+                <Input
+                  id="bus-end-date"
+                  type="date"
+                  value={form.endDate}
+                  onChange={(event) => setForm((current) => ({ ...current, endDate: event.target.value }))}
+                  className="h-10 rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
+                />
+                <p className="text-[11px] text-slate-400 leading-snug">Repeats daily until this date. Leave empty for a single departure.</p>
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="bus-departure" className="text-sm font-semibold">Departure</Label>
-              <Input
-                id="bus-departure"
-                type="time"
-                value={form.departureTime}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    departureTime: event.target.value,
-                  }))
-                }
-                className="h-11 rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
-                required
-              />
-            </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="bus-departure" className="text-sm font-semibold text-slate-700">Departure <span className="text-red-500">*</span></Label>
+                <Input
+                  id="bus-departure"
+                  type="time"
+                  value={form.departureTime}
+                  onChange={(event) => setForm((current) => ({ ...current, departureTime: event.target.value }))}
+                  className="h-10 rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
+                  required
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="bus-arrival" className="text-sm font-semibold">Arrival</Label>
-              <Input
-                id="bus-arrival"
-                type="time"
-                value={form.arrivalTime}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    arrivalTime: event.target.value,
-                  }))
-                }
-                className="h-11 rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
-                required
-              />
+              <div className="space-y-1.5">
+                <Label htmlFor="bus-arrival" className="text-sm font-semibold text-slate-700">Arrival <span className="text-red-500">*</span></Label>
+                <Input
+                  id="bus-arrival"
+                  type="time"
+                  value={form.arrivalTime}
+                  onChange={(event) => setForm((current) => ({ ...current, arrivalTime: event.target.value }))}
+                  className="h-10 rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
+                  required
+                />
+              </div>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-semibold">Assigned Bus Detail</Label>
-              <span className="text-xs text-slate-400">
-                {busDetails.length - busyBusDetailIds.size} of {busDetails.length} vehicle{busDetails.length === 1 ? "" : "s"} free
-                {availabilityLoading && " · checking…"}
+          {/* ── Section 2: Vehicle & Driver ── */}
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Vehicle & Driver Assignment</p>
+            </div>
+            <div className="p-4 grid gap-5 md:grid-cols-2">
+
+              {/* Bus Detail */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-semibold text-slate-700">Assigned Vehicle</Label>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+                    {busDetails.length - busyBusDetailIds.size}/{busDetails.length} free
+                    {availabilityLoading && <span className="text-slate-400"> · checking…</span>}
+                  </span>
+                </div>
+                <Select
+                  value={form.busDetailId}
+                  onValueChange={(value) => {
+                    const selectedDetail = busDetails.find((detail) => detail.id === value);
+                    setTemplateSaveState(null);
+                    setForm((current) => {
+                      if (!selectedDetail) return { ...current, busDetailId: value };
+                      const template = selectedDetail.seatLayoutTemplate ?? getSeatLayoutTemplate(selectedDetail.busType);
+                      return { ...current, busDetailId: value, busType: selectedDetail.busType, seatLayout: structuredClone(template) };
+                    });
+                  }}
+                >
+                  <SelectTrigger className="h-10 rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20">
+                    <SelectValue placeholder="Select a vehicle or leave blank" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Unassigned</SelectItem>
+                    {busDetails.map((detail) => {
+                      const isBusy = busyBusDetailIds.has(detail.id);
+                      return (
+                        <SelectItem key={detail.id} value={detail.id} disabled={isBusy}>
+                          {detail.name} · {detail.registrationNumber}
+                          {isBusy && <span className="ml-2 text-[10px] font-bold text-red-500">· Busy{conflictInfo[detail.id] ? ` ${conflictInfo[detail.id]}` : ""}</span>}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                {form.busDetailId && busyBusDetailIds.has(form.busDetailId) ? (
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[11px] font-medium text-red-700">
+                    ⚠ This vehicle is already assigned at this time. Change the time or pick a different vehicle.
+                  </p>
+                ) : busDetailsLoading ? (
+                  <p className="text-[11px] text-slate-400">Loading vehicles…</p>
+                ) : busDetailsError ? (
+                  <p className="text-[11px] text-red-600">{busDetailsError}</p>
+                ) : (
+                  <p className="text-[11px] text-slate-500">Pick a saved vehicle so passengers see a consistent fleet.</p>
+                )}
+                {busyBusDetailIds.size > 0 && !busyBusDetailIds.has(form.busDetailId ?? "") && (
+                  <p className="text-[11px] font-medium text-amber-600">
+                    {busyBusDetailIds.size} vehicle{busyBusDetailIds.size !== 1 ? "s are" : " is"} unavailable at this time slot
+                  </p>
+                )}
+              </div>
+
+              {/* Driver */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="bus-driver" className="text-sm font-semibold text-slate-700">
+                    Assigned Driver <span className="text-xs font-normal text-slate-400">(optional)</span>
+                  </Label>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+                    {drivers.length - busyDriverIds.size}/{drivers.length} free
+                    {availabilityLoading && <span className="text-slate-400"> · checking…</span>}
+                  </span>
+                </div>
+                <Select
+                  value={form.driverId}
+                  onValueChange={(value) => setForm((current) => ({ ...current, driverId: value }))}
+                >
+                  <SelectTrigger id="bus-driver" className="h-10 rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20">
+                    <SelectValue placeholder="Select a driver" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Unassigned</SelectItem>
+                    {drivers.map((driver) => {
+                      const isBusy = busyDriverIds.has(driver.id);
+                      return (
+                        <SelectItem key={driver.id} value={driver.id} disabled={isBusy}>
+                          {driver.name} · {driver.phone}
+                          {isBusy && <span className="ml-2 text-[10px] font-bold text-red-500">· Busy{conflictInfo[driver.id] ? ` ${conflictInfo[driver.id]}` : ""}</span>}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                {form.driverId && busyDriverIds.has(form.driverId) ? (
+                  <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[11px] font-medium text-red-700">
+                    ⚠ This driver is already assigned at this time. Change the time or pick a different driver.
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-slate-500">
+                    {driversLoading ? "Loading driver roster…" : drivers.length === 0 ? "Add a driver first before assigning." : "Choose the driver who will operate this departure."}
+                  </p>
+                )}
+                {driversError && <p className="text-[11px] text-red-600">{driversError}</p>}
+                {busyDriverIds.size > 0 && !busyDriverIds.has(form.driverId ?? "") && (
+                  <p className="text-[11px] font-medium text-amber-600">
+                    {busyDriverIds.size} driver{busyDriverIds.size !== 1 ? "s are" : " is"} unavailable at this time slot
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* ── Section 3: Bus Type & Price ── */}
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Bus Type & Pricing</p>
+            </div>
+            <div className="p-4 grid gap-4 md:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="bus-type" className="text-sm font-semibold text-slate-700">Bus Type</Label>
+                <Select
+                  value={form.busType}
+                  onValueChange={(value) => {
+                    if (!isBusType(value)) return;
+                    setTemplateSaveState(null);
+                    setForm((current) => ({ ...current, busType: value, seatLayout: getSeatLayoutTemplate(value) }));
+                  }}
+                >
+                  <SelectTrigger id="bus-type" className="h-10 w-full rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20">
+                    <SelectValue placeholder="Choose bus type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {BUS_TYPES.map((busType) => (
+                      <SelectItem key={busType} value={busType}>{formatBusType(busType)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="bus-price" className="text-sm font-semibold text-slate-700">Price per Seat ($) <span className="text-red-500">*</span></Label>
+                <Input
+                  id="bus-price"
+                  type="number"
+                  min={1}
+                  value={form.pricePerSeat}
+                  onChange={(event) => setForm((current) => ({ ...current, pricePerSeat: event.target.value }))}
+                  className="h-10 rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* ── Section 4: Amenities ── */}
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Bus Amenities</p>
+              <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-semibold text-indigo-700">
+                {form.amenities.length} selected
               </span>
             </div>
-            <Select
-              value={form.busDetailId}
-              onValueChange={(value) => {
-                const selectedDetail = busDetails.find((detail) => detail.id === value);
-                setTemplateSaveState(null);
-                setForm((current) => {
-                  if (!selectedDetail) {
-                    return {
-                      ...current,
-                      busDetailId: value,
-                    };
-                  }
-
-                  const template =
-                    selectedDetail.seatLayoutTemplate ??
-                    getSeatLayoutTemplate(selectedDetail.busType);
-
-                  return {
-                    ...current,
-                    busDetailId: value,
-                    busType: selectedDetail.busType,
-                    seatLayout: structuredClone(template),
-                  };
-                });
-              }}
-            >
-              <SelectTrigger className="h-11 rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20">
-                <SelectValue placeholder="Select a bus or leave blank" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Unassigned</SelectItem>
-                {busDetails.map((detail) => {
-                  const isBusy = busyBusDetailIds.has(detail.id);
+            <div className="p-4">
+              <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                {AMENITY_OPTIONS.map((amenity) => {
+                  const checked = form.amenities.includes(amenity.value as AmenityValue);
                   return (
-                    <SelectItem key={detail.id} value={detail.id} disabled={isBusy}>
-                      {detail.name} · {detail.registrationNumber}
-                      {isBusy && (
-                        <span className="ml-2 text-[10px] font-bold text-red-500">
-                          · Busy{conflictInfo[detail.id] ? ` ${conflictInfo[detail.id]}` : ""}
-                        </span>
-                      )}
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
-            {form.busDetailId && busyBusDetailIds.has(form.busDetailId) && (
-              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[11px] font-medium text-red-700">
-                ⚠ This vehicle is already assigned to another departure at this time. Change the time or select a different vehicle.
-              </p>
-            )}
-            {busyBusDetailIds.size > 0 && !busyBusDetailIds.has(form.busDetailId ?? "") && (
-              <p className="text-[11px] font-medium text-amber-600">
-                {busyBusDetailIds.size} vehicle{busyBusDetailIds.size !== 1 ? "s are" : " is"} unavailable at this time slot
-              </p>
-            )}
-            {busDetailsLoading ? (
-              <p className="text-[11px] text-slate-500">Loading vehicles…</p>
-            ) : busDetailsError ? (
-              <p className="text-[11px] text-red-600">{busDetailsError}</p>
-            ) : busyBusDetailIds.size === 0 ? (
-              <p className="text-[11px] text-slate-500">
-                Pick a saved vehicle so passengers see a consistent fleet.
-              </p>
-            ) : null}
-          </div>
-
-          {/* Bus Type and Price */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="bus-type" className="text-sm font-semibold">Bus Type</Label>
-              <Select
-                value={form.busType}
-                onValueChange={(value) => {
-                  if (!isBusType(value)) {
-                    return;
-                  }
-
-                  const nextType = value;
-                  setTemplateSaveState(null);
-                  setForm((current) => ({
-                    ...current,
-                    busType: nextType,
-                    seatLayout: getSeatLayoutTemplate(nextType),
-                  }));
-                }}
-              >
-                <SelectTrigger id="bus-type" className="h-11 w-full rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20">
-                  <SelectValue placeholder="Choose bus type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {BUS_TYPES.map((busType) => (
-                    <SelectItem key={busType} value={busType}>
-                      {formatBusType(busType)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="bus-price" className="text-sm font-semibold">Price per Seat</Label>
-              <Input
-                id="bus-price"
-                type="number"
-                min={1}
-                value={form.pricePerSeat}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    pricePerSeat: event.target.value,
-                  }))
-                }
-                className="h-11 rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="bus-driver" className="text-sm font-semibold">
-                Assigned driver
-              </Label>
-              <span className="text-xs text-slate-400">
-                {drivers.length - busyDriverIds.size} of {drivers.length} driver{drivers.length === 1 ? "" : "s"} free
-                {availabilityLoading && " · checking…"}
-              </span>
-            </div>
-            <Select
-              value={form.driverId}
-              onValueChange={(value) =>
-                setForm((current) => ({
-                  ...current,
-                  driverId: value,
-                }))
-              }
-            >
-              <SelectTrigger
-                id="bus-driver"
-                className="h-11 rounded-xl border-orange-200/60 bg-white/90 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
-              >
-                <SelectValue placeholder="Select a driver (optional)" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Unassigned</SelectItem>
-                {drivers.map((driver) => {
-                  const isBusy = busyDriverIds.has(driver.id);
-                  return (
-                    <SelectItem key={driver.id} value={driver.id} disabled={isBusy}>
-                      {driver.name} · {driver.phone}
-                      {isBusy && (
-                        <span className="ml-2 text-[10px] font-bold text-red-500">
-                          · Busy{conflictInfo[driver.id] ? ` ${conflictInfo[driver.id]}` : ""}
-                        </span>
-                      )}
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
-            {form.driverId && busyDriverIds.has(form.driverId) && (
-              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[11px] font-medium text-red-700">
-                ⚠ This driver is already assigned to another departure at this time. Change the time or select a different driver.
-              </p>
-            )}
-            {busyDriverIds.size > 0 && !busyDriverIds.has(form.driverId ?? "") && (
-              <p className="text-[11px] font-medium text-amber-600">
-                {busyDriverIds.size} driver{busyDriverIds.size !== 1 ? "s are" : " is"} unavailable at this time slot
-              </p>
-            )}
-            <p className="text-[11px] text-slate-500">
-              {driversLoading
-                ? "Loading driver roster…"
-                : drivers.length === 0
-                ? "Add a driver first before assigning it to a bus."
-                : "Choose a driver who will operate this departure."}
-            </p>
-            {driversError ? (
-              <p className="text-[11px] text-red-600">{driversError}</p>
-            ) : null}
-          </div>
-
-          {/* Amenities Section */}
-          <div className="space-y-3">
-            <Label className="text-sm font-semibold">Bus Amenities</Label>
-            <div className="rounded-2xl border-2 border-dashed border-orange-300/50 bg-gradient-to-br from-orange-50/50 to-red-50/50 p-5">
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {AMENITY_OPTIONS.map((amenity) => (
-                  <div
-                    key={amenity.value}
-                    className="flex items-start space-x-3 rounded-xl border border-orange-200/60 bg-white/80 p-3 hover:bg-white/100 transition-colors"
-                  >
-                    <Checkbox
-                      id={`amenity-${amenity.value}`}
-                      checked={form.amenities.includes(amenity.value as AmenityValue)}
-                      onCheckedChange={(checked) => {
-                        setForm((current) => ({
-                          ...current,
-                          amenities: checked
-                            ? [...current.amenities, amenity.value as AmenityValue]
-                            : current.amenities.filter((a) => a !== amenity.value),
-                        }));
-                      }}
-                      className="mt-0.5 border-orange-300 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                    />
-                    <div className="flex-1">
-                      <Label
-                        htmlFor={`amenity-${amenity.value}`}
-                        className="cursor-pointer text-sm font-medium text-foreground"
-                      >
+                    <label
+                      key={amenity.value}
+                      className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition-all ${
+                        checked
+                          ? "border-indigo-300 bg-indigo-50 shadow-sm"
+                          : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                      }`}
+                    >
+                      <Checkbox
+                        id={`amenity-${amenity.value}`}
+                        checked={checked}
+                        onCheckedChange={(c) => {
+                          setForm((current) => ({
+                            ...current,
+                            amenities: c
+                              ? [...current.amenities, amenity.value as AmenityValue]
+                              : current.amenities.filter((a) => a !== amenity.value),
+                          }));
+                        }}
+                        className="border-slate-300 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                      />
+                      <span className={`text-sm font-medium ${checked ? "text-indigo-800" : "text-slate-700"}`}>
                         <span className="mr-1.5">{amenity.icon}</span>
                         {amenity.label}
-                      </Label>
-                    </div>
-                  </div>
-                ))}
+                      </span>
+                    </label>
+                  );
+                })}
               </div>
-              <p className="mt-4 text-xs text-muted-foreground text-center">
-                {form.amenities.length} amen{form.amenities.length === 1 ? 'y' : 'ies'} selected
-              </p>
             </div>
           </div>
 
-          {/* Stops Section */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-semibold">Boarding & Drop-off stops</Label>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-10 rounded-full"
-                onClick={addStop}
-              >
-                Add stop
+          {/* ── Section 5: Stops ── */}
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Boarding & Drop-off Stops</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">First stop = main boarding point · Last stop = final drop-off</p>
+              </div>
+              <Button type="button" variant="outline" className="h-8 rounded-xl text-xs font-semibold" onClick={addStop}>
+                + Add Stop
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Keep the first stop as the main boarding point and the last as the final drop-off.
-            </p>
-            <div className="space-y-3">
+            <div className="p-4 space-y-2.5">
               {form.stops.map((stop, index) => (
-                <div
-                  key={stop.id}
-                  className="grid grid-cols-1 gap-3 rounded-2xl border border-dashed border-orange-200/60 bg-white/80 p-3 md:grid-cols-[1fr_auto_auto_auto]"
-                >
+                <div key={stop.id} className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50/50 p-3 md:grid-cols-[1fr_auto_auto_auto]">
                   <Input
                     value={stop.location}
-                    onChange={(event) =>
-                      updateStop(stop.id, { location: event.target.value })
-                    }
+                    onChange={(event) => updateStop(stop.id, { location: event.target.value })}
                     placeholder="Stop location"
-                    className="h-11 rounded-2xl"
+                    className="h-9 rounded-xl border-slate-200 bg-white text-sm"
                   />
                   <div className="flex items-center gap-2">
                     <Checkbox
                       checked={stop.boarding}
-                      onCheckedChange={(checked) =>
-                        updateStop(stop.id, { boarding: Boolean(checked) })
-                      }
-                      className="border-orange-300 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                      onCheckedChange={(checked) => updateStop(stop.id, { boarding: Boolean(checked) })}
+                      className="border-slate-300 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                     />
-                    <span className="text-sm font-medium text-foreground">Boarding</span>
+                    <span className="text-sm font-medium text-slate-700">Boarding</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Checkbox
                       checked={stop.dropping}
-                      onCheckedChange={(checked) =>
-                        updateStop(stop.id, { dropping: Boolean(checked) })
-                      }
-                      className="border-orange-300 data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                      onCheckedChange={(checked) => updateStop(stop.id, { dropping: Boolean(checked) })}
+                      className="border-slate-300 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                     />
-                    <span className="text-sm font-medium text-foreground">Drop-off</span>
+                    <span className="text-sm font-medium text-slate-700">Drop-off</span>
                   </div>
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="h-11 rounded-2xl text-red-600 hover:bg-red-50"
+                    className="h-9 rounded-xl text-red-600 hover:bg-red-50 text-xs font-semibold"
                     onClick={() => removeStop(stop.id)}
                     disabled={index === 0 || index === form.stops.length - 1}
                   >
@@ -834,95 +767,79 @@ export default function AdminBusDialog({
             </div>
           </div>
 
-          {/* Seat Layout Editor with Blocking */}
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="space-y-1">
-                <Label className="text-sm font-semibold">Seat Layout & Blocking</Label>
-                <p className="text-xs text-muted-foreground">
+          {/* ── Section 6: Seat Layout ── */}
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Seat Layout & Blocking</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">
                   {selectedBusDetail
                     ? `Saving updates the reusable layout for ${selectedBusDetail.name} (${selectedBusDetail.registrationNumber}).`
-                    : "Choose an assigned vehicle above if you want to save this layout as a reusable template."}
+                    : "Select a vehicle above to save this as a reusable template."}
                 </p>
               </div>
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                <div className="flex items-center gap-1">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
                   <div className="h-3 w-3 rounded bg-red-200 border border-red-400" />
-                  <span className="text-muted-foreground">Blocked</span>
+                  <span className="text-xs text-slate-500">Blocked</span>
                 </div>
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-10 rounded-full"
-                  disabled={
-                    isSavingTemplate || !form.busDetailId || Boolean(layoutValidation)
-                  }
+                  className="h-8 rounded-xl text-xs font-semibold border-slate-300 hover:border-indigo-400 hover:text-indigo-600"
+                  disabled={isSavingTemplate || !form.busDetailId || Boolean(layoutValidation)}
                   onClick={saveSeatTemplate}
                 >
-                  {isSavingTemplate ? "Saving template..." : "Save as Vehicle Template"}
+                  {isSavingTemplate ? "Saving…" : "Save as Vehicle Template"}
                 </Button>
               </div>
             </div>
-            <div className="rounded-2xl border-2 border-dashed border-orange-300/50 bg-gradient-to-br from-orange-50/50 to-red-50/50 p-6">
+            <div className="p-4 bg-slate-50/30">
               <SeatLayoutEditor
                 busType={form.busType}
                 value={form.seatLayout}
                 bookedSeats={bus?.bookedSeats ?? []}
                 blockedSeats={form.blockedSeats}
-                onChange={(seatLayout) =>
-                  setForm((current) => ({
-                    ...current,
-                    seatLayout,
-                  }))
-                }
-                onBlockedSeatsChange={(blockedSeats) =>
-                  setForm((current) => ({
-                    ...current,
-                    blockedSeats,
-                  }))
-                }
+                onChange={(seatLayout) => setForm((current) => ({ ...current, seatLayout }))}
+                onBlockedSeatsChange={(blockedSeats) => setForm((current) => ({ ...current, blockedSeats }))}
               />
             </div>
-            {templateSaveState ? (
-              <p
-                className={`rounded-xl border px-4 py-3 text-sm font-medium ${
-                  templateSaveState.type === "success"
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                    : "border-red-200 bg-red-50 text-red-700"
-                }`}
-              >
+            {templateSaveState && (
+              <div className={`mx-4 mb-4 rounded-xl border px-4 py-2.5 text-sm font-medium ${
+                templateSaveState.type === "success"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border-red-200 bg-red-50 text-red-700"
+              }`}>
                 {templateSaveState.text}
-              </p>
-            ) : null}
+              </div>
+            )}
           </div>
 
-          {error ? (
-            <p className="rounded-xl border-2 border-red-200/60 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+          {/* ── Error ── */}
+          {error && (
+            <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
               ⚠️ {error}
             </p>
-          ) : null}
+          )}
 
-          <DialogFooter className="gap-3 pt-4">
+          {/* ── Footer ── */}
+          <DialogFooter className="gap-3 pt-2 pb-1">
             <Button
               type="button"
               variant="outline"
-              className="h-11 rounded-xl border-2 border-orange-200/60 hover:bg-orange-50"
+              className="h-10 rounded-xl border-slate-300 text-slate-700 hover:bg-slate-50"
               onClick={() => onOpenChange(false)}
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              className="h-11 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 shadow-lg hover:shadow-xl transition-all"
+              className="h-10 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold px-6 shadow-md shadow-indigo-100"
               disabled={isPending || Boolean(layoutValidation) || hasConflict}
             >
               {isPending
-                ? isEditing
-                  ? "Saving..."
-                  : "Creating..."
-                : isEditing
-                ? "Save Changes"
-                : "Create Bus"}
+                ? isEditing ? "Saving…" : "Creating…"
+                : isEditing ? "Save Changes" : "Create Bus"}
             </Button>
           </DialogFooter>
         </form>

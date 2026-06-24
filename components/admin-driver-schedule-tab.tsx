@@ -88,8 +88,8 @@ function StatCard({ icon: Icon, label, value, color }: {
         <Icon className="size-5 text-white" />
       </div>
       <div>
-        <p className="text-xs text-slate-500 font-medium">{label}</p>
-        <p className="text-2xl font-bold text-slate-800">{value}</p>
+        <p className="text-xs text-slate-600 font-semibold">{label}</p>
+        <p className="text-2xl font-bold text-slate-900">{value}</p>
       </div>
     </div>
   );
@@ -408,8 +408,8 @@ export default function AdminDriverScheduleTab() {
             <CalendarDays className="size-5 text-white" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-slate-800">Driver Roster</h2>
-            <p className="text-xs text-slate-500">Assign drivers to vehicles by shift</p>
+            <h2 className="text-lg font-bold text-slate-900">Driver Roster</h2>
+            <p className="text-xs text-slate-600 font-medium">Assign drivers to vehicles by shift</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -493,18 +493,18 @@ export default function AdminDriverScheduleTab() {
                     "text-center mb-1 pb-1.5 border-b",
                     today ? "border-indigo-200" : "border-slate-100"
                   )}>
-                    <p className={cn("text-[10px] font-semibold uppercase tracking-wider",
-                      today ? "text-indigo-600" : "text-slate-400")}>
+                    <p className={cn("text-[11px] font-bold uppercase tracking-wider",
+                      today ? "text-indigo-600" : "text-slate-500")}>
                       {DAY_NAMES[i]}
                     </p>
                     <p className={cn(
                       "text-base font-bold mt-0.5",
-                      today ? "text-indigo-700" : "text-slate-700"
+                      today ? "text-indigo-700" : "text-slate-800"
                     )}>
                       {new Date(day + "T00:00:00").getDate()}
                     </p>
                     {daySchedules.length > 0 && (
-                      <p className="text-[10px] text-slate-400 mt-0.5">
+                      <p className="text-[11px] text-slate-500 font-medium mt-0.5">
                         {daySchedules.length} shift{daySchedules.length !== 1 ? "s" : ""}
                       </p>
                     )}
@@ -517,7 +517,7 @@ export default function AdminDriverScheduleTab() {
                     </div>
                   ) : daySchedules.length === 0 ? (
                     <div className="flex-1 flex items-center justify-center">
-                      <p className="text-[10px] text-slate-300 text-center">No shifts</p>
+                      <p className="text-xs text-slate-400 text-center font-medium">No shifts</p>
                     </div>
                   ) : (
                     daySchedules.map((s) => (
@@ -529,7 +529,7 @@ export default function AdminDriverScheduleTab() {
                   {/* Quick add for this day */}
                   <button
                     onClick={() => { setForm({ ...emptyForm(), date: day }); setFormError(""); setShowAdd(true); }}
-                    className="mt-auto w-full rounded-lg border border-dashed border-slate-200 py-1 text-[10px] text-slate-300 hover:border-indigo-300 hover:text-indigo-400 transition-colors"
+                    className="mt-auto w-full rounded-lg border border-dashed border-slate-300 py-1 text-xs text-slate-500 font-medium hover:border-indigo-400 hover:text-indigo-600 transition-colors"
                   >
                     + Add
                   </button>
@@ -567,8 +567,8 @@ export default function AdminDriverScheduleTab() {
                   <tr>
                     <td colSpan={7} className="px-4 py-16 text-center">
                       <CalendarDays className="size-10 text-slate-200 mx-auto mb-3" />
-                      <p className="text-slate-400 font-medium">No schedules this week</p>
-                      <p className="text-slate-300 text-xs mt-1">Use the + Add button to create driver assignments.</p>
+                      <p className="text-slate-600 font-semibold">No schedules this week</p>
+                      <p className="text-slate-500 text-xs mt-1">Use the + Add button to create driver assignments.</p>
                     </td>
                   </tr>
                 ) : (
