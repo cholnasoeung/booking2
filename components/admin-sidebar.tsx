@@ -7,7 +7,7 @@ import {
   BarChart3, Tags, Bell, FileSpreadsheet, Shield, Activity, Package,
   ChevronDown, Users, LogOut, UserCog, MessageSquare, Star,
   CalendarClock, MonitorCheck, ScanLine, Settings, Fuel, Wallet, Wrench, CalendarDays,
-  Briefcase, Banknote, PackageSearch, RotateCcw,
+  Briefcase, Banknote, PackageSearch, RotateCcw, AlertTriangle,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
@@ -51,10 +51,11 @@ const navSections = [
     title: "Management",
     accent: "text-slate-400",
     items: [
-      { title: "Drivers",        href: "/admin?tab=drivers",        icon: Users,        gradient: "from-cyan-500 to-sky-600" },
-      { title: "Driver Roster", href: "/admin?tab=driver-roster", icon: CalendarDays, gradient: "from-indigo-500 to-violet-600" },
-      { title: "Bus Details",   href: "/admin?tab=bus-details",   icon: Package,         gradient: "from-slate-400 to-gray-500" },
-      { title: "Fuel Logs",      href: "/admin?tab=fuel-logs",      icon: Fuel,   gradient: "from-amber-500 to-orange-600" },
+      { title: "Drivers",        href: "/admin?tab=drivers",        icon: Users,          gradient: "from-cyan-500 to-sky-600"     },
+      { title: "Driver Roster",  href: "/admin?tab=driver-roster",  icon: CalendarDays,   gradient: "from-indigo-500 to-violet-600" },
+      { title: "Bus Details",    href: "/admin?tab=bus-details",    icon: Package,        gradient: "from-slate-400 to-gray-500"   },
+      { title: "Incidents",      href: "/admin?tab=incidents",      icon: AlertTriangle,  gradient: "from-rose-500 to-red-600",   badge: "New" },
+      { title: "Fuel Logs",      href: "/admin?tab=fuel-logs",      icon: Fuel,           gradient: "from-amber-500 to-orange-600" },
       { title: "Driver Earnings", href: "/admin?tab=driver-earnings", icon: Wallet, gradient: "from-violet-500 to-purple-600" },
       { title: "Maintenance",    href: "/admin?tab=maintenance",     icon: Wrench,   gradient: "from-rose-500 to-red-600"     },
       { title: "Payroll",       href: "/admin?tab=payroll",         icon: Banknote,   gradient: "from-emerald-500 to-cyan-600" },

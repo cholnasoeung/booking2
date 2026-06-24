@@ -77,8 +77,21 @@ export async function POST(request: Request) {
       );
     }
 
-    // Calculate pricing
-    const totalPrice = seats.length * busDocument.pricePerSeat;
+    // Calculate pricing (with per-seat tier multipliers)
+    const tierMultipliers = (busDocument as any).seatTierMultipliers ?? null;
+    const totalPrice = seats.reduce((sum: number, seatCode: string) => {
+      const item = normalizedBus.seatLayout.items.find(
+        (i: { seatCode?: string }) => i.seatCode?.toUpperCase() === seatCode.toUpperCase()
+      );
+      const tier = (item as any)?.tier ?? "standard";
+      const multiplier =
+        tier === "vip"
+          ? (tierMultipliers?.vip ?? 1.6)
+          : tier === "business"
+          ? (tierMultipliers?.business ?? 1.3)
+          : 1.0;
+      return sum + Math.round(busDocument.pricePerSeat * multiplier * 100) / 100;
+    }, 0);
     let discountAmount = 0;
     let appliedPromoCode = null;
 

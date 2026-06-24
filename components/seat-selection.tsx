@@ -78,7 +78,21 @@ export default function SeatSelection({
     droppingOptions[0]?.location ?? bus.to
   );
 
-  const totalPrice = selectedSeats.length * bus.pricePerSeat;
+  function getSeatPrice(seatCode: string): number {
+    const item = bus.seatLayout.items.find(
+      (i) => i.seatCode?.toUpperCase() === seatCode.toUpperCase()
+    );
+    const tier = item?.tier ?? "standard";
+    const multiplier =
+      tier === "vip"
+        ? (bus.seatTierMultipliers?.vip ?? 1.6)
+        : tier === "business"
+        ? (bus.seatTierMultipliers?.business ?? 1.3)
+        : 1.0;
+    return Math.round(bus.pricePerSeat * multiplier * 100) / 100;
+  }
+
+  const totalPrice = selectedSeats.reduce((sum, code) => sum + getSeatPrice(code), 0);
   const validSeatCodes = useMemo(
     () => new Set(getSeatCodesFromLayout(bus.seatLayout)),
     [bus.seatLayout]
@@ -398,7 +412,9 @@ export default function SeatSelection({
               variant="outline"
               className="rounded-full border-slate-200 bg-white px-3 py-1 text-slate-700"
             >
-              {formatCurrency(bus.pricePerSeat)} per seat
+              {bus.seatLayout.items.some((i) => (i as any).tier && (i as any).tier !== "standard")
+                ? `from ${formatCurrency(bus.pricePerSeat)}`
+                : `${formatCurrency(bus.pricePerSeat)} per seat`}
             </Badge>
           </div>
 
@@ -573,15 +589,23 @@ export default function SeatSelection({
               <span className="font-medium">{selectedSeats.length}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Price per seat</span>
+              <span className="text-muted-foreground">Base price</span>
               <span className="font-medium">{formatCurrency(bus.pricePerSeat)}</span>
             </div>
 
             {selectedSeats.length > 0 ? (
-              <div className="rounded-xl bg-slate-100 px-3 py-2 text-xs text-slate-600">
-                Calculation: {selectedSeats.length} seat
-                {selectedSeats.length > 1 ? "s" : ""} x {formatCurrency(bus.pricePerSeat)} ={" "}
-                {formatCurrency(totalPrice)}
+              <div className="rounded-xl bg-slate-100 px-3 py-2 text-xs text-slate-600 space-y-1">
+                {selectedSeats.map((code) => {
+                  const p = getSeatPrice(code);
+                  const item = bus.seatLayout.items.find((i) => i.seatCode?.toUpperCase() === code.toUpperCase());
+                  const tier = (item as any)?.tier;
+                  return (
+                    <div key={code} className="flex justify-between">
+                      <span>{code}{tier && tier !== "standard" ? <span className="ml-1 font-semibold capitalize text-indigo-600">({tier})</span> : null}</span>
+                      <span>{formatCurrency(p)}</span>
+                    </div>
+                  );
+                })}
               </div>
             ) : null}
 

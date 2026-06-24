@@ -11,6 +11,8 @@ export type SeatLayoutItemKind =
   | "empty"
   | "deck_label";
 
+export type SeatTier = "standard" | "business" | "vip";
+
 export type SeatLayoutItem = {
   id: string;
   kind: SeatLayoutItemKind;
@@ -20,6 +22,7 @@ export type SeatLayoutItem = {
   colSpan?: number;
   seatCode?: string;
   label?: string;
+  tier?: SeatTier;
 };
 
 export type SeatLayout = {

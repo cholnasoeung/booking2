@@ -10,10 +10,17 @@ import { ArrowUp } from "lucide-react";
 import {
   type SeatLayout,
   type SeatLayoutItem,
+  type SeatTier,
   getSeatLayoutItems,
   isBookableItemKind,
   normalizeSeatCode,
 } from "@/lib/seat-layout";
+
+const TIER_BADGE: Record<SeatTier, { label: string; className: string }> = {
+  standard: { label: "STD", className: "bg-slate-200/80 text-slate-600"  },
+  business: { label: "BIZ", className: "bg-blue-100 text-blue-700"       },
+  vip:      { label: "VIP", className: "bg-amber-100 text-amber-700"     },
+};
 import { cn } from "@/lib/utils";
 
 type SeatMapProps = {
@@ -276,9 +283,9 @@ const SeatMapCell = memo(function SeatMapCell({
         }}
       >
         {item.kind === "sleeper" ? (
-          <SleeperSeat label={seatLabel} state={seatState} compact={compact} />
+          <SleeperSeat label={seatLabel} state={seatState} compact={compact} tier={item.tier} />
         ) : (
-          <UprightSeat label={seatLabel} state={seatState} compact={compact} />
+          <UprightSeat label={seatLabel} state={seatState} compact={compact} tier={item.tier} />
         )}
       </button>
     </div>
@@ -289,12 +296,15 @@ function UprightSeat({
   label,
   state,
   compact,
+  tier,
 }: {
   label: string;
   state: SeatState;
   compact: boolean;
+  tier?: SeatTier;
 }) {
   const theme = getSeatTheme(state);
+  const tierBadge = tier && tier !== "standard" ? TIER_BADGE[tier] : null;
 
   return (
     <div
@@ -344,6 +354,11 @@ function UprightSeat({
             {theme.statusLabel}
           </span>
         ) : null}
+        {tierBadge && !compact && (
+          <span className={cn("mt-1 rounded-full px-1.5 text-[8px] font-bold uppercase tracking-wider", tierBadge.className)}>
+            {tierBadge.label}
+          </span>
+        )}
       </div>
 
       <div
@@ -369,12 +384,16 @@ function SleeperSeat({
   label,
   state,
   compact,
+  tier,
 }: {
   label: string;
   state: SeatState;
   compact: boolean;
+  tier?: SeatTier;
 }) {
   const theme = getSeatTheme(state);
+
+  const tierBadge = tier && tier !== "standard" ? TIER_BADGE[tier] : null;
 
   return (
     <div
@@ -416,6 +435,11 @@ function SleeperSeat({
         >
           {theme.statusLabel}
         </span>
+        {tierBadge && (
+          <span className={cn("mt-1 rounded-full px-1.5 text-[8px] font-bold uppercase tracking-wider", tierBadge.className)}>
+            {tierBadge.label}
+          </span>
+        )}
       </div>
 
       <div

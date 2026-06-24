@@ -56,6 +56,8 @@ type BusFormState = {
     driverId: string | null;
     busDetailId: string | null;
     endDate: string;
+    tierBusinessMultiplier: string;
+    tierVipMultiplier: string;
   };
 
 type StopEntry = BusStop & {
@@ -232,10 +234,21 @@ export default function AdminBusDialog({
   }, [form.date, form.endDate, form.departureTime, form.arrivalTime, bus?.id]);
 
   const layoutValidation = getLayoutValidation(form.seatLayout, bus?.bookedSeats ?? []);
-  const hasConflict =
-    (Boolean(form.busDetailId) && busyBusDetailIds.has(form.busDetailId!)) ||
-    (Boolean(form.driverId) && busyDriverIds.has(form.driverId!));
   const isEditing = Boolean(bus);
+
+  // In edit mode, only flag a conflict when the user has actually changed the
+  // vehicle/driver or the time window — not on initial open (the existing
+  // assignment was already valid when the bus was created).
+  const timeChanged = isEditing && (
+    form.date !== bus?.travelDate ||
+    form.departureTime !== bus?.departureTime ||
+    form.arrivalTime !== bus?.arrivalTime
+  );
+  const vehicleConflict = Boolean(form.busDetailId) && busyBusDetailIds.has(form.busDetailId!) &&
+    (!isEditing || timeChanged || form.busDetailId !== (bus?.busDetail?.id ?? null));
+  const driverConflict = Boolean(form.driverId) && busyDriverIds.has(form.driverId!) &&
+    (!isEditing || timeChanged || form.driverId !== (bus?.driver?.id ?? null));
+  const hasConflict = vehicleConflict || driverConflict;
   const selectedBusDetail =
     busDetails.find((detail) => detail.id === form.busDetailId) ?? null;
 
@@ -389,6 +402,10 @@ export default function AdminBusDialog({
             })),
             driverId: form.driverId || null,
             busDetailId: form.busDetailId || null,
+            seatTierMultipliers: {
+              business: Number(form.tierBusinessMultiplier) || 1.3,
+              vip:      Number(form.tierVipMultiplier)      || 1.6,
+            },
           }),
         });
 
@@ -562,7 +579,7 @@ export default function AdminBusDialog({
                     })}
                   </SelectContent>
                 </Select>
-                {form.busDetailId && busyBusDetailIds.has(form.busDetailId) ? (
+                {vehicleConflict ? (
                   <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[11px] font-medium text-red-700">
                     ⚠ This vehicle is already assigned at this time. Change the time or pick a different vehicle.
                   </p>
@@ -611,7 +628,7 @@ export default function AdminBusDialog({
                     })}
                   </SelectContent>
                 </Select>
-                {form.driverId && busyDriverIds.has(form.driverId) ? (
+                {driverConflict ? (
                   <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[11px] font-medium text-red-700">
                     ⚠ This driver is already assigned at this time. Change the time or pick a different driver.
                   </p>
@@ -657,7 +674,7 @@ export default function AdminBusDialog({
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="bus-price" className="text-sm font-semibold text-slate-700">Price per Seat ($) <span className="text-red-500">*</span></Label>
+                <Label htmlFor="bus-price" className="text-sm font-semibold text-slate-700">Base Price per Seat ($) <span className="text-red-500">*</span></Label>
                 <Input
                   id="bus-price"
                   type="number"
@@ -667,6 +684,49 @@ export default function AdminBusDialog({
                   className="h-10 rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
                   required
                 />
+              </div>
+            </div>
+
+            {/* Tier pricing */}
+            <div className="rounded-xl border border-blue-100 bg-blue-50/40 p-4 space-y-3">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Seat Tier Pricing</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Set multipliers per tier — Standard is always 1.0×. Assign tiers per seat in the layout editor below.
+                </p>
+              </div>
+              <div className="grid grid-cols-3 gap-3 text-sm">
+                <div className="rounded-xl bg-white border border-slate-200 p-3 text-center">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Standard</p>
+                  <p className="text-base font-bold text-slate-700 mt-1">1.0×</p>
+                  <p className="text-[10px] text-slate-400">${Number(form.pricePerSeat || 0).toFixed(2)}</p>
+                </div>
+                <div className="rounded-xl bg-white border border-blue-200 p-3 text-center">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-blue-500">Business</p>
+                  <Input
+                    type="number"
+                    step="0.05"
+                    min="1"
+                    max="5"
+                    value={form.tierBusinessMultiplier}
+                    onChange={(e) => setForm((c) => ({ ...c, tierBusinessMultiplier: e.target.value }))}
+                    className="h-8 text-center text-base font-bold text-blue-700 border-0 bg-transparent focus:ring-0 p-0 mt-1"
+                  />
+                  <p className="text-[10px] text-slate-400">${(Number(form.pricePerSeat || 0) * Number(form.tierBusinessMultiplier || 1.3)).toFixed(2)}</p>
+                </div>
+                <div className="rounded-xl bg-white border border-amber-200 p-3 text-center">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-600">VIP</p>
+                  <Input
+                    type="number"
+                    step="0.05"
+                    min="1"
+                    max="5"
+                    value={form.tierVipMultiplier}
+                    onChange={(e) => setForm((c) => ({ ...c, tierVipMultiplier: e.target.value }))}
+                    className="h-8 text-center text-base font-bold text-amber-700 border-0 bg-transparent focus:ring-0 p-0 mt-1"
+                  />
+                  <p className="text-[10px] text-slate-400">${(Number(form.pricePerSeat || 0) * Number(form.tierVipMultiplier || 1.6)).toFixed(2)}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -835,7 +895,7 @@ export default function AdminBusDialog({
             <Button
               type="submit"
               className="h-10 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold px-6 shadow-md shadow-indigo-100"
-              disabled={isPending || Boolean(layoutValidation) || hasConflict}
+              disabled={isPending || Boolean(layoutValidation) || (!isEditing && hasConflict)}
             >
               {isPending
                 ? isEditing ? "Saving…" : "Creating…"
@@ -864,6 +924,8 @@ function createFormState(routes: RouteSummary[], bus?: BusSummary | null): BusFo
       endDate: bus.travelDate,
         driverId: bus.driver?.id ?? null,
         busDetailId: bus.busDetail?.id ?? null,
+        tierBusinessMultiplier: String(bus.seatTierMultipliers?.business ?? 1.3),
+        tierVipMultiplier:      String(bus.seatTierMultipliers?.vip      ?? 1.6),
     };
   }
 
@@ -884,6 +946,8 @@ function createFormState(routes: RouteSummary[], bus?: BusSummary | null): BusFo
     endDate: "",
       driverId: null,
       busDetailId: null,
+      tierBusinessMultiplier: "1.3",
+      tierVipMultiplier:      "1.6",
   };
 }
 

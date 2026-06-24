@@ -63,6 +63,14 @@ export async function PUT(
       typeof body?.busDetailId === "string" && body.busDetailId.trim()
         ? body.busDetailId.trim()
         : "";
+    const rawTierMultipliers = body?.seatTierMultipliers;
+    const seatTierMultipliers =
+      rawTierMultipliers && typeof rawTierMultipliers === "object"
+        ? {
+            business: Number(rawTierMultipliers.business) >= 1 ? Number(rawTierMultipliers.business) : 1.3,
+            vip:      Number(rawTierMultipliers.vip)      >= 1 ? Number(rawTierMultipliers.vip)      : 1.6,
+          }
+        : null;
 
     if (!isValidObjectId(routeId)) {
       return Response.json({ message: "A valid route is required." }, { status: 400 });
@@ -149,18 +157,28 @@ export async function PUT(
     });
     const busDate = toTravelDate(date);
 
-    const conflictingBus = await BusModel.findOne({
-      _id: { $ne: id },
-      routeId,
-      date: busDate,
-      departureTime,
-    }).lean();
+    // Only check for schedule conflicts when route, date, or departure time has changed.
+    // If none of those fields changed the existing assignment is already in the DB and
+    // the $ne guard above would exclude only this bus — a spurious conflict would fire
+    // whenever a duplicate record exists from a previously created date-range.
+    const routeChanged      = String(existingBusDocument.routeId) !== routeId;
+    const dateChanged       = existingBusDocument.date.toISOString() !== busDate.toISOString();
+    const departureChanged  = existingBusDocument.departureTime !== departureTime;
 
-    if (conflictingBus) {
-      return Response.json(
-        { message: "A different bus already uses that route and departure time." },
-        { status: 409 }
-      );
+    if (routeChanged || dateChanged || departureChanged) {
+      const conflictingBus = await BusModel.findOne({
+        _id: { $ne: id },
+        routeId,
+        date: busDate,
+        departureTime,
+      }).lean();
+
+      if (conflictingBus) {
+        return Response.json(
+          { message: "A different bus already uses that route and departure time." },
+          { status: 409 }
+        );
+      }
     }
 
     existingBusDocument.set({
@@ -178,6 +196,7 @@ export async function PUT(
       amenities,
       driverId: driverId || null,
       busDetailId: busDetailId || null,
+      ...(seatTierMultipliers ? { seatTierMultipliers } : {}),
     });
     await existingBusDocument.save();
 

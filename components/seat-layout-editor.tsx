@@ -21,6 +21,7 @@ import {
   type SeatLayout,
   type SeatLayoutItem,
   type SeatLayoutItemKind,
+  type SeatTier,
   autofillSeatCodes,
   cloneSeatLayout,
   createLayoutItem,
@@ -31,6 +32,12 @@ import {
   normalizeSeatCode,
   validateSeatLayout,
 } from "@/lib/seat-layout";
+
+const TIER_OPTIONS: { value: SeatTier; label: string; color: string }[] = [
+  { value: "standard", label: "Standard",   color: "text-slate-600"   },
+  { value: "business", label: "Business",   color: "text-blue-600"    },
+  { value: "vip",      label: "VIP",        color: "text-amber-600"   },
+];
 
 const itemKindOptions: SeatLayoutItemKind[] = [
   "seat",
@@ -454,6 +461,32 @@ export default function SeatLayoutEditor({
                           className="h-11 rounded-2xl"
                         />
                       </div>
+
+                      {isBookableItemKind(item.kind) && (
+                        <div className="space-y-2">
+                          <Label>Tier</Label>
+                          <Select
+                            value={item.tier ?? "standard"}
+                            onValueChange={(v) =>
+                              updateItem(item.id, (current) => ({
+                                ...current,
+                                tier: v as SeatTier,
+                              }))
+                            }
+                          >
+                            <SelectTrigger className="h-11 w-full rounded-2xl">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {TIER_OPTIONS.map((t) => (
+                                <SelectItem key={t.value} value={t.value}>
+                                  <span className={t.color}>{t.label}</span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

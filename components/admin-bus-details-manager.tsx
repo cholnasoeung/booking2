@@ -3,8 +3,9 @@
 import { useRef, useState, useTransition } from "react";
 import {
   Bus, Plus, MoreVertical, Eye, Pencil, Trash2, RefreshCw, X,
-  Hash, Users, Calendar, Layers, Image, ImagePlus,
+  Hash, Users, Calendar, Layers, Image, ImagePlus, FileText,
 } from "lucide-react";
+import AdminVehicleDocuments from "@/components/admin-vehicle-documents";
 import { Button } from "@/components/ui/button";
 import { confirmDelete, toastSuccess, toastError } from "@/lib/swal";
 import { Input } from "@/components/ui/input";
@@ -313,6 +314,7 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
   const [showAdd, setShowAdd] = useState(false);
   const [editTarget, setEditTarget] = useState<BusDetail | null>(null);
   const [detailTarget, setDetailTarget] = useState<BusDetail | null>(null);
+  const [docsTarget, setDocsTarget] = useState<BusDetail | null>(null);
 
 
   // Form state
@@ -518,6 +520,12 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
                         >
                           <Pencil className="h-4 w-4" />Edit
                         </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="gap-2 text-violet-700 focus:text-violet-700 focus:bg-violet-50"
+                          onClick={() => setDocsTarget(detail)}
+                        >
+                          <FileText className="h-4 w-4" />Documents
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="gap-2 text-red-700 focus:text-red-700 focus:bg-red-50"
@@ -670,6 +678,10 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
 
               <div className="flex justify-end gap-3 pt-1">
                 <Button variant="outline" className="rounded-xl" onClick={() => setDetailTarget(null)}>Close</Button>
+                <Button variant="outline" className="rounded-xl border-violet-200 text-violet-700 hover:bg-violet-50"
+                  onClick={() => { setDetailTarget(null); setDocsTarget(detailTarget); }}>
+                  <FileText className="h-4 w-4 mr-2" />Documents
+                </Button>
                 <Button className="rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white"
                   onClick={() => { setDetailTarget(null); setEditForm(formFromDetail(detailTarget)); setEditTarget(detailTarget); }}>
                   <Pencil className="h-4 w-4 mr-2" />Edit
@@ -677,6 +689,27 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── DOCUMENTS MODAL ── */}
+      <Dialog open={!!docsTarget} onOpenChange={(o) => { if (!o) setDocsTarget(null); }}>
+        <DialogContent className="sm:max-w-2xl rounded-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-slate-900">Vehicle Documents</DialogTitle>
+            <DialogDescription>
+              Track insurance, road tax, inspections, and permits with expiry alerts.
+            </DialogDescription>
+          </DialogHeader>
+          {docsTarget && (
+            <AdminVehicleDocuments
+              busDetailId={docsTarget.id}
+              busName={`${docsTarget.name} · ${docsTarget.registrationNumber}`}
+            />
+          )}
+          <div className="flex justify-end pt-2 border-t border-slate-100 mt-2">
+            <Button variant="outline" className="rounded-xl" onClick={() => setDocsTarget(null)}>Close</Button>
+          </div>
         </DialogContent>
       </Dialog>
 

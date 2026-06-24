@@ -67,6 +67,14 @@ export async function POST(request: Request) {
         ? body.busDetailId.trim()
         : "";
     const endDate = typeof body?.endDate === "string" ? body.endDate : "";
+    const rawTierMultipliers = body?.seatTierMultipliers;
+    const seatTierMultipliers =
+      rawTierMultipliers && typeof rawTierMultipliers === "object"
+        ? {
+            business: Number(rawTierMultipliers.business) >= 1 ? Number(rawTierMultipliers.business) : 1.3,
+            vip:      Number(rawTierMultipliers.vip)      >= 1 ? Number(rawTierMultipliers.vip)      : 1.6,
+          }
+        : null;
 
     if (!isValidObjectId(routeId)) {
       return Response.json({ message: "A valid route is required." }, { status: 400 });
@@ -229,6 +237,7 @@ export async function POST(request: Request) {
         amenities,
         driverId: driverReference,
         busDetailId: busDetailReference,
+        ...(seatTierMultipliers ? { seatTierMultipliers } : {}),
       }))
     );
 

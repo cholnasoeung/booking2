@@ -48,6 +48,7 @@ type StoredBusRecord = {
   departureStatus?: string;
   delayMinutes?: number;
   statusNote?: string;
+  seatTierMultipliers?: { business?: number; vip?: number } | null;
 };
 
 type DriverRecord = {
@@ -145,6 +146,7 @@ export type RouteSummary = {
   departureStatus: string;
   delayMinutes: number;
   statusNote: string;
+  seatTierMultipliers?: { business?: number; vip?: number } | null;
   rating?: { average: number; count: number } | null;
   driver?: {
     id: string;
@@ -290,6 +292,7 @@ function serializeBus(
     departureStatus: bus.departureStatus ?? "scheduled",
     delayMinutes: bus.delayMinutes ?? 0,
     statusNote: bus.statusNote ?? "",
+    seatTierMultipliers: bus.seatTierMultipliers ?? null,
     stops,
     driver: driver
       ? {

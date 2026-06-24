@@ -2,6 +2,18 @@ import mongoose, { type Document, Schema } from "mongoose";
 
 import { type BusType, type SeatLayout } from "@/lib/seat-layout";
 
+export type VehicleDocType = "insurance" | "road_tax" | "inspection" | "permit" | "other";
+
+export interface IVehicleDocument {
+  _id: mongoose.Types.ObjectId;
+  docType: VehicleDocType;
+  docNumber: string;
+  issueDate?: Date;
+  expiryDate: Date;
+  notes?: string;
+  createdAt: Date;
+}
+
 export interface IBusDetail extends Document {
   name: string;
   registrationNumber: string;
@@ -10,9 +22,25 @@ export interface IBusDetail extends Document {
   seatLayoutTemplate?: SeatLayout | null;
   amenities: string[];
   images: string[];
+  documents: IVehicleDocument[];
   createdAt: Date;
   updatedAt: Date;
 }
+
+const VehicleDocumentSchema = new Schema<IVehicleDocument>(
+  {
+    docType: {
+      type: String,
+      enum: ["insurance", "road_tax", "inspection", "permit", "other"],
+      required: true,
+    },
+    docNumber: { type: String, required: true, trim: true },
+    issueDate:  { type: Date },
+    expiryDate: { type: Date, required: true, index: true },
+    notes:      { type: String, trim: true },
+  },
+  { timestamps: true }
+);
 
 const BusDetailSchema = new Schema<IBusDetail>(
   {
@@ -48,6 +76,10 @@ const BusDetailSchema = new Schema<IBusDetail>(
     },
     images: {
       type: [String],
+      default: [],
+    },
+    documents: {
+      type: [VehicleDocumentSchema],
       default: [],
     },
   },

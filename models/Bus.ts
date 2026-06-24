@@ -30,6 +30,10 @@ export interface IBus extends Document {
   departureStatus: BusDepartureStatus;
   delayMinutes?: number;
   statusNote?: string;
+  seatTierMultipliers?: {
+    business?: number;
+    vip?: number;
+  };
 }
 
 const BusSchema = new Schema<IBus>({
@@ -126,6 +130,13 @@ const BusSchema = new Schema<IBus>({
     type: String,
     maxlength: 300,
     default: "",
+  },
+  seatTierMultipliers: {
+    type: {
+      business: { type: Number, min: 1, default: 1.3 },
+      vip:      { type: Number, min: 1, default: 1.6 },
+    },
+    default: null,
   },
 });
 
