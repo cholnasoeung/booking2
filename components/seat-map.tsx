@@ -176,7 +176,15 @@ function SeatMap({
             className="relative grid gap-4"
             style={{
               gridTemplateColumns: `repeat(${layout.grid.cols}, minmax(${compact ? "56px" : "72px"}, 1fr))`,
-              gridAutoRows: compact ? "86px" : "98px",
+              gridTemplateRows: (() => {
+                const deckLabelRows = new Set(
+                  items.filter((i) => i.kind === "deck_label").map((i) => i.row)
+                );
+                const rowHeight = compact ? "86px" : "98px";
+                return Array.from({ length: layout.grid.rows }, (_, i) =>
+                  deckLabelRows.has(i + 1) ? "38px" : rowHeight
+                ).join(" ");
+              })(),
             }}
           >
             {items.map((item) => (
@@ -430,6 +438,23 @@ function StaticLayoutItem({
   compact: boolean;
 }) {
   switch (item.kind) {
+    case "deck_label":
+      return (
+        <div className="flex h-full min-h-0 items-center justify-center overflow-hidden rounded-2xl border border-indigo-200 bg-gradient-to-r from-indigo-50 via-violet-50 to-indigo-50 px-4">
+          <div className="flex w-full items-center gap-3">
+            <div className="h-px flex-1 bg-indigo-200" />
+            <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.26em] text-indigo-600">
+              {item.label === "Upper Deck" ? (
+                <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 fill-indigo-500" aria-hidden><path d="M8 3L14 10H2L8 3Z"/></svg>
+              ) : (
+                <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 fill-indigo-400" aria-hidden><path d="M8 13L14 6H2L8 13Z"/></svg>
+              )}
+              {item.label ?? "Deck"}
+            </span>
+            <div className="h-px flex-1 bg-indigo-200" />
+          </div>
+        </div>
+      );
     case "aisle":
       return (
         <div className="relative h-full min-h-0 rounded-[22px] bg-gradient-to-b from-transparent via-white/60 to-transparent">

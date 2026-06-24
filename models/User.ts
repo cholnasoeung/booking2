@@ -62,7 +62,7 @@ const SavedSeatTemplateSchema = new Schema<ISavedSeatTemplate>(
   {
     busType: {
       type: String,
-      enum: ["bus_45", "mini_bus", "car"],
+      enum: ["bus_45", "mini_bus", "car", "sleeper_30", "sleeper_40"],
       required: true,
     },
     seats: {
@@ -139,7 +139,7 @@ const UserSchema = new Schema<IUser>(
       preferredSeatType: [String],
       preferredBusType: {
         type: [String],
-        enum: ["bus_45", "mini_bus", "car"],
+        enum: ["bus_45", "mini_bus", "car", "sleeper_30", "sleeper_40"],
       },
       savedSeatTemplates: {
         type: [SavedSeatTemplateSchema],

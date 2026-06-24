@@ -549,7 +549,9 @@ function normalizeLayout(layout: SeatLayout) {
               ? "WC"
               : nextItem.kind === "aisle"
                 ? "Aisle"
-                : "";
+                : nextItem.kind === "deck_label"
+                  ? (nextItem.label ?? "Deck")
+                  : "";
       }
     }
 

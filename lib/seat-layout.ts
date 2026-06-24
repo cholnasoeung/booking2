@@ -8,7 +8,8 @@ export type SeatLayoutItemKind =
   | "aisle"
   | "driver"
   | "toilet"
-  | "empty";
+  | "empty"
+  | "deck_label";
 
 export type SeatLayoutItem = {
   id: string;
@@ -182,6 +183,10 @@ export function getBusTypeLabel(busType: BusType) {
       return "Mini Bus";
     case "car":
       return "Car";
+    case "sleeper_30":
+      return "Sleeper Bus (30 Berths)";
+    case "sleeper_40":
+      return "Sleeper Bus (40 Berths)";
     default:
       return "Bus";
   }
@@ -286,6 +291,90 @@ function createBus45Template(): SeatLayout {
   };
 }
 
+// sleeper_30: 2-left + aisle + 1-right, 15 lower + 15 upper = 30 berths
+function createSleeper30Template(): SeatLayout {
+  const items: SeatLayoutItem[] = [];
+
+  // Row 1: driver cabin
+  items.push(buildItem("driver", 1, 1, { colSpan: 2, label: "Driver" }));
+  items.push(buildItem("aisle", 1, 3, { label: "Aisle" }));
+  items.push(buildItem("empty", 1, 4));
+  items.push(buildItem("empty", 1, 5));
+
+  // Row 2: lower deck label
+  items.push(buildItem("deck_label", 2, 1, { colSpan: 5, label: "Lower Deck" }));
+
+  let lNum = 1;
+  for (let row = 3; row <= 7; row++) {
+    items.push(buildItem("sleeper", row, 1, { seatCode: `L${lNum}`,   label: `L${lNum}` }));   lNum++;
+    items.push(buildItem("sleeper", row, 2, { seatCode: `L${lNum}`,   label: `L${lNum}` }));   lNum++;
+    items.push(buildItem("aisle",   row, 3, { label: "Aisle" }));
+    items.push(buildItem("sleeper", row, 4, { seatCode: `L${lNum}`,   label: `L${lNum}` }));   lNum++;
+    items.push(buildItem("empty",   row, 5));
+  }
+
+  // Row 8: upper deck label
+  items.push(buildItem("deck_label", 8, 1, { colSpan: 5, label: "Upper Deck" }));
+
+  let uNum = 1;
+  for (let row = 9; row <= 13; row++) {
+    items.push(buildItem("sleeper", row, 1, { seatCode: `U${uNum}`,   label: `U${uNum}` }));   uNum++;
+    items.push(buildItem("sleeper", row, 2, { seatCode: `U${uNum}`,   label: `U${uNum}` }));   uNum++;
+    items.push(buildItem("aisle",   row, 3, { label: "Aisle" }));
+    items.push(buildItem("sleeper", row, 4, { seatCode: `U${uNum}`,   label: `U${uNum}` }));   uNum++;
+    items.push(buildItem("empty",   row, 5));
+  }
+
+  return {
+    version: LAYOUT_VERSION,
+    template: "sleeper_30",
+    grid: { rows: 13, cols: 5 },
+    items,
+  };
+}
+
+// sleeper_40: 2-left + aisle + 2-right, 20 lower + 20 upper = 40 berths
+function createSleeper40Template(): SeatLayout {
+  const items: SeatLayoutItem[] = [];
+
+  // Row 1: driver cabin
+  items.push(buildItem("driver", 1, 1, { colSpan: 2, label: "Driver" }));
+  items.push(buildItem("aisle", 1, 3, { label: "Aisle" }));
+  items.push(buildItem("empty", 1, 4));
+  items.push(buildItem("empty", 1, 5));
+
+  // Row 2: lower deck label
+  items.push(buildItem("deck_label", 2, 1, { colSpan: 5, label: "Lower Deck" }));
+
+  let lNum = 1;
+  for (let row = 3; row <= 7; row++) {
+    items.push(buildItem("sleeper", row, 1, { seatCode: `L${lNum}`,   label: `L${lNum}` }));   lNum++;
+    items.push(buildItem("sleeper", row, 2, { seatCode: `L${lNum}`,   label: `L${lNum}` }));   lNum++;
+    items.push(buildItem("aisle",   row, 3, { label: "Aisle" }));
+    items.push(buildItem("sleeper", row, 4, { seatCode: `L${lNum}`,   label: `L${lNum}` }));   lNum++;
+    items.push(buildItem("sleeper", row, 5, { seatCode: `L${lNum}`,   label: `L${lNum}` }));   lNum++;
+  }
+
+  // Row 8: upper deck label
+  items.push(buildItem("deck_label", 8, 1, { colSpan: 5, label: "Upper Deck" }));
+
+  let uNum = 1;
+  for (let row = 9; row <= 13; row++) {
+    items.push(buildItem("sleeper", row, 1, { seatCode: `U${uNum}`,   label: `U${uNum}` }));   uNum++;
+    items.push(buildItem("sleeper", row, 2, { seatCode: `U${uNum}`,   label: `U${uNum}` }));   uNum++;
+    items.push(buildItem("aisle",   row, 3, { label: "Aisle" }));
+    items.push(buildItem("sleeper", row, 4, { seatCode: `U${uNum}`,   label: `U${uNum}` }));   uNum++;
+    items.push(buildItem("sleeper", row, 5, { seatCode: `U${uNum}`,   label: `U${uNum}` }));   uNum++;
+  }
+
+  return {
+    version: LAYOUT_VERSION,
+    template: "sleeper_40",
+    grid: { rows: 13, cols: 5 },
+    items,
+  };
+}
+
 export function getSeatLayoutTemplate(busType: BusType): SeatLayout {
   switch (busType) {
     case "bus_45":
@@ -294,6 +383,10 @@ export function getSeatLayoutTemplate(busType: BusType): SeatLayout {
       return createMiniBusTemplate();
     case "car":
       return createCarTemplate();
+    case "sleeper_30":
+      return createSleeper30Template();
+    case "sleeper_40":
+      return createSleeper40Template();
     default:
       return createMiniBusTemplate();
   }

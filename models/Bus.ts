@@ -58,7 +58,7 @@ const BusSchema = new Schema<IBus>({
   },
   busType: {
     type: String,
-    enum: ["bus_45", "mini_bus", "car"],
+    enum: ["bus_45", "mini_bus", "car", "sleeper_30", "sleeper_40"],
     default: "bus_45",
     required: true,
   },
