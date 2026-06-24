@@ -3,14 +3,13 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckSquare, Download, Eye, Search, Square, Ticket, XCircle } from "lucide-react";
+import {
+  CheckCircle2, CheckSquare, ChevronLeft, ChevronRight,
+  Download, Eye, Search, Square, Ticket, X, XCircle,
+} from "lucide-react";
 
 import {
-  EmptyState,
-  PAGE_SIZE,
-  Paginator,
   StatusBadge,
-  SummaryTile,
   passengerCountLabel,
   shortBookingId,
 } from "@/components/admin-management-shared";
@@ -35,14 +34,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import {
   formatBusType,
@@ -144,11 +135,34 @@ export default function AdminBookingsManager({
       }
     });
 
-  const [page, setPage] = useState(1);
-  const totalPages = Math.ceil(visibleBookings.length / PAGE_SIZE);
-  const pagedBookings = visibleBookings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  // Calendar state
+  const today = new Date();
+  const [calYear,    setCalYear]    = useState(today.getFullYear());
+  const [calMonth,   setCalMonth]   = useState(today.getMonth());
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
-  useEffect(() => { setPage(1); }, [bookingQuery, bookingStatusFilter, bookingRouteFilter, bookingTravelDateFilter, bookingSort]);
+  function prevMonth() {
+    if (calMonth === 0) { setCalYear(y => y - 1); setCalMonth(11); }
+    else setCalMonth(m => m - 1);
+    setSelectedDay(null);
+  }
+  function nextMonth() {
+    if (calMonth === 11) { setCalYear(y => y + 1); setCalMonth(0); }
+    else setCalMonth(m => m + 1);
+    setSelectedDay(null);
+  }
+  function goToday() { setCalYear(today.getFullYear()); setCalMonth(today.getMonth()); setSelectedDay(null); }
+
+  // Group ALL filtered bookings by ISO date (createdAt)
+  const bookingsByDate = visibleBookings.reduce<Record<string, AdminBookingSummary[]>>((acc, b) => {
+    const key = b.createdAt.slice(0, 10);
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(b);
+    return acc;
+  }, {});
+
+  const calendarDays = buildCalendarDays(calYear, calMonth, bookingsByDate);
+  const selectedDayBookings = selectedDay ? (bookingsByDate[selectedDay] ?? []) : [];
 
   // Bulk selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -274,303 +288,265 @@ export default function AdminBookingsManager({
     }
   }
 
+
+  const calMonthName = new Date(calYear, calMonth).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-5">
         <Card className="border border-slate-200 bg-white shadow-sm">
-          <CardHeader className="border-b border-slate-100 bg-slate-50/50">
-            <div className="space-y-4">
-              <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg">
-                    <Ticket className="size-6" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-2xl">Customer Bookings</CardTitle>
-                    <CardDescription className="text-sm">
-                      Search bookings, inspect passenger details, and cancel trips when needed
-                    </CardDescription>
-                  </div>
+
+          {/* ── Header ── */}
+          <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-0">
+            <div className="flex flex-col gap-4 pb-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md">
+                  <Ticket className="size-5" />
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <SummaryTile label="All bookings" value={String(bookings.length)} tone="slate" />
-                  <SummaryTile
-                    label="Confirmed"
-                    value={String(confirmedBookings.length)}
-                    tone="slate"
-                  />
-                  <SummaryTile
-                    label="Cancelled"
-                    value={String(cancelledBookings.length)}
-                    tone="slate"
-                  />
-                  <SummaryTile
-                    label="Revenue"
-                    value={formatCurrency(totalRevenue)}
-                    tone="slate"
-                  />
+                <div>
+                  <CardTitle className="text-xl font-bold text-slate-900">Customer Bookings</CardTitle>
+                  <CardDescription className="text-sm text-slate-500">Bookings calendar — click any day to see details</CardDescription>
                 </div>
               </div>
+              <div className="flex flex-wrap gap-2">
+                {([
+                  { label: "Total",     value: String(bookings.length),              cls: "bg-slate-100 text-slate-700" },
+                  { label: "Confirmed", value: String(confirmedBookings.length),     cls: "bg-emerald-100 text-emerald-700" },
+                  { label: "Cancelled", value: String(cancelledBookings.length),     cls: "bg-red-100 text-red-600" },
+                  { label: "Revenue",   value: formatCurrency(totalRevenue),         cls: "bg-indigo-100 text-indigo-700" },
+                ] as const).map((k) => (
+                  <div key={k.label} className={`flex items-center gap-2 rounded-xl px-3 py-1.5 ${k.cls}`}>
+                    <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">{k.label}</span>
+                    <span className="text-base font-bold">{k.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
 
-              <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-5">
-                <div className="relative xl:col-span-2">
+            {/* Filters */}
+            <div className="border-t border-slate-100 pt-3 pb-4 space-y-2.5">
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="relative sm:col-span-2 lg:col-span-1">
                   <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-                  <Input
-                    value={bookingQuery}
-                    onChange={(event) => setBookingQuery(event.target.value)}
-                    placeholder="Search by booking ID, passenger, email, route, or seat"
-                    className="h-11 rounded-xl border-slate-200 bg-white/90 pl-9"
-                  />
+                  <Input value={bookingQuery} onChange={(e) => setBookingQuery(e.target.value)}
+                    placeholder="Search booking, passenger, route…"
+                    className="h-9 rounded-xl border-slate-200 bg-white pl-9 text-sm" />
                 </div>
-                <Select
-                  value={bookingStatusFilter}
-                  onValueChange={(value) => {
-                    if (value) {
-                      setBookingStatusFilter(value);
-                    }
-                  }}
-                >
-                  <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-white/90">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
+                <Select value={bookingStatusFilter} onValueChange={(v) => { if (v) setBookingStatusFilter(v); }}>
+                  <SelectTrigger className="h-9 rounded-xl border-slate-200 bg-white text-sm"><SelectValue placeholder="All statuses" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All statuses</SelectItem>
                     <SelectItem value="confirmed">Confirmed</SelectItem>
                     <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select
-                  value={bookingRouteFilter}
-                  onValueChange={(value) => {
-                    if (value) {
-                      setBookingRouteFilter(value);
-                    }
-                  }}
-                >
-                  <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-white/90">
-                    <SelectValue placeholder="All routes" />
-                  </SelectTrigger>
+                <Select value={bookingRouteFilter} onValueChange={(v) => { if (v) setBookingRouteFilter(v); }}>
+                  <SelectTrigger className="h-9 rounded-xl border-slate-200 bg-white text-sm"><SelectValue placeholder="All routes" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All routes</SelectItem>
-                    {routes.map((route) => (
-                      <SelectItem key={route.id} value={route.id}>
-                        {route.from} to {route.to}
-                      </SelectItem>
-                    ))}
+                    {routes.map((r) => <SelectItem key={r.id} value={r.id}>{r.from} → {r.to}</SelectItem>)}
                   </SelectContent>
                 </Select>
-                <Input
-                  type="date"
-                  value={bookingTravelDateFilter}
-                  onChange={(event) => setBookingTravelDateFilter(event.target.value)}
-                  className="h-11 rounded-xl border-slate-200 bg-white/90"
-                />
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <Select
-                  value={bookingSort}
-                  onValueChange={(value) => { if (value) setBookingSort(value); }}
-                >
-                  <SelectTrigger className="h-11 w-full max-w-xs rounded-xl border-slate-200 bg-white/90">
-                    <SelectValue placeholder="Sort bookings" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">Newest first</SelectItem>
-                    <SelectItem value="oldest">Oldest first</SelectItem>
-                    <SelectItem value="amount-high">Highest amount</SelectItem>
-                    <SelectItem value="amount-low">Lowest amount</SelectItem>
-                    <SelectItem value="status">Status</SelectItem>
-                  </SelectContent>
-                </Select>
-
                 <div className="flex items-center gap-2">
                   {selectedIds.size > 0 && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      className="rounded-full border-red-200 text-red-700 hover:bg-red-50"
-                      disabled={bulkCancelPending}
-                      onClick={bulkCancel}
-                    >
-                      <XCircle className="size-4" />
-                      {bulkCancelPending ? "Cancelling…" : `Cancel ${selectedIds.size} selected`}
+                    <Button type="button" size="sm" variant="outline"
+                      className="h-9 flex-1 rounded-xl border-red-200 text-red-700 hover:bg-red-50 text-xs"
+                      disabled={bulkCancelPending} onClick={bulkCancel}>
+                      <XCircle className="size-3.5" />{bulkCancelPending ? "Cancelling…" : `Cancel ${selectedIds.size}`}
                     </Button>
                   )}
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    className="rounded-full border-indigo-200 text-indigo-700 hover:bg-indigo-50"
-                    onClick={exportCsv}
-                    disabled={visibleBookings.length === 0}
-                  >
-                    <Download className="size-4" />
-                    Export CSV ({visibleBookings.length})
+                  <Button type="button" size="sm" variant="outline"
+                    className="h-9 flex-1 rounded-xl border-indigo-200 text-indigo-700 hover:bg-indigo-50 text-xs"
+                    onClick={exportCsv} disabled={visibleBookings.length === 0}>
+                    <Download className="size-3.5" />Export
                   </Button>
                 </div>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-6">
-            <div className="rounded-2xl border border-slate-200 bg-white">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-slate-50 hover:bg-slate-50">
-                    <TableHead className="w-10">
-                      <button
-                        type="button"
-                        onClick={toggleSelectAll}
-                        className="flex items-center justify-center"
-                        title={allVisibleSelected ? "Deselect all" : "Select all confirmed"}
-                      >
-                        {allVisibleSelected
-                          ? <CheckSquare className="size-4 text-indigo-600" />
-                          : <Square className="size-4 text-slate-400" />
-                        }
-                      </button>
-                    </TableHead>
-                    <TableHead className="font-bold text-slate-700">Booking</TableHead>
-                    <TableHead className="font-bold text-slate-700">Customer</TableHead>
-                    <TableHead className="font-bold text-slate-700">Trip</TableHead>
-                    <TableHead className="font-bold text-slate-700">Seats</TableHead>
-                    <TableHead className="font-bold text-slate-700">Total</TableHead>
-                    <TableHead className="font-bold text-slate-700">Status</TableHead>
-                    <TableHead className="font-bold text-slate-700">Booked</TableHead>
-                    <TableHead className="text-right font-bold text-slate-700">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {visibleBookings.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={9} className="py-10">
-                        <EmptyState
-                          icon={<Ticket className="size-10 text-slate-300" />}
-                          title="No bookings match these filters"
-                          description="Try a different search, route, date, or status."
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    pagedBookings.map((booking) => (
-                      <TableRow
-                        key={booking.id}
-                        className={`transition-colors hover:bg-slate-50/50 ${selectedIds.has(booking.id) ? "bg-indigo-50/40" : ""}`}
-                      >
-                        <TableCell>
-                          <button
-                            type="button"
-                            disabled={booking.status !== "confirmed"}
-                            onClick={() => toggleRow(booking.id, booking.status)}
-                            className="flex items-center justify-center disabled:opacity-30"
-                          >
-                            {selectedIds.has(booking.id)
-                              ? <CheckSquare className="size-4 text-indigo-600" />
-                              : <Square className="size-4 text-slate-300" />
-                            }
-                          </button>
-                        </TableCell>
-                        <TableCell className="whitespace-normal">
-                          <div className="space-y-1">
-                            <p className="font-mono text-xs text-foreground">
-                              {shortBookingId(booking.id)}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {passengerCountLabel(booking)}
-                            </p>
-                          </div>
-                        </TableCell>
-                        <TableCell className="whitespace-normal">
-                          <div className="space-y-1">
-                            <p className="font-medium text-foreground">
-                              {booking.user?.name || "Unknown"}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {booking.user?.email || "No email"}
-                            </p>
-                          </div>
-                        </TableCell>
-                        <TableCell className="whitespace-normal">
-                          {booking.bus ? (
-                            <div className="space-y-1">
-                              <p className="font-medium text-foreground">
-                                {booking.bus.from} to {booking.bus.to}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {formatTravelDate(booking.bus.travelDate)} •{" "}
-                                {booking.bus.departureTime}
-                              </p>
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground">Unavailable</span>
-                          )}
-                        </TableCell>
-                        <TableCell className="whitespace-normal">
-                          <Badge className="border-slate-200 bg-slate-100 text-slate-700">
-                            {formatSeatList(booking.seats)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="font-semibold">
-                          {formatCurrency(booking.totalPrice)}
-                        </TableCell>
-                        <TableCell>
-                          <StatusBadge status={booking.status} />
-                        </TableCell>
-                        <TableCell className="whitespace-normal">
-                          <span className="text-sm text-foreground">
-                            {formatDateTime(booking.createdAt)}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              className="rounded-full"
-                              onClick={() => setSelectedBooking(booking)}
-                            >
-                              <Eye className="size-4" />
-                              Details
-                            </Button>
-                            <Link
-                              href={`/booking/confirmation/${booking.id}`}
-                              className="inline-flex h-7 items-center justify-center rounded-full border border-border bg-white px-3 text-[0.8rem] font-medium text-foreground transition hover:bg-secondary"
-                            >
-                              Ticket
-                            </Link>
-                            <Button
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              className="rounded-full border-red-200 text-red-700 hover:bg-red-50"
-                              disabled={booking.status !== "confirmed"}
-                              onClick={() => {
-                                setBookingToCancel(booking);
-                                setBookingCancellationReason("");
-                              }}
-                            >
-                              <XCircle className="size-4" />
-                              Cancel
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-              <Paginator
-                page={page}
-                totalPages={totalPages}
-                totalItems={visibleBookings.length}
-                pageSize={PAGE_SIZE}
-                onPageChange={setPage}
-              />
+
+          <CardContent className="p-0">
+            {/* ── Calendar navigation ── */}
+            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 bg-white">
+              <div className="flex items-center gap-2">
+                <Button type="button" variant="outline" size="icon" className="h-8 w-8 rounded-xl" onClick={prevMonth}>
+                  <ChevronLeft className="size-4" />
+                </Button>
+                <span className="text-base font-bold text-slate-900 min-w-[160px] text-center">{calMonthName}</span>
+                <Button type="button" variant="outline" size="icon" className="h-8 w-8 rounded-xl" onClick={nextMonth}>
+                  <ChevronRight className="size-4" />
+                </Button>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:flex items-center gap-3 text-xs text-slate-500">
+                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500 inline-block" />Confirmed</span>
+                  <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-red-400 inline-block" />Cancelled</span>
+                </div>
+                <Button type="button" variant="outline" size="sm" className="h-8 rounded-xl text-xs font-semibold" onClick={goToday}>
+                  Today
+                </Button>
+              </div>
             </div>
+
+            {/* ── Day-of-week headers ── */}
+            <div className="grid grid-cols-7 border-b border-slate-100">
+              {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => (
+                <div key={d} className="py-2.5 text-center text-[11px] font-bold uppercase tracking-wider text-slate-500 border-r border-slate-100 last:border-r-0">
+                  {d}
+                </div>
+              ))}
+            </div>
+
+            {/* ── Calendar grid ── */}
+            <div className="grid grid-cols-7">
+              {calendarDays.map((day, idx) => {
+                const isSelected = selectedDay === day.iso;
+                const isToday    = day.iso === today.toISOString().slice(0, 10);
+                const hasBkg     = day.bookings.length > 0;
+                return (
+                  <div
+                    key={day.iso}
+                    onClick={() => setSelectedDay(isSelected ? null : day.iso)}
+                    className={[
+                      "min-h-[88px] p-1.5 border-b border-r border-slate-100 cursor-pointer transition-colors select-none",
+                      idx % 7 === 6 ? "border-r-0" : "",
+                      !day.isCurrentMonth ? "bg-slate-50/60" : "bg-white",
+                      isSelected ? "bg-indigo-50 ring-2 ring-inset ring-indigo-400" : "hover:bg-slate-50",
+                    ].join(" ")}
+                  >
+                    {/* Day number */}
+                    <div className={[
+                      "mb-1 flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold transition-colors",
+                      isToday    ? "bg-indigo-600 text-white shadow-sm" :
+                      isSelected ? "bg-indigo-100 text-indigo-700" :
+                      day.isCurrentMonth ? "text-slate-800 hover:bg-slate-100" : "text-slate-300",
+                    ].join(" ")}>
+                      {day.date}
+                    </div>
+
+                    {/* Booking dots / pills */}
+                    {hasBkg && (
+                      <div className="space-y-0.5">
+                        {day.confirmedCount > 0 && (
+                          <div className="flex items-center gap-1 rounded-md bg-emerald-100 px-1.5 py-0.5 overflow-hidden">
+                            <CheckCircle2 className="h-2.5 w-2.5 shrink-0 text-emerald-600" />
+                            <span className="text-[10px] font-bold text-emerald-700 truncate">{day.confirmedCount} confirmed</span>
+                          </div>
+                        )}
+                        {day.cancelledCount > 0 && (
+                          <div className="flex items-center gap-1 rounded-md bg-red-100 px-1.5 py-0.5 overflow-hidden">
+                            <XCircle className="h-2.5 w-2.5 shrink-0 text-red-500" />
+                            <span className="text-[10px] font-bold text-red-600 truncate">{day.cancelledCount} cancelled</span>
+                          </div>
+                        )}
+                        {day.dayRevenue > 0 && (
+                          <p className="truncate px-1 text-[10px] font-semibold text-indigo-600">{formatCurrency(day.dayRevenue)}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ── Selected day panel ── */}
+            {selectedDay && (
+              <div className="border-t border-slate-200">
+                {/* Panel header */}
+                <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/60 px-5 py-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-1 rounded-full bg-indigo-500" />
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">
+                        {new Date(selectedDay + "T00:00:00").toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {selectedDayBookings.length} booking{selectedDayBookings.length !== 1 ? "s" : ""}
+                        {selectedDayBookings.filter(b => b.status === "confirmed").length > 0 && (
+                          <span className="ml-2 text-emerald-600 font-semibold">
+                            · {formatCurrency(selectedDayBookings.filter(b => b.status === "confirmed").reduce((s, b) => s + b.totalPrice, 0))} revenue
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <Button type="button" variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-slate-400 hover:text-slate-700"
+                    onClick={() => setSelectedDay(null)}>
+                    <X className="size-4" />
+                  </Button>
+                </div>
+
+                {/* Booking rows */}
+                {selectedDayBookings.length === 0 ? (
+                  <div className="py-10 text-center">
+                    <Ticket className="size-8 text-slate-300 mx-auto mb-2" />
+                    <p className="text-sm font-medium text-slate-500">No bookings on this day</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-slate-100">
+                    {selectedDayBookings.map((booking) => (
+                      <div key={booking.id}
+                        className={`flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-slate-50/60 ${selectedIds.has(booking.id) ? "bg-indigo-50/40" : ""}`}>
+                        {/* Checkbox */}
+                        <button type="button"
+                          disabled={booking.status !== "confirmed"}
+                          onClick={() => toggleRow(booking.id, booking.status)}
+                          className="shrink-0 disabled:opacity-30">
+                          {selectedIds.has(booking.id)
+                            ? <CheckSquare className="size-4 text-indigo-600" />
+                            : <Square className="size-4 text-slate-300" />}
+                        </button>
+
+                        {/* Info grid */}
+                        <div className="flex-1 grid grid-cols-2 gap-x-6 gap-y-0.5 min-w-0 md:grid-cols-4">
+                          <div>
+                            <p className="font-mono text-xs font-semibold text-slate-700">{shortBookingId(booking.id)}</p>
+                            <p className="text-[11px] text-slate-400">{passengerCountLabel(booking)}</p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-slate-800 truncate">{booking.user?.name || "Unknown"}</p>
+                            <p className="text-[11px] text-slate-400 truncate">{booking.user?.email || "No email"}</p>
+                          </div>
+                          <div>
+                            {booking.bus ? (
+                              <>
+                                <p className="text-sm font-semibold text-slate-800 truncate">{booking.bus.from} → {booking.bus.to}</p>
+                                <p className="text-[11px] text-slate-400">{formatTravelDate(booking.bus.travelDate)} · {booking.bus.departureTime}</p>
+                              </>
+                            ) : (
+                              <span className="text-xs text-slate-400 italic">Unavailable</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2.5">
+                            <StatusBadge status={booking.status} />
+                            <span className="text-sm font-bold text-slate-900">{formatCurrency(booking.totalPrice)}</span>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex shrink-0 items-center gap-1.5">
+                          <Button type="button" size="sm" variant="outline"
+                            className="h-7 rounded-lg px-2.5 text-xs border-slate-200 text-slate-700 hover:bg-slate-50"
+                            onClick={() => setSelectedBooking(booking)}>
+                            <Eye className="size-3.5 mr-1" />Details
+                          </Button>
+                          <Link href={`/booking/confirmation/${booking.id}`}
+                            className="inline-flex h-7 items-center rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                            <Ticket className="size-3.5 mr-1" />Ticket
+                          </Link>
+                          <Button type="button" size="sm" variant="outline"
+                            className="h-7 rounded-lg px-2.5 text-xs border-red-100 text-red-600 hover:bg-red-50 disabled:opacity-30"
+                            disabled={booking.status !== "confirmed"}
+                            onClick={() => { setBookingToCancel(booking); setBookingCancellationReason(""); }}>
+                            <XCircle className="size-3.5 mr-1" />Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -579,132 +555,146 @@ export default function AdminBookingsManager({
         open={Boolean(selectedBooking)}
         onOpenChange={(open) => !open && setSelectedBooking(null)}
       >
-        <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-3xl border-2 border-slate-200 bg-white shadow-lg">
+        <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-2xl p-0 gap-0 border border-slate-200 bg-white shadow-2xl rounded-2xl">
           {selectedBooking ? (
             <>
-              <DialogHeader className="border-b border-dashed border-slate-200 pb-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              {/* ── Dialog Header ── */}
+              <div className="flex items-start justify-between gap-4 px-6 py-5 border-b border-slate-100 bg-slate-50/60 rounded-t-2xl">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md">
+                    <Ticket className="size-5" />
+                  </div>
                   <div>
-                    <DialogTitle className="text-2xl">Booking Details</DialogTitle>
-                    <DialogDescription>
-                      Full management view for booking {shortBookingId(selectedBooking.id)}
+                    <DialogTitle className="text-lg font-bold text-slate-900">Booking Details</DialogTitle>
+                    <DialogDescription className="text-xs text-slate-500 mt-0.5">
+                      ID: <span className="font-mono font-semibold text-slate-700">{selectedBooking.id}</span>
                     </DialogDescription>
                   </div>
-                  <StatusBadge status={selectedBooking.status} />
                 </div>
-              </DialogHeader>
-
-              <div className="grid gap-4 pt-4 lg:grid-cols-2">
-                <DetailCard
-                  title="Customer"
-                  lines={[
-                    selectedBooking.user?.name || "Unknown customer",
-                    selectedBooking.user?.email || "No email on file",
-                    passengerCountLabel(selectedBooking),
-                  ]}
-                />
-                <DetailCard
-                  title="Financials"
-                  lines={[
-                    `Total: ${formatCurrency(selectedBooking.totalPrice)}`,
-                    `Booked on ${formatDateTime(selectedBooking.createdAt)}`,
-                    selectedBooking.cancelledAt
-                      ? `Cancelled on ${formatDateTime(selectedBooking.cancelledAt)}`
-                      : "Currently active",
-                  ]}
-                />
-                <DetailCard
-                  title="Trip"
-                  lines={
-                    selectedBooking.bus
-                      ? [
-                          `${selectedBooking.bus.from} to ${selectedBooking.bus.to}`,
-                          `${formatTravelDate(selectedBooking.bus.travelDate)} • ${selectedBooking.bus.departureTime} to ${selectedBooking.bus.arrivalTime}`,
-                          `${formatBusType(selectedBooking.bus.busType)} • ${selectedBooking.bus.duration}`,
-                        ]
-                      : ["Bus details unavailable", "The linked departure may have been removed."]
-                  }
-                />
-                <DetailCard
-                  title="Seats"
-                  lines={[
-                    formatSeatList(selectedBooking.seats),
-                    `${selectedBooking.seats.length} seat${selectedBooking.seats.length === 1 ? "" : "s"} reserved`,
-                    selectedBooking.cancellationReason
-                      ? `Reason: ${selectedBooking.cancellationReason}`
-                      : "No cancellation reason recorded",
-                  ]}
-                />
+                <StatusBadge status={selectedBooking.status} />
               </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-heading text-lg font-semibold text-foreground">
-                    Passenger Details
-                  </h3>
-                  <Badge variant="outline">
-                    {selectedBooking.passengers.length || selectedBooking.seats.length} listed
-                  </Badge>
+              <div className="px-6 py-5 space-y-5">
+                {/* ── Summary row ── */}
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {[
+                    { label: "Total Paid",  value: formatCurrency(selectedBooking.totalPrice), cls: "bg-indigo-50 text-indigo-700" },
+                    { label: "Seats",       value: `${selectedBooking.seats.length} seat${selectedBooking.seats.length !== 1 ? "s" : ""}`, cls: "bg-slate-100 text-slate-700" },
+                    { label: "Booked On",   value: formatDateTime(selectedBooking.createdAt),   cls: "bg-slate-100 text-slate-700" },
+                    { label: "Status",      value: selectedBooking.status === "confirmed" ? "Active" : "Cancelled", cls: selectedBooking.status === "confirmed" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600" },
+                  ].map((item) => (
+                    <div key={item.label} className={`rounded-xl px-3 py-2.5 ${item.cls}`}>
+                      <p className="text-[10px] font-bold uppercase tracking-wider opacity-60">{item.label}</p>
+                      <p className="text-sm font-bold mt-0.5 leading-tight">{item.value}</p>
+                    </div>
+                  ))}
                 </div>
 
-                {selectedBooking.passengers.length > 0 ? (
-                  <div className="grid gap-3">
-                    {selectedBooking.passengers.map((passenger, index) => (
-                      <div
-                        key={`${selectedBooking.id}-${index}`}
-                        className="rounded-2xl border border-slate-100 bg-white/90 px-4 py-3"
-                      >
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                {/* ── Customer & Trip ── */}
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {/* Customer */}
+                  <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                    <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Customer</p>
+                    </div>
+                    <div className="px-4 py-3 space-y-1.5">
+                      <p className="text-sm font-bold text-slate-900">{selectedBooking.user?.name || "Unknown customer"}</p>
+                      <p className="text-xs text-slate-500">{selectedBooking.user?.email || "No email on file"}</p>
+                      <p className="text-xs text-slate-500">{passengerCountLabel(selectedBooking)}</p>
+                    </div>
+                  </div>
+
+                  {/* Trip */}
+                  <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                    <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Trip</p>
+                    </div>
+                    <div className="px-4 py-3 space-y-1.5">
+                      {selectedBooking.bus ? (
+                        <>
+                          <p className="text-sm font-bold text-slate-900">{selectedBooking.bus.from} → {selectedBooking.bus.to}</p>
+                          <p className="text-xs text-slate-500">{formatTravelDate(selectedBooking.bus.travelDate)} · {selectedBooking.bus.departureTime} – {selectedBooking.bus.arrivalTime}</p>
+                          <p className="text-xs text-slate-500">{formatBusType(selectedBooking.bus.busType)} · {selectedBooking.bus.duration}</p>
+                        </>
+                      ) : (
+                        <p className="text-xs text-slate-400 italic">Bus details unavailable</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Seats ── */}
+                <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                  <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Reserved Seats</p>
+                    <span className="text-xs font-bold text-indigo-600 bg-indigo-50 rounded-full px-2.5 py-0.5">{selectedBooking.seats.length}</span>
+                  </div>
+                  <div className="px-4 py-3">
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedBooking.seats.map((seat) => (
+                        <span key={seat} className="inline-flex items-center rounded-lg bg-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-700">{seat}</span>
+                      ))}
+                    </div>
+                    {selectedBooking.cancellationReason && (
+                      <p className="mt-2.5 text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">
+                        <span className="font-semibold">Cancellation reason:</span> {selectedBooking.cancellationReason}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* ── Passengers ── */}
+                <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                  <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Passengers</p>
+                    <Badge variant="outline" className="text-xs">
+                      {selectedBooking.passengers.length || selectedBooking.seats.length} listed
+                    </Badge>
+                  </div>
+                  {selectedBooking.passengers.length > 0 ? (
+                    <div className="divide-y divide-slate-100">
+                      {selectedBooking.passengers.map((passenger, index) => (
+                        <div key={`${selectedBooking.id}-${index}`} className="flex items-center justify-between px-4 py-3 gap-4">
                           <div>
-                            <p className="font-medium text-foreground">{passenger.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {passenger.gender} • Age {passenger.age}
-                            </p>
+                            <p className="text-sm font-semibold text-slate-800">{passenger.name}</p>
+                            <p className="text-xs text-slate-500 mt-0.5">{passenger.gender} · Age {passenger.age}</p>
                           </div>
-                          <div className="text-sm text-muted-foreground">
+                          <div className="text-right text-xs text-slate-500">
                             <p>{passenger.contactNumber}</p>
-                            <p>{passenger.email || "No email provided"}</p>
+                            <p>{passenger.email || "No email"}</p>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-700">
-                    Passenger details were not saved for this booking. Older bookings may only have seat selections.
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="px-4 py-5 text-sm text-slate-500 bg-slate-50/50 text-center">
+                      No passenger details saved for this booking.
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <DialogFooter className="gap-3">
+              {/* ── Footer ── */}
+              <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/40 rounded-b-2xl">
                 <Link
                   href={`/booking/confirmation/${selectedBooking.id}`}
-                  className="inline-flex h-10 items-center justify-center rounded-xl border border-border bg-white px-4 text-sm font-medium text-foreground transition hover:bg-secondary"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                 >
-                  View Ticket
+                  <Ticket className="size-4" />View Ticket
                 </Link>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-xl border-red-200 text-red-700 hover:bg-red-50"
-                  disabled={selectedBooking.status !== "confirmed"}
-                  onClick={() => {
-                    setBookingToCancel(selectedBooking);
-                    setBookingCancellationReason("");
-                  }}
-                >
-                  <XCircle className="size-4" />
-                  Cancel Booking
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-xl"
-                  onClick={() => setSelectedBooking(null)}
-                >
-                  Close
-                </Button>
-              </DialogFooter>
+                <div className="flex items-center gap-2">
+                  <Button type="button" variant="outline"
+                    className="h-9 rounded-xl border-red-200 text-red-700 hover:bg-red-50 text-sm disabled:opacity-40"
+                    disabled={selectedBooking.status !== "confirmed"}
+                    onClick={() => { setBookingToCancel(selectedBooking); setBookingCancellationReason(""); }}>
+                    <XCircle className="size-4" />Cancel Booking
+                  </Button>
+                  <Button type="button" variant="outline" className="h-9 rounded-xl text-sm"
+                    onClick={() => setSelectedBooking(null)}>
+                    Close
+                  </Button>
+                </div>
+              </div>
             </>
           ) : null}
         </DialogContent>
@@ -785,4 +775,59 @@ function DetailCard({ title, lines }: { title: string; lines: string[] }) {
       </div>
     </div>
   );
+}
+
+type CalendarDay = {
+  iso: string;
+  date: number;
+  isCurrentMonth: boolean;
+  bookings: AdminBookingSummary[];
+  confirmedCount: number;
+  cancelledCount: number;
+  dayRevenue: number;
+};
+
+function buildCalendarDays(
+  year: number,
+  month: number,
+  bookingsByDate: Record<string, AdminBookingSummary[]>,
+): CalendarDay[] {
+  const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevMonthDays = new Date(year, month, 0).getDate();
+
+  const days: CalendarDay[] = [];
+
+  // Padding from previous month
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const d = prevMonthDays - i;
+    const prevMonth = month === 0 ? 11 : month - 1;
+    const prevYear  = month === 0 ? year - 1 : year;
+    const iso = `${prevYear}-${String(prevMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    days.push({ iso, date: d, isCurrentMonth: false, bookings: [], confirmedCount: 0, cancelledCount: 0, dayRevenue: 0 });
+  }
+
+  // Current month
+  for (let d = 1; d <= daysInMonth; d++) {
+    const iso = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const bkgs = bookingsByDate[iso] ?? [];
+    const confirmed  = bkgs.filter((b) => b.status === "confirmed");
+    const cancelled  = bkgs.filter((b) => b.status === "cancelled");
+    const dayRevenue = confirmed.reduce((s, b) => s + b.totalPrice, 0);
+    days.push({ iso, date: d, isCurrentMonth: true, bookings: bkgs, confirmedCount: confirmed.length, cancelledCount: cancelled.length, dayRevenue });
+  }
+
+  // Padding to fill last row (total must be multiple of 7)
+  const remainder = days.length % 7;
+  if (remainder !== 0) {
+    const toAdd = 7 - remainder;
+    const nextMonth = month === 11 ? 0 : month + 1;
+    const nextYear  = month === 11 ? year + 1 : year;
+    for (let d = 1; d <= toAdd; d++) {
+      const iso = `${nextYear}-${String(nextMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      days.push({ iso, date: d, isCurrentMonth: false, bookings: [], confirmedCount: 0, cancelledCount: 0, dayRevenue: 0 });
+    }
+  }
+
+  return days;
 }
