@@ -191,16 +191,16 @@ export default function AdminSidebar({ userName }: AdminSidebarProps) {
                         )} />
                       )}
 
-                      {/* Icon with gradient */}
+                      {/* Icon */}
                       <div className={cn(
                         "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-200",
                         isActive
-                          ? `bg-gradient-to-br ${item.gradient} shadow-md`
-                          : `bg-white/5 group-hover:bg-gradient-to-br group-hover:${item.gradient}`
+                          ? "bg-white/15 shadow-sm"
+                          : "bg-white/6 group-hover:bg-white/12"
                       )}>
                         <item.icon className={cn(
                           "size-5 transition-colors",
-                          isActive ? "text-white" : "text-slate-400 group-hover:text-white"
+                          isActive ? "text-white" : "text-slate-500 group-hover:text-slate-200"
                         )} />
                       </div>
 

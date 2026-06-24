@@ -90,23 +90,15 @@ export type RouteUsage = {
 export function SummaryTile({
   label,
   value,
-  tone,
 }: {
   label: string;
   value: string;
-  tone: "emerald" | "orange" | "pink";
+  tone?: string;
 }) {
-  const classes =
-    tone === "emerald"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-      : tone === "orange"
-      ? "border-orange-200 bg-orange-50 text-orange-900"
-      : "border-pink-200 bg-pink-50 text-pink-900";
-
   return (
-    <div className={`rounded-2xl border px-4 py-3 ${classes}`}>
-      <p className="text-xs uppercase tracking-[0.16em] opacity-80">{label}</p>
-      <p className="mt-2 font-heading text-2xl font-semibold">{value}</p>
+    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+      <p className="text-xs uppercase tracking-[0.16em] text-slate-500">{label}</p>
+      <p className="mt-2 font-heading text-2xl font-semibold text-slate-800">{value}</p>
     </div>
   );
 }

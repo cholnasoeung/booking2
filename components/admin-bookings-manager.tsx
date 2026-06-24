@@ -277,12 +277,12 @@ export default function AdminBookingsManager({
   return (
     <>
       <div className="space-y-6">
-        <Card className="border-2 border-pink-200/60 bg-gradient-to-br from-white to-pink-50/50 shadow-xl backdrop-blur-xl">
-          <CardHeader className="border-b-2 border-dashed border-pink-200/60 bg-gradient-to-r from-pink-50 to-rose-50">
+        <Card className="border border-slate-200 bg-white shadow-sm">
+          <CardHeader className="border-b border-slate-100 bg-slate-50/50">
             <div className="space-y-4">
               <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 text-white shadow-lg">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg">
                     <Ticket className="size-6" />
                   </div>
                   <div>
@@ -293,33 +293,33 @@ export default function AdminBookingsManager({
                   </div>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <SummaryTile label="All bookings" value={String(bookings.length)} tone="pink" />
+                  <SummaryTile label="All bookings" value={String(bookings.length)} tone="slate" />
                   <SummaryTile
                     label="Confirmed"
                     value={String(confirmedBookings.length)}
-                    tone="pink"
+                    tone="slate"
                   />
                   <SummaryTile
                     label="Cancelled"
                     value={String(cancelledBookings.length)}
-                    tone="pink"
+                    tone="slate"
                   />
                   <SummaryTile
                     label="Revenue"
                     value={formatCurrency(totalRevenue)}
-                    tone="pink"
+                    tone="slate"
                   />
                 </div>
               </div>
 
               <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-5">
                 <div className="relative xl:col-span-2">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-pink-600/70" />
+                  <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
                   <Input
                     value={bookingQuery}
                     onChange={(event) => setBookingQuery(event.target.value)}
                     placeholder="Search by booking ID, passenger, email, route, or seat"
-                    className="h-11 rounded-xl border-pink-200/70 bg-white/90 pl-9"
+                    className="h-11 rounded-xl border-slate-200 bg-white/90 pl-9"
                   />
                 </div>
                 <Select
@@ -330,7 +330,7 @@ export default function AdminBookingsManager({
                     }
                   }}
                 >
-                  <SelectTrigger className="h-11 rounded-xl border-pink-200/70 bg-white/90">
+                  <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-white/90">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -347,7 +347,7 @@ export default function AdminBookingsManager({
                     }
                   }}
                 >
-                  <SelectTrigger className="h-11 rounded-xl border-pink-200/70 bg-white/90">
+                  <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-white/90">
                     <SelectValue placeholder="All routes" />
                   </SelectTrigger>
                   <SelectContent>
@@ -363,7 +363,7 @@ export default function AdminBookingsManager({
                   type="date"
                   value={bookingTravelDateFilter}
                   onChange={(event) => setBookingTravelDateFilter(event.target.value)}
-                  className="h-11 rounded-xl border-pink-200/70 bg-white/90"
+                  className="h-11 rounded-xl border-slate-200 bg-white/90"
                 />
               </div>
 
@@ -372,7 +372,7 @@ export default function AdminBookingsManager({
                   value={bookingSort}
                   onValueChange={(value) => { if (value) setBookingSort(value); }}
                 >
-                  <SelectTrigger className="h-11 w-full max-w-xs rounded-xl border-pink-200/70 bg-white/90">
+                  <SelectTrigger className="h-11 w-full max-w-xs rounded-xl border-slate-200 bg-white/90">
                     <SelectValue placeholder="Sort bookings" />
                   </SelectTrigger>
                   <SelectContent>
@@ -579,10 +579,10 @@ export default function AdminBookingsManager({
         open={Boolean(selectedBooking)}
         onOpenChange={(open) => !open && setSelectedBooking(null)}
       >
-        <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-3xl border-2 border-pink-200/70 bg-gradient-to-br from-white to-pink-50/50 shadow-2xl">
+        <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-3xl border-2 border-slate-200 bg-gradient-to-br from-white to-pink-50/50 shadow-2xl">
           {selectedBooking ? (
             <>
-              <DialogHeader className="border-b border-dashed border-pink-200/70 pb-4">
+              <DialogHeader className="border-b border-dashed border-slate-200 pb-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <DialogTitle className="text-2xl">Booking Details</DialogTitle>

@@ -208,8 +208,8 @@ export default function AdminRoutesManager({
 
   return (
     <>
-      <Card className="border-2 border-emerald-200/60 bg-gradient-to-br from-white to-emerald-50/50 shadow-xl backdrop-blur-xl">
-        <CardHeader className="border-b-2 border-dashed border-emerald-200/60 bg-gradient-to-r from-emerald-50 to-teal-50">
+      <Card className="border border-slate-200 bg-white shadow-sm">
+        <CardHeader className="border-b border-slate-100 bg-slate-50/50">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg">
@@ -224,12 +224,12 @@ export default function AdminRoutesManager({
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
               <div className="relative min-w-[260px]">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-emerald-600/70" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   value={routeQuery}
                   onChange={(event) => setRouteQuery(event.target.value)}
                   placeholder="Search by city, duration, or distance"
-                  className="h-11 rounded-xl border-emerald-200/70 bg-white/90 pl-9"
+                  className="h-11 rounded-xl border-slate-200 bg-white/90 pl-9"
                 />
               </div>
               <Button
@@ -246,29 +246,29 @@ export default function AdminRoutesManager({
         </CardHeader>
         <CardContent className="space-y-4 p-6">
           <div className="grid gap-4 md:grid-cols-3">
-            <SummaryTile label="Total routes" value={String(routes.length)} tone="emerald" />
+            <SummaryTile label="Total routes" value={String(routes.length)} tone="slate" />
             <SummaryTile
               label="Published departures"
               value={String(buses.length)}
-              tone="emerald"
+              tone="slate"
             />
             <SummaryTile
               label="Confirmed bookings"
               value={String(confirmedBookings.length)}
-              tone="emerald"
+              tone="slate"
             />
           </div>
 
-          <div className="rounded-2xl border border-emerald-200/50 bg-white/80">
+          <div className="rounded-2xl border border-slate-200 bg-white">
             <Table>
               <TableHeader>
-                <TableRow className="bg-gradient-to-r from-emerald-50 to-teal-50 hover:bg-transparent">
-                  <TableHead className="font-bold text-emerald-900">Route</TableHead>
-                  <TableHead className="font-bold text-emerald-900">Duration</TableHead>
-                  <TableHead className="font-bold text-emerald-900">Distance</TableHead>
-                  <TableHead className="font-bold text-emerald-900">Departures</TableHead>
-                  <TableHead className="font-bold text-emerald-900">Revenue</TableHead>
-                  <TableHead className="text-right font-bold text-emerald-900">
+                <TableRow className="bg-slate-50 hover:bg-slate-50">
+                  <TableHead className="font-bold text-slate-700">Route</TableHead>
+                  <TableHead className="font-bold text-slate-700">Duration</TableHead>
+                  <TableHead className="font-bold text-slate-700">Distance</TableHead>
+                  <TableHead className="font-bold text-slate-700">Departures</TableHead>
+                  <TableHead className="font-bold text-slate-700">Revenue</TableHead>
+                  <TableHead className="text-right font-bold text-slate-700">
                     Actions
                   </TableHead>
                 </TableRow>
@@ -278,7 +278,7 @@ export default function AdminRoutesManager({
                   <TableRow>
                     <TableCell colSpan={6} className="py-10">
                       <EmptyState
-                        icon={<MapPinned className="size-10 text-emerald-300" />}
+                        icon={<MapPinned className="size-10 text-slate-300" />}
                         title="No routes match this search"
                         description="Try a different keyword or create a new route."
                       />
@@ -291,7 +291,7 @@ export default function AdminRoutesManager({
                     return (
                       <TableRow
                         key={route.id}
-                        className="transition-colors hover:bg-emerald-50/50"
+                        className="transition-colors hover:bg-slate-50/50"
                       >
                         <TableCell className="whitespace-normal">
                           <div className="space-y-1">
@@ -355,8 +355,8 @@ export default function AdminRoutesManager({
       </Card>
 
       <Dialog open={routeDialogOpen} onOpenChange={(open) => !open && resetRouteDialog()}>
-        <DialogContent className="sm:max-w-lg border-2 border-emerald-200/60 bg-gradient-to-br from-white to-emerald-50/50 shadow-2xl">
-          <DialogHeader className="border-b-2 border-dashed border-emerald-200/60 pb-4">
+        <DialogContent className="sm:max-w-lg border border-slate-200 bg-white shadow-lg">
+          <DialogHeader className="border-b border-slate-100 pb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg">
                 {isEditingRoute ? <PencilLine className="size-5" /> : <Plus className="size-5" />}
@@ -386,7 +386,7 @@ export default function AdminRoutesManager({
                   onChange={(event) =>
                     setRouteForm((current) => ({ ...current, from: event.target.value }))
                   }
-                  className="h-11 rounded-xl border-emerald-200/60 bg-white/90"
+                  className="h-11 rounded-xl border-slate-200 bg-white/90"
                   placeholder="e.g., Phnom Penh"
                   required
                 />
@@ -401,7 +401,7 @@ export default function AdminRoutesManager({
                   onChange={(event) =>
                     setRouteForm((current) => ({ ...current, to: event.target.value }))
                   }
-                  className="h-11 rounded-xl border-emerald-200/60 bg-white/90"
+                  className="h-11 rounded-xl border-slate-200 bg-white/90"
                   placeholder="e.g., Siem Reap"
                   required
                 />
@@ -423,7 +423,7 @@ export default function AdminRoutesManager({
                     }))
                   }
                   placeholder="6h 15m"
-                  className="h-11 rounded-xl border-emerald-200/60 bg-white/90"
+                  className="h-11 rounded-xl border-slate-200 bg-white/90"
                   required
                 />
               </div>
@@ -442,7 +442,7 @@ export default function AdminRoutesManager({
                       distance: event.target.value,
                     }))
                   }
-                  className="h-11 rounded-xl border-emerald-200/60 bg-white/90"
+                  className="h-11 rounded-xl border-slate-200 bg-white/90"
                   placeholder="e.g., 320"
                   required
                 />
@@ -459,14 +459,14 @@ export default function AdminRoutesManager({
               <Button
                 type="button"
                 variant="outline"
-                className="h-11 rounded-xl border-2 border-emerald-200/60 hover:bg-emerald-50"
+                className="h-11 rounded-xl border-2 border-slate-200 hover:bg-slate-50"
                 onClick={resetRouteDialog}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                className="h-11 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 shadow-lg transition-all hover:shadow-xl"
+                className="h-11 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 shadow-md transition-all"
                 disabled={routePending}
               >
                 {routePending

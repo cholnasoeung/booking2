@@ -240,8 +240,8 @@ export default function AdminBusesManager({
 
   return (
     <>
-      <Card className="border-2 border-orange-200/60 bg-gradient-to-br from-white to-orange-50/50 shadow-xl backdrop-blur-xl">
-        <CardHeader className="border-b-2 border-dashed border-orange-200/60 bg-gradient-to-r from-orange-50 to-red-50">
+      <Card className="border border-slate-200 bg-white shadow-sm">
+        <CardHeader className="border-b border-slate-100 bg-slate-50/50">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
               <div className="flex items-center gap-3">
@@ -257,11 +257,11 @@ export default function AdminBusesManager({
               </div>
               <div className="flex items-center gap-2">
                 {/* View toggle */}
-                <div className="flex rounded-xl border border-orange-200 bg-white overflow-hidden shadow-sm">
+                <div className="flex rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
                   <button
                     type="button"
                     onClick={() => setGroupedView(true)}
-                    className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors ${groupedView ? "bg-orange-500 text-white" : "text-slate-500 hover:bg-orange-50"}`}
+                    className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors ${groupedView ? "bg-indigo-600 text-white" : "text-slate-500 hover:bg-slate-50"}`}
                     title="Group by route"
                   >
                     <Layers className="size-3.5" /> Grouped
@@ -269,7 +269,7 @@ export default function AdminBusesManager({
                   <button
                     type="button"
                     onClick={() => setGroupedView(false)}
-                    className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors ${!groupedView ? "bg-orange-500 text-white" : "text-slate-500 hover:bg-orange-50"}`}
+                    className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors ${!groupedView ? "bg-indigo-600 text-white" : "text-slate-500 hover:bg-slate-50"}`}
                     title="Flat list"
                   >
                     <LayoutList className="size-3.5" /> List
@@ -293,12 +293,12 @@ export default function AdminBusesManager({
 
             <div className="grid gap-3 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_190px]">
               <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-orange-600/70" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   value={busQuery}
                   onChange={(event) => setBusQuery(event.target.value)}
                   placeholder="Search by route, type, or time"
-                  className="h-11 rounded-xl border-orange-200/70 bg-white/90 pl-9"
+                  className="h-11 rounded-xl border-slate-200 bg-white/90 pl-9"
                 />
               </div>
               <Select
@@ -309,7 +309,7 @@ export default function AdminBusesManager({
                   }
                 }}
               >
-                <SelectTrigger className="h-11 rounded-xl border-orange-200/70 bg-white/90">
+                <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-white/90">
                   <SelectValue placeholder="All routes" />
                 </SelectTrigger>
                 <SelectContent>
@@ -325,7 +325,7 @@ export default function AdminBusesManager({
                 type="date"
                 value={busDateFilter}
                 onChange={(event) => setBusDateFilter(event.target.value)}
-                className="h-11 rounded-xl border-orange-200/70 bg-white/90"
+                className="h-11 rounded-xl border-slate-200 bg-white/90"
               />
             </div>
           </div>
@@ -335,27 +335,27 @@ export default function AdminBusesManager({
             <SummaryTile
               label="Published departures"
               value={String(buses.length)}
-              tone="orange"
+              tone="slate"
             />
             <SummaryTile
               label="Seats available"
               value={String(buses.reduce((sum, bus) => sum + bus.seatsLeft, 0))}
-              tone="orange"
+              tone="slate"
             />
             <SummaryTile
               label="Seats booked"
               value={String(
                 buses.reduce((sum, bus) => sum + (bus.totalSeats - bus.seatsLeft), 0)
               )}
-              tone="orange"
+              tone="slate"
             />
           </div>
 
           {/* ── Bulk action bar ── */}
           {selectedIds.size > 0 && (
-            <div className="flex items-center gap-3 rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 shadow-sm animate-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm animate-in slide-in-from-top-2 duration-200">
               <div className="flex items-center gap-2 text-sm font-semibold text-orange-800">
-                <CheckSquare2 className="size-4 text-orange-600" />
+                <CheckSquare2 className="size-4 text-indigo-600" />
                 {selectedIds.size} departure{selectedIds.size !== 1 ? "s" : ""} selected
               </div>
               <div className="ml-auto flex items-center gap-2">
@@ -379,7 +379,7 @@ export default function AdminBusesManager({
 
           {buses.length === 0 ? (
             <div className="rounded-2xl border-2 border-dashed border-orange-300/50 bg-gradient-to-br from-orange-50/50 to-orange-100/50 px-8 py-12 text-center">
-              <BusFront className="mx-auto mb-4 size-12 text-orange-400" />
+              <BusFront className="mx-auto mb-4 size-12 text-slate-400" />
               <p className="text-sm text-muted-foreground">
                 No buses yet. Create your first departure to start selling seats.
               </p>
@@ -389,7 +389,7 @@ export default function AdminBusesManager({
             <div className="space-y-3">
               {visibleBuses.length === 0 ? (
                 <EmptyState
-                  icon={<BusFront className="size-10 text-orange-300" />}
+                  icon={<BusFront className="size-10 text-slate-300" />}
                   title="No departures match these filters"
                   description="Adjust the route, date, or search query to see more results."
                 />
@@ -418,7 +418,7 @@ export default function AdminBusesManager({
                   return (
                     <div
                       key={group.key}
-                      className={`rounded-2xl border overflow-hidden transition-shadow ${isOpen ? "border-orange-300 shadow-lg" : "border-orange-200/70 shadow-sm"}`}
+                      className={`rounded-2xl border overflow-hidden transition-shadow ${isOpen ? "border-orange-300 shadow-lg" : "border-slate-200 shadow-sm"}`}
                     >
                       {/* ── Route header ── */}
                       <div
@@ -428,12 +428,12 @@ export default function AdminBusesManager({
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); toggleGroupSel(); }}
-                          className="shrink-0 text-slate-300 hover:text-orange-500 transition-colors"
+                          className="shrink-0 text-slate-300 hover:text-indigo-500 transition-colors"
                         >
                           {allSel
-                            ? <CheckSquare2 className="size-4 text-orange-500" />
+                            ? <CheckSquare2 className="size-4 text-indigo-500" />
                             : someSel
-                            ? <CheckSquare2 className="size-4 text-orange-300" />
+                            ? <CheckSquare2 className="size-4 text-slate-300" />
                             : <Square className="size-4" />}
                         </button>
 
@@ -450,7 +450,7 @@ export default function AdminBusesManager({
 
                         {/* Stat pills */}
                         <div className="hidden sm:flex items-center gap-2 shrink-0">
-                          <span className="rounded-full bg-orange-100 border border-orange-200 px-2.5 py-0.5 text-[11px] font-bold text-orange-700">
+                          <span className="rounded-full bg-slate-100 border border-orange-200 px-2.5 py-0.5 text-[11px] font-bold text-orange-700">
                             {group.totalBuses} dep{group.totalBuses !== 1 ? "s" : ""}
                           </span>
                           <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold border ${
@@ -498,19 +498,19 @@ export default function AdminBusesManager({
                                       else slotIds.forEach((id) => next.add(id));
                                       return next;
                                     })}
-                                    className="shrink-0 text-slate-300 hover:text-orange-500 transition-colors"
+                                    className="shrink-0 text-slate-300 hover:text-indigo-500 transition-colors"
                                   >
                                     {slotAllSel
-                                      ? <CheckSquare2 className="size-3.5 text-orange-500" />
+                                      ? <CheckSquare2 className="size-3.5 text-indigo-500" />
                                       : slotSomeSel
-                                      ? <CheckSquare2 className="size-3.5 text-orange-300" />
+                                      ? <CheckSquare2 className="size-3.5 text-slate-300" />
                                       : <Square className="size-3.5" />}
                                   </button>
-                                  <Clock className="size-3.5 text-orange-500 shrink-0" />
+                                  <Clock className="size-3.5 text-indigo-500 shrink-0" />
                                   <span className="text-xs font-bold text-slate-700">
                                     {slot.departureTime} – {slot.arrivalTime}
                                   </span>
-                                  <span className="ml-1 rounded-full bg-orange-100 border border-orange-200 px-2 py-0.5 text-[10px] font-bold text-orange-600">
+                                  <span className="ml-1 rounded-full bg-slate-100 border border-orange-200 px-2 py-0.5 text-[10px] font-bold text-indigo-600">
                                     {slot.buses.length} bus{slot.buses.length !== 1 ? "es" : ""}
                                   </span>
                                 </div>
@@ -550,9 +550,9 @@ export default function AdminBusesManager({
                                           {/* Checkbox */}
                                           <td className="pl-10 pr-2 py-2.5">
                                             <button type="button" onClick={() => toggleOne(bus.id)}
-                                              className="text-slate-200 hover:text-orange-500 transition-colors">
+                                              className="text-slate-200 hover:text-indigo-500 transition-colors">
                                               {isSel
-                                                ? <CheckSquare2 className="size-3.5 text-orange-500" />
+                                                ? <CheckSquare2 className="size-3.5 text-indigo-500" />
                                                 : <Square className="size-3.5" />}
                                             </button>
                                           </td>
@@ -573,8 +573,8 @@ export default function AdminBusesManager({
                                           <td className="px-3 py-2.5">
                                             {vehicleName ? (
                                               <div className="flex items-center gap-1.5">
-                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-orange-100">
-                                                  <Bus className="size-3 text-orange-600" />
+                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-slate-100">
+                                                  <Bus className="size-3 text-indigo-600" />
                                                 </div>
                                                 <span className="text-xs font-semibold text-slate-800 truncate max-w-[120px]">{vehicleName}</span>
                                               </div>
@@ -599,7 +599,7 @@ export default function AdminBusesManager({
 
                                           {/* Bus type */}
                                           <td className="px-3 py-2.5 hidden sm:table-cell">
-                                            <Badge className="border-orange-200 bg-orange-100 text-orange-700 text-[10px] py-0 whitespace-nowrap">
+                                            <Badge className="border-orange-200 bg-slate-100 text-orange-700 text-[10px] py-0 whitespace-nowrap">
                                               {formatBusType(bus.busType)}
                                             </Badge>
                                           </td>
@@ -632,7 +632,7 @@ export default function AdminBusesManager({
                                             <div className="flex items-center gap-1">
                                               <button type="button" title="Edit departure"
                                                 onClick={() => { setSelectedBus(bus); setBusDialogOpen(true); }}
-                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-500 transition-colors">
+                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-50 hover:bg-slate-100 text-indigo-500 transition-colors">
                                                 <PencilLine className="size-3.5" />
                                               </button>
                                               <button type="button" title="Assign driver"
@@ -683,13 +683,13 @@ export default function AdminBusesManager({
                       <button
                         type="button"
                         onClick={toggleSelectAll}
-                        className="flex items-center justify-center text-orange-400 hover:text-orange-600 transition-colors"
+                        className="flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-colors"
                         title={allPageSelected ? "Deselect all on page" : "Select all on page"}
                       >
                         {allPageSelected
-                          ? <CheckSquare2 className="size-4 text-orange-600" />
+                          ? <CheckSquare2 className="size-4 text-indigo-600" />
                           : somePageSelected
-                          ? <CheckSquare2 className="size-4 text-orange-400 opacity-60" />
+                          ? <CheckSquare2 className="size-4 text-slate-400 opacity-60" />
                           : <Square className="size-4" />
                         }
                       </button>
@@ -708,7 +708,7 @@ export default function AdminBusesManager({
                     <TableRow>
                       <TableCell colSpan={8} className="py-10">
                         <EmptyState
-                          icon={<BusFront className="size-10 text-orange-300" />}
+                          icon={<BusFront className="size-10 text-slate-300" />}
                           title="No departures match these filters"
                           description="Adjust the route, date, or search query to see more results."
                         />
@@ -733,10 +733,10 @@ export default function AdminBusesManager({
                             <button
                               type="button"
                               onClick={() => toggleOne(bus.id)}
-                              className="flex items-center justify-center text-slate-300 hover:text-orange-500 transition-colors"
+                              className="flex items-center justify-center text-slate-300 hover:text-indigo-500 transition-colors"
                             >
                               {isSelected
-                                ? <CheckSquare2 className="size-4 text-orange-500" />
+                                ? <CheckSquare2 className="size-4 text-indigo-500" />
                                 : <Square className="size-4" />
                               }
                             </button>
@@ -753,7 +753,7 @@ export default function AdminBusesManager({
 
                           {/* Type */}
                           <TableCell className="py-3">
-                            <Badge className="border-orange-200 bg-orange-100 text-orange-700 text-[11px]">
+                            <Badge className="border-orange-200 bg-slate-100 text-orange-700 text-[11px]">
                               {formatBusType(bus.busType)}
                             </Badge>
                           </TableCell>
@@ -810,7 +810,7 @@ export default function AdminBusesManager({
                             <div className="flex items-center gap-1">
                               <button type="button" title="Edit departure"
                                 onClick={() => { setSelectedBus(bus); setBusDialogOpen(true); }}
-                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-500 transition-colors">
+                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-50 hover:bg-slate-100 text-indigo-500 transition-colors">
                                 <PencilLine className="size-3.5" />
                               </button>
                               <button type="button" title="Assign driver"
