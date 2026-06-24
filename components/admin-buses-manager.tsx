@@ -354,7 +354,7 @@ export default function AdminBusesManager({
           {/* ── Bulk action bar ── */}
           {selectedIds.size > 0 && (
             <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm animate-in slide-in-from-top-2 duration-200">
-              <div className="flex items-center gap-2 text-sm font-semibold text-orange-800">
+              <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                 <CheckSquare2 className="size-4 text-indigo-600" />
                 {selectedIds.size} departure{selectedIds.size !== 1 ? "s" : ""} selected
               </div>
@@ -378,7 +378,7 @@ export default function AdminBusesManager({
           )}
 
           {buses.length === 0 ? (
-            <div className="rounded-2xl border-2 border-dashed border-orange-300/50 bg-gradient-to-br from-orange-50/50 to-orange-100/50 px-8 py-12 text-center">
+            <div className="rounded-2xl border-2 border-dashed border-slate-300/50 bg-gradient-to-br from-slate-50/50 to-slate-100/50 px-8 py-12 text-center">
               <BusFront className="mx-auto mb-4 size-12 text-slate-400" />
               <p className="text-sm text-muted-foreground">
                 No buses yet. Create your first departure to start selling seats.
@@ -418,11 +418,11 @@ export default function AdminBusesManager({
                   return (
                     <div
                       key={group.key}
-                      className={`rounded-2xl border overflow-hidden transition-shadow ${isOpen ? "border-orange-300 shadow-lg" : "border-slate-200 shadow-sm"}`}
+                      className={`rounded-2xl border overflow-hidden transition-shadow ${isOpen ? "border-slate-300 shadow-lg" : "border-slate-200 shadow-sm"}`}
                     >
                       {/* ── Route header ── */}
                       <div
-                        className={`flex items-center gap-3 px-4 py-3.5 cursor-pointer select-none transition-colors ${isOpen ? "bg-gradient-to-r from-orange-50 to-red-50" : "bg-white hover:bg-orange-50/60"}`}
+                        className={`flex items-center gap-3 px-4 py-3.5 cursor-pointer select-none transition-colors ${isOpen ? "bg-slate-50" : "bg-white hover:bg-slate-50/60"}`}
                         onClick={() => toggleGroup(group.key)}
                       >
                         <button
@@ -450,7 +450,7 @@ export default function AdminBusesManager({
 
                         {/* Stat pills */}
                         <div className="hidden sm:flex items-center gap-2 shrink-0">
-                          <span className="rounded-full bg-slate-100 border border-orange-200 px-2.5 py-0.5 text-[11px] font-bold text-orange-700">
+                          <span className="rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[11px] font-bold text-slate-700">
                             {group.totalBuses} dep{group.totalBuses !== 1 ? "s" : ""}
                           </span>
                           <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold border ${
@@ -480,7 +480,7 @@ export default function AdminBusesManager({
 
                       {/* ── Expanded: time-slot sections ── */}
                       {isOpen && (
-                        <div className="border-t border-orange-100 divide-y divide-orange-100/70">
+                        <div className="border-t border-slate-100 divide-y divide-slate-100/70">
                           {group.timeSlots.map((slot) => {
                             const slotIds = slot.buses.map((b) => b.id);
                             const slotAllSel = slotIds.every((id) => selectedIds.has(id));
@@ -489,7 +489,7 @@ export default function AdminBusesManager({
                             return (
                               <div key={slot.slotKey}>
                                 {/* Time slot header */}
-                                <div className="flex items-center gap-3 bg-slate-50/80 px-4 py-2 border-b border-orange-100/60">
+                                <div className="flex items-center gap-3 bg-slate-50/80 px-4 py-2 border-b border-slate-100/60">
                                   <button
                                     type="button"
                                     onClick={() => setSelectedIds((prev) => {
@@ -510,7 +510,7 @@ export default function AdminBusesManager({
                                   <span className="text-xs font-bold text-slate-700">
                                     {slot.departureTime} – {slot.arrivalTime}
                                   </span>
-                                  <span className="ml-1 rounded-full bg-slate-100 border border-orange-200 px-2 py-0.5 text-[10px] font-bold text-indigo-600">
+                                  <span className="ml-1 rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-bold text-indigo-600">
                                     {slot.buses.length} bus{slot.buses.length !== 1 ? "es" : ""}
                                   </span>
                                 </div>
@@ -545,7 +545,7 @@ export default function AdminBusesManager({
                                       return (
                                         <tr
                                           key={bus.id}
-                                          className={`transition-colors group/row ${isSel ? "bg-orange-50/70" : "hover:bg-orange-50/30"}`}
+                                          className={`transition-colors group/row ${isSel ? "bg-slate-50/70" : "hover:bg-slate-50/30"}`}
                                         >
                                           {/* Checkbox */}
                                           <td className="pl-10 pr-2 py-2.5">
@@ -599,7 +599,7 @@ export default function AdminBusesManager({
 
                                           {/* Bus type */}
                                           <td className="px-3 py-2.5 hidden sm:table-cell">
-                                            <Badge className="border-orange-200 bg-slate-100 text-orange-700 text-[10px] py-0 whitespace-nowrap">
+                                            <Badge className="border-slate-200 bg-slate-100 text-slate-700 text-[10px] py-0 whitespace-nowrap">
                                               {formatBusType(bus.busType)}
                                             </Badge>
                                           </td>
@@ -632,7 +632,7 @@ export default function AdminBusesManager({
                                             <div className="flex items-center gap-1">
                                               <button type="button" title="Edit departure"
                                                 onClick={() => { setSelectedBus(bus); setBusDialogOpen(true); }}
-                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-50 hover:bg-slate-100 text-indigo-500 transition-colors">
+                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 hover:bg-slate-100 text-indigo-500 transition-colors">
                                                 <PencilLine className="size-3.5" />
                                               </button>
                                               <button type="button" title="Assign driver"
@@ -674,10 +674,10 @@ export default function AdminBusesManager({
             </div>
           ) : (
             /* ════════ FLAT LIST VIEW (existing) ════════ */
-            <div className="rounded-2xl border border-orange-200/50 bg-white/80 overflow-hidden">
+            <div className="rounded-2xl border border-slate-200/50 bg-white/80 overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gradient-to-r from-orange-50 to-red-50 hover:bg-transparent">
+                  <TableRow className="bg-slate-50 hover:bg-transparent">
                     {/* Select-all checkbox */}
                     <TableHead className="w-[44px] pl-4">
                       <button
@@ -694,12 +694,12 @@ export default function AdminBusesManager({
                         }
                       </button>
                     </TableHead>
-                    <TableHead className="font-bold text-orange-900 w-[220px]">Route</TableHead>
-                    <TableHead className="font-bold text-orange-900 w-[90px]">Type</TableHead>
-                    <TableHead className="font-bold text-orange-900 w-[130px]">Date & Time</TableHead>
-                    <TableHead className="font-bold text-orange-900 w-[70px]">Fare</TableHead>
-                    <TableHead className="font-bold text-orange-900 w-[150px]">Seats</TableHead>
-                    <TableHead className="font-bold text-orange-900 w-[120px]">Status</TableHead>
+                    <TableHead className="font-bold text-slate-700 w-[220px]">Route</TableHead>
+                    <TableHead className="font-bold text-slate-700 w-[90px]">Type</TableHead>
+                    <TableHead className="font-bold text-slate-700 w-[130px]">Date & Time</TableHead>
+                    <TableHead className="font-bold text-slate-700 w-[70px]">Fare</TableHead>
+                    <TableHead className="font-bold text-slate-700 w-[150px]">Seats</TableHead>
+                    <TableHead className="font-bold text-slate-700 w-[120px]">Status</TableHead>
                     <TableHead className="w-[44px]" />
                   </TableRow>
                 </TableHeader>
@@ -726,7 +726,7 @@ export default function AdminBusesManager({
                       return (
                         <TableRow
                           key={bus.id}
-                          className={`transition-colors group ${isSelected ? "bg-orange-50/70" : "hover:bg-orange-50/40"}`}
+                          className={`transition-colors group ${isSelected ? "bg-slate-50/70" : "hover:bg-slate-50/40"}`}
                         >
                           {/* Checkbox */}
                           <TableCell className="py-3 pl-4">
@@ -753,7 +753,7 @@ export default function AdminBusesManager({
 
                           {/* Type */}
                           <TableCell className="py-3">
-                            <Badge className="border-orange-200 bg-slate-100 text-orange-700 text-[11px]">
+                            <Badge className="border-slate-200 bg-slate-100 text-slate-700 text-[11px]">
                               {formatBusType(bus.busType)}
                             </Badge>
                           </TableCell>
@@ -810,7 +810,7 @@ export default function AdminBusesManager({
                             <div className="flex items-center gap-1">
                               <button type="button" title="Edit departure"
                                 onClick={() => { setSelectedBus(bus); setBusDialogOpen(true); }}
-                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-50 hover:bg-slate-100 text-indigo-500 transition-colors">
+                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 hover:bg-slate-100 text-indigo-500 transition-colors">
                                 <PencilLine className="size-3.5" />
                               </button>
                               <button type="button" title="Assign driver"

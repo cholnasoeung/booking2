@@ -414,10 +414,10 @@ export default function AdminBookingsManager({
             </div>
           </CardHeader>
           <CardContent className="p-6">
-            <div className="rounded-2xl border border-pink-200/50 bg-white/80">
+            <div className="rounded-2xl border border-slate-200 bg-white">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gradient-to-r from-pink-50 to-rose-50 hover:bg-transparent">
+                  <TableRow className="bg-slate-50 hover:bg-slate-50">
                     <TableHead className="w-10">
                       <button
                         type="button"
@@ -426,19 +426,19 @@ export default function AdminBookingsManager({
                         title={allVisibleSelected ? "Deselect all" : "Select all confirmed"}
                       >
                         {allVisibleSelected
-                          ? <CheckSquare className="size-4 text-pink-600" />
-                          : <Square className="size-4 text-pink-400" />
+                          ? <CheckSquare className="size-4 text-indigo-600" />
+                          : <Square className="size-4 text-slate-400" />
                         }
                       </button>
                     </TableHead>
-                    <TableHead className="font-bold text-pink-900">Booking</TableHead>
-                    <TableHead className="font-bold text-pink-900">Customer</TableHead>
-                    <TableHead className="font-bold text-pink-900">Trip</TableHead>
-                    <TableHead className="font-bold text-pink-900">Seats</TableHead>
-                    <TableHead className="font-bold text-pink-900">Total</TableHead>
-                    <TableHead className="font-bold text-pink-900">Status</TableHead>
-                    <TableHead className="font-bold text-pink-900">Booked</TableHead>
-                    <TableHead className="text-right font-bold text-pink-900">
+                    <TableHead className="font-bold text-slate-700">Booking</TableHead>
+                    <TableHead className="font-bold text-slate-700">Customer</TableHead>
+                    <TableHead className="font-bold text-slate-700">Trip</TableHead>
+                    <TableHead className="font-bold text-slate-700">Seats</TableHead>
+                    <TableHead className="font-bold text-slate-700">Total</TableHead>
+                    <TableHead className="font-bold text-slate-700">Status</TableHead>
+                    <TableHead className="font-bold text-slate-700">Booked</TableHead>
+                    <TableHead className="text-right font-bold text-slate-700">
                       Actions
                     </TableHead>
                   </TableRow>
@@ -448,7 +448,7 @@ export default function AdminBookingsManager({
                     <TableRow>
                       <TableCell colSpan={9} className="py-10">
                         <EmptyState
-                          icon={<Ticket className="size-10 text-pink-300" />}
+                          icon={<Ticket className="size-10 text-slate-300" />}
                           title="No bookings match these filters"
                           description="Try a different search, route, date, or status."
                         />
@@ -458,7 +458,7 @@ export default function AdminBookingsManager({
                     pagedBookings.map((booking) => (
                       <TableRow
                         key={booking.id}
-                        className={`transition-colors hover:bg-pink-50/50 ${selectedIds.has(booking.id) ? "bg-pink-50" : ""}`}
+                        className={`transition-colors hover:bg-slate-50/50 ${selectedIds.has(booking.id) ? "bg-indigo-50/40" : ""}`}
                       >
                         <TableCell>
                           <button
@@ -468,8 +468,8 @@ export default function AdminBookingsManager({
                             className="flex items-center justify-center disabled:opacity-30"
                           >
                             {selectedIds.has(booking.id)
-                              ? <CheckSquare className="size-4 text-pink-600" />
-                              : <Square className="size-4 text-pink-300" />
+                              ? <CheckSquare className="size-4 text-indigo-600" />
+                              : <Square className="size-4 text-slate-300" />
                             }
                           </button>
                         </TableCell>
@@ -509,7 +509,7 @@ export default function AdminBookingsManager({
                           )}
                         </TableCell>
                         <TableCell className="whitespace-normal">
-                          <Badge className="border-pink-200 bg-pink-100 text-pink-700">
+                          <Badge className="border-slate-200 bg-slate-100 text-slate-700">
                             {formatSeatList(booking.seats)}
                           </Badge>
                         </TableCell>
@@ -579,7 +579,7 @@ export default function AdminBookingsManager({
         open={Boolean(selectedBooking)}
         onOpenChange={(open) => !open && setSelectedBooking(null)}
       >
-        <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-3xl border-2 border-slate-200 bg-gradient-to-br from-white to-pink-50/50 shadow-2xl">
+        <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-3xl border-2 border-slate-200 bg-white shadow-lg">
           {selectedBooking ? (
             <>
               <DialogHeader className="border-b border-dashed border-slate-200 pb-4">
@@ -652,7 +652,7 @@ export default function AdminBookingsManager({
                     {selectedBooking.passengers.map((passenger, index) => (
                       <div
                         key={`${selectedBooking.id}-${index}`}
-                        className="rounded-2xl border border-pink-100 bg-white/90 px-4 py-3"
+                        className="rounded-2xl border border-slate-100 bg-white/90 px-4 py-3"
                       >
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                           <div>
@@ -670,7 +670,7 @@ export default function AdminBookingsManager({
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-2xl border border-dashed border-pink-200 bg-pink-50/60 px-4 py-5 text-sm text-pink-800">
+                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-700">
                     Passenger details were not saved for this booking. Older bookings may only have seat selections.
                   </div>
                 )}
@@ -772,7 +772,7 @@ export default function AdminBookingsManager({
 
 function DetailCard({ title, lines }: { title: string; lines: string[] }) {
   return (
-    <div className="rounded-2xl border border-pink-100 bg-white/90 p-4">
+    <div className="rounded-2xl border border-slate-100 bg-white/90 p-4">
       <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
         {title}
       </p>
