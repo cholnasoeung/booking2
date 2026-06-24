@@ -20,6 +20,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import AvatarUpload, { AvatarPicker, uploadAvatarFile } from "@/components/avatar-upload";
 
 type Emp = {
   id: string; name: string; phone: string; email: string | null;
@@ -31,6 +32,7 @@ type Emp = {
   grossMonthly: number; notes: string | null; createdAt: string;
   resignDate: string | null; lastWorkingDay: string | null; resignReason: string | null; resignNote: string | null;
   terminationDate: string | null; terminationReason: string | null; terminationNote: string | null;
+  avatar?: string | null;
 };
 
 type StatusMode = "resigned" | "terminated";
@@ -107,13 +109,6 @@ const emptyForm: EmpForm = {
 
 const fmt = (n: number) => `$${n.toLocaleString()}`;
 
-const DEPT_GRAD: Record<string, string> = {
-  operations:       "from-indigo-500 to-violet-600",
-  finance:          "from-emerald-500 to-teal-600",
-  maintenance:      "from-amber-500 to-orange-600",
-  admin:            "from-violet-500 to-purple-600",
-  customer_service: "from-sky-500 to-blue-600",
-};
 
 function EmployeeFormContent({
   form, onChange,
@@ -276,9 +271,10 @@ export default function AdminEmployeesTab() {
   const [filterStatus, setFilterStatus] = useState("_all");
   const [search,       setSearch]       = useState("");
 
-  const [addOpen,      setAddOpen]      = useState(false);
-  const [editOpen,     setEditOpen]     = useState(false);
-  const [deleteOpen,   setDeleteOpen]   = useState(false);
+  const [addOpen,        setAddOpen]        = useState(false);
+  const [addAvatarFile,  setAddAvatarFile]  = useState<File | null>(null);
+  const [editOpen,       setEditOpen]       = useState(false);
+  const [deleteOpen,     setDeleteOpen]     = useState(false);
   const [editTarget,   setEditTarget]   = useState<Emp | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Emp | null>(null);
   const [form,         setForm]         = useState<EmpForm>(emptyForm);
@@ -359,6 +355,11 @@ export default function AdminEmployeesTab() {
     startTransition(async () => {
       const res = await fetch("/api/admin/employees", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(buildBody()) });
       if (!res.ok) { const d = await res.json(); setFormErr(d.message ?? "Error"); return; }
+      const data = await res.json();
+      if (addAvatarFile && data.employee?.id) {
+        await uploadAvatarFile(addAvatarFile, "employee", data.employee.id);
+        setAddAvatarFile(null);
+      }
       setAddOpen(false); fetchData();
     });
   };
@@ -551,15 +552,18 @@ export default function AdminEmployeesTab() {
                 const role       = ROLES[emp.role]       ?? ROLES.other;
                 const dept       = DEPTS[emp.department] ?? DEPTS.operations;
                 const status     = STATUSES[emp.status]  ?? STATUSES.active;
-                const avatarGrad = DEPT_GRAD[emp.department] ?? "from-indigo-500 to-violet-600";
-                const initials   = emp.name.split(" ").map((p: string) => p[0] ?? "").join("").slice(0, 2).toUpperCase();
                 return (
                   <tr key={emp.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white text-sm font-black shadow-lg bg-gradient-to-br", avatarGrad)}>
-                          {initials}
-                        </div>
+                        <AvatarUpload
+                          entityType="employee"
+                          entityId={emp.id}
+                          currentAvatar={emp.avatar}
+                          name={emp.name}
+                          size="sm"
+                          onUploaded={(url) => setEmployees((prev) => prev.map((e) => e.id === emp.id ? { ...e, avatar: url } : e))}
+                        />
                         <div>
                           <p className="text-slate-900 font-semibold leading-tight">{emp.name}</p>
                           <p className="text-slate-500 text-[11px] mt-0.5">{emp.email ?? emp.phone}</p>
@@ -639,12 +643,20 @@ export default function AdminEmployeesTab() {
       )}
 
       {/* Add Dialog */}
-      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+      <Dialog open={addOpen} onOpenChange={(o) => { if (!o) setAddAvatarFile(null); setAddOpen(o); }}>
         <DialogContent className="sm:max-w-3xl bg-slate-900 border-white/10 text-white max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add Employee</DialogTitle>
             <DialogDescription className="text-slate-400">Create a new employee record with salary information.</DialogDescription>
           </DialogHeader>
+          <div className="flex justify-center pt-2">
+            <AvatarPicker
+              name={form.name || "?"}
+              file={addAvatarFile}
+              onChange={setAddAvatarFile}
+              size="lg"
+            />
+          </div>
           <EmployeeFormContent form={form} onChange={onChange} />
           {formErr && <p className="text-sm text-red-400">{formErr}</p>}
           <DialogFooter>

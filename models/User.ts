@@ -24,6 +24,7 @@ export interface IUser extends Document {
   password: string;
   phone?: string;
   address?: string;
+  avatar?: string;
   role: UserRole;
   isEmailVerified: boolean;
   isSuspended?: boolean;
@@ -95,6 +96,10 @@ const UserSchema = new Schema<IUser>(
       trim: true,
     },
     address: {
+      type: String,
+      trim: true,
+    },
+    avatar: {
       type: String,
       trim: true,
     },

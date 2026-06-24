@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { confirmDelete, confirmWarning, toastSuccess, toastError } from "@/lib/swal";
+import AvatarUpload from "@/components/avatar-upload";
 
 interface AdminUser {
   id: string;
@@ -22,6 +23,7 @@ interface AdminUser {
   email: string;
   role: "user" | "admin";
   phone: string | null;
+  avatar: string | null;
   isEmailVerified: boolean;
   isSuspended: boolean;
   suspendedAt: string | null;
@@ -273,14 +275,13 @@ export default function AdminUsersManager() {
                     {/* User */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className={cn(
-                          "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white text-sm font-bold",
-                          user.isSuspended
-                            ? "bg-gradient-to-br from-orange-400 to-red-500"
-                            : "bg-gradient-to-br from-indigo-400 to-purple-500"
-                        )}>
-                          {user.isSuspended ? <Ban className="w-4 h-4" /> : user.name.charAt(0).toUpperCase()}
-                        </div>
+                        <AvatarUpload
+                          entityType="user"
+                          entityId={user.id}
+                          currentAvatar={user.avatar}
+                          name={user.name}
+                          size="sm"
+                        />
                         <div>
                           <p className="font-medium text-slate-900">{user.name}</p>
                           <p className="text-xs text-slate-400">{user.email}</p>

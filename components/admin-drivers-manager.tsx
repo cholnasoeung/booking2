@@ -18,9 +18,10 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import AvatarUpload, { AvatarPicker, uploadAvatarFile } from "@/components/avatar-upload";
 import type { DriverSummary } from "@/lib/queries";
 
-type Driver = DriverSummary & { vehicleNumber?: string | null };
+type Driver = DriverSummary & { vehicleNumber?: string | null; avatar?: string | null };
 
 type DriverForm = {
   name: string;
@@ -40,18 +41,6 @@ function formFromDriver(d: Driver): DriverForm {
   };
 }
 
-function DriverAvatar({ name, suspended }: { name: string; suspended?: boolean }) {
-  return (
-    <div className={cn(
-      "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white text-sm font-bold shadow-sm",
-      suspended
-        ? "bg-gradient-to-br from-orange-400 to-red-500"
-        : "bg-gradient-to-br from-indigo-500 to-violet-600"
-    )}>
-      {suspended ? <Ban className="h-4 w-4" /> : name.charAt(0).toUpperCase()}
-    </div>
-  );
-}
 
 function DriverFormFields({
   form,
@@ -117,6 +106,7 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
 
   // Form state
   const [addForm, setAddForm] = useState<DriverForm>(EMPTY_FORM);
+  const [addAvatarFile, setAddAvatarFile] = useState<File | null>(null);
   const [editForm, setEditForm] = useState<DriverForm>(EMPTY_FORM);
 
   const [actionPendingId, setActionPendingId] = useState<string | null>(null);
@@ -138,8 +128,14 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
         });
         const json = await res.json();
         if (!res.ok) { toastError(json.message ?? "Failed to add driver"); return; }
-        setDrivers((prev) => [json.driver, ...prev]);
+        let driver = json.driver;
+        if (addAvatarFile) {
+          const url = await uploadAvatarFile(addAvatarFile, "driver", driver.id);
+          if (url) driver = { ...driver, avatar: url };
+        }
+        setDrivers((prev) => [driver, ...prev]);
         setAddForm(EMPTY_FORM);
+        setAddAvatarFile(null);
         setShowAdd(false);
         toastSuccess("Driver added successfully!");
       } catch {
@@ -290,7 +286,14 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
                 >
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <DriverAvatar name={driver.name} suspended={driver.status === "inactive"} />
+                      <AvatarUpload
+                        entityType="driver"
+                        entityId={driver.id}
+                        currentAvatar={driver.avatar}
+                        name={driver.name}
+                        size="sm"
+                        onUploaded={(url) => setDrivers((prev) => prev.map((d) => d.id === driver.id ? { ...d, avatar: url } : d))}
+                      />
                       <div>
                         <p className="font-semibold text-slate-900">{driver.name}</p>
                         <p className="text-xs text-slate-400 mt-0.5">
@@ -382,13 +385,21 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
       </div>
 
       {/* ── ADD DRIVER MODAL ── */}
-      <Dialog open={showAdd} onOpenChange={setShowAdd}>
+      <Dialog open={showAdd} onOpenChange={(o) => { if (!o) setAddAvatarFile(null); setShowAdd(o); }}>
         <DialogContent className="sm:max-w-lg rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-slate-900">Add New Driver</DialogTitle>
             <DialogDescription>Fill in the driver's details to register them on the roster.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAdd} className="space-y-5 mt-2">
+            <div className="flex justify-center">
+              <AvatarPicker
+                name={addForm.name || "?"}
+                file={addAvatarFile}
+                onChange={setAddAvatarFile}
+                size="lg"
+              />
+            </div>
             <DriverFormFields form={addForm} onChange={setAddForm} disabled={isPending} />
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" className="rounded-xl" onClick={() => setShowAdd(false)} disabled={isPending}>
@@ -441,7 +452,17 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
             <div className="space-y-5 mt-2">
               {/* Avatar + name */}
               <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <DriverAvatar name={detailTarget.name} suspended={detailTarget.status === "inactive"} />
+                <AvatarUpload
+                  entityType="driver"
+                  entityId={detailTarget.id}
+                  currentAvatar={detailTarget.avatar}
+                  name={detailTarget.name}
+                  size="md"
+                  onUploaded={(url) => {
+                    setDrivers((prev) => prev.map((d) => d.id === detailTarget.id ? { ...d, avatar: url } : d));
+                    setDetailTarget((prev) => prev ? { ...prev, avatar: url } : prev);
+                  }}
+                />
                 <div>
                   <p className="font-bold text-slate-900 text-lg">{detailTarget.name}</p>
                   {detailTarget.status === "active" ? (

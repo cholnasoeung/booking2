@@ -12,18 +12,19 @@ type DriverPayload = {
   phone: string;
   licenseNumber: string;
   vehicleNumber?: string;
+  avatar?: string | null;
   status: "active" | "inactive";
   createdAt: string;
 };
 
 function mapDriver(driver: IDriver): DriverPayload {
-
   return {
     id: String(driver._id),
     name: driver.name,
     phone: driver.phone,
     licenseNumber: driver.licenseNumber,
     vehicleNumber: driver.vehicleNumber,
+    avatar: driver.avatar ?? null,
     status: driver.status,
     createdAt: driver.createdAt.toISOString(),
   };
@@ -40,6 +41,7 @@ export async function GET() {
     phone: driver.phone,
     licenseNumber: driver.licenseNumber,
     vehicleNumber: driver.vehicleNumber,
+    avatar: (driver as any).avatar ?? null,
     status: driver.status,
     createdAt: driver.createdAt.toISOString(),
   }));

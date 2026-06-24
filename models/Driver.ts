@@ -7,6 +7,7 @@ export interface IDriver extends Document {
   phone: string;
   licenseNumber: string;
   vehicleNumber?: string;
+  avatar?: string;
   status: DriverStatus;
   createdAt: Date;
   updatedAt: Date;
@@ -33,6 +34,10 @@ const DriverSchema = new Schema<IDriver>(
       index: true,
     },
     vehicleNumber: {
+      type: String,
+      trim: true,
+    },
+    avatar: {
       type: String,
       trim: true,
     },

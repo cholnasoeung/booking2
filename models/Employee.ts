@@ -9,6 +9,7 @@ export interface IEmployee extends Document {
   name: string;
   phone: string;
   email?: string;
+  avatar?: string;
   role: EmployeeRole;
   department: EmployeeDept;
   hireDate: Date;
@@ -46,6 +47,7 @@ const EmployeeSchema = new Schema<IEmployee>(
     name:               { type: String, required: true, trim: true, index: true },
     phone:              { type: String, required: true, trim: true },
     email:              { type: String, trim: true, lowercase: true },
+    avatar:             { type: String, trim: true },
     role:               { type: String, enum: ["driver","mechanic","ticket_agent","manager","accountant","other"], required: true },
     department:         { type: String, enum: ["operations","finance","maintenance","admin","customer_service"], required: true },
     hireDate:           { type: Date,   required: true },

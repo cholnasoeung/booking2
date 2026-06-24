@@ -66,6 +66,7 @@ export async function GET(request: Request) {
       terminationReason:  e.terminationReason  ?? null,
       terminationNote:    e.terminationNote    ?? null,
       createdAt:          e.createdAt,
+      avatar:             e.avatar ?? null,
     })),
     stats,
   });

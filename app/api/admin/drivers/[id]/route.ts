@@ -31,6 +31,7 @@ export async function PATCH(
     update.vehicleNumber = body.vehicleNumber.trim() || undefined;
   }
   if (body.status === "active" || body.status === "inactive") update.status = body.status;
+  if (typeof body.avatar === "string") update.avatar = body.avatar.trim() || undefined;
 
   if (Object.keys(update).length === 0) {
     return NextResponse.json({ message: "Nothing to update" }, { status: 400 });
@@ -50,6 +51,7 @@ export async function PATCH(
       phone: driver.phone,
       licenseNumber: driver.licenseNumber,
       vehicleNumber: driver.vehicleNumber ?? null,
+      avatar: driver.avatar ?? null,
       status: driver.status,
       createdAt: driver.createdAt.toISOString(),
     },

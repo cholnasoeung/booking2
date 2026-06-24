@@ -36,7 +36,7 @@ export async function GET(request: Request) {
   const [total, users] = await Promise.all([
     UserModel.countDocuments(filter),
     UserModel.find(filter)
-      .select("name email role phone isEmailVerified isSuspended suspendedAt lastLoginAt createdAt")
+      .select("name email role phone avatar isEmailVerified isSuspended suspendedAt lastLoginAt createdAt")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -50,6 +50,7 @@ export async function GET(request: Request) {
       email: u.email,
       role: u.role,
       phone: u.phone ?? null,
+      avatar: u.avatar ?? null,
       isEmailVerified: u.isEmailVerified,
       isSuspended: u.isSuspended ?? false,
       suspendedAt: u.suspendedAt ?? null,
