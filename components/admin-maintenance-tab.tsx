@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer,
@@ -8,7 +8,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
-import { confirmDelete } from "@/lib/swal";
+import { confirmDelete, toastSuccess, toastError } from "@/lib/swal";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -229,15 +229,6 @@ export default function AdminMaintenanceTab() {
   const [form, setForm]           = useState(emptyForm());
   const [formError, setFormError] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [feedback, setFeedback]   = useState<{ kind: "success" | "error"; msg: string } | null>(null);
-  const fbTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
-  const flash = (kind: "success" | "error", msg: string) => {
-    clearTimeout(fbTimer.current);
-    setFeedback({ kind, msg });
-    fbTimer.current = setTimeout(() => setFeedback(null), 4000);
-  };
-
   const fetchData = useCallback(async (pg = page) => {
     setLoading(true);
     const p = new URLSearchParams({ page: String(pg) });
@@ -288,7 +279,7 @@ export default function AdminMaintenanceTab() {
         body: JSON.stringify(buildBody()),
       });
       const json = await res.json();
-      if (res.ok) { setShowAdd(false); setForm(emptyForm()); setPage(1); fetchData(1); flash("success", "Maintenance record added."); }
+      if (res.ok) { setShowAdd(false); setForm(emptyForm()); setPage(1); fetchData(1); toastSuccess("Maintenance record added."); }
       else { setFormError(json.message ?? "Failed to save."); }
     });
   };
@@ -301,7 +292,7 @@ export default function AdminMaintenanceTab() {
         body: JSON.stringify(buildBody()),
       });
       const json = await res.json();
-      if (res.ok) { setShowEdit(null); fetchData(page); flash("success", "Record updated."); }
+      if (res.ok) { setShowEdit(null); fetchData(page); toastSuccess("Record updated."); }
       else { setFormError(json.message ?? "Failed to update."); }
     });
   };
@@ -311,8 +302,8 @@ export default function AdminMaintenanceTab() {
     if (!(await confirmDelete("this maintenance record"))) return;
     startTransition(async () => {
       const res = await fetch(`/api/admin/maintenance/${showDelete.id}`, { method: "DELETE" });
-      if (res.ok) flash("success", "Record deleted.");
-      else flash("error", "Failed to delete.");
+      if (res.ok) toastSuccess("Record deleted.");
+      else toastError("Failed to delete.");
       setShowDelete(null);
       fetchData(page);
     });
@@ -347,17 +338,6 @@ export default function AdminMaintenanceTab() {
 
   return (
     <div className="space-y-6">
-      {/* Feedback */}
-      {feedback && (
-        <div className={cn(
-          "rounded-xl border px-4 py-3 text-sm font-medium",
-          feedback.kind === "success" ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                                      : "bg-red-50 border-red-200 text-red-800"
-        )}>
-          {feedback.msg}
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -373,9 +353,9 @@ export default function AdminMaintenanceTab() {
           <Button variant="outline" size="sm" onClick={() => fetchData(page)} disabled={loading}>
             <RefreshCw className={cn("size-4", loading && "animate-spin")} />
           </Button>
-          <Button size="sm" onClick={openAdd}
-            className="bg-gradient-to-r from-rose-500 to-red-600 text-white hover:from-rose-600 hover:to-red-700">
-            <Plus className="size-4 mr-1" /> Add Record
+          <Button onClick={openAdd}
+            className="rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold px-5 shadow-md shadow-indigo-100 gap-2">
+            <Plus className="size-4" /> Add Record
           </Button>
         </div>
       </div>

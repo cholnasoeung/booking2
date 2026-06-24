@@ -235,7 +235,7 @@ export default function AdminRoutesManager({
               <Button
                 type="button"
                 size="lg"
-                className="rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 shadow-lg transition-all hover:shadow-xl"
+                className="rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold px-5 shadow-md shadow-indigo-100 gap-2"
                 onClick={openCreateRouteDialog}
               >
                 <Plus className="size-4" />

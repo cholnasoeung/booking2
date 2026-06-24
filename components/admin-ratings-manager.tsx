@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { toastSuccess, toastError } from "@/lib/swal";
 import {
   Star,
   CheckCircle2,
@@ -63,8 +64,6 @@ export default function AdminRatingsManager() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [pending, setPending] = useState<Record<string, boolean>>({});
-  const [feedback, setFeedback] = useState<{ id: string; msg: string; ok: boolean } | null>(null);
-
   const fetchRatings = useCallback(async () => {
     setLoading(true);
     try {
@@ -89,7 +88,6 @@ export default function AdminRatingsManager() {
 
   const setStatus = async (rating: RatingItem, newStatus: "approved" | "rejected" | "pending") => {
     setPending((p) => ({ ...p, [rating.id]: true }));
-    setFeedback(null);
     try {
       const res = await fetch(`/api/admin/ratings/${rating.id}`, {
         method: "PATCH",
@@ -98,17 +96,17 @@ export default function AdminRatingsManager() {
       });
       const json = await res.json();
       if (!res.ok) {
-        setFeedback({ id: rating.id, msg: json.message ?? "Failed", ok: false });
+        toastError(json.message ?? "Failed");
         return;
       }
-      setFeedback({ id: rating.id, msg: `Rating ${newStatus}`, ok: true });
+      toastSuccess(`Rating ${newStatus}`);
       setData((prev) =>
         prev
           ? { ...prev, ratings: prev.ratings.filter((r) => r.id !== rating.id) }
           : prev
       );
     } catch {
-      setFeedback({ id: rating.id, msg: "Request failed", ok: false });
+      toastError("Request failed");
     } finally {
       setPending((p) => ({ ...p, [rating.id]: false }));
     }
@@ -149,19 +147,6 @@ export default function AdminRatingsManager() {
           </button>
         ))}
       </div>
-
-      {/* Feedback */}
-      {feedback && (
-        <div
-          className={`rounded-xl px-4 py-3 text-sm font-medium ${
-            feedback.ok
-              ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
-              : "bg-red-50 border border-red-200 text-red-700"
-          }`}
-        >
-          {feedback.msg}
-        </div>
-      )}
 
       {/* Cards */}
       {loading && !data ? (

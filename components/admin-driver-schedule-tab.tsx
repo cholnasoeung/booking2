@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
-import { confirmDelete } from "@/lib/swal";
+import { confirmDelete, toastSuccess, toastError } from "@/lib/swal";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -280,15 +280,6 @@ export default function AdminDriverScheduleTab() {
   const [form, setForm]           = useState(emptyForm());
   const [formError, setFormError] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [feedback, setFeedback]   = useState<{ kind: "success" | "error"; msg: string } | null>(null);
-  const fbTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
-  const flash = (kind: "success" | "error", msg: string) => {
-    clearTimeout(fbTimer.current);
-    setFeedback({ kind, msg });
-    fbTimer.current = setTimeout(() => setFeedback(null), 4000);
-  };
-
   const fetchData = useCallback(async (ws = weekStart) => {
     setLoading(true);
     const p = new URLSearchParams({ week: ws.toISOString().slice(0, 10) });
@@ -337,7 +328,7 @@ export default function AdminDriverScheduleTab() {
       const json = await res.json();
       if (res.ok) {
         setShowAdd(false); setForm(emptyForm());
-        fetchData(weekStart); flash("success", "Schedule added.");
+        fetchData(weekStart); toastSuccess("Schedule added.");
       } else {
         setFormError(json.message ?? "Failed to save.");
       }
@@ -352,7 +343,7 @@ export default function AdminDriverScheduleTab() {
         body: JSON.stringify(buildBody()),
       });
       const json = await res.json();
-      if (res.ok) { setShowEdit(null); fetchData(weekStart); flash("success", "Schedule updated."); }
+      if (res.ok) { setShowEdit(null); fetchData(weekStart); toastSuccess("Schedule updated."); }
       else { setFormError(json.message ?? "Failed to update."); }
     });
   };
@@ -362,8 +353,8 @@ export default function AdminDriverScheduleTab() {
     if (!(await confirmDelete("this schedule"))) return;
     startTransition(async () => {
       const res = await fetch(`/api/admin/driver-schedules/${showDelete.id}`, { method: "DELETE" });
-      if (res.ok) flash("success", "Schedule deleted.");
-      else flash("error", "Failed to delete.");
+      if (res.ok) toastSuccess("Schedule deleted.");
+      else toastError("Failed to delete.");
       setShowDelete(null); fetchData(weekStart);
     });
   };
@@ -374,7 +365,7 @@ export default function AdminDriverScheduleTab() {
         method: "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
-      if (res.ok) { fetchData(weekStart); flash("success", `Marked as ${status.replace("_"," ")}.`); }
+      if (res.ok) { fetchData(weekStart); toastSuccess(`Marked as ${status.replace("_"," ")}.`); }
     });
   };
 
@@ -410,17 +401,6 @@ export default function AdminDriverScheduleTab() {
 
   return (
     <div className="space-y-6">
-      {/* Feedback */}
-      {feedback && (
-        <div className={cn(
-          "rounded-xl border px-4 py-3 text-sm font-medium",
-          feedback.kind === "success" ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                                      : "bg-red-50 border-red-200 text-red-800"
-        )}>
-          {feedback.msg}
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -448,9 +428,9 @@ export default function AdminDriverScheduleTab() {
               List
             </Button>
           </div>
-          <Button size="sm" onClick={openAdd}
-            className="bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:from-indigo-600 hover:to-violet-700">
-            <Plus className="size-4 mr-1" /> Add Schedule
+          <Button onClick={openAdd}
+            className="rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold px-5 shadow-md shadow-indigo-100 gap-2">
+            <Plus className="size-4" /> Add Schedule
           </Button>
         </div>
       </div>

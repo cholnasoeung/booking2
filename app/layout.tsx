@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono, Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
+import { getServerSession } from "next-auth/next";
 
-import Navbar from "@/components/navbar";
 import Providers from "@/components/providers";
 import AnalyticsTracker from "@/components/analytics-tracker";
+import { authOptions } from "@/lib/auth";
 import { APP_NAME } from "@/lib/constants";
 
 import "./globals.css";
@@ -32,18 +33,19 @@ export const metadata: Metadata = {
     "Search bus routes, pick your seats, and manage bookings with a RedBus-inspired Cambodia travel app.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions);
   return (
     <html
       lang="en"
       className={`${plusJakartaSans.variable} ${spaceGrotesk.variable} ${jetBrainsMono.variable} antialiased`}
     >
       <body>
-        <Providers>
+        <Providers session={session}>
           <AnalyticsTracker />
           <div className="relative min-h-screen overflow-x-clip">
             {/* Enhanced animated background */}

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import {
   Users, Search, ShieldCheck, ShieldOff, CheckCircle2, XCircle,
   RefreshCw, ChevronLeft, ChevronRight, MoreVertical,
-  Ban, CircleCheck, Trash2, AlertTriangle, X,
+  Ban, CircleCheck, Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { confirmDelete, confirmWarning, toastSuccess, toastError } from "@/lib/swal";
 
 interface AdminUser {
   id: string;
@@ -38,15 +39,12 @@ interface UsersResponse {
 type StatusFilter = "" | "user" | "admin" | "suspended";
 
 export default function AdminUsersManager() {
-  const [data, setData] = useState<UsersResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [query, setQuery] = useState("");
+  const [data,       setData]       = useState<UsersResponse | null>(null);
+  const [loading,    setLoading]    = useState(false);
+  const [query,      setQuery]      = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
-  const [page, setPage] = useState(1);
-  const [pendingId, setPendingId] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<{ msg: string; ok: boolean } | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  const [page,       setPage]       = useState(1);
+  const [pendingId,  setPendingId]  = useState<string | null>(null);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -70,12 +68,13 @@ export default function AdminUsersManager() {
   useEffect(() => { setPage(1); }, [query, statusFilter]);
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-  function showFeedback(msg: string, ok: boolean) {
-    setFeedback({ msg, ok });
-    setTimeout(() => setFeedback(null), 4000);
-  }
-
   async function changeRole(user: AdminUser, newRole: "user" | "admin") {
+    const label = newRole === "admin" ? "Make Admin" : "Remove Admin";
+    const text  = newRole === "admin"
+      ? `Grant ${user.name} admin privileges?`
+      : `Remove admin privileges from ${user.name}?`;
+    if (!(await confirmWarning(label, text, "Yes"))) return;
+
     setPendingId(user.id);
     try {
       const res = await fetch(`/api/admin/users/${user.id}`, {
@@ -84,62 +83,67 @@ export default function AdminUsersManager() {
         body: JSON.stringify({ role: newRole }),
       });
       const json = await res.json();
-      if (!res.ok) { showFeedback(json.message ?? "Failed", false); return; }
-      showFeedback(`${user.name} is now ${newRole === "admin" ? "an Admin" : "a regular User"}`, true);
+      if (!res.ok) { toastError(json.message ?? "Failed"); return; }
+      toastSuccess(`${user.name} is now ${newRole === "admin" ? "an Admin" : "a regular User"}`);
       setData((prev) => prev
         ? { ...prev, users: prev.users.map((u) => u.id === user.id ? { ...u, role: newRole } : u) }
         : prev
       );
     } catch {
-      showFeedback("Request failed", false);
+      toastError("Request failed");
     } finally {
       setPendingId(null);
     }
   }
 
   async function toggleSuspend(user: AdminUser) {
+    const suspending = !user.isSuspended;
+    const ok = await confirmWarning(
+      suspending ? "Suspend Account?" : "Reinstate Account?",
+      suspending
+        ? `${user.name}'s account will be suspended and they won't be able to log in.`
+        : `${user.name}'s account will be reinstated and they can log in again.`,
+      suspending ? "Yes, Suspend" : "Yes, Reinstate"
+    );
+    if (!ok) return;
+
     setPendingId(user.id);
-    const nextSuspended = !user.isSuspended;
     try {
       const res = await fetch(`/api/admin/users/${user.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isSuspended: nextSuspended }),
+        body: JSON.stringify({ isSuspended: suspending }),
       });
       const json = await res.json();
-      if (!res.ok) { showFeedback(json.message ?? "Failed", false); return; }
-      showFeedback(
-        nextSuspended ? `${user.name}'s account has been suspended` : `${user.name}'s account has been reinstated`,
-        true
-      );
+      if (!res.ok) { toastError(json.message ?? "Failed"); return; }
+      toastSuccess(suspending ? `${user.name}'s account has been suspended` : `${user.name}'s account has been reinstated`);
       setData((prev) => prev
-        ? { ...prev, users: prev.users.map((u) => u.id === user.id ? { ...u, isSuspended: nextSuspended } : u) }
+        ? { ...prev, users: prev.users.map((u) => u.id === user.id ? { ...u, isSuspended: suspending, suspendedAt: suspending ? new Date().toISOString() : null } : u) }
         : prev
       );
     } catch {
-      showFeedback("Request failed", false);
+      toastError("Request failed");
     } finally {
       setPendingId(null);
     }
   }
 
-  async function deleteUser() {
-    if (!deleteTarget) return;
-    setDeleting(true);
+  async function deleteUser(user: AdminUser) {
+    if (!(await confirmDelete(user.name))) return;
+    setPendingId(user.id);
     try {
-      const res = await fetch(`/api/admin/users/${deleteTarget.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/users/${user.id}`, { method: "DELETE" });
       const json = await res.json();
-      if (!res.ok) { showFeedback(json.message ?? "Failed to delete", false); return; }
-      showFeedback(`${deleteTarget.name}'s account has been permanently deleted`, true);
+      if (!res.ok) { toastError(json.message ?? "Failed to delete"); return; }
+      toastSuccess(`${user.name}'s account has been permanently deleted`);
       setData((prev) => prev
-        ? { ...prev, users: prev.users.filter((u) => u.id !== deleteTarget.id), total: prev.total - 1 }
+        ? { ...prev, users: prev.users.filter((u) => u.id !== user.id), total: prev.total - 1 }
         : prev
       );
-      setDeleteTarget(null);
     } catch {
-      showFeedback("Request failed", false);
+      toastError("Request failed");
     } finally {
-      setDeleting(false);
+      setPendingId(null);
     }
   }
 
@@ -149,14 +153,14 @@ export default function AdminUsersManager() {
   };
 
   const filters: { value: StatusFilter; label: string }[] = [
-    { value: "", label: "All" },
-    { value: "user", label: "Users" },
-    { value: "admin", label: "Admins" },
+    { value: "",          label: "All"       },
+    { value: "user",      label: "Users"     },
+    { value: "admin",     label: "Admins"    },
     { value: "suspended", label: "Suspended" },
   ];
 
-  const suspendedCount = data?.users.filter((u) => u.isSuspended).length ?? 0;
-  const adminCount = data?.users.filter((u) => u.role === "admin").length ?? 0;
+  const suspendedCount  = data?.users.filter((u) => u.isSuspended).length ?? 0;
+  const adminCount      = data?.users.filter((u) => u.role === "admin").length ?? 0;
   const unverifiedCount = data?.users.filter((u) => !u.isEmailVerified).length ?? 0;
 
   return (
@@ -174,57 +178,6 @@ export default function AdminUsersManager() {
           Refresh
         </Button>
       </div>
-
-      {/* Feedback banner */}
-      {feedback && (
-        <div className={cn(
-          "rounded-xl px-4 py-3 text-sm font-medium flex items-center justify-between",
-          feedback.ok
-            ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
-            : "bg-red-50 border border-red-200 text-red-700"
-        )}>
-          <span>{feedback.msg}</span>
-          <button onClick={() => setFeedback(null)} className="ml-4 opacity-60 hover:opacity-100">
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
-      {/* Delete confirmation */}
-      {deleteTarget && (
-        <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4 flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
-            </div>
-            <div>
-              <p className="font-bold text-red-900">Delete "{deleteTarget.name}"?</p>
-              <p className="text-sm text-red-700 mt-0.5">
-                This will permanently remove the account and all associated data. This cannot be undone.
-              </p>
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="rounded-xl border-red-200 text-red-700 hover:bg-red-100"
-              onClick={() => setDeleteTarget(null)}
-              disabled={deleting}
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              className="rounded-xl bg-red-600 hover:bg-red-700 text-white"
-              onClick={deleteUser}
-              disabled={deleting}
-            >
-              {deleting ? <><RefreshCw className="w-3.5 h-3.5 animate-spin mr-1.5" />Deleting…</> : "Yes, Delete"}
-            </Button>
-          </div>
-        </div>
-      )}
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
@@ -435,7 +388,7 @@ export default function AdminUsersManager() {
 
                           {/* Delete */}
                           <DropdownMenuItem
-                            onClick={() => setDeleteTarget({ id: user.id, name: user.name })}
+                            onClick={() => deleteUser(user)}
                             className="gap-2 text-red-700 focus:text-red-700 focus:bg-red-50"
                           >
                             <Trash2 className="w-4 h-4" />

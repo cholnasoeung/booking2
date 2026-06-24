@@ -3,14 +3,13 @@
 import { useState, useTransition } from "react";
 import {
   Users, Plus, MoreVertical, Eye, Pencil, Ban, CircleCheck,
-  Trash2, Phone, FileText, Car, RefreshCw, X, AlertTriangle,
+  Trash2, Phone, FileText, Car, RefreshCw,
   Calendar, CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { confirmDelete } from "@/lib/swal";
+import { confirmDelete, confirmWarning, toastSuccess, toastError } from "@/lib/swal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
@@ -115,24 +114,15 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
   const [showAdd, setShowAdd] = useState(false);
   const [editTarget, setEditTarget] = useState<Driver | null>(null);
   const [detailTarget, setDetailTarget] = useState<Driver | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Driver | null>(null);
 
   // Form state
   const [addForm, setAddForm] = useState<DriverForm>(EMPTY_FORM);
   const [editForm, setEditForm] = useState<DriverForm>(EMPTY_FORM);
 
-  // Feedback
-  const [feedback, setFeedback] = useState<{ msg: string; ok: boolean } | null>(null);
   const [actionPendingId, setActionPendingId] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
-
-  function showFeedback(msg: string, ok: boolean) {
-    setFeedback({ msg, ok });
-    setTimeout(() => setFeedback(null), 4000);
-  }
 
   // ── Add driver ──
-  async function handleAdd(e: React.FormEvent) {
+  async function handleAdd(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     startTransition(async () => {
       try {
@@ -147,19 +137,19 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
           }),
         });
         const json = await res.json();
-        if (!res.ok) { showFeedback(json.message ?? "Failed to add driver", false); return; }
+        if (!res.ok) { toastError(json.message ?? "Failed to add driver"); return; }
         setDrivers((prev) => [json.driver, ...prev]);
         setAddForm(EMPTY_FORM);
         setShowAdd(false);
-        showFeedback("Driver added successfully!", true);
+        toastSuccess("Driver added successfully!");
       } catch {
-        showFeedback("Something went wrong", false);
+        toastError("Something went wrong");
       }
     });
   }
 
   // ── Edit driver ──
-  async function handleEdit(e: React.FormEvent) {
+  async function handleEdit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!editTarget) return;
     startTransition(async () => {
@@ -175,20 +165,30 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
           }),
         });
         const json = await res.json();
-        if (!res.ok) { showFeedback(json.message ?? "Failed to save", false); return; }
+        if (!res.ok) { toastError(json.message ?? "Failed to save"); return; }
         setDrivers((prev) => prev.map((d) => d.id === editTarget.id ? json.driver : d));
         setEditTarget(null);
-        showFeedback("Driver updated successfully!", true);
+        toastSuccess("Driver updated successfully!");
       } catch {
-        showFeedback("Something went wrong", false);
+        toastError("Something went wrong");
       }
     });
   }
 
   // ── Toggle status ──
   async function toggleStatus(driver: Driver) {
+    const suspending = driver.status === "active";
+    const ok = await confirmWarning(
+      suspending ? "Suspend Driver?" : "Reinstate Driver?",
+      suspending
+        ? `${driver.name} will be marked inactive and won't be assignable to trips.`
+        : `${driver.name} will be reinstated as an active driver.`,
+      suspending ? "Yes, Suspend" : "Yes, Reinstate"
+    );
+    if (!ok) return;
+
     setActionPendingId(driver.id);
-    const newStatus = driver.status === "active" ? "inactive" : "active";
+    const newStatus = suspending ? "inactive" : "active";
     try {
       const res = await fetch(`/api/admin/drivers/${driver.id}`, {
         method: "PATCH",
@@ -196,37 +196,30 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
         body: JSON.stringify({ status: newStatus }),
       });
       const json = await res.json();
-      if (!res.ok) { showFeedback(json.message ?? "Failed", false); return; }
+      if (!res.ok) { toastError(json.message ?? "Failed"); return; }
       setDrivers((prev) => prev.map((d) => d.id === driver.id ? json.driver : d));
-      showFeedback(
-        newStatus === "inactive"
-          ? `${driver.name} has been suspended`
-          : `${driver.name} has been reinstated`,
-        true
-      );
+      toastSuccess(suspending ? `${driver.name} has been suspended` : `${driver.name} has been reinstated`);
     } catch {
-      showFeedback("Request failed", false);
+      toastError("Request failed");
     } finally {
       setActionPendingId(null);
     }
   }
 
   // ── Delete driver ──
-  async function handleDelete() {
-    if (!deleteTarget) return;
-    if (!(await confirmDelete(deleteTarget.name ?? "this driver"))) return;
-    setDeleting(true);
+  async function handleDelete(driver: Driver) {
+    if (!(await confirmDelete(driver.name ?? "this driver"))) return;
+    setActionPendingId(driver.id);
     try {
-      const res = await fetch(`/api/admin/drivers/${deleteTarget.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/drivers/${driver.id}`, { method: "DELETE" });
       const json = await res.json();
-      if (!res.ok) { showFeedback(json.message ?? "Failed to delete", false); return; }
-      setDrivers((prev) => prev.filter((d) => d.id !== deleteTarget.id));
-      setDeleteTarget(null);
-      showFeedback("Driver removed from roster", true);
+      if (!res.ok) { toastError(json.message ?? "Failed to delete"); return; }
+      setDrivers((prev) => prev.filter((d) => d.id !== driver.id));
+      toastSuccess("Driver removed from roster");
     } catch {
-      showFeedback("Request failed", false);
+      toastError("Request failed");
     } finally {
-      setDeleting(false);
+      setActionPendingId(null);
     }
   }
 
@@ -243,25 +236,12 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
         </div>
         <Button
           onClick={() => { setAddForm(EMPTY_FORM); setShowAdd(true); }}
-          className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-xl h-11 px-5 shadow-md shadow-indigo-200"
+          className="rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold px-5 shadow-md shadow-indigo-100 gap-2"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Driver
         </Button>
       </div>
-
-      {/* Feedback */}
-      {feedback && (
-        <div className={cn(
-          "rounded-xl px-4 py-3 text-sm font-medium flex items-center justify-between",
-          feedback.ok
-            ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
-            : "bg-red-50 border border-red-200 text-red-700"
-        )}>
-          <span>{feedback.msg}</span>
-          <button onClick={() => setFeedback(null)}><X className="h-4 w-4 opacity-60 hover:opacity-100" /></button>
-        </div>
-      )}
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
@@ -387,7 +367,7 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="gap-2 text-red-700 focus:text-red-700 focus:bg-red-50"
-                          onClick={() => setDeleteTarget(driver)}
+                          onClick={() => handleDelete(driver)}
                         >
                           <Trash2 className="h-4 w-4" />Delete
                         </DropdownMenuItem>
@@ -508,35 +488,6 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
         </DialogContent>
       </Dialog>
 
-      {/* ── DELETE CONFIRM MODAL ── */}
-      <Dialog open={!!deleteTarget} onOpenChange={(o) => { if (!o && !deleting) setDeleteTarget(null); }}>
-        <DialogContent className="sm:max-w-sm rounded-2xl">
-          <DialogHeader>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-100">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
-              </div>
-              <DialogTitle className="text-lg font-bold text-slate-900">Delete Driver</DialogTitle>
-            </div>
-            <DialogDescription className="text-slate-600">
-              Are you sure you want to remove <span className="font-semibold text-slate-800">{deleteTarget?.name}</span> from the roster?
-              This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-3 mt-4">
-            <Button variant="outline" className="rounded-xl" onClick={() => setDeleteTarget(null)} disabled={deleting}>
-              Cancel
-            </Button>
-            <Button
-              className="rounded-xl bg-red-600 hover:bg-red-700 text-white"
-              onClick={handleDelete}
-              disabled={deleting}
-            >
-              {deleting ? <><RefreshCw className="h-4 w-4 animate-spin mr-2" />Deleting…</> : <><Trash2 className="h-4 w-4 mr-2" />Delete Driver</>}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

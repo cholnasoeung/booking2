@@ -204,7 +204,7 @@ export default function AdminLostFoundTab() {
           </Button>
           <Button
             onClick={() => { setForm(emptyForm); setFormErr(""); setAddOpen(true); }}
-            className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white shadow-md shadow-teal-200 gap-2"
+            className="rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold px-5 shadow-md shadow-indigo-100 gap-2"
           >
             <Plus className="size-4" /> New Report
           </Button>

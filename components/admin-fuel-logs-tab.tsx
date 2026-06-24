@@ -1,13 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
-import { confirmDelete } from "@/lib/swal";
+import { confirmDelete, toastSuccess, toastError } from "@/lib/swal";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -212,15 +212,6 @@ export default function AdminFuelLogsTab() {
   const [form, setForm] = useState(emptyForm());
   const [formError, setFormError] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [feedback, setFeedback] = useState<{ kind: "success" | "error"; msg: string } | null>(null);
-  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
-  const showFeedback = (kind: "success" | "error", msg: string) => {
-    clearTimeout(feedbackTimer.current);
-    setFeedback({ kind, msg });
-    feedbackTimer.current = setTimeout(() => setFeedback(null), 4000);
-  };
-
   const fetchData = useCallback(async (pg = page) => {
     setLoading(true);
     const params = new URLSearchParams({ page: String(pg) });
@@ -271,7 +262,7 @@ export default function AdminFuelLogsTab() {
         setForm(emptyForm());
         fetchData(1);
         setPage(1);
-        showFeedback("success", "Fuel log added.");
+        toastSuccess("Fuel log added.");
       } else {
         setFormError(json.message ?? "Failed to add.");
       }
@@ -294,7 +285,7 @@ export default function AdminFuelLogsTab() {
       if (res.ok) {
         setShowEdit(null);
         fetchData(page);
-        showFeedback("success", "Fuel log updated.");
+        toastSuccess("Fuel log updated.");
       } else {
         setFormError(json.message ?? "Failed to update.");
       }
@@ -309,9 +300,9 @@ export default function AdminFuelLogsTab() {
       if (res.ok) {
         setShowDelete(null);
         fetchData(page);
-        showFeedback("success", "Fuel log deleted.");
+        toastSuccess("Fuel log deleted.");
       } else {
-        showFeedback("error", "Failed to delete.");
+        toastError("Failed to delete.");
         setShowDelete(null);
       }
     });
@@ -346,18 +337,6 @@ export default function AdminFuelLogsTab() {
 
   return (
     <div className="space-y-6">
-      {/* Feedback banner */}
-      {feedback && (
-        <div className={cn(
-          "rounded-xl border px-4 py-3 text-sm font-medium",
-          feedback.kind === "success"
-            ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-            : "bg-red-50 border-red-200 text-red-800"
-        )}>
-          {feedback.msg}
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -373,9 +352,9 @@ export default function AdminFuelLogsTab() {
           <Button variant="outline" size="sm" onClick={() => fetchData(page)} disabled={loading}>
             <RefreshCw className={cn("size-4", loading && "animate-spin")} />
           </Button>
-          <Button size="sm" onClick={openAdd}
-            className="bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:from-amber-600 hover:to-orange-700">
-            <Plus className="size-4 mr-1" /> Add Fuel Log
+          <Button onClick={openAdd}
+            className="rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold px-5 shadow-md shadow-indigo-100 gap-2">
+            <Plus className="size-4" /> Add Fuel Log
           </Button>
         </div>
       </div>

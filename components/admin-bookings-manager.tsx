@@ -16,7 +16,7 @@ import {
 } from "@/components/admin-management-shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { confirmAction } from "@/lib/swal";
+import { confirmAction, toastSuccess, toastError } from "@/lib/swal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -53,12 +53,7 @@ import {
 } from "@/lib/formatters";
 import type { AdminBookingSummary, RouteSummary } from "@/lib/queries";
 
-type FeedbackState =
-  | {
-      kind: "success" | "error";
-      message: string;
-    }
-  | null;
+
 
 type AdminBookingsManagerProps = {
   routes: RouteSummary[];
@@ -70,7 +65,6 @@ export default function AdminBookingsManager({
   bookings,
 }: AdminBookingsManagerProps) {
   const router = useRouter();
-  const [feedback, setFeedback] = useState<FeedbackState>(null);
   const [selectedBooking, setSelectedBooking] =
     useState<AdminBookingSummary | null>(null);
   const [bookingToCancel, setBookingToCancel] =
@@ -197,7 +191,6 @@ export default function AdminBookingsManager({
     if (selectedIds.size === 0) return;
     if (!(await confirmAction("Cancel Bookings", `Cancel ${selectedIds.size} selected booking(s)?`, "Yes, Cancel"))) return;
     setBulkCancelPending(true);
-    setFeedback(null);
     try {
       const res = await fetch("/api/admin/bookings/bulk-cancel", {
         method: "POST",
@@ -206,14 +199,14 @@ export default function AdminBookingsManager({
       });
       const payload = await res.json();
       if (!res.ok) {
-        setFeedback({ kind: "error", message: payload.message ?? "Bulk cancel failed" });
+        toastError(payload.message ?? "Bulk cancel failed");
         return;
       }
-      setFeedback({ kind: "success", message: `Cancelled ${payload.cancelled} booking(s).` });
+      toastSuccess(`Cancelled ${payload.cancelled} booking(s).`);
       setSelectedIds(new Set());
       router.refresh();
     } catch {
-      setFeedback({ kind: "error", message: "Bulk cancel failed." });
+      toastError("Bulk cancel failed.");
     } finally {
       setBulkCancelPending(false);
     }
@@ -258,43 +251,24 @@ export default function AdminBookingsManager({
     }
 
     setBookingCancelPending(true);
-    setFeedback(null);
-
     try {
       const response = await fetch(`/api/bookings/${bookingToCancel.id}`, {
         method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          reason: bookingCancellationReason.trim() || undefined,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: bookingCancellationReason.trim() || undefined }),
       });
       const payload = (await response.json()) as { message?: string };
-
       if (!response.ok) {
-        setFeedback({
-          kind: "error",
-          message: payload.message || "Unable to cancel the booking.",
-        });
+        toastError(payload.message || "Unable to cancel the booking.");
         return;
       }
-
-      setFeedback({
-        kind: "success",
-        message: "Booking cancelled successfully.",
-      });
+      toastSuccess("Booking cancelled successfully.");
       setBookingToCancel(null);
       setBookingCancellationReason("");
-      if (selectedBooking?.id === bookingToCancel.id) {
-        setSelectedBooking(null);
-      }
+      if (selectedBooking?.id === bookingToCancel.id) setSelectedBooking(null);
       router.refresh();
     } catch {
-      setFeedback({
-        kind: "error",
-        message: "Unable to cancel the booking right now.",
-      });
+      toastError("Unable to cancel the booking right now.");
     } finally {
       setBookingCancelPending(false);
     }
@@ -303,18 +277,6 @@ export default function AdminBookingsManager({
   return (
     <>
       <div className="space-y-6">
-        {feedback ? (
-          <div
-            className={
-              feedback.kind === "success"
-                ? "rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
-                : "rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-            }
-          >
-            {feedback.message}
-          </div>
-        ) : null}
-
         <Card className="border-2 border-pink-200/60 bg-gradient-to-br from-white to-pink-50/50 shadow-xl backdrop-blur-xl">
           <CardHeader className="border-b-2 border-dashed border-pink-200/60 bg-gradient-to-r from-pink-50 to-rose-50">
             <div className="space-y-4">

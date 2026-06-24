@@ -448,7 +448,7 @@ export default function AdminEmployeesTab() {
             <p className="text-xs text-slate-400">{totalAll} total staff · {stats.active} active</p>
           </div>
         </div>
-        <Button onClick={openAdd} className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/30 gap-2 px-5">
+        <Button onClick={openAdd} className="rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold px-5 shadow-md shadow-indigo-100 gap-2">
           <Plus className="size-4" /> Add Employee
         </Button>
       </div>

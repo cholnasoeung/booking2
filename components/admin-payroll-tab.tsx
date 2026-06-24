@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
-import { confirmDelete } from "@/lib/swal";
+import { confirmDelete, toastSuccess, toastError } from "@/lib/swal";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
@@ -82,12 +82,8 @@ export default function AdminPayrollTab() {
   const [summary,   setSummary]   = useState<Summary>({ totalGross: 0, totalNet: 0, totalBonus: 0, countDraft: 0, countApproved: 0, countPaid: 0, total: 0 });
   const [monthly,   setMonthly]   = useState<MonthlyPoint[]>([]);
   const [loading,   setLoading]   = useState(true);
-  const [genMsg,    setGenMsg]     = useState("");
-  const [genErr,    setGenErr]     = useState("");
   const [editOpen,  setEditOpen]   = useState(false);
-  const [deleteOpen,setDeleteOpen] = useState(false);
   const [editTarget,   setEditTarget]   = useState<PayrollRec | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<PayrollRec | null>(null);
   const [dedForm,   setDedForm]   = useState<DedForm>(emptyDedForm);
   const [formErr,   setFormErr]   = useState("");
   const [isPending, startTransition] = useTransition();
@@ -106,12 +102,11 @@ export default function AdminPayrollTab() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const handleGenerate = () => {
-    setGenMsg(""); setGenErr("");
     startTransition(async () => {
       const res  = await fetch("/api/admin/payroll", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ month }) });
       const data = await res.json();
-      if (res.ok) { setGenMsg(data.message); fetchData(); }
-      else        { setGenErr(data.message); }
+      if (res.ok) { toastSuccess(data.message); fetchData(); }
+      else        { toastError(data.message); }
     });
   };
 
@@ -154,12 +149,12 @@ export default function AdminPayrollTab() {
     });
   };
 
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
+  const handleDelete = async (rec: PayrollRec) => {
     if (!(await confirmDelete("this payroll record"))) return;
     startTransition(async () => {
-      await fetch(`/api/admin/payroll/${deleteTarget.id}`, { method: "DELETE" });
-      setDeleteOpen(false); fetchData();
+      const res = await fetch(`/api/admin/payroll/${rec.id}`, { method: "DELETE" });
+      if (res.ok) { toastSuccess("Payroll record deleted."); fetchData(); }
+      else { toastError("Failed to delete."); }
     });
   };
 
@@ -214,10 +209,6 @@ export default function AdminPayrollTab() {
           </Button>
         </div>
       </div>
-
-      {/* Generate feedback */}
-      {genMsg && <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">{genMsg}</div>}
-      {genErr && <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">{genErr}</div>}
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -375,7 +366,7 @@ export default function AdminPayrollTab() {
                           {rec.status === "approved" && <DropdownMenuItem onClick={() => handleStatusChange(rec.id, "paid")}     className="gap-2 cursor-pointer text-emerald-400"><Banknote className="size-3.5" /> Mark as Paid</DropdownMenuItem>}
                           {rec.status === "paid"     && <DropdownMenuItem onClick={() => handleStatusChange(rec.id, "draft")}    className="gap-2 cursor-pointer text-slate-300"><Clock className="size-3.5" /> Revert to Draft</DropdownMenuItem>}
                           <DropdownMenuSeparator className="bg-white/8" />
-                          <DropdownMenuItem onClick={() => { setDeleteTarget(rec); setDeleteOpen(true); }} className="gap-2 cursor-pointer text-red-400">
+                          <DropdownMenuItem onClick={() => handleDelete(rec)} className="gap-2 cursor-pointer text-red-400">
                             <Trash2 className="size-3.5" /> Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -474,23 +465,6 @@ export default function AdminPayrollTab() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
-      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent className="sm:max-w-md bg-slate-900 border-white/10 text-white">
-          <DialogHeader>
-            <DialogTitle>Delete Payroll Record</DialogTitle>
-            <DialogDescription className="text-slate-400">
-              Remove payroll record for <span className="font-semibold text-white">{deleteTarget?.employeeName}</span> ({monthLabel(month)})? This cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setDeleteOpen(false)} className="text-slate-300 hover:text-white">Cancel</Button>
-            <Button onClick={handleDelete} disabled={isPending} className="bg-red-600 hover:bg-red-700 text-white">
-              {isPending ? "Deleting…" : "Delete"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

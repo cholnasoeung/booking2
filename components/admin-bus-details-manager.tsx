@@ -2,12 +2,11 @@
 
 import { useRef, useState, useTransition } from "react";
 import {
-  Bus, Plus, MoreVertical, Eye, Pencil, Trash2, RefreshCw,
-  X, AlertTriangle, Hash, Users, Calendar, Layers, Image,
-  Upload, ImagePlus,
+  Bus, Plus, MoreVertical, Eye, Pencil, Trash2, RefreshCw, X,
+  Hash, Users, Calendar, Layers, Image, ImagePlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { confirmDelete } from "@/lib/swal";
+import { confirmDelete, toastSuccess, toastError } from "@/lib/swal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -314,20 +313,11 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
   const [showAdd, setShowAdd] = useState(false);
   const [editTarget, setEditTarget] = useState<BusDetail | null>(null);
   const [detailTarget, setDetailTarget] = useState<BusDetail | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<BusDetail | null>(null);
+
 
   // Form state
   const [addForm, setAddForm] = useState<BusForm>(EMPTY_FORM);
   const [editForm, setEditForm] = useState<BusForm>(EMPTY_FORM);
-
-  // Feedback
-  const [feedback, setFeedback] = useState<{ msg: string; ok: boolean } | null>(null);
-  const [deleting, setDeleting] = useState(false);
-
-  function showFeedback(msg: string, ok: boolean) {
-    setFeedback({ msg, ok });
-    setTimeout(() => setFeedback(null), 4000);
-  }
 
   function buildPayload(form: BusForm) {
     return {
@@ -341,7 +331,7 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
   }
 
   // ── Add ──
-  async function handleAdd(e: React.FormEvent) {
+  async function handleAdd(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     startTransition(async () => {
       try {
@@ -351,19 +341,19 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
           body: JSON.stringify(buildPayload(addForm)),
         });
         const json = await res.json();
-        if (!res.ok) { showFeedback(json.message ?? "Failed to add vehicle", false); return; }
+        if (!res.ok) { toastError(json.message ?? "Failed to add vehicle"); return; }
         setDetails((prev) => [json.busDetail, ...prev]);
         setAddForm(EMPTY_FORM);
         setShowAdd(false);
-        showFeedback("Vehicle added to fleet!", true);
+        toastSuccess("Vehicle added to fleet!");
       } catch {
-        showFeedback("Something went wrong", false);
+        toastError("Something went wrong");
       }
     });
   }
 
   // ── Edit ──
-  async function handleEdit(e: React.FormEvent) {
+  async function handleEdit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!editTarget) return;
     startTransition(async () => {
@@ -374,32 +364,27 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
           body: JSON.stringify(buildPayload(editForm)),
         });
         const json = await res.json();
-        if (!res.ok) { showFeedback(json.message ?? "Failed to save", false); return; }
+        if (!res.ok) { toastError(json.message ?? "Failed to save"); return; }
         setDetails((prev) => prev.map((d) => d.id === editTarget.id ? json.busDetail : d));
         setEditTarget(null);
-        showFeedback("Vehicle updated successfully!", true);
+        toastSuccess("Vehicle updated successfully!");
       } catch {
-        showFeedback("Something went wrong", false);
+        toastError("Something went wrong");
       }
     });
   }
 
   // ── Delete ──
-  async function handleDelete() {
-    if (!deleteTarget) return;
-    if (!(await confirmDelete(deleteTarget.registrationNumber ?? "this bus"))) return;
-    setDeleting(true);
+  async function handleDelete(target: { id: string; registrationNumber: string }) {
+    if (!(await confirmDelete(target.registrationNumber ?? "this bus"))) return;
     try {
-      const res = await fetch(`/api/admin/bus-details/${deleteTarget.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/bus-details/${target.id}`, { method: "DELETE" });
       const json = await res.json();
-      if (!res.ok) { showFeedback(json.message ?? "Failed to delete", false); return; }
-      setDetails((prev) => prev.filter((d) => d.id !== deleteTarget.id));
-      setDeleteTarget(null);
-      showFeedback("Vehicle removed from fleet", true);
+      if (!res.ok) { toastError(json.message ?? "Failed to delete"); return; }
+      setDetails((prev) => prev.filter((d) => d.id !== target.id));
+      toastSuccess("Vehicle removed from fleet");
     } catch {
-      showFeedback("Request failed", false);
-    } finally {
-      setDeleting(false);
+      toastError("Request failed");
     }
   }
 
@@ -420,24 +405,11 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
         </div>
         <Button
           onClick={() => { setAddForm(EMPTY_FORM); setShowAdd(true); }}
-          className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-xl h-11 px-5 shadow-md shadow-indigo-200"
+          className="rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold px-5 shadow-md shadow-indigo-100 gap-2"
         >
           <Plus className="h-4 w-4 mr-2" />Add Vehicle
         </Button>
       </div>
-
-      {/* Feedback */}
-      {feedback && (
-        <div className={cn(
-          "rounded-xl px-4 py-3 text-sm font-medium flex items-center justify-between",
-          feedback.ok
-            ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
-            : "bg-red-50 border border-red-200 text-red-700"
-        )}>
-          <span>{feedback.msg}</span>
-          <button onClick={() => setFeedback(null)}><X className="h-4 w-4 opacity-60 hover:opacity-100" /></button>
-        </div>
-      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -549,7 +521,7 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="gap-2 text-red-700 focus:text-red-700 focus:bg-red-50"
-                          onClick={() => setDeleteTarget(detail)}
+                          onClick={() => handleDelete(detail)}
                         >
                           <Trash2 className="h-4 w-4" />Delete
                         </DropdownMenuItem>
@@ -708,34 +680,6 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
         </DialogContent>
       </Dialog>
 
-      {/* ── DELETE MODAL ── */}
-      <Dialog open={!!deleteTarget} onOpenChange={(o) => { if (!o && !deleting) setDeleteTarget(null); }}>
-        <DialogContent className="sm:max-w-sm rounded-2xl">
-          <DialogHeader>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-100">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
-              </div>
-              <DialogTitle className="text-lg font-bold text-slate-900">Delete Vehicle</DialogTitle>
-            </div>
-            <DialogDescription className="text-slate-600">
-              Are you sure you want to remove{" "}
-              <span className="font-semibold text-slate-800">{deleteTarget?.name}</span>{" "}
-              ({deleteTarget?.registrationNumber}) from the fleet? This cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-3 mt-4">
-            <Button variant="outline" className="rounded-xl" onClick={() => setDeleteTarget(null)} disabled={deleting}>
-              Cancel
-            </Button>
-            <Button className="rounded-xl bg-red-600 hover:bg-red-700 text-white" onClick={handleDelete} disabled={deleting}>
-              {deleting
-                ? <><RefreshCw className="h-4 w-4 animate-spin mr-2" />Deleting…</>
-                : <><Trash2 className="h-4 w-4 mr-2" />Delete Vehicle</>}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
