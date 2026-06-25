@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import {
   BusFront, Navigation, PencilLine, Plus, Search, Trash2, UserCheck,
   CheckSquare2, Square, X, AlertTriangle, ChevronDown, ChevronRight,
-  LayoutList, Layers, Clock, Bus, User, Users,
+  LayoutList, Layers, Clock, Bus, User, Users, XCircle, Megaphone,
 } from "lucide-react";
 
 import AdminBusDialog from "@/components/admin-bus-dialog";
 import AdminManifestDialog from "@/components/admin-manifest-dialog";
+import AdminTripCancellationDialog from "@/components/admin-trip-cancellation-dialog";
+import AdminAnnouncementDialog from "@/components/admin-announcement-dialog";
 import { AvailabilityBadge, EmptyState, PAGE_SIZE, Paginator, SummaryTile } from "@/components/admin-management-shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -80,6 +82,16 @@ export default function AdminBusesManager({
   const [manifestBusId,    setManifestBusId]    = useState<string | null>(null);
   const [manifestBusLabel, setManifestBusLabel] = useState("");
   const [manifestOpen,     setManifestOpen]     = useState(false);
+
+  // ── Trip Cancellation ──
+  const [cancelBusId,    setCancelBusId]    = useState<string | null>(null);
+  const [cancelBusLabel, setCancelBusLabel] = useState("");
+  const [cancelOpen,     setCancelOpen]     = useState(false);
+
+  // ── Announcement ──
+  const [announceBusId,    setAnnounceBusId]    = useState<string | null>(null);
+  const [announceBusLabel, setAnnounceBusLabel] = useState("");
+  const [announceOpen,     setAnnounceOpen]     = useState(false);
 
   const normalizedQuery = busQuery.trim().toLowerCase();
   const visibleBuses = buses.filter((bus) => {
@@ -650,6 +662,16 @@ export default function AdminBusesManager({
                                                 className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-500 transition-colors">
                                                 <Users className="size-3.5" />
                                               </button>
+                                              <button type="button" title="Send announcement"
+                                                onClick={() => { setAnnounceBusId(bus.id); setAnnounceBusLabel(`${bus.from} → ${bus.to} · ${bus.travelDate} ${bus.departureTime}`); setAnnounceOpen(true); }}
+                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-500 transition-colors">
+                                                <Megaphone className="size-3.5" />
+                                              </button>
+                                              <button type="button" title="Cancel departure"
+                                                onClick={() => { setCancelBusId(bus.id); setCancelBusLabel(`${bus.from} → ${bus.to} · ${bus.travelDate} ${bus.departureTime}`); setCancelOpen(true); }}
+                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-500 transition-colors">
+                                                <XCircle className="size-3.5" />
+                                              </button>
                                               <button type="button" title="Delete"
                                                 onClick={() => handleBusDelete(bus)}
                                                 className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition-colors">
@@ -1016,6 +1038,21 @@ export default function AdminBusesManager({
         busLabel={manifestBusLabel}
         open={manifestOpen}
         onClose={() => { setManifestOpen(false); setManifestBusId(null); }}
+      />
+
+      <AdminTripCancellationDialog
+        busId={cancelBusId}
+        busLabel={cancelBusLabel}
+        open={cancelOpen}
+        onOpenChange={(o) => { setCancelOpen(o); if (!o) setCancelBusId(null); }}
+        onCancelled={() => router.refresh()}
+      />
+
+      <AdminAnnouncementDialog
+        busId={announceBusId}
+        busLabel={announceBusLabel}
+        open={announceOpen}
+        onOpenChange={(o) => { setAnnounceOpen(o); if (!o) setAnnounceBusId(null); }}
       />
     </>
   );

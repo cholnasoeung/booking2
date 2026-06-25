@@ -33,6 +33,8 @@ import AdminReportsTab from "@/components/admin-reports-tab";
 import AdminLostFoundTab from "@/components/admin-lost-found-tab";
 import AdminRefundTab from "@/components/admin-refund-tab";
 import AdminIncidentTab from "@/components/admin-incident-tab";
+import AdminFinanceTab from "@/components/admin-finance-tab";
+import AdminDriverPerformanceTab from "@/components/admin-driver-performance-tab";
 import type {
   AdminBookingSummary,
   BusDetailSummary,
@@ -158,7 +160,9 @@ export default function AdminPanel({
       {activeTab === "reports"    ? <AdminReportsTab />    : null}
       {activeTab === "lost-found" ? <AdminLostFoundTab /> : null}
       {activeTab === "refunds"    ? <AdminRefundTab />    : null}
-      {activeTab === "incidents"  ? <AdminIncidentTab />  : null}
+      {activeTab === "incidents"         ? <AdminIncidentTab />            : null}
+      {activeTab === "finance"           ? <AdminFinanceTab />             : null}
+      {activeTab === "driver-performance" ? <AdminDriverPerformanceTab /> : null}
     </div>
   );
 }
