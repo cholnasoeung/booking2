@@ -23,6 +23,21 @@ export interface ISettings extends Document {
     notifyOnNewBooking: boolean;
     notifyOnCancellation: boolean;
   };
+  payment: {
+    stripe: {
+      enabled: boolean;
+      publishableKey: string;
+      secretKey: string;
+      webhookSecret: string;
+    };
+    abaPayway: {
+      enabled: boolean;
+      merchantId: string;
+      apiKey: string;
+      publicKey: string;
+    };
+    activeGateway: "stripe" | "abaPayway" | "none";
+  };
 }
 
 const SettingsSchema = new Schema<ISettings>(
@@ -48,6 +63,21 @@ const SettingsSchema = new Schema<ISettings>(
       adminAlertEmail: { type: String, default: "" },
       notifyOnNewBooking: { type: Boolean, default: true },
       notifyOnCancellation: { type: Boolean, default: true },
+    },
+    payment: {
+      stripe: {
+        enabled: { type: Boolean, default: false },
+        publishableKey: { type: String, default: "" },
+        secretKey: { type: String, default: "" },
+        webhookSecret: { type: String, default: "" },
+      },
+      abaPayway: {
+        enabled: { type: Boolean, default: false },
+        merchantId: { type: String, default: "" },
+        apiKey: { type: String, default: "" },
+        publicKey: { type: String, default: "" },
+      },
+      activeGateway: { type: String, enum: ["stripe", "abaPayway", "none"], default: "none" },
     },
   },
   { timestamps: true }

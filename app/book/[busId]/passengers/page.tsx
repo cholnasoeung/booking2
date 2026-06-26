@@ -17,7 +17,7 @@ type PassengersPageProps = {
   }>;
 };
 
-async function createBooking(
+async function initiateBookingPayment(
   busId: string,
   userId: string,
   selectedSeats: string[],
@@ -29,33 +29,36 @@ async function createBooking(
 ) {
   "use server";
 
-  const { createBooking } = await import("@/lib/actions");
   const totalPrice = passengers.length * pricePerSeat;
 
+  // Call the payment initiation function directly (no HTTP — avoids session/cookie issues)
   try {
-    const booking = await createBooking({
-      busId,
-      userId,
-      seats: selectedSeats,
-      passengers,
-      totalPrice,
-      promoCode,
-      boardingStop,
-      droppingStop,
-    });
+    const { initiatePayment } = await import("@/lib/initiate-payment");
+    const result = await initiatePayment({ userId, busId, seats: selectedSeats, passengers, totalPrice, promoCode, boardingStop, droppingStop });
 
+    if ("error" in result) {
+      return { success: false, error: result.error };
+    }
+
+    if (result.gateway !== "none") {
+      return {
+        success: true,
+        redirectUrl: result.redirectUrl,
+        abaFormData: "abaFormData" in result ? result.abaFormData : null,
+      };
+    }
+  } catch (err) {
+    console.error("Payment initiation error:", err);
+  }
+
+  // Fallback: no gateway active — create booking directly
+  const { createBooking } = await import("@/lib/actions");
+  try {
+    const booking = await createBooking({ busId, userId, seats: selectedSeats, passengers, totalPrice, promoCode, boardingStop, droppingStop });
     return { success: true, bookingId: booking.id };
   } catch (error: unknown) {
-    console.error("Booking creation error:", error);
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to create booking. Please try again.";
-
-    return {
-      success: false,
-      error: message,
-    };
+    const message = error instanceof Error ? error.message : "Failed to create booking. Please try again.";
+    return { success: false, error: message };
   }
 }
 
@@ -95,7 +98,7 @@ export default async function PassengersPage({ params, searchParams }: Passenger
   async function handlePassengerSubmit(passengers: Passenger[], promoCode?: string) {
     "use server";
 
-    const result = await createBooking(
+    return await initiateBookingPayment(
       busId,
       user.id,
       selectedSeats,
@@ -105,7 +108,6 @@ export default async function PassengersPage({ params, searchParams }: Passenger
       boardingStop,
       droppingStop
     );
-    return result;
   }
 
   return (

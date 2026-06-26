@@ -5,7 +5,7 @@ import {
   Globe, BookOpen, Bell, Shield, Save, Check,
   Building2, Mail, Phone, Clock, Users, AlertTriangle,
   Lock, Eye, EyeOff, RefreshCw, Palette, Upload,
-  Trash2, ImageIcon, X,
+  Trash2, ImageIcon, X, CreditCard, KeyRound, CircleDot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,15 +34,35 @@ type SettingsData = {
     notifyOnNewBooking: boolean;
     notifyOnCancellation: boolean;
   };
+  payment: {
+    stripe: {
+      enabled: boolean;
+      publishableKey: string;
+      secretKey: string;
+      webhookSecret: string;
+    };
+    abaPayway: {
+      enabled: boolean;
+      merchantId: string;
+      apiKey: string;
+      publicKey: string;
+    };
+    activeGateway: "stripe" | "abaPayway" | "none";
+  };
 };
 
 const DEFAULT: SettingsData = {
   general: { businessName: "BusBooking", contactEmail: "", supportPhone: "", currency: "USD", timezone: "UTC" },
   booking: { maxSeatsPerBooking: 6, bookingCutoffMinutes: 30, cancellationWindowHours: 24, autoConfirm: true, requirePaymentUpfront: false },
   notifications: { emailEnabled: true, smsEnabled: false, adminAlertEmail: "", notifyOnNewBooking: true, notifyOnCancellation: true },
+  payment: {
+    stripe: { enabled: false, publishableKey: "", secretKey: "", webhookSecret: "" },
+    abaPayway: { enabled: false, merchantId: "", apiKey: "", publicKey: "" },
+    activeGateway: "none",
+  },
 };
 
-type Tab = "general" | "booking" | "notifications" | "security" | "branding";
+type Tab = "general" | "booking" | "notifications" | "security" | "branding" | "payment";
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -132,7 +152,13 @@ export default function AdminSettingsTab() {
     fetch("/api/admin/settings")
       .then((r) => r.json())
       .then((data) => {
-        if (data.general) setSettings(data);
+        if (data.general) {
+          setSettings({
+            ...DEFAULT,
+            ...data,
+            payment: { ...DEFAULT.payment, ...(data.payment ?? {}), stripe: { ...DEFAULT.payment.stripe, ...(data.payment?.stripe ?? {}) }, abaPayway: { ...DEFAULT.payment.abaPayway, ...(data.payment?.abaPayway ?? {}) } },
+          });
+        }
         if (data.logoUrl) setCurrentLogoUrl(data.logoUrl);
         setLoading(false);
       })
@@ -238,11 +264,12 @@ export default function AdminSettingsTab() {
   }
 
   const tabs = [
-    { id: "general" as Tab,       label: "General",       icon: Globe,     desc: "Business info & locale" },
-    { id: "branding" as Tab,      label: "Branding",      icon: Palette,   desc: "Logo & visual identity" },
-    { id: "booking" as Tab,       label: "Booking Rules", icon: BookOpen,  desc: "Seats, timing & policy" },
-    { id: "notifications" as Tab, label: "Notifications", icon: Bell,      desc: "Alerts & emails" },
-    { id: "security" as Tab,      label: "Security",      icon: Shield,    desc: "Password & access" },
+    { id: "general" as Tab,       label: "General",       icon: Globe,       desc: "Business info & locale" },
+    { id: "branding" as Tab,      label: "Branding",      icon: Palette,     desc: "Logo & visual identity" },
+    { id: "booking" as Tab,       label: "Booking Rules", icon: BookOpen,    desc: "Seats, timing & policy" },
+    { id: "notifications" as Tab, label: "Notifications", icon: Bell,        desc: "Alerts & emails" },
+    { id: "payment" as Tab,       label: "Payment Keys",  icon: CreditCard,  desc: "Stripe & ABA PayWay" },
+    { id: "security" as Tab,      label: "Security",      icon: Shield,      desc: "Password & access" },
   ];
 
   if (loading) {
@@ -618,6 +645,18 @@ export default function AdminSettingsTab() {
             </div>
           )}
 
+          {/* ── PAYMENT GATEWAYS ── */}
+          {activeTab === "payment" && (
+            <PaymentTab
+              payment={settings.payment}
+              onChange={(payment) => setSettings({ ...settings, payment })}
+              saving={saving}
+              saved={savedSection === "payment"}
+              error={saveError}
+              onSave={() => saveSection("payment")}
+            />
+          )}
+
           {/* ── SECURITY ── */}
           {activeTab === "security" && (
             <div className="space-y-6">
@@ -683,6 +722,218 @@ export default function AdminSettingsTab() {
 
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── Secret key input with show/hide toggle ──────────────────────────────────
+function SecretInput({
+  label, hint, value, onChange, placeholder,
+}: {
+  label: string; hint?: string; value: string;
+  onChange: (v: string) => void; placeholder?: string;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-sm font-semibold text-slate-700">{label}</Label>
+      <div className="relative">
+        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <Input
+          className="pl-10 pr-11 h-11 rounded-xl font-mono text-sm"
+          type={show ? "text" : "password"}
+          placeholder={placeholder ?? "Paste your key here"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+        <button
+          type="button"
+          onClick={() => setShow(!show)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+        >
+          {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </button>
+      </div>
+      {hint && <p className="text-[11px] text-slate-400">{hint}</p>}
+    </div>
+  );
+}
+
+// ── Payment Gateways tab ─────────────────────────────────────────────────────
+type PaymentTabProps = {
+  payment: SettingsData["payment"];
+  onChange: (p: SettingsData["payment"]) => void;
+  saving: boolean; saved: boolean; error: string | null;
+  onSave: () => void;
+};
+
+function PaymentTab({ payment, onChange, saving, saved, error, onSave }: PaymentTabProps) {
+  const setStripe = (patch: Partial<SettingsData["payment"]["stripe"]>) =>
+    onChange({ ...payment, stripe: { ...payment.stripe, ...patch } });
+  const setAba = (patch: Partial<SettingsData["payment"]["abaPayway"]>) =>
+    onChange({ ...payment, abaPayway: { ...payment.abaPayway, ...patch } });
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-bold text-slate-900">Payment Gateways</h3>
+        <p className="text-sm text-slate-500 mt-1">
+          Store your API keys here. Secret keys are masked in the UI — they are never exposed to end users.
+        </p>
+      </div>
+
+      {/* Active gateway selector */}
+      <div className="space-y-2">
+        <Label className="text-sm font-semibold text-slate-700">Active Gateway</Label>
+        <div className="flex flex-wrap gap-3">
+          {(["none", "stripe", "abaPayway"] as const).map((gw) => {
+            const labels = { none: "None (disabled)", stripe: "Stripe", abaPayway: "ABA PayWay" };
+            const active = payment.activeGateway === gw;
+            return (
+              <button
+                key={gw}
+                type="button"
+                onClick={() => onChange({ ...payment, activeGateway: gw })}
+                className={cn(
+                  "flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all",
+                  active
+                    ? "border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm"
+                    : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+                )}
+              >
+                <CircleDot className={cn("h-4 w-4", active ? "text-indigo-500" : "text-slate-300")} />
+                {labels[gw]}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-[11px] text-slate-400">
+          Only the active gateway will be used when processing payments.
+        </p>
+      </div>
+
+      {/* ── Stripe ── */}
+      <div className={cn(
+        "rounded-2xl border-2 p-5 space-y-4 transition-colors",
+        payment.stripe.enabled ? "border-indigo-200 bg-indigo-50/30" : "border-slate-200 bg-slate-50/50"
+      )}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white font-bold text-sm shadow">
+              S
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-900">Stripe</p>
+              <p className="text-xs text-slate-500">Global card payments</p>
+            </div>
+          </div>
+          <Toggle checked={payment.stripe.enabled} onChange={(v) => setStripe({ enabled: v })} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label className="text-sm font-semibold text-slate-700">Publishable Key</Label>
+            <div className="relative">
+              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input
+                className="pl-10 h-11 rounded-xl font-mono text-sm"
+                placeholder="pk_test_..."
+                value={payment.stripe.publishableKey}
+                onChange={(e) => setStripe({ publishableKey: e.target.value })}
+              />
+            </div>
+            <p className="text-[11px] text-slate-400">Safe to expose — used in the browser</p>
+          </div>
+
+          <SecretInput
+            label="Secret Key"
+            placeholder="sk_test_..."
+            value={payment.stripe.secretKey}
+            onChange={(v) => setStripe({ secretKey: v })}
+            hint="Never shared with users. Masked after saving."
+          />
+
+          <div className="sm:col-span-2">
+            <SecretInput
+              label="Webhook Secret"
+              placeholder="whsec_..."
+              value={payment.stripe.webhookSecret}
+              onChange={(v) => setStripe({ webhookSecret: v })}
+              hint="From Stripe Dashboard → Webhooks. Used to verify payment events."
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ── ABA PayWay ── */}
+      <div className={cn(
+        "rounded-2xl border-2 p-5 space-y-4 transition-colors",
+        payment.abaPayway.enabled ? "border-emerald-200 bg-emerald-50/30" : "border-slate-200 bg-slate-50/50"
+      )}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-white font-bold text-sm shadow">
+              ABA
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-900">ABA PayWay</p>
+              <p className="text-xs text-slate-500">Cambodia — KHQR & cards</p>
+            </div>
+          </div>
+          <Toggle checked={payment.abaPayway.enabled} onChange={(v) => setAba({ enabled: v })} />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label className="text-sm font-semibold text-slate-700">Merchant ID</Label>
+            <div className="relative">
+              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input
+                className="pl-10 h-11 rounded-xl font-mono text-sm"
+                placeholder="Your ABA merchant ID"
+                value={payment.abaPayway.merchantId}
+                onChange={(e) => setAba({ merchantId: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-sm font-semibold text-slate-700">Public Key</Label>
+            <div className="relative">
+              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input
+                className="pl-10 h-11 rounded-xl font-mono text-sm"
+                placeholder="ABA public key"
+                value={payment.abaPayway.publicKey}
+                onChange={(e) => setAba({ publicKey: e.target.value })}
+              />
+            </div>
+            <p className="text-[11px] text-slate-400">Used in the KHQR checkout widget</p>
+          </div>
+
+          <div className="sm:col-span-2">
+            <SecretInput
+              label="API Key (Secret)"
+              placeholder="ABA PayWay API key"
+              value={payment.abaPayway.apiKey}
+              onChange={(v) => setAba({ apiKey: v })}
+              hint="From ABA PayWay merchant portal. Masked after saving."
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800 flex items-start gap-2">
+        <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-amber-500" />
+        <span>
+          Keys are stored encrypted in the database. For production, also set{" "}
+          <code className="font-mono bg-amber-100 px-1 rounded">STRIPE_SECRET_KEY</code> and{" "}
+          <code className="font-mono bg-amber-100 px-1 rounded">ABA_API_KEY</code> as environment
+          variables — your payment code can prefer env vars over DB values.
+        </span>
+      </div>
+
+      <SaveBar saving={saving} saved={saved} error={error} onSave={onSave} />
     </div>
   );
 }

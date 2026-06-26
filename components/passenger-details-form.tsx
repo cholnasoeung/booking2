@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ArrowRight, CheckCircle2, User, Mail, Phone, Calendar, Users, Tag, X, Check } from "lucide-react";
+import { ArrowRight, CheckCircle2, User, Mail, Phone, Calendar, Users, Tag, X, Check, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,7 +23,7 @@ type PassengerDetailsFormProps = {
   selectedSeats: string[];
   seatLabels?: string[];
   pricePerSeat?: number;
-  onSubmit: (passengers: Passenger[], promoCode?: string) => Promise<{ success: boolean; bookingId?: string; error?: string }>;
+  onSubmit: (passengers: Passenger[], promoCode?: string) => Promise<{ success: boolean; bookingId?: string; redirectUrl?: string; abaFormData?: Record<string, string> | null; error?: string }>;
   onCancel?: () => void;
   isSubmitting?: boolean;
   busId?: string;
@@ -64,6 +64,7 @@ export default function PassengerDetailsForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitError, setSubmitError] = useState("");
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
   // Promo code state
   const [promoCode, setPromoCode] = useState("");
@@ -218,6 +219,8 @@ export default function PassengerDetailsForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
+    if (isFormSubmitting) return;
+
     // Mark all fields as touched
     const allTouched: Record<string, boolean> = {};
     passengers.forEach((_, index) => {
@@ -233,14 +236,40 @@ export default function PassengerDetailsForm({
     }
 
     setSubmitError("");
+    setIsFormSubmitting(true);
 
-    const result = await onSubmit(passengers, appliedPromo || undefined);
+    try {
+      const result = await onSubmit(passengers, appliedPromo || undefined);
 
-    // If successful, redirect to confirmation page
-    if (result.success && result.bookingId) {
-      router.push(`/booking/confirmation/${result.bookingId}`);
-    } else if (result.error) {
-      setSubmitError(result.error);
+      if (!result.success) {
+        setSubmitError(result.error ?? "Something went wrong. Please try again.");
+        return;
+      }
+
+      // Payment gateway redirect (Stripe hosted page)
+      if (result.redirectUrl && !result.abaFormData) {
+        window.location.href = result.redirectUrl;
+        return;
+      }
+
+      // ABA PayWay — store form data in sessionStorage then navigate to auto-submit page
+      if (result.redirectUrl && result.abaFormData) {
+        const pendingId = result.redirectUrl.split("pending=")[1];
+        if (pendingId) {
+          sessionStorage.setItem(`aba_form_${pendingId}`, JSON.stringify(result.abaFormData));
+        }
+        window.location.href = result.redirectUrl;
+        return;
+      }
+
+      // Fallback: no gateway, direct booking
+      if (result.bookingId) {
+        router.push(`/booking/confirmation/${result.bookingId}`);
+      }
+    } catch {
+      setSubmitError("Something went wrong. Please try again.");
+    } finally {
+      setIsFormSubmitting(false);
     }
   }
 
@@ -461,15 +490,12 @@ export default function PassengerDetailsForm({
 
             <Button
               type="submit"
-              className="h-12 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-8 shadow-lg hover:shadow-xl transition-all"
-              disabled={isSubmitting || !!submitError}
+              className="h-12 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-8 shadow-lg hover:shadow-xl transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={isFormSubmitting || isSubmitting}
             >
-              {isSubmitting ? (
+              {isFormSubmitting ? (
                 <>
-                  <svg className="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Processing...
                 </>
               ) : (

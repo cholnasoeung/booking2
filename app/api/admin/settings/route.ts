@@ -26,7 +26,36 @@ const DEFAULT_SETTINGS = {
     notifyOnNewBooking: true,
     notifyOnCancellation: true,
   },
+  payment: {
+    stripe: { enabled: false, publishableKey: "", secretKey: "", webhookSecret: "" },
+    abaPayway: { enabled: false, merchantId: "", apiKey: "", publicKey: "" },
+    activeGateway: "none",
+  },
 };
+
+function maskKey(key: string): string {
+  if (!key || key.length < 8) return key;
+  return key.slice(0, 7) + "****" + key.slice(-4);
+}
+
+function maskPaymentSettings(payment: typeof DEFAULT_SETTINGS.payment) {
+  return {
+    ...payment,
+    stripe: {
+      ...payment.stripe,
+      secretKey: maskKey(payment.stripe.secretKey),
+      webhookSecret: maskKey(payment.stripe.webhookSecret),
+    },
+    abaPayway: {
+      ...payment.abaPayway,
+      apiKey: maskKey(payment.abaPayway.apiKey),
+    },
+  };
+}
+
+function isMasked(value: string): boolean {
+  return value.includes("****");
+}
 
 export async function GET() {
   const session = await getCurrentSession();
@@ -34,8 +63,14 @@ export async function GET() {
     return Response.json({ message: "Forbidden" }, { status: 403 });
   }
   await connectToDatabase();
-  const settings = await SettingsModel.findOne().lean();
-  return Response.json(settings ?? DEFAULT_SETTINGS);
+  const settings = await SettingsModel.findOne().lean() as any;
+  if (!settings) return Response.json(DEFAULT_SETTINGS);
+
+  // Mask secret keys before sending to client
+  if (settings.payment) {
+    settings.payment = maskPaymentSettings(settings.payment);
+  }
+  return Response.json(settings);
 }
 
 export async function PATCH(request: Request) {
@@ -45,10 +80,39 @@ export async function PATCH(request: Request) {
   }
   await connectToDatabase();
   const body = await request.json();
-  const settings = await SettingsModel.findOneAndUpdate(
-    {},
-    { $set: body },
-    { upsert: true, new: true }
-  ).lean();
-  return Response.json(settings);
+
+  // If payment keys are masked placeholders, remove them from the update
+  // so the real stored values are not overwritten
+  if (body.payment?.stripe) {
+    if (isMasked(body.payment.stripe.secretKey ?? "")) delete body.payment.stripe.secretKey;
+    if (isMasked(body.payment.stripe.webhookSecret ?? "")) delete body.payment.stripe.webhookSecret;
+  }
+  if (body.payment?.abaPayway) {
+    if (isMasked(body.payment.abaPayway.apiKey ?? "")) delete body.payment.abaPayway.apiKey;
+  }
+
+  // Flatten nested payment fields for $set to avoid overwriting sibling keys
+  const $set: Record<string, unknown> = {};
+  for (const [section, value] of Object.entries(body)) {
+    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+      for (const [field, fieldValue] of Object.entries(value as Record<string, unknown>)) {
+        if (typeof fieldValue === "object" && fieldValue !== null && !Array.isArray(fieldValue)) {
+          for (const [subField, subValue] of Object.entries(fieldValue as Record<string, unknown>)) {
+            $set[`${section}.${field}.${subField}`] = subValue;
+          }
+        } else {
+          $set[`${section}.${field}`] = fieldValue;
+        }
+      }
+    } else {
+      $set[section] = value;
+    }
+  }
+
+  await SettingsModel.findOneAndUpdate({}, { $set }, { upsert: true, new: true });
+
+  // Return masked version
+  const updated = await SettingsModel.findOne().lean() as any;
+  if (updated?.payment) updated.payment = maskPaymentSettings(updated.payment);
+  return Response.json(updated);
 }
