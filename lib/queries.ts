@@ -292,7 +292,9 @@ function serializeBus(
     departureStatus: bus.departureStatus ?? "scheduled",
     delayMinutes: bus.delayMinutes ?? 0,
     statusNote: bus.statusNote ?? "",
-    seatTierMultipliers: bus.seatTierMultipliers ?? null,
+    seatTierMultipliers: bus.seatTierMultipliers
+      ? { business: bus.seatTierMultipliers.business ?? undefined, vip: bus.seatTierMultipliers.vip ?? undefined }
+      : null,
     stops,
     driver: driver
       ? {
