@@ -38,6 +38,14 @@ export interface ISettings extends Document {
     };
     activeGateway: "stripe" | "abaPayway" | "none";
   };
+  sms: {
+    twilio: {
+      enabled: boolean;
+      accountSid: string;
+      authToken: string;
+      fromNumber: string;
+    };
+  };
 }
 
 const SettingsSchema = new Schema<ISettings>(
@@ -78,6 +86,14 @@ const SettingsSchema = new Schema<ISettings>(
         publicKey: { type: String, default: "" },
       },
       activeGateway: { type: String, enum: ["stripe", "abaPayway", "none"], default: "none" },
+    },
+    sms: {
+      twilio: {
+        enabled: { type: Boolean, default: false },
+        accountSid: { type: String, default: "" },
+        authToken: { type: String, default: "" },
+        fromNumber: { type: String, default: "" },
+      },
     },
   },
   { timestamps: true }

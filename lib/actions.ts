@@ -7,7 +7,9 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { normalizeBusSeatLayout } from "@/lib/seat-layout";
 import BookingModel from "@/models/Booking";
 import BusModel from "@/models/Bus";
+import RouteModel from "@/models/Route";
 import UserModel from "@/models/User";
+import NotificationModel from "@/models/Notification";
 import { authOptions } from "@/lib/auth";
 import type { Passenger } from "@/types/passenger";
 
@@ -129,6 +131,20 @@ export async function createBooking(input: CreateBookingInput) {
   await BusModel.findByIdAndUpdate(bus.id, {
     $addToSet: { bookedSeats: { $each: input.seats } },
   });
+
+  // In-app notification
+  try {
+    const route = await RouteModel.findById(bus.routeId).lean() as any;
+    const routeStr = route ? `${route.from} → ${route.to}` : "Bus Ticket";
+    await NotificationModel.create({
+      userId: input.userId,
+      type: "booking_confirmed",
+      title: "Booking Confirmed",
+      message: `Your booking for ${routeStr} has been confirmed. ${input.seats.length} seat(s) reserved.`,
+      busId: String(bus.id),
+      bookingId: String(booking.id),
+    });
+  } catch { /* non-fatal */ }
 
   // Revalidate pages
   revalidatePath("/book/[busId]");

@@ -49,6 +49,14 @@ type SettingsData = {
     };
     activeGateway: "stripe" | "abaPayway" | "none";
   };
+  sms: {
+    twilio: {
+      enabled: boolean;
+      accountSid: string;
+      authToken: string;
+      fromNumber: string;
+    };
+  };
 };
 
 const DEFAULT: SettingsData = {
@@ -60,9 +68,12 @@ const DEFAULT: SettingsData = {
     abaPayway: { enabled: false, merchantId: "", apiKey: "", publicKey: "" },
     activeGateway: "none",
   },
+  sms: {
+    twilio: { enabled: false, accountSid: "", authToken: "", fromNumber: "" },
+  },
 };
 
-type Tab = "general" | "booking" | "notifications" | "security" | "branding" | "payment";
+type Tab = "general" | "booking" | "notifications" | "security" | "branding" | "payment" | "sms";
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -156,7 +167,17 @@ export default function AdminSettingsTab() {
           setSettings({
             ...DEFAULT,
             ...data,
-            payment: { ...DEFAULT.payment, ...(data.payment ?? {}), stripe: { ...DEFAULT.payment.stripe, ...(data.payment?.stripe ?? {}) }, abaPayway: { ...DEFAULT.payment.abaPayway, ...(data.payment?.abaPayway ?? {}) } },
+            payment: {
+              ...DEFAULT.payment,
+              ...(data.payment ?? {}),
+              stripe: { ...DEFAULT.payment.stripe, ...(data.payment?.stripe ?? {}) },
+              abaPayway: { ...DEFAULT.payment.abaPayway, ...(data.payment?.abaPayway ?? {}) },
+            },
+            sms: {
+              ...DEFAULT.sms,
+              ...(data.sms ?? {}),
+              twilio: { ...DEFAULT.sms.twilio, ...(data.sms?.twilio ?? {}) },
+            },
           });
         }
         if (data.logoUrl) setCurrentLogoUrl(data.logoUrl);
@@ -269,6 +290,7 @@ export default function AdminSettingsTab() {
     { id: "booking" as Tab,       label: "Booking Rules", icon: BookOpen,    desc: "Seats, timing & policy" },
     { id: "notifications" as Tab, label: "Notifications", icon: Bell,        desc: "Alerts & emails" },
     { id: "payment" as Tab,       label: "Payment Keys",  icon: CreditCard,  desc: "Stripe & ABA PayWay" },
+    { id: "sms" as Tab,           label: "SMS / Twilio",  icon: Phone,       desc: "Phone alerts via Twilio" },
     { id: "security" as Tab,      label: "Security",      icon: Shield,      desc: "Password & access" },
   ];
 
@@ -655,6 +677,92 @@ export default function AdminSettingsTab() {
               error={saveError}
               onSave={() => saveSection("payment")}
             />
+          )}
+
+          {/* ── SMS / TWILIO ── */}
+          {activeTab === "sms" && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900">SMS Notifications</h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  Send WhatsApp-style SMS alerts to passengers via Twilio when announcements are sent.
+                  Passengers receive alerts on the phone number registered in their profile.
+                </p>
+              </div>
+
+              {/* Info banner */}
+              <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 flex gap-3">
+                <Phone className="h-4 w-4 shrink-0 mt-0.5 text-blue-600" />
+                <div>
+                  <p className="font-semibold mb-0.5">How it works</p>
+                  <p className="text-blue-700 text-xs leading-relaxed">
+                    When you send an announcement from the bus management panel, passengers who have a registered phone number automatically receive an SMS. Enable this and enter your Twilio credentials to activate.
+                  </p>
+                </div>
+              </div>
+
+              {/* Enable toggle */}
+              <div className="rounded-xl bg-slate-50 border border-slate-200 px-5 py-1">
+                <ToggleRow
+                  label="Enable SMS Notifications"
+                  description="Send SMS to passengers when announcements are broadcast"
+                  checked={settings.sms.twilio.enabled}
+                  onChange={(v) => setSettings({ ...settings, sms: { ...settings.sms, twilio: { ...settings.sms.twilio, enabled: v } } })}
+                />
+              </div>
+
+              {/* Credentials */}
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-semibold text-slate-700">Account SID</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input
+                      className="pl-10 h-11 rounded-xl font-mono text-sm"
+                      placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                      value={settings.sms.twilio.accountSid}
+                      onChange={(e) => setSettings({ ...settings, sms: { ...settings.sms, twilio: { ...settings.sms.twilio, accountSid: e.target.value } } })}
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-400">Found on your Twilio Console dashboard</p>
+                </div>
+
+                <SecretInput
+                  label="Auth Token"
+                  hint="Found next to your Account SID on the Twilio Console"
+                  placeholder="Paste your auth token"
+                  value={settings.sms.twilio.authToken}
+                  onChange={(v) => setSettings({ ...settings, sms: { ...settings.sms, twilio: { ...settings.sms.twilio, authToken: v } } })}
+                />
+
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-semibold text-slate-700">From Number</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input
+                      className="pl-10 h-11 rounded-xl"
+                      placeholder="+1234567890"
+                      value={settings.sms.twilio.fromNumber}
+                      onChange={(e) => setSettings({ ...settings, sms: { ...settings.sms, twilio: { ...settings.sms.twilio, fromNumber: e.target.value } } })}
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-400">Your Twilio phone number in E.164 format (e.g. +12015551234)</p>
+                </div>
+              </div>
+
+              {/* Setup hint */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-500 space-y-1">
+                <p className="font-semibold text-slate-700">Environment variables (optional)</p>
+                <p>You can also set these in your <code className="bg-slate-200 rounded px-1">.env.local</code> file:</p>
+                <pre className="mt-1 text-[11px] text-slate-600 bg-white border border-slate-200 rounded-lg px-3 py-2 overflow-x-auto">
+{`TWILIO_ACCOUNT_SID=ACxxxxxxxx
+TWILIO_AUTH_TOKEN=your_token
+TWILIO_FROM_NUMBER=+1234567890`}
+                </pre>
+              </div>
+
+              <SaveBar saving={saving} saved={savedSection === "sms"} error={saveError} onSave={() => saveSection("sms")} />
+            </div>
           )}
 
           {/* ── SECURITY ── */}

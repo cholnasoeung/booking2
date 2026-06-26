@@ -4,6 +4,8 @@ import { isValidObjectId } from "@/lib/validation";
 import BookingModel from "@/models/Booking";
 import BusModel from "@/models/Bus";
 import RouteModel from "@/models/Route";
+import NotificationModel from "@/models/Notification";
+import SettingsModel from "@/models/Settings";
 
 export const runtime = "nodejs";
 
@@ -16,6 +18,29 @@ const TYPE_SUBJECTS: Record<AnnouncementType, string> = {
   general:              "📢 Important Trip Update",
   cancellation_warning: "⚠️ Possible Trip Cancellation Notice",
 };
+
+const TYPE_NOTIF: Record<AnnouncementType, "announcement" | "trip_update"> = {
+  delay:                "trip_update",
+  platform_change:      "trip_update",
+  general:              "announcement",
+  cancellation_warning: "trip_update",
+};
+
+async function sendTwilioSms(accountSid: string, authToken: string, from: string, to: string, body: string) {
+  const credentials = Buffer.from(`${accountSid}:${authToken}`).toString("base64");
+  const res = await fetch(
+    `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${credentials}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ To: to, From: from, Body: body }).toString(),
+    }
+  );
+  if (!res.ok) throw new Error(`Twilio ${res.status}: ${await res.text()}`);
+}
 
 function buildAnnouncementHtml(opts: {
   type: AnnouncementType;
@@ -86,7 +111,10 @@ export async function POST(
 
   await connectToDatabase();
 
-  const bus = await BusModel.findById(id).lean();
+  const [bus, settings] = await Promise.all([
+    BusModel.findById(id).lean(),
+    SettingsModel.findOne().lean() as Promise<any>,
+  ]);
   if (!bus) return Response.json({ message: "Bus not found" }, { status: 404 });
 
   const route = await RouteModel.findById(bus.routeId).lean();
@@ -108,43 +136,72 @@ export async function POST(
     bus: id,
     status: { $in: ["confirmed", "pending"] },
   })
-    .populate("user", "name email")
+    .populate("user", "name email phone")
     .lean() as any[];
 
-  // Dynamically import Resend/email service
-  const { default: sendRaw } = await import("@/lib/email-service").then((m) => ({
-    default: async (to: string, subject: string, html: string) => {
-      const { Resend } = await import("resend").catch(() => ({ Resend: null }));
-      const resend = process.env.RESEND_API_KEY && Resend ? new Resend(process.env.RESEND_API_KEY) : null;
-      if (resend && process.env.NODE_ENV !== "development") {
-        await resend.emails.send({ from: process.env.RESEND_FROM_EMAIL || "noreply@busbooking.com", to, subject, html });
-      } else {
-        console.log(`[DEV] Announcement email to ${to}: ${subject}`);
-      }
-    },
-  }));
+  const sendEmail = async (to: string, subj: string, html: string) => {
+    const { Resend } = await import("resend").catch(() => ({ Resend: null }));
+    const resend = process.env.RESEND_API_KEY && Resend ? new Resend(process.env.RESEND_API_KEY) : null;
+    if (resend && process.env.NODE_ENV !== "development") {
+      await resend.emails.send({ from: process.env.RESEND_FROM_EMAIL || "noreply@busbooking.com", to, subject: subj, html });
+    } else {
+      console.log(`[DEV] Announcement email to ${to}: ${subj}`);
+    }
+  };
 
-  let sent = 0;
+  // SMS via Twilio (no SDK — plain REST)
+  const twilioSid  = settings?.sms?.twilio?.enabled ? (settings.sms.twilio.accountSid || process.env.TWILIO_ACCOUNT_SID) : process.env.TWILIO_ACCOUNT_SID;
+  const twilioAuth = settings?.sms?.twilio?.enabled ? (settings.sms.twilio.authToken  || process.env.TWILIO_AUTH_TOKEN)  : process.env.TWILIO_AUTH_TOKEN;
+  const twilioFrom = settings?.sms?.twilio?.enabled ? (settings.sms.twilio.fromNumber  || process.env.TWILIO_FROM_NUMBER) : process.env.TWILIO_FROM_NUMBER;
+  const smsReady   = !!(twilioSid && twilioAuth && twilioFrom);
+
   const subject = TYPE_SUBJECTS[type];
+  const notifTitle = subject.replace(/^\S+\s/, ""); // strip emoji prefix
+  const notifType  = TYPE_NOTIF[type];
+  let sent = 0;
+  let smsSent = 0;
 
   await Promise.allSettled(
     bookings.map(async (booking) => {
       const email = booking.user?.email ?? booking.metadata?.guestEmail;
       const name  = booking.user?.name  ?? booking.metadata?.guestName ?? "Passenger";
-      if (!email) return;
-      const html = buildAnnouncementHtml({
-        type, message, delayMinutes, route: routeStr,
-        date: dateStr, departureTime: bus.departureTime,
-        passengerName: name, bookingId: String(booking._id),
-      });
-      try {
-        await sendRaw(email, subject, html);
-        sent++;
-      } catch { /* non-fatal */ }
+      const phone = booking.user?.phone ?? null;
+
+      // 1. Email
+      if (email) {
+        const html = buildAnnouncementHtml({
+          type, message, delayMinutes, route: routeStr,
+          date: dateStr, departureTime: bus.departureTime,
+          passengerName: name, bookingId: String(booking._id),
+        });
+        try { await sendEmail(email, subject, html); sent++; } catch { /* non-fatal */ }
+      }
+
+      // 2. In-app notification
+      if (booking.user?._id) {
+        try {
+          await NotificationModel.create({
+            userId: booking.user._id,
+            type: notifType,
+            title: notifTitle,
+            message: `${routeStr} · ${dateStr} ${bus.departureTime}\n${message}`,
+            busId: id,
+            bookingId: String(booking._id),
+          });
+        } catch { /* non-fatal */ }
+      }
+
+      // 3. SMS
+      if (smsReady && phone) {
+        const delayNote = type === "delay" && delayMinutes ? ` (Delay: ${delayMinutes} min)` : "";
+        const smsBody = `[Bus Alert] ${notifTitle}${delayNote}\n${routeStr} ${dateStr} ${bus.departureTime}\n${message}\nRef #${String(booking._id).slice(-6).toUpperCase()}`;
+        try { await sendTwilioSms(twilioSid!, twilioAuth!, twilioFrom!, phone, smsBody); smsSent++; }
+        catch (err) { console.warn("[SMS] Failed:", phone, err); }
+      }
     })
   );
 
-  return Response.json({ message: "Announcement sent", totalPassengers: bookings.length, sent });
+  return Response.json({ message: "Announcement sent", totalPassengers: bookings.length, sent, smsSent, smsEnabled: smsReady });
 }
 
 // Preview — return recipient list without sending
@@ -162,13 +219,14 @@ export async function GET(
 
   const route = await RouteModel.findById(bus.routeId).lean();
   const bookings = await BookingModel.find({ bus: id, status: { $in: ["confirmed", "pending"] } })
-    .populate("user", "name email").lean() as any[];
+    .populate("user", "name email phone").lean() as any[];
 
   const recipients = bookings.map((b) => ({
     name:  b.user?.name  ?? b.metadata?.guestName  ?? "Guest",
     email: b.user?.email ?? b.metadata?.guestEmail ?? null,
+    phone: b.user?.phone ?? null,
     seats: b.seats ?? [],
-  })).filter((r) => r.email);
+  })).filter((r) => r.email || r.phone);
 
   return Response.json({
     route: route ? `${route.from} → ${route.to}` : "Unknown",

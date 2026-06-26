@@ -31,6 +31,9 @@ const DEFAULT_SETTINGS = {
     abaPayway: { enabled: false, merchantId: "", apiKey: "", publicKey: "" },
     activeGateway: "none",
   },
+  sms: {
+    twilio: { enabled: false, accountSid: "", authToken: "", fromNumber: "" },
+  },
 };
 
 function maskKey(key: string): string {
@@ -53,6 +56,16 @@ function maskPaymentSettings(payment: typeof DEFAULT_SETTINGS.payment) {
   };
 }
 
+function maskSmsSettings(sms: typeof DEFAULT_SETTINGS.sms) {
+  return {
+    ...sms,
+    twilio: {
+      ...sms.twilio,
+      authToken: maskKey(sms.twilio.authToken),
+    },
+  };
+}
+
 function isMasked(value: string): boolean {
   return value.includes("****");
 }
@@ -69,6 +82,9 @@ export async function GET() {
   // Mask secret keys before sending to client
   if (settings.payment) {
     settings.payment = maskPaymentSettings(settings.payment);
+  }
+  if (settings.sms) {
+    settings.sms = maskSmsSettings(settings.sms);
   }
   return Response.json(settings);
 }
@@ -89,6 +105,9 @@ export async function PATCH(request: Request) {
   }
   if (body.payment?.abaPayway) {
     if (isMasked(body.payment.abaPayway.apiKey ?? "")) delete body.payment.abaPayway.apiKey;
+  }
+  if (body.sms?.twilio) {
+    if (isMasked(body.sms.twilio.authToken ?? "")) delete body.sms.twilio.authToken;
   }
 
   // Flatten nested payment fields for $set to avoid overwriting sibling keys
@@ -114,5 +133,6 @@ export async function PATCH(request: Request) {
   // Return masked version
   const updated = await SettingsModel.findOne().lean() as any;
   if (updated?.payment) updated.payment = maskPaymentSettings(updated.payment);
+  if (updated?.sms) updated.sms = maskSmsSettings(updated.sms);
   return Response.json(updated);
 }

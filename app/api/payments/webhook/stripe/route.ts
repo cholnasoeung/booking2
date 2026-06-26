@@ -4,6 +4,7 @@ import PendingBookingModel from "@/models/PendingBooking";
 import BookingModel from "@/models/Booking";
 import BusModel from "@/models/Bus";
 import SettingsModel from "@/models/Settings";
+import NotificationModel from "@/models/Notification";
 import { normalizeBusSeatLayout } from "@/lib/seat-layout";
 
 export const runtime = "nodejs";
@@ -114,6 +115,20 @@ export async function POST(request: Request) {
         status: "paid",
         createdBookingId: String((booking as any)._id),
       });
+
+      // In-app notification for the user
+      try {
+        const route = await (await import("@/models/Route")).default.findById(bus.routeId).lean() as any;
+        const routeStr = route ? `${route.from} → ${route.to}` : "Bus Ticket";
+        await NotificationModel.create({
+          userId: pending.userId,
+          type: "booking_confirmed",
+          title: "Booking Confirmed",
+          message: `Your booking for ${routeStr} has been confirmed. ${pending.seats.length} seat(s) reserved.`,
+          busId: String(pending.busId),
+          bookingId: String((booking as any)._id),
+        });
+      } catch { /* non-fatal */ }
 
       console.log("[stripe-webhook] Booking created:", (booking as any)._id);
     } catch (err) {

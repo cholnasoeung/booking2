@@ -6,6 +6,7 @@ import { Shield, LogIn, UserPlus, Ticket } from "lucide-react";
 import LanguageToggle from "@/components/language-toggle";
 import LogoutButton from "@/components/logout-button";
 import NavbarLogo from "@/components/navbar-logo";
+import NotificationBell from "@/components/notification-bell";
 import { getCurrentUser } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/mongodb";
 import SettingsModel from "@/models/Settings";
@@ -89,6 +90,7 @@ export default async function Navbar() {
 
             {user ? (
               <div className="flex items-center gap-2">
+                <NotificationBell />
                 {/* User chip */}
                 <div className="hidden sm:flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50/80 pl-1.5 pr-3 py-1 shadow-sm">
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-[11px] font-black text-white shadow shadow-indigo-500/30 shrink-0">

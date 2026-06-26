@@ -1,5 +1,6 @@
 import AdminPanel from "@/components/admin-panel";
 import AdminSidebar from "@/components/admin-sidebar";
+import NotificationBell from "@/components/notification-bell";
 import { requireAdmin, getCurrentUser } from "@/lib/auth";
 import { getAdminSnapshot } from "@/lib/queries";
 import { BusFront, MapPinned, Package, Ticket, Users } from "lucide-react";
@@ -32,8 +33,9 @@ export default async function AdminPage() {
                 </div>
               </div>
 
-              {/* Right: Stats Cards */}
+              {/* Right: Notification bell + Stats Cards */}
               <div className="flex items-center gap-2 sm:gap-3">
+                <NotificationBell />
                 {/* Routes */}
                 <div className="flex items-center gap-2 rounded-xl bg-gray-50 border border-gray-200 px-3 py-2 hover:bg-gray-100 transition-colors">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 sm:h-9 sm:w-9">
