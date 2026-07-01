@@ -251,8 +251,8 @@ function createCarTemplate(): SeatLayout {
       cols: 3,
     },
     items: [
-      buildItem("empty", 1, 1),
-      buildItem("driver", 1, 2, { label: "Driver" }),
+      buildItem("driver", 1, 1, { label: "Driver" }),
+      buildItem("empty", 1, 2),
       buildItem("empty", 1, 3),
       buildSeat(2, 1, "1A"),
       buildSeat(2, 2, "1B"),

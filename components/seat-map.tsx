@@ -45,16 +45,18 @@ type LegendItem = {
   pillClassName: string;
 };
 
-type SeatTheme = {
-  shellClassName: string;
-  innerClassName: string;
-  baseClassName: string;
-  labelClassName: string;
-  chipClassName: string;
-  captionClassName: string;
-  accentClassName: string;
-  glowClassName: string;
-  statusLabel: string;
+type SeatColors = {
+  bg: string;
+  border: string;
+  shadow: string;
+  headrest: string;
+  armrest: string;
+  cushion: string;
+  inner: string;
+  label: string;
+  sublabel: string;
+  pillow: string;
+  stitchLine: string;
 };
 
 const legendItems: LegendItem[] = [
@@ -303,78 +305,122 @@ function UprightSeat({
   compact: boolean;
   tier?: SeatTier;
 }) {
-  const theme = getSeatTheme(state);
+  const c = seatColors(state);
   const tierBadge = tier && tier !== "standard" ? TIER_BADGE[tier] : null;
 
   return (
-    <div
-      className={cn(
-        "relative flex h-full min-h-0 flex-col overflow-hidden rounded-[26px] border p-1.5 transition-all duration-200",
-        theme.shellClassName,
-        theme.glowClassName
-      )}
-    >
-      <SeatPatternOverlay state={state} />
-      <div className="pointer-events-none absolute inset-x-4 top-2 h-10 rounded-full bg-white/60 blur-xl" />
+    <div className="relative flex h-full min-h-0 flex-col items-center gap-0.5 transition-all duration-200">
 
+      {/* ── HEADREST  (separate floating pill — narrower than body) ── */}
       <div
         className={cn(
-          "relative flex min-h-0 flex-1 flex-col items-center justify-center rounded-[20px] border px-2 pb-2 pt-3 text-center",
-          theme.innerClassName
+          "flex-shrink-0 rounded-xl",
+          compact ? "h-[12%] w-[52%]" : "h-[12%] w-[54%]",
+          c.headrest
         )}
       >
-        <div
-          className={cn(
-            "absolute left-1/2 top-2 h-2.5 w-10 -translate-x-1/2 rounded-full bg-white/80 shadow-sm",
-            compact ? "w-8" : "w-10"
-          )}
-        />
-        <span
-          className={cn(
-            "absolute right-2.5 top-2.5 size-2.5 rounded-full ring-4 ring-white/60",
-            theme.chipClassName
-          )}
-        />
-        <span
-          className={cn(
-            "relative z-10 font-semibold tracking-tight",
-            compact ? "text-xs" : "text-sm",
-            theme.labelClassName
-          )}
-        >
-          {label}
-        </span>
-        {!compact ? (
-          <span
-            className={cn(
-              "mt-2 text-[10px] font-semibold uppercase tracking-[0.24em]",
-              theme.captionClassName
-            )}
-          >
-            {theme.statusLabel}
-          </span>
-        ) : null}
-        {tierBadge && !compact && (
-          <span className={cn("mt-1 rounded-full px-1.5 text-[8px] font-bold uppercase tracking-wider", tierBadge.className)}>
-            {tierBadge.label}
-          </span>
-        )}
+        {/* padding seam */}
+        <div className="mx-auto mt-1 h-px w-[40%] rounded-full bg-white/45" />
       </div>
 
+      {/* ── MAIN BODY  (backrest + cushion share one rounded card) ── */}
       <div
         className={cn(
-          "relative mt-1.5 min-h-[18px] rounded-[14px] border",
-          compact ? "h-[22%]" : "h-[24%]",
-          theme.baseClassName
+          "relative w-full flex-1 overflow-hidden rounded-xl border-2",
+          c.bg, c.border, c.shadow
         )}
       >
-        <div className="absolute inset-x-2 top-1 h-1 rounded-full bg-white/60" />
+        {/* Left armrest */}
         <div
           className={cn(
-            "absolute bottom-1 left-1/2 h-1.5 w-8 -translate-x-1/2 rounded-full",
-            theme.accentClassName
+            "absolute left-0 top-0 w-[19%] rounded-bl-xl rounded-tl-xl",
+            compact ? "h-[68%]" : "h-[70%]",
+            c.armrest
           )}
-        />
+        >
+          {/* rest-pad nub */}
+          <div className="absolute bottom-1.5 left-1/2 h-3 w-1 -translate-x-1/2 rounded-full bg-white/25" />
+        </div>
+
+        {/* Right armrest */}
+        <div
+          className={cn(
+            "absolute right-0 top-0 w-[19%] rounded-br-xl rounded-tr-xl",
+            compact ? "h-[68%]" : "h-[70%]",
+            c.armrest
+          )}
+        >
+          <div className="absolute bottom-1.5 left-1/2 h-3 w-1 -translate-x-1/2 rounded-full bg-white/25" />
+        </div>
+
+        {/* Backrest (between armrests, top section) */}
+        <div
+          className={cn(
+            "absolute left-[21%] right-[21%] top-0 flex flex-col items-center justify-center",
+            compact ? "h-[68%]" : "h-[70%]",
+            c.inner
+          )}
+        >
+          <div className={cn("mb-1 h-px w-[75%] rounded-full opacity-25", c.stitchLine)} />
+
+          <span className={cn("font-bold tracking-tight", compact ? "text-[9px]" : "text-xs", c.label)}>
+            {label}
+          </span>
+
+          {!compact && (
+            <span className={cn("mt-px text-[9px] font-semibold uppercase tracking-[0.2em] opacity-65", c.sublabel)}>
+              {state === "selected" ? "Chosen" : state === "booked" ? "Taken" : state === "blocked" ? "N/A" : "Open"}
+            </span>
+          )}
+
+          {tierBadge && !compact && (
+            <span className={cn("mt-1 rounded-full px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-wider", tierBadge.className)}>
+              {tierBadge.label}
+            </span>
+          )}
+
+          <div className={cn("mt-1 h-px w-[75%] rounded-full opacity-25", c.stitchLine)} />
+        </div>
+
+        {/* Seat cushion (bottom strip, full width) */}
+        <div
+          className={cn(
+            "absolute bottom-0 left-0 right-0 rounded-b-xl",
+            compact ? "h-[32%]" : "h-[30%]",
+            c.cushion
+          )}
+        >
+          <div className="mx-auto mt-1.5 h-px w-[45%] rounded-full bg-white/45" />
+        </div>
+
+        {/* Diagonal stripe overlay for unavailable */}
+        {(state === "booked" || state === "blocked") && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 rounded-xl opacity-[0.14]"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(135deg, rgba(0,0,0,0.6) 0px, rgba(0,0,0,0.6) 1.5px, transparent 1.5px, transparent 9px)",
+            }}
+          />
+        )}
+
+        {/* X mark for blocked */}
+        {state === "blocked" && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center pb-[20%]">
+            <svg
+              viewBox="0 0 16 16"
+              className={cn("text-rose-500/65", compact ? "size-4" : "size-5")}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            >
+              <line x1="4" y1="4" x2="12" y2="12" />
+              <line x1="12" y1="4" x2="4" y2="12" />
+            </svg>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -391,65 +437,104 @@ function SleeperSeat({
   compact: boolean;
   tier?: SeatTier;
 }) {
-  const theme = getSeatTheme(state);
-
+  const c = seatColors(state);
   const tierBadge = tier && tier !== "standard" ? TIER_BADGE[tier] : null;
 
   return (
     <div
       className={cn(
-        "relative flex h-full min-h-0 flex-col overflow-hidden rounded-[24px] border p-2 transition-all duration-200",
-        theme.shellClassName,
-        theme.glowClassName
+        "relative flex h-full min-h-0 flex-col overflow-hidden rounded-[22px] border transition-all duration-200",
+        c.bg, c.border, c.shadow
       )}
     >
-      <SeatPatternOverlay state={state} />
-      <div className="pointer-events-none absolute inset-x-4 top-3 h-10 rounded-full bg-white/55 blur-xl" />
+      {/* Headboard */}
+      <div className={cn("flex-shrink-0 rounded-t-[22px]", compact ? "h-3" : "h-3.5", c.headrest)}>
+        <div className="mx-auto mt-1 h-0.5 w-[35%] rounded-full bg-white/30" />
+      </div>
 
-      <div
-        className={cn(
-          "relative flex min-h-0 flex-1 flex-col items-center justify-center rounded-[18px] border px-2 py-3 text-center",
-          theme.innerClassName
-        )}
-      >
-        <span
+      {/* Pillow */}
+      <div className="flex-shrink-0 px-2.5 pt-2">
+        <div
           className={cn(
-            "absolute right-2.5 top-2.5 size-2.5 rounded-full ring-4 ring-white/60",
-            theme.chipClassName
+            "rounded-2xl border",
+            compact ? "h-4" : "h-5",
+            c.pillow
           )}
-        />
+        >
+          {/* Pillow centre seams */}
+          <div className="flex h-full items-center justify-center gap-4">
+            <div className={cn("h-[50%] w-px rounded-full opacity-25", c.stitchLine)} />
+            <div className={cn("h-[50%] w-px rounded-full opacity-25", c.stitchLine)} />
+          </div>
+        </div>
+      </div>
+
+      {/* Mattress / sheet with quilting lines */}
+      <div className={cn("mx-2 flex flex-1 flex-col justify-evenly rounded-xl py-1.5", c.inner)}>
+        {Array.from({ length: compact ? 2 : 3 }).map((_, i) => (
+          <div
+            key={i}
+            className={cn("h-px w-full rounded-full opacity-40", c.stitchLine)}
+          />
+        ))}
+      </div>
+
+      {/* Seat label + tier badge */}
+      <div className="flex flex-shrink-0 flex-col items-center justify-center py-1">
         <span
           className={cn(
-            "relative z-10 font-semibold tracking-tight",
-            compact ? "text-sm" : "text-base",
-            theme.labelClassName
+            "font-bold tracking-tight",
+            compact ? "text-[9px]" : "text-xs",
+            c.label
           )}
         >
           {label}
         </span>
-        <span
-          className={cn(
-            "mt-2 text-[10px] font-semibold uppercase tracking-[0.24em]",
-            theme.captionClassName
-          )}
-        >
-          {theme.statusLabel}
-        </span>
         {tierBadge && (
-          <span className={cn("mt-1 rounded-full px-1.5 text-[8px] font-bold uppercase tracking-wider", tierBadge.className)}>
+          <span
+            className={cn(
+              "rounded-full px-1.5 text-[7px] font-bold uppercase tracking-wider",
+              tierBadge.className
+            )}
+          >
             {tierBadge.label}
           </span>
         )}
       </div>
 
-      <div
-        className={cn(
-          "relative mt-2 flex h-4 items-center justify-center rounded-full border",
-          theme.baseClassName
-        )}
-      >
-        <div className="h-1.5 w-10 rounded-full bg-white/65" />
+      {/* Footboard */}
+      <div className={cn("flex-shrink-0 rounded-b-[22px]", compact ? "h-2.5" : "h-3", c.headrest)}>
+        <div className="mx-auto mb-0.5 h-0.5 w-[35%] rounded-full bg-white/30" />
       </div>
+
+      {/* Diagonal stripe overlay for unavailable */}
+      {(state === "booked" || state === "blocked") && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 rounded-[22px] opacity-20"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(135deg, rgba(0,0,0,0.3) 0px, rgba(0,0,0,0.3) 2px, transparent 2px, transparent 10px)",
+          }}
+        />
+      )}
+
+      {/* X mark for blocked */}
+      {state === "blocked" && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <svg
+            viewBox="0 0 16 16"
+            className={cn("text-rose-500/70", compact ? "size-4" : "size-5")}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          >
+            <line x1="4" y1="4" x2="12" y2="12" />
+            <line x1="12" y1="4" x2="4" y2="12" />
+          </svg>
+        </div>
+      )}
     </div>
   );
 }
@@ -557,106 +642,65 @@ function DecorativeBlock({
   );
 }
 
-function SeatPatternOverlay({ state }: { state: SeatState }) {
-  const patternStyle = getSeatPatternStyle(state);
-
-  if (!patternStyle) {
-    return null;
-  }
-
-  return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0 opacity-60"
-      style={patternStyle}
-    />
-  );
-}
-
-function getSeatTheme(state: SeatState): SeatTheme {
+function seatColors(state: SeatState): SeatColors {
   switch (state) {
     case "selected":
       return {
-        shellClassName:
-          "border-amber-300 bg-gradient-to-b from-amber-50 via-white to-orange-100/80 ring-2 ring-amber-200/80",
-        innerClassName:
-          "border-white/90 bg-gradient-to-b from-white/80 to-amber-50/80",
-        baseClassName:
-          "border-amber-300/80 bg-gradient-to-r from-amber-200 to-orange-200",
-        labelClassName: "text-amber-950",
-        chipClassName: "bg-amber-500",
-        captionClassName: "text-amber-700",
-        accentClassName: "bg-amber-500/70",
-        glowClassName:
-          "shadow-[0_18px_40px_-24px_rgba(245,158,11,0.85)]",
-        statusLabel: "Chosen",
+        bg: "bg-amber-50",
+        border: "border-amber-300",
+        shadow: "ring-2 ring-amber-200 shadow-[0_8px_24px_-8px_rgba(245,158,11,0.55)]",
+        headrest: "bg-gradient-to-b from-amber-500 to-amber-400",
+        armrest: "bg-amber-300",
+        cushion: "bg-gradient-to-b from-amber-200 to-amber-300",
+        inner: "bg-gradient-to-b from-amber-50 to-white",
+        label: "text-amber-900",
+        sublabel: "text-amber-600",
+        pillow: "bg-gradient-to-b from-amber-100 to-amber-200 border-amber-200",
+        stitchLine: "bg-amber-300",
       };
     case "booked":
       return {
-        shellClassName:
-          "border-slate-200 bg-gradient-to-b from-slate-100 via-slate-50 to-slate-200/75",
-        innerClassName:
-          "border-white/70 bg-gradient-to-b from-slate-50 to-slate-100/80",
-        baseClassName:
-          "border-slate-300/80 bg-gradient-to-r from-slate-300 to-slate-200",
-        labelClassName: "text-slate-600",
-        chipClassName: "bg-slate-400",
-        captionClassName: "text-slate-500",
-        accentClassName: "bg-slate-400/70",
-        glowClassName:
-          "shadow-[0_16px_32px_-26px_rgba(148,163,184,0.9)]",
-        statusLabel: "Taken",
+        bg: "bg-slate-100",
+        border: "border-slate-200",
+        shadow: "shadow-[0_4px_12px_-6px_rgba(148,163,184,0.5)]",
+        headrest: "bg-gradient-to-b from-slate-400 to-slate-300",
+        armrest: "bg-slate-300",
+        cushion: "bg-gradient-to-b from-slate-200 to-slate-300",
+        inner: "bg-gradient-to-b from-slate-50 to-slate-100",
+        label: "text-slate-400",
+        sublabel: "text-slate-400",
+        pillow: "bg-gradient-to-b from-slate-100 to-slate-200 border-slate-200",
+        stitchLine: "bg-slate-300",
       };
     case "blocked":
       return {
-        shellClassName:
-          "border-rose-200 bg-gradient-to-b from-rose-50 via-white to-rose-100/80",
-        innerClassName:
-          "border-white/80 bg-gradient-to-b from-white/85 to-rose-50/80",
-        baseClassName:
-          "border-rose-200/80 bg-gradient-to-r from-rose-200 to-rose-100",
-        labelClassName: "text-rose-800",
-        chipClassName: "bg-rose-400",
-        captionClassName: "text-rose-700",
-        accentClassName: "bg-rose-400/65",
-        glowClassName:
-          "shadow-[0_16px_32px_-26px_rgba(244,63,94,0.6)]",
-        statusLabel: "Blocked",
+        bg: "bg-rose-50",
+        border: "border-rose-200",
+        shadow: "shadow-[0_4px_12px_-6px_rgba(244,63,94,0.35)]",
+        headrest: "bg-gradient-to-b from-rose-500 to-rose-400",
+        armrest: "bg-rose-300",
+        cushion: "bg-gradient-to-b from-rose-200 to-rose-300",
+        inner: "bg-gradient-to-b from-rose-50 to-white",
+        label: "text-rose-700",
+        sublabel: "text-rose-500",
+        pillow: "bg-gradient-to-b from-rose-100 to-rose-200 border-rose-200",
+        stitchLine: "bg-rose-300",
       };
     case "available":
     default:
       return {
-        shellClassName:
-          "border-emerald-200 bg-gradient-to-b from-white via-emerald-50/90 to-emerald-100/85",
-        innerClassName:
-          "border-white/90 bg-gradient-to-b from-white/90 to-emerald-50/75",
-        baseClassName:
-          "border-emerald-200/80 bg-gradient-to-r from-emerald-200 to-emerald-100",
-        labelClassName: "text-emerald-950",
-        chipClassName: "bg-emerald-500",
-        captionClassName: "text-emerald-700",
-        accentClassName: "bg-emerald-500/70",
-        glowClassName:
-          "shadow-[0_18px_40px_-24px_rgba(16,185,129,0.7)]",
-        statusLabel: "Tap",
+        bg: "bg-white",
+        border: "border-emerald-200",
+        shadow: "shadow-[0_6px_20px_-8px_rgba(16,185,129,0.40)]",
+        headrest: "bg-gradient-to-b from-emerald-500 to-emerald-400",
+        armrest: "bg-emerald-300",
+        cushion: "bg-gradient-to-b from-emerald-100 to-emerald-200",
+        inner: "bg-gradient-to-b from-white to-emerald-50",
+        label: "text-emerald-900",
+        sublabel: "text-emerald-600",
+        pillow: "bg-gradient-to-b from-emerald-50 to-emerald-100 border-emerald-200",
+        stitchLine: "bg-emerald-200",
       };
-  }
-}
-
-function getSeatPatternStyle(state: SeatState): CSSProperties | undefined {
-  switch (state) {
-    case "booked":
-      return {
-        backgroundImage:
-          "repeating-linear-gradient(135deg, rgba(148,163,184,0.12) 0px, rgba(148,163,184,0.12) 8px, rgba(255,255,255,0) 8px, rgba(255,255,255,0) 16px)",
-      };
-    case "blocked":
-      return {
-        backgroundImage:
-          "repeating-linear-gradient(135deg, rgba(244,63,94,0.12) 0px, rgba(244,63,94,0.12) 8px, rgba(255,255,255,0) 8px, rgba(255,255,255,0) 16px)",
-      };
-    default:
-      return undefined;
   }
 }
 

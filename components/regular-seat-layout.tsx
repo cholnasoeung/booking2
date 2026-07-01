@@ -121,37 +121,17 @@ export default function RegularSeatLayout({
 
       <div className="max-w-6xl mx-auto p-4 space-y-4">
         {/* Legend */}
-        <div className="flex items-center justify-center gap-6 bg-white rounded-lg p-3 shadow-sm border border-slate-200">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-white border-2 border-slate-300 rounded flex items-center justify-center">
-              <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-              </svg>
+        <div className="flex flex-wrap items-center justify-center gap-4 bg-white rounded-xl p-3 shadow-sm border border-slate-200">
+          {[
+            { dot: "bg-emerald-500", label: "Available" },
+            { dot: "bg-amber-400",   label: "Selected"  },
+            { dot: "bg-slate-400",   label: "Booked"    },
+          ].map(({ dot, label }) => (
+            <div key={label} className="flex items-center gap-2">
+              <span className={cn("size-3 rounded-full ring-4 ring-white shadow-sm", dot)} />
+              <span className="text-xs font-medium text-slate-600">{label}</span>
             </div>
-            <span className="text-xs text-slate-600">Available</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-red-600 rounded flex items-center justify-center">
-              <span className="text-[10px] font-bold text-white">1A</span>
-            </div>
-            <span className="text-xs text-slate-600">Selected</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-slate-200 border border-slate-300 rounded flex items-center justify-center">
-              <span className="text-[10px] font-bold text-slate-500">2B</span>
-            </div>
-            <span className="text-xs text-slate-600">Booked</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-amber-50 border-2 border-amber-400 rounded flex items-center justify-center">
-              <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <span className="text-xs text-slate-600">Window</span>
-          </div>
+          ))}
         </div>
 
         {/* Bus Layout */}
@@ -259,38 +239,52 @@ type RegularSeatProps = {
 function RegularSeat({ seat, isSelected, isMaxReached, onToggle }: RegularSeatProps) {
   const isBooked = seat.state === "booked";
 
+  const headrest = isSelected
+    ? "bg-gradient-to-b from-amber-500 to-amber-400"
+    : isBooked
+      ? "bg-gradient-to-b from-slate-400 to-slate-300"
+      : "bg-gradient-to-b from-emerald-500 to-emerald-400";
+
+  const armrest  = isSelected ? "bg-amber-300"  : isBooked ? "bg-slate-300"  : "bg-emerald-300";
+  const cushion  = isSelected ? "bg-amber-200"  : isBooked ? "bg-slate-200"  : "bg-emerald-100";
+  const bodyBg   = isSelected ? "bg-amber-50 border-amber-400"  : isBooked ? "bg-slate-100 border-slate-200" : "bg-white border-emerald-300";
+  const shadow   = isSelected ? "shadow-md -translate-y-0.5" : "";
+  const backFill = isSelected ? "bg-amber-50"  : isBooked ? "bg-slate-50"  : "bg-white";
+  const label    = isSelected ? "text-amber-900" : isBooked ? "text-slate-400" : "text-slate-700";
+
   return (
     <button
       type="button"
       disabled={isBooked || (isMaxReached && !isSelected)}
       onClick={onToggle}
       className={cn(
-        "relative w-14 h-10 flex-shrink-0 rounded-lg border-2 flex items-center justify-center transition-all duration-200",
-        !isBooked && !isSelected && "bg-white border-slate-300 hover:border-red-400 hover:shadow-md",
-        isSelected && "bg-red-600 border-red-700 shadow-md",
-        isBooked && "bg-slate-200 border-slate-300 cursor-not-allowed",
-        !isBooked && "active:scale-95"
+        "relative w-14 h-[52px] flex-shrink-0 flex flex-col items-center gap-px transition-all duration-200",
+        !isBooked && "hover:-translate-y-0.5 active:scale-95",
+        isBooked && "cursor-not-allowed opacity-55"
       )}
       title={`${seat.number} - ${seat.position} seat`}
     >
-      {/* Seat number */}
-      <span className={cn(
-        "text-xs font-bold",
-        isSelected ? "text-white" : isBooked ? "text-slate-500" : "text-slate-700"
-      )}>
-        {seat.number}
-      </span>
+      {/* Floating headrest — narrower, separate */}
+      <div className={cn("h-[20%] w-[52%] flex-shrink-0 rounded-lg", headrest)} />
 
-      {/* Window indicator */}
-      {seat.position === "window" && !isBooked && (
-        <svg className={cn(
-          "absolute top-0.5 right-0.5 w-3 h-3",
-          isSelected ? "text-white/70" : "text-blue-500"
-        )} fill="currentColor" viewBox="0 0 20 20">
-          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-          <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-        </svg>
-      )}
+      {/* Main body */}
+      <div className={cn(
+        "relative w-full flex-1 overflow-hidden rounded-lg border-2",
+        bodyBg, shadow
+      )}>
+        {/* Left armrest */}
+        <div className={cn("absolute left-0 top-0 h-[68%] w-[18%] rounded-tl-lg", armrest)} />
+        {/* Right armrest */}
+        <div className={cn("absolute right-0 top-0 h-[68%] w-[18%] rounded-tr-lg", armrest)} />
+
+        {/* Backrest label */}
+        <div className={cn("absolute left-[20%] right-[20%] top-0 flex h-[68%] items-center justify-center", backFill)}>
+          <span className={cn("text-[9px] font-bold", label)}>{seat.number}</span>
+        </div>
+
+        {/* Seat cushion */}
+        <div className={cn("absolute bottom-0 left-0 right-0 h-[32%] rounded-b-md", cushion)} />
+      </div>
     </button>
   );
 }
