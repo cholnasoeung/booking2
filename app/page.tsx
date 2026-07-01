@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, Users, Star, Zap, Shield, ArrowRight, MapPin } from "lucide-react";
+import { Clock, Zap, Shield, ArrowRight, MapPin } from "lucide-react";
 
 import Navbar from "@/components/navbar";
 import AboutSection from "@/components/about-section";
@@ -8,7 +8,6 @@ import CTASection from "@/components/cta-section";
 import FAQSection from "@/components/faq-section";
 import Footer from "@/components/footer";
 import HeroSearchForm from "@/components/hero-search-form";
-import DiscountPopup from "@/components/discount-popup";
 import { POPULAR_ROUTES } from "@/lib/constants";
 import { getTomorrowDateInput } from "@/lib/date";
 import { formatCurrency } from "@/lib/formatters";
@@ -20,8 +19,6 @@ export default function Home() {
     <>
       <Navbar />
       <main>
-        <DiscountPopup />
-
         {/* ── HERO ─────────────────────────────────────────────────────── */}
         <section className="relative overflow-hidden bg-gradient-to-r from-red-700 to-orange-500 pb-32 pt-14 text-white">
           {/* Angkor Wat + palm silhouette */}
@@ -112,26 +109,6 @@ export default function Home() {
         <div className="relative z-10 -mt-20 pb-14">
           <div className="mx-auto max-w-5xl px-5 sm:px-8">
             <HeroSearchForm />
-          </div>
-        </div>
-
-        {/* ── TRUST STATS ───────────────────────────────────────────────── */}
-        <div className="border-y border-slate-100 bg-white py-7">
-          <div className="mx-auto max-w-7xl px-5 sm:px-8">
-            <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-14">
-              {[
-                { icon: Star, value: "4.9 / 5", label: "Rider rating" },
-                { icon: Users, value: "5,000+", label: "Happy travelers" },
-                { icon: Zap, value: "~90s", label: "Avg. booking" },
-                { icon: Shield, value: "100%", label: "Secure payments" },
-              ].map(({ icon: Icon, value, label }) => (
-                <div key={label} className="flex items-center gap-2.5">
-                  <Icon className="size-5 text-red-500" />
-                  <span className="font-bold text-slate-900">{value}</span>
-                  <span className="text-sm text-slate-500">{label}</span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 
