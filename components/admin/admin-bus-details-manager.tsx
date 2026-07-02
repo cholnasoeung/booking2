@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { BUS_TYPES, AMENITY_OPTIONS } from "@/lib/utils/constants";
+import { AmenityIcon } from "@/lib/utils/amenity-icons";
 import { type BusType } from "@/lib/seat/seat-layout";
 import { type BusDetailSummary } from "@/lib/db/queries";
 
@@ -292,7 +293,7 @@ function BusFormFields({
               }}
               className="text-[11px] px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 transition-colors"
             >
-              {a.icon} {a.label}
+              <AmenityIcon value={a.value} className="size-3 inline-block mr-1" />{a.label}
             </button>
           ))}
         </div>

@@ -12,6 +12,7 @@ import JoinWaitlistButton from "@/components/booking/join-waitlist-button";
 import SeatSelection from "@/components/booking/seat-selection";
 import { requireUser } from "@/lib/auth";
 import { AMENITY_OPTIONS, MAX_SEATS_PER_BOOKING } from "@/lib/utils/constants";
+import { AmenityIcon } from "@/lib/utils/amenity-icons";
 import { formatBusType, formatCurrency, formatTravelDate } from "@/lib/utils/formatters";
 import { getBusSummary } from "@/lib/db/queries";
 import { getFirstSearchParam, parsePassengerCount } from "@/lib/utils/validation";
@@ -261,7 +262,7 @@ export default async function BookPage({ params, searchParams }: BookPageProps) 
                         key={amenity}
                         className="flex items-center gap-1.5 rounded-xl border border-indigo-100 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700"
                       >
-                        <span>{info?.icon ?? "✓"}</span>
+                        <AmenityIcon value={amenity} className="size-3.5" />
                         {info?.label ?? amenity}
                       </span>
                     );

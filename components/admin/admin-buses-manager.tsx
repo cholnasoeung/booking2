@@ -283,10 +283,7 @@ export default function AdminBusesManager({
                   size="lg"
                   className="rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold px-5 shadow-md shadow-indigo-100 gap-2"
                   disabled={routes.length === 0}
-                  onClick={() => {
-                    setSelectedBus(null);
-                    setBusDialogOpen(true);
-                  }}
+                  onClick={() => router.push("/admin/buses/new")}
                 >
                   <Plus className="size-4" />
                   Add Bus

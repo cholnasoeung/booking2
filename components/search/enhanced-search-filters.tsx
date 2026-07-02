@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronDown, X, Filter } from "lucide-react";
 import { BUS_TYPES, AMENITY_OPTIONS } from "@/lib/utils/constants";
+import { AmenityIcon } from "@/lib/utils/amenity-icons";
 
 export type SearchFilters = {
   busTypes: string[];
@@ -249,7 +250,7 @@ export default function EnhancedSearchFilters({
                       onChange={() => toggleAmenity(amenity.value)}
                       className="border-slate-300 data-[state=checked]:bg-red-500 data-[state=checked]:border-red-500"
                     />
-                    <span className="text-lg">{amenity.icon}</span>
+                    <AmenityIcon value={amenity.value} className="size-4 shrink-0" />
                     <span className="text-xs">{amenity.label}</span>
                   </label>
                 ))}

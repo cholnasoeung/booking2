@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AMENITY_OPTIONS, BUS_TYPES, type AmenityValue } from "@/lib/utils/constants";
+import { AmenityIcon } from "@/lib/utils/amenity-icons";
 import { formatBusType } from "@/lib/utils/formatters";
 import type { BusDetailSummary, BusSummary, DriverSummary, RouteSummary } from "@/lib/db/queries";
 import { type BusStop } from "@/types/bus";
@@ -765,8 +766,8 @@ export default function AdminBusDialog({
                         }}
                         className="border-slate-300 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                       />
-                      <span className={`text-sm font-medium ${checked ? "text-indigo-800" : "text-slate-700"}`}>
-                        <span className="mr-1.5">{amenity.icon}</span>
+                      <span className={`flex items-center gap-2 text-sm font-medium ${checked ? "text-indigo-800" : "text-slate-700"}`}>
+                        <AmenityIcon value={amenity.value} className="size-4 shrink-0" />
                         {amenity.label}
                       </span>
                     </label>
