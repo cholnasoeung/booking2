@@ -46,7 +46,14 @@ type Schedule = {
 };
 type DriverOpt = { id: string; name: string; phone: string };
 type BusOpt    = { id: string; name: string; reg: string };
-type TripOpt   = { id: string; label: string };
+type TripOpt   = {
+  id: string; label: string;
+  busDetailId: string | null;
+  driverId:    string | null;
+  date:        string | null;
+  shiftStart:  string | null;
+  shiftEnd:    string | null;
+};
 type Summary   = { today: number; thisWeek: number; noShows: number; active: number };
 type ApiData   = {
   schedules: Schedule[]; today: Schedule[];
@@ -190,13 +197,56 @@ function ScheduleCard({
 }
 
 /* ─── form fields ───────────────────────────────────────────── */
-function ScheduleFormFields({ form, onChange, drivers, buses, trips }: {
+function ScheduleFormFields({ form, onChange, onTripSelect, drivers, buses, trips }: {
   form: ReturnType<typeof emptyForm>;
   onChange: (k: string, v: string) => void;
+  onTripSelect: (trip: TripOpt | null) => void;
   drivers: DriverOpt[]; buses: BusOpt[]; trips: TripOpt[];
 }) {
+  const selectedTrip = trips.find((t) => t.id === form.busId) ?? null;
+  const autoFilled   = selectedTrip !== null;
+
+  function handleTripChange(value: string) {
+    if (!value || value === "_none") {
+      onChange("busId", "");
+      onTripSelect(null);
+    } else {
+      onChange("busId", value);
+      const trip = trips.find((t) => t.id === value) ?? null;
+      onTripSelect(trip);
+    }
+  }
+
   return (
     <div className="space-y-4">
+
+      {/* Trip picker — moved to top so auto-fill happens first */}
+      {trips.length > 0 && (
+        <div className="space-y-1.5">
+          <Label className="flex items-center gap-2">
+            Link to Trip
+            <span className="text-slate-400 font-normal text-xs">(optional — auto-fills vehicle, date & shift)</span>
+          </Label>
+          <Select value={form.busId || "_none"} onValueChange={handleTripChange}>
+            <SelectTrigger className={cn(autoFilled && "border-indigo-400 ring-1 ring-indigo-300")}>
+              <SelectValue placeholder="No specific trip" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="_none">No specific trip</SelectItem>
+              {trips.map((t) => (
+                <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {autoFilled && (
+            <p className="text-[11px] text-indigo-600 font-medium flex items-center gap-1">
+              <CheckCircle2 className="size-3" />
+              Vehicle, date and shift times auto-filled from this trip. You can still edit them below.
+            </p>
+          )}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label>Driver *</Label>
@@ -213,9 +263,16 @@ function ScheduleFormFields({ form, onChange, drivers, buses, trips }: {
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label>Vehicle *</Label>
+          <Label className="flex items-center gap-1.5">
+            Vehicle *
+            {autoFilled && selectedTrip?.busDetailId && (
+              <span className="text-[10px] font-semibold text-indigo-500 bg-indigo-50 border border-indigo-200 rounded-full px-1.5 py-0.5">auto</span>
+            )}
+          </Label>
           <Select value={form.busDetailId} onValueChange={(v) => onChange("busDetailId", v ?? "")}>
-            <SelectTrigger><SelectValue placeholder="Select vehicle" /></SelectTrigger>
+            <SelectTrigger className={cn(autoFilled && selectedTrip?.busDetailId && "border-indigo-300")}>
+              <SelectValue placeholder="Select vehicle" />
+            </SelectTrigger>
             <SelectContent>
               {buses.map((b) => (
                 <SelectItem key={b.id} value={b.id}>
@@ -229,33 +286,45 @@ function ScheduleFormFields({ form, onChange, drivers, buses, trips }: {
 
       <div className="grid grid-cols-3 gap-4">
         <div className="space-y-1.5">
-          <Label>Date *</Label>
-          <Input type="date" value={form.date} onChange={(e) => onChange("date", e.target.value)} />
+          <Label className="flex items-center gap-1.5">
+            Date *
+            {autoFilled && selectedTrip?.date && (
+              <span className="text-[10px] font-semibold text-indigo-500 bg-indigo-50 border border-indigo-200 rounded-full px-1.5 py-0.5">auto</span>
+            )}
+          </Label>
+          <Input
+            type="date" value={form.date}
+            onChange={(e) => onChange("date", e.target.value)}
+            className={cn(autoFilled && selectedTrip?.date && "border-indigo-300")}
+          />
         </div>
         <div className="space-y-1.5">
-          <Label>Shift Start *</Label>
-          <Input type="time" value={form.shiftStart} onChange={(e) => onChange("shiftStart", e.target.value)} />
+          <Label className="flex items-center gap-1.5">
+            Shift Start *
+            {autoFilled && selectedTrip?.shiftStart && (
+              <span className="text-[10px] font-semibold text-indigo-500 bg-indigo-50 border border-indigo-200 rounded-full px-1.5 py-0.5">auto</span>
+            )}
+          </Label>
+          <Input
+            type="time" value={form.shiftStart}
+            onChange={(e) => onChange("shiftStart", e.target.value)}
+            className={cn(autoFilled && selectedTrip?.shiftStart && "border-indigo-300")}
+          />
         </div>
         <div className="space-y-1.5">
-          <Label>Shift End *</Label>
-          <Input type="time" value={form.shiftEnd} onChange={(e) => onChange("shiftEnd", e.target.value)} />
+          <Label className="flex items-center gap-1.5">
+            Shift End *
+            {autoFilled && selectedTrip?.shiftEnd && (
+              <span className="text-[10px] font-semibold text-indigo-500 bg-indigo-50 border border-indigo-200 rounded-full px-1.5 py-0.5">auto</span>
+            )}
+          </Label>
+          <Input
+            type="time" value={form.shiftEnd}
+            onChange={(e) => onChange("shiftEnd", e.target.value)}
+            className={cn(autoFilled && selectedTrip?.shiftEnd && "border-indigo-300")}
+          />
         </div>
       </div>
-
-      {trips.length > 0 && (
-        <div className="space-y-1.5">
-          <Label>Link to Trip <span className="text-slate-400 font-normal">(optional)</span></Label>
-          <Select value={form.busId} onValueChange={(v) => onChange("busId", v == null || v === "_none" ? "" : v)}>
-            <SelectTrigger><SelectValue placeholder="No specific trip" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="_none">No specific trip</SelectItem>
-              {trips.map((t) => (
-                <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
 
       <div className="space-y-1.5">
         <Label>Notes</Label>
@@ -299,6 +368,18 @@ export default function AdminDriverScheduleTab() {
   const goToday  = () => setWeekStart(isoToMonday(new Date()));
 
   const setField = (k: string, v: string) => { setForm((f) => ({ ...f, [k]: v })); setFormError(""); };
+
+  const handleTripSelect = (trip: TripOpt | null) => {
+    if (!trip) return;
+    setForm((f) => ({
+      ...f,
+      busDetailId: trip.busDetailId ?? f.busDetailId,
+      date:        trip.date        ?? f.date,
+      shiftStart:  trip.shiftStart  ?? f.shiftStart,
+      shiftEnd:    trip.shiftEnd    ?? f.shiftEnd,
+    }));
+    setFormError("");
+  };
 
   const buildBody = () => ({
     driverId:    form.driverId,
@@ -657,7 +738,7 @@ export default function AdminDriverScheduleTab() {
             </DialogTitle>
           </DialogHeader>
           <div className="py-2">
-            <ScheduleFormFields form={form} onChange={setField} drivers={drivers} buses={buses} trips={trips} />
+            <ScheduleFormFields form={form} onChange={setField} onTripSelect={handleTripSelect} drivers={drivers} buses={buses} trips={trips} />
             {formError && <p className="mt-3 text-sm text-red-600">{formError}</p>}
           </div>
           <DialogFooter>
@@ -679,7 +760,7 @@ export default function AdminDriverScheduleTab() {
             </DialogTitle>
           </DialogHeader>
           <div className="py-2">
-            <ScheduleFormFields form={form} onChange={setField} drivers={drivers} buses={buses} trips={trips} />
+            <ScheduleFormFields form={form} onChange={setField} onTripSelect={handleTripSelect} drivers={drivers} buses={buses} trips={trips} />
             {formError && <p className="mt-3 text-sm text-red-600">{formError}</p>}
           </div>
           <DialogFooter>

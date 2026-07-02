@@ -65,7 +65,7 @@ export async function GET(request: Request) {
 
     BusModel.find({ date: { $gte: today } })
       .populate("routeId", "from to")
-      .select("departureTime date routeId")
+      .select("departureTime arrivalTime date routeId busDetailId driverId")
       .sort({ date: 1, departureTime: 1 })
       .limit(100)
       .lean(),
@@ -124,8 +124,13 @@ export async function GET(request: Request) {
     drivers:    (drivers  as any[]).map((d) => ({ id: String(d._id), name: d.name,  phone: d.phone })),
     buses:      (buses    as any[]).map((b) => ({ id: String(b._id), name: b.name,  reg:   b.registrationNumber })),
     trips:      (trips    as any[]).map((t) => ({
-      id:    String(t._id),
-      label: `${(t.routeId as any)?.from ?? "?"} → ${(t.routeId as any)?.to ?? "?"} · ${t.departureTime} · ${new Date(t.date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}`,
+      id:          String(t._id),
+      label:       `${(t.routeId as any)?.from ?? "?"} → ${(t.routeId as any)?.to ?? "?"} · ${t.departureTime} · ${new Date(t.date).toLocaleDateString("en-US",{month:"short",day:"numeric"})}`,
+      busDetailId: t.busDetailId ? String(t.busDetailId) : null,
+      driverId:    t.driverId    ? String(t.driverId)    : null,
+      date:        new Date(t.date).toISOString().slice(0, 10),
+      shiftStart:  t.departureTime  ?? null,
+      shiftEnd:    t.arrivalTime    ?? null,
     })),
   });
 }
