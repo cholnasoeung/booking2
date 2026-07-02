@@ -5,6 +5,7 @@ import {
   PackageSearch, Plus, Search, RefreshCw, ChevronLeft, ChevronRight,
   Eye, Trash2, Smartphone, FileText, Key, Gem, Banknote, HelpCircle,
   ShoppingBag, Package, CheckCircle, Clock, AlertCircle, XCircle,
+  Settings2, Tag, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,33 @@ import { cn } from "@/lib/utils";
 import { confirmDelete } from "@/lib/utils/swal";
 
 type LFStatus   = "reported" | "under_review" | "found" | "returned" | "not_found" | "closed";
-type LFCategory = "bag" | "electronics" | "clothing" | "documents" | "jewelry" | "money" | "keys" | "other";
+type LFCategory = "bag" | "electronics" | "clothing" | "documents" | "jewelry" | "money" | "keys" | "other" | string;
+
+type CustomCategory = {
+  value: string;   // e.g. "custom_umbrella"
+  label: string;   // e.g. "Umbrella"
+  color: string;   // tailwind text color key
+};
+
+const CUSTOM_CAT_COLORS = [
+  { label: "Teal",   text: "text-teal-600",   bg: "bg-teal-100"   },
+  { label: "Purple", text: "text-purple-600",  bg: "bg-purple-100" },
+  { label: "Rose",   text: "text-rose-600",    bg: "bg-rose-100"   },
+  { label: "Sky",    text: "text-sky-600",     bg: "bg-sky-100"    },
+  { label: "Lime",   text: "text-lime-600",    bg: "bg-lime-100"   },
+  { label: "Fuchsia",text: "text-fuchsia-600", bg: "bg-fuchsia-100"},
+  { label: "Cyan",   text: "text-cyan-600",    bg: "bg-cyan-100"   },
+  { label: "Indigo", text: "text-indigo-600",  bg: "bg-indigo-100" },
+];
+
+const LS_KEY = "lf_custom_categories";
+
+function loadCustomCats(): CustomCategory[] {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) ?? "[]"); } catch { return []; }
+}
+function saveCustomCats(cats: CustomCategory[]) {
+  localStorage.setItem(LS_KEY, JSON.stringify(cats));
+}
 
 type LFRecord = {
   id: string; refNumber: string;
@@ -90,6 +117,46 @@ export default function AdminLostFoundTab() {
   const [editForm,   setEditForm]   = useState(emptyEdit);
   const [formErr,    setFormErr]    = useState("");
   const [isPending,  startTransition] = useTransition();
+
+  // ── Custom categories ─────────────────────────────────────────────
+  const [customCats, setCustomCats] = useState<CustomCategory[]>([]);
+  const [catMgrOpen, setCatMgrOpen] = useState(false);
+  const [newCatLabel, setNewCatLabel] = useState("");
+  const [newCatColor, setNewCatColor] = useState(CUSTOM_CAT_COLORS[0].label);
+  const [catErr, setCatErr] = useState("");
+
+  useEffect(() => { setCustomCats(loadCustomCats()); }, []);
+
+  function getCategoryInfo(value: string) {
+    if (value in CATEGORY_MAP) return CATEGORY_MAP[value as keyof typeof CATEGORY_MAP];
+    const custom = customCats.find((c) => c.value === value);
+    const col = CUSTOM_CAT_COLORS.find((c) => c.label === custom?.color) ?? CUSTOM_CAT_COLORS[0];
+    return { label: custom?.label ?? value, icon: Tag, color: col.text, bg: col.bg };
+  }
+
+  function addCustomCat() {
+    setCatErr("");
+    const label = newCatLabel.trim();
+    if (!label) { setCatErr("Please enter a category name."); return; }
+    const value = `custom_${label.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "")}`;
+    if (customCats.some((c) => c.value === value)) { setCatErr("A category with this name already exists."); return; }
+    const next = [...customCats, { value, label, color: newCatColor }];
+    setCustomCats(next);
+    saveCustomCats(next);
+    setNewCatLabel("");
+    setCatErr("");
+  }
+
+  function removeCustomCat(value: string) {
+    const next = customCats.filter((c) => c.value !== value);
+    setCustomCats(next);
+    saveCustomCats(next);
+  }
+
+  const allCategories = [
+    ...ALL_CATS.map((c) => ({ value: c, label: CATEGORY_MAP[c].label })),
+    ...customCats.map((c) => ({ value: c.value, label: c.label })),
+  ];
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -203,6 +270,14 @@ export default function AdminLostFoundTab() {
             <RefreshCw className="size-4" />
           </Button>
           <Button
+            onClick={() => { setCatMgrOpen(true); setCatErr(""); setNewCatLabel(""); setNewCatColor(CUSTOM_CAT_COLORS[0].label); }}
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-slate-600 border-slate-200 hover:bg-slate-50"
+          >
+            <Settings2 className="size-4" /> Categories
+          </Button>
+          <Button
             onClick={() => { setForm(emptyForm); setFormErr(""); setAddOpen(true); }}
             className="rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold px-5 shadow-md shadow-indigo-100 gap-2"
           >
@@ -292,8 +367,8 @@ export default function AdminLostFoundTab() {
           className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400/40"
         >
           <option value="">All Categories</option>
-          {ALL_CATS.map(c => (
-            <option key={c} value={c}>{CATEGORY_MAP[c].label}</option>
+          {allCategories.map(c => (
+            <option key={c.value} value={c.value}>{c.label}</option>
           ))}
         </select>
       </div>
@@ -323,7 +398,7 @@ export default function AdminLostFoundTab() {
               <tbody className="divide-y divide-slate-100">
                 {records.map((rec) => {
                   const status   = STATUS_MAP[rec.status];
-                  const category = CATEGORY_MAP[rec.itemCategory];
+                  const category = getCategoryInfo(rec.itemCategory);
                   const CatIcon  = category.icon;
                   const SIcon    = status.icon;
                   return (
@@ -489,8 +564,8 @@ export default function AdminLostFoundTab() {
                     onChange={setF("itemCategory")}
                     className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400/40"
                   >
-                    {ALL_CATS.map(c => (
-                      <option key={c} value={c}>{CATEGORY_MAP[c].label}</option>
+                    {allCategories.map(c => (
+                      <option key={c.value} value={c.value}>{c.label}</option>
                     ))}
                   </select>
                 </div>
@@ -534,10 +609,121 @@ export default function AdminLostFoundTab() {
         </DialogContent>
       </Dialog>
 
+      {/* ── Manage Categories Dialog ───────────────────────────── */}
+      <Dialog open={catMgrOpen} onOpenChange={setCatMgrOpen}>
+        <DialogContent className="sm:max-w-md bg-white border-slate-200 text-slate-800">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-slate-800">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100">
+                <Settings2 className="size-4 text-teal-600" />
+              </div>
+              Manage Item Categories
+            </DialogTitle>
+            <DialogDescription className="text-slate-500">
+              Add custom categories for lost &amp; found reports. Built-in categories cannot be removed.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {/* Built-in categories */}
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Built-in</p>
+              <div className="flex flex-wrap gap-2">
+                {ALL_CATS.map((c) => {
+                  const cat = CATEGORY_MAP[c];
+                  const Icon = cat.icon;
+                  return (
+                    <span
+                      key={c}
+                      className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold", cat.bg, cat.color)}
+                    >
+                      <Icon className="size-3" />
+                      {cat.label}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Custom categories */}
+            {customCats.length > 0 && (
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Custom</p>
+                <div className="space-y-1.5">
+                  {customCats.map((cat) => {
+                    const col = CUSTOM_CAT_COLORS.find((c) => c.label === cat.color) ?? CUSTOM_CAT_COLORS[0];
+                    return (
+                      <div key={cat.value} className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+                        <span className={cn("inline-flex items-center gap-1.5 text-sm font-semibold", col.text)}>
+                          <Tag className="size-3.5" />
+                          {cat.label}
+                        </span>
+                        <button
+                          onClick={() => removeCustomCat(cat.value)}
+                          className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                          title="Remove category"
+                        >
+                          <X className="size-3.5" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Add new category form */}
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Add New Category</p>
+              <div className="space-y-1">
+                <Label className="text-slate-600 text-xs font-semibold">Category Name</Label>
+                <Input
+                  value={newCatLabel}
+                  onChange={e => setNewCatLabel(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && addCustomCat()}
+                  placeholder="e.g. Umbrella, Toy, Sports gear…"
+                  className="bg-white border-slate-200"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-slate-600 text-xs font-semibold">Badge Color</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {CUSTOM_CAT_COLORS.map((col) => (
+                    <button
+                      key={col.label}
+                      onClick={() => setNewCatColor(col.label)}
+                      className={cn(
+                        "rounded-full px-3 py-1 text-xs font-semibold border-2 transition-all",
+                        col.bg, col.text,
+                        newCatColor === col.label ? "border-current scale-105" : "border-transparent opacity-70 hover:opacity-100"
+                      )}
+                    >
+                      {col.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {catErr && <p className="text-xs text-red-500">{catErr}</p>}
+              <Button
+                onClick={addCustomCat}
+                size="sm"
+                className="w-full gap-1.5 bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white"
+              >
+                <Plus className="size-3.5" /> Add Category
+              </Button>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCatMgrOpen(false)} className="text-slate-600 border-slate-200">Done</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* ── View / Edit Dialog ──────────────────────────────────── */}
       <Dialog open={viewOpen} onOpenChange={setViewOpen}>
         {viewTarget && (() => {
-          const category = CATEGORY_MAP[viewTarget.itemCategory];
+          const category = getCategoryInfo(viewTarget.itemCategory);
           const CatIcon  = category.icon;
           return (
             <DialogContent className="sm:max-w-2xl bg-white border-slate-200 text-slate-800 max-h-[90vh] overflow-y-auto">
