@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   BusFront, Navigation, PencilLine, Plus, Search, Trash2, UserCheck,
-  CheckSquare2, Square, X, AlertTriangle, ChevronDown, ChevronRight,
+  CheckSquare2, Square, X, ChevronRight,
   LayoutList, Layers, Clock, Bus, User, Users, XCircle, Megaphone,
 } from "lucide-react";
 
@@ -72,7 +72,6 @@ export default function AdminBusesManager({
 
   // ── View mode ──
   const [groupedView, setGroupedView] = useState(true);
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   // ── Bulk select ──
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -138,14 +137,6 @@ export default function AdminBusesManager({
     setSelectedIds((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  }
-
-  function toggleGroup(key: string) {
-    setExpandedGroups((prev) => {
-      const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
       return next;
     });
   }
@@ -407,7 +398,6 @@ export default function AdminBusesManager({
                 />
               ) : (
                 routeGroups.map((group) => {
-                  const isOpen   = expandedGroups.has(group.key);
                   const groupIds: string[] = group.timeSlots.flatMap((s: TimeSlotGroup) => s.buses.map((b: BusSummary) => b.id));
                   const allSel   = groupIds.length > 0 && groupIds.every((id: string) => selectedIds.has(id));
                   const someSel  = groupIds.some((id: string) => selectedIds.has(id));
@@ -430,12 +420,16 @@ export default function AdminBusesManager({
                   return (
                     <div
                       key={group.key}
-                      className={`rounded-2xl border overflow-hidden transition-shadow ${isOpen ? "border-slate-300 shadow-lg" : "border-slate-200 shadow-sm"}`}
+                      className="rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-shadow hover:shadow-md"
                     >
-                      {/* ── Route header ── */}
+                      {/* Route header — click navigates to route calendar page */}
                       <div
-                        className={`flex items-center gap-3 px-4 py-3.5 cursor-pointer select-none transition-colors ${isOpen ? "bg-slate-50" : "bg-white hover:bg-slate-50/60"}`}
-                        onClick={() => toggleGroup(group.key)}
+                        className="flex items-center gap-3 px-4 py-3.5 cursor-pointer select-none transition-colors bg-white hover:bg-indigo-50/40 group"
+                        onClick={() =>
+                          router.push(
+                            `/admin/buses/route?from=${encodeURIComponent(group.from)}&to=${encodeURIComponent(group.to)}`
+                          )
+                        }
                       >
                         <button
                           type="button"
@@ -486,209 +480,9 @@ export default function AdminBusesManager({
                         </div>
 
                         <div className="shrink-0 text-slate-400">
-                          {isOpen ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+                          <ChevronRight className="size-4 group-hover:text-indigo-400 transition-colors" />
                         </div>
                       </div>
-
-                      {/* ── Expanded: time-slot sections ── */}
-                      {isOpen && (
-                        <div className="border-t border-slate-100 divide-y divide-slate-100/70">
-                          {group.timeSlots.map((slot) => {
-                            const slotIds = slot.buses.map((b) => b.id);
-                            const slotAllSel = slotIds.every((id) => selectedIds.has(id));
-                            const slotSomeSel = slotIds.some((id) => selectedIds.has(id));
-
-                            return (
-                              <div key={slot.slotKey}>
-                                {/* Time slot header */}
-                                <div className="flex items-center gap-3 bg-slate-50/80 px-4 py-2 border-b border-slate-100/60">
-                                  <button
-                                    type="button"
-                                    onClick={() => setSelectedIds((prev) => {
-                                      const next = new Set(prev);
-                                      if (slotAllSel) slotIds.forEach((id) => next.delete(id));
-                                      else slotIds.forEach((id) => next.add(id));
-                                      return next;
-                                    })}
-                                    className="shrink-0 text-slate-300 hover:text-indigo-500 transition-colors"
-                                  >
-                                    {slotAllSel
-                                      ? <CheckSquare2 className="size-3.5 text-indigo-500" />
-                                      : slotSomeSel
-                                      ? <CheckSquare2 className="size-3.5 text-slate-300" />
-                                      : <Square className="size-3.5" />}
-                                  </button>
-                                  <Clock className="size-3.5 text-indigo-500 shrink-0" />
-                                  <span className="text-xs font-bold text-slate-700">
-                                    {slot.departureTime} – {slot.arrivalTime}
-                                  </span>
-                                  <span className="ml-1 rounded-full bg-slate-100 border border-slate-200 px-2 py-0.5 text-[10px] font-bold text-indigo-600">
-                                    {slot.buses.length} bus{slot.buses.length !== 1 ? "es" : ""}
-                                  </span>
-                                </div>
-
-                                {/* Buses table inside time slot */}
-                                <table className="w-full text-sm">
-                                  <thead>
-                                    <tr className="bg-white border-b border-slate-100">
-                                      <th className="w-9 pl-10" />
-                                      <th className="px-3 py-2 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date</th>
-                                      <th className="px-3 py-2 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                        <span className="flex items-center gap-1"><Bus className="size-3" /> Vehicle</span>
-                                      </th>
-                                      <th className="px-3 py-2 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider hidden md:table-cell">
-                                        <span className="flex items-center gap-1"><User className="size-3" /> Driver</span>
-                                      </th>
-                                      <th className="px-3 py-2 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider hidden sm:table-cell">Type</th>
-                                      <th className="px-3 py-2 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Fare</th>
-                                      <th className="px-3 py-2 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Seats</th>
-                                      <th className="px-3 py-2 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                                      <th className="w-9" />
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-slate-50">
-                                    {slot.buses.map((bus) => {
-                                      const isSel  = selectedIds.has(bus.id);
-                                      const booked = bus.totalSeats - bus.seatsLeft;
-                                      const pct    = bus.totalSeats > 0 ? Math.round((booked / bus.totalSeats) * 100) : 0;
-                                      const vehicleName = (bus as any).busDetail?.name ?? null;
-                                      const driverName  = bus.driver?.name ?? null;
-
-                                      return (
-                                        <tr
-                                          key={bus.id}
-                                          className={`transition-colors group/row ${isSel ? "bg-slate-50/70" : "hover:bg-slate-50/30"}`}
-                                        >
-                                          {/* Checkbox */}
-                                          <td className="pl-10 pr-2 py-2.5">
-                                            <button type="button" onClick={() => toggleOne(bus.id)}
-                                              className="text-slate-200 hover:text-indigo-500 transition-colors">
-                                              {isSel
-                                                ? <CheckSquare2 className="size-3.5 text-indigo-500" />
-                                                : <Square className="size-3.5" />}
-                                            </button>
-                                          </td>
-
-                                          {/* Date */}
-                                          <td className="px-3 py-2.5 whitespace-nowrap">
-                                            <p className="text-xs font-semibold text-slate-800">
-                                              {new Date(bus.travelDate + "T00:00:00Z").toLocaleDateString("en-US", {
-                                                weekday: "short", month: "short", day: "numeric", timeZone: "UTC",
-                                              })}
-                                            </p>
-                                            <p className="text-[10px] text-slate-400 mt-0.5">
-                                              {new Date(bus.travelDate + "T00:00:00Z").toLocaleDateString("en-US", { year: "numeric", timeZone: "UTC" })}
-                                            </p>
-                                          </td>
-
-                                          {/* Vehicle */}
-                                          <td className="px-3 py-2.5">
-                                            {vehicleName ? (
-                                              <div className="flex items-center gap-1.5">
-                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-slate-100">
-                                                  <Bus className="size-3 text-indigo-600" />
-                                                </div>
-                                                <span className="text-xs font-semibold text-slate-800 truncate max-w-[120px]">{vehicleName}</span>
-                                              </div>
-                                            ) : (
-                                              <span className="text-[11px] text-slate-300 italic">No vehicle</span>
-                                            )}
-                                          </td>
-
-                                          {/* Driver */}
-                                          <td className="px-3 py-2.5 hidden md:table-cell">
-                                            {driverName ? (
-                                              <div className="flex items-center gap-1.5">
-                                                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-indigo-100">
-                                                  <User className="size-3 text-indigo-600" />
-                                                </div>
-                                                <span className="text-xs font-semibold text-slate-800 truncate max-w-[110px]">{driverName}</span>
-                                              </div>
-                                            ) : (
-                                              <span className="text-[11px] text-slate-300 italic">No driver</span>
-                                            )}
-                                          </td>
-
-                                          {/* Bus type */}
-                                          <td className="px-3 py-2.5 hidden sm:table-cell">
-                                            <Badge className="border-slate-200 bg-slate-100 text-slate-700 text-[10px] py-0 whitespace-nowrap">
-                                              {formatBusType(bus.busType)}
-                                            </Badge>
-                                          </td>
-
-                                          {/* Fare */}
-                                          <td className="px-3 py-2.5 text-xs font-semibold text-slate-700 whitespace-nowrap">
-                                            {formatCurrency(bus.pricePerSeat)}
-                                          </td>
-
-                                          {/* Seats */}
-                                          <td className="px-3 py-2.5">
-                                            <div className="flex items-center gap-1.5">
-                                              <span className="text-xs font-medium text-slate-700 whitespace-nowrap">
-                                                {bus.seatsLeft}/{bus.totalSeats}
-                                              </span>
-                                              <div className="h-1 w-10 rounded-full bg-slate-100 overflow-hidden">
-                                                <div className={`h-full rounded-full ${pct >= 90 ? "bg-red-500" : pct >= 60 ? "bg-amber-500" : "bg-emerald-500"}`}
-                                                  style={{ width: `${pct}%` }} />
-                                              </div>
-                                            </div>
-                                          </td>
-
-                                          {/* Status */}
-                                          <td className="px-3 py-2.5">
-                                            <AvailabilityBadge bus={bus} />
-                                          </td>
-
-                                          {/* Actions — inline buttons */}
-                                          <td className="pr-3 py-2.5">
-                                            <div className="flex items-center gap-1">
-                                              <button type="button" title="Edit departure"
-                                                onClick={() => { setSelectedBus(bus); setBusDialogOpen(true); }}
-                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50 hover:bg-slate-100 text-indigo-500 transition-colors">
-                                                <PencilLine className="size-3.5" />
-                                              </button>
-                                              <button type="button" title="Assign driver"
-                                                onClick={() => { setDriverBus(bus); setSelectedDriverId((bus as any).driverId ?? ""); }}
-                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-500 transition-colors">
-                                                <UserCheck className="size-3.5" />
-                                              </button>
-                                              <button type="button" title="Update status"
-                                                onClick={() => { setStatusBus(bus); setNewStatus((bus as any).departureStatus ?? "scheduled"); setNewDelayMinutes((bus as any).delayMinutes ?? 0); setNewStatusNote((bus as any).statusNote ?? ""); }}
-                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-500 transition-colors">
-                                                <Navigation className="size-3.5" />
-                                              </button>
-                                              <button type="button" title="Passenger manifest"
-                                                onClick={() => { setManifestBusId(bus.id); setManifestBusLabel(`${bus.from} → ${bus.to}`); setManifestOpen(true); }}
-                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-500 transition-colors">
-                                                <Users className="size-3.5" />
-                                              </button>
-                                              <button type="button" title="Send announcement"
-                                                onClick={() => { setAnnounceBusId(bus.id); setAnnounceBusLabel(`${bus.from} → ${bus.to} · ${bus.travelDate} ${bus.departureTime}`); setAnnounceOpen(true); }}
-                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-500 transition-colors">
-                                                <Megaphone className="size-3.5" />
-                                              </button>
-                                              <button type="button" title="Cancel departure"
-                                                onClick={() => { setCancelBusId(bus.id); setCancelBusLabel(`${bus.from} → ${bus.to} · ${bus.travelDate} ${bus.departureTime}`); setCancelOpen(true); }}
-                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-500 transition-colors">
-                                                <XCircle className="size-3.5" />
-                                              </button>
-                                              <button type="button" title="Delete"
-                                                onClick={() => handleBusDelete(bus)}
-                                                className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition-colors">
-                                                <Trash2 className="size-3.5" />
-                                              </button>
-                                            </div>
-                                          </td>
-                                        </tr>
-                                      );
-                                    })}
-                                  </tbody>
-                                </table>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
                     </div>
                   );
                 })
