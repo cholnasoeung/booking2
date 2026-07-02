@@ -1,6 +1,6 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import WaitingListModel from "@/models/WaitingList";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import WaitingListModel from "@/models/booking/WaitingList";
 
 export const runtime = "nodejs";
 

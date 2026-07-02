@@ -1,5 +1,5 @@
-import { connectToDatabase } from "@/lib/mongodb";
-import PendingBookingModel from "@/models/PendingBooking";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import PendingBookingModel from "@/models/booking/PendingBooking";
 
 export const runtime = "nodejs";
 

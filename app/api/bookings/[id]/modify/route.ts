@@ -1,9 +1,9 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import { isValidObjectId } from "@/lib/validation";
-import BookingModel from "@/models/Booking";
-import BusModel from "@/models/Bus";
-import { normalizeStoredSeatCodes } from "@/lib/seat-layout";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { isValidObjectId } from "@/lib/utils/validation";
+import BookingModel from "@/models/booking/Booking";
+import BusModel from "@/models/transport/Bus";
+import { normalizeStoredSeatCodes } from "@/lib/seat/seat-layout";
 
 export const runtime = "nodejs";
 

@@ -1,5 +1,5 @@
-import { getBusSummary } from "@/lib/queries";
-import { isValidObjectId } from "@/lib/validation";
+import { getBusSummary } from "@/lib/db/queries";
+import { isValidObjectId } from "@/lib/utils/validation";
 
 export const runtime = "nodejs";
 

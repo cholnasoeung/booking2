@@ -1,5 +1,5 @@
 import { getCurrentSession } from "@/lib/auth";
-import { initiatePayment } from "@/lib/initiate-payment";
+import { initiatePayment } from "@/lib/payment/initiate-payment";
 
 export const runtime = "nodejs";
 

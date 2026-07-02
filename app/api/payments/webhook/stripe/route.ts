@@ -1,11 +1,11 @@
 import Stripe from "stripe";
-import { connectToDatabase } from "@/lib/mongodb";
-import PendingBookingModel from "@/models/PendingBooking";
-import BookingModel from "@/models/Booking";
-import BusModel from "@/models/Bus";
-import SettingsModel from "@/models/Settings";
-import NotificationModel from "@/models/Notification";
-import { normalizeBusSeatLayout } from "@/lib/seat-layout";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import PendingBookingModel from "@/models/booking/PendingBooking";
+import BookingModel from "@/models/booking/Booking";
+import BusModel from "@/models/transport/Bus";
+import SettingsModel from "@/models/system/Settings";
+import NotificationModel from "@/models/communication/Notification";
+import { normalizeBusSeatLayout } from "@/lib/seat/seat-layout";
 
 export const runtime = "nodejs";
 
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
       let appliedPromoCode: string | undefined;
 
       if (pending.promoCode) {
-        const PromoCodeModel = (await import("@/models/PromoCode")).default;
+        const PromoCodeModel = (await import("@/models/commerce/PromoCode")).default;
         const promo = await PromoCodeModel.findOne({ code: pending.promoCode.toUpperCase(), isActive: true });
         if (promo && promo.isValid()) {
           const result = promo.calculateDiscount(pending.totalPrice);
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
 
       // In-app notification for the user
       try {
-        const route = await (await import("@/models/Route")).default.findById(bus.routeId).lean() as any;
+        const route = await (await import("@/models/transport/Route")).default.findById(bus.routeId).lean() as any;
         const routeStr = route ? `${route.from} → ${route.to}` : "Bus Ticket";
         await NotificationModel.create({
           userId: pending.userId,

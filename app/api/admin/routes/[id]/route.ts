@@ -1,12 +1,12 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
+import { connectToDatabase } from "@/lib/db/mongodb";
 import {
   escapeRegExp,
   isValidObjectId,
   normalizeCity,
-} from "@/lib/validation";
-import BusModel from "@/models/Bus";
-import RouteModel from "@/models/Route";
+} from "@/lib/utils/validation";
+import BusModel from "@/models/transport/Bus";
+import RouteModel from "@/models/transport/Route";
 
 export const runtime = "nodejs";
 

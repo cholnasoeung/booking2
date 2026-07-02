@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import DriverModel, { type IDriver } from "@/models/Driver";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import DriverModel, { type IDriver } from "@/models/hr/Driver";
 
 export const runtime = "nodejs";
 

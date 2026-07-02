@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
+import { connectToDatabase } from "@/lib/db/mongodb";
 import {
   type SeatLayout,
   getBookableSeatItems,
   isBusType,
   validateSeatLayout,
-} from "@/lib/seat-layout";
-import { isValidObjectId } from "@/lib/validation";
-import BusDetailModel from "@/models/BusDetail";
+} from "@/lib/seat/seat-layout";
+import { isValidObjectId } from "@/lib/utils/validation";
+import BusDetailModel from "@/models/transport/BusDetail";
 
 export const runtime = "nodejs";
 

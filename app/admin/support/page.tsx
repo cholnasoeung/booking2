@@ -1,4 +1,4 @@
-import AdminSidebar from "@/components/admin-sidebar";
+import AdminSidebar from "@/components/admin/admin-sidebar";
 import { requireAdmin, getCurrentUser } from "@/lib/auth";
 
 export default async function AdminSupportPage() {

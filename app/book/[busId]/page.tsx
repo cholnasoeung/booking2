@@ -5,16 +5,16 @@ import {
   Ruler, Ticket, Users, Zap, CheckCircle2,
 } from "lucide-react";
 
-import Navbar from "@/components/navbar";
-import VehicleGallery from "@/components/vehicle-gallery";
-import DepartureStatusBadge from "@/components/departure-status-badge";
-import JoinWaitlistButton from "@/components/join-waitlist-button";
-import SeatSelection from "@/components/seat-selection";
+import Navbar from "@/components/layout/navbar";
+import VehicleGallery from "@/components/common/vehicle-gallery";
+import DepartureStatusBadge from "@/components/search/departure-status-badge";
+import JoinWaitlistButton from "@/components/booking/join-waitlist-button";
+import SeatSelection from "@/components/booking/seat-selection";
 import { requireUser } from "@/lib/auth";
-import { AMENITY_OPTIONS, MAX_SEATS_PER_BOOKING } from "@/lib/constants";
-import { formatBusType, formatCurrency, formatTravelDate } from "@/lib/formatters";
-import { getBusSummary } from "@/lib/queries";
-import { getFirstSearchParam, parsePassengerCount } from "@/lib/validation";
+import { AMENITY_OPTIONS, MAX_SEATS_PER_BOOKING } from "@/lib/utils/constants";
+import { formatBusType, formatCurrency, formatTravelDate } from "@/lib/utils/formatters";
+import { getBusSummary } from "@/lib/db/queries";
+import { getFirstSearchParam, parsePassengerCount } from "@/lib/utils/validation";
 
 type BookPageProps = {
   params: Promise<{ busId: string }>;

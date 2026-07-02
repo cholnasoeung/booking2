@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import { BUS_TYPES } from "@/lib/constants";
-import { type BusType } from "@/lib/seat-layout";
-import { escapeRegExp } from "@/lib/validation";
-import BusDetailModel from "@/models/BusDetail";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { BUS_TYPES } from "@/lib/utils/constants";
+import { type BusType } from "@/lib/seat/seat-layout";
+import { escapeRegExp } from "@/lib/utils/validation";
+import BusDetailModel from "@/models/transport/BusDetail";
 
 export const runtime = "nodejs";
 

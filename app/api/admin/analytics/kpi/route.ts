@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
-import { getKPIMetrics } from "@/lib/queries";
+import { getKPIMetrics } from "@/lib/db/queries";
 
 export const runtime = "nodejs";
 

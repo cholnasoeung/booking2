@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/mongodb";
-import PromoCodeModel from "@/models/PromoCode";
-import BusModel from "@/models/Bus";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import PromoCodeModel from "@/models/commerce/PromoCode";
+import BusModel from "@/models/transport/Bus";
 
 export const runtime = "nodejs";
 

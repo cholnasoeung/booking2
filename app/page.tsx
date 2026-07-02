@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { Clock, Zap, Shield, ArrowRight, MapPin } from "lucide-react";
 
-import Navbar from "@/components/navbar";
-import AboutSection from "@/components/about-section";
-import HowItWorks from "@/components/how-it-works";
-import CTASection from "@/components/cta-section";
-import FAQSection from "@/components/faq-section";
-import Footer from "@/components/footer";
-import HeroSearchForm from "@/components/hero-search-form";
-import { POPULAR_ROUTES } from "@/lib/constants";
-import { getTomorrowDateInput } from "@/lib/date";
-import { formatCurrency } from "@/lib/formatters";
+import Navbar from "@/components/layout/navbar";
+import AboutSection from "@/components/landing/about-section";
+import HowItWorks from "@/components/landing/how-it-works";
+import CTASection from "@/components/landing/cta-section";
+import FAQSection from "@/components/landing/faq-section";
+import Footer from "@/components/layout/footer";
+import HeroSearchForm from "@/components/landing/hero-search-form";
+import { POPULAR_ROUTES } from "@/lib/utils/constants";
+import { getTomorrowDateInput } from "@/lib/utils/date";
+import { formatCurrency } from "@/lib/utils/formatters";
 
 export default function Home() {
   const tomorrow = getTomorrowDateInput();

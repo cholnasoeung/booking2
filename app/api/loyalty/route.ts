@@ -1,6 +1,6 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import LoyaltyModel, { LOYALTY_TIERS } from "@/models/Loyalty";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import LoyaltyModel, { LOYALTY_TIERS } from "@/models/commerce/Loyalty";
 
 export const runtime = "nodejs";
 

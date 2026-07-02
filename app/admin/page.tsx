@@ -1,8 +1,8 @@
-import AdminPanel from "@/components/admin-panel";
-import AdminSidebar from "@/components/admin-sidebar";
-import NotificationBell from "@/components/notification-bell";
+import AdminPanel from "@/components/admin/admin-panel";
+import AdminSidebar from "@/components/admin/admin-sidebar";
+import NotificationBell from "@/components/dashboard/notification-bell";
 import { requireAdmin, getCurrentUser } from "@/lib/auth";
-import { getAdminSnapshot } from "@/lib/queries";
+import { getAdminSnapshot } from "@/lib/db/queries";
 import { BusFront, MapPinned, Package, Ticket, Users } from "lucide-react";
 
 export default async function AdminPage() {

@@ -1,9 +1,9 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import { isValidObjectId } from "@/lib/validation";
-import { getBookingSummaryById } from "@/lib/queries";
-import { createTicketDataFromBooking, generateTicketPDF } from "@/lib/pdf-generator";
-import BookingModel from "@/models/Booking";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { isValidObjectId } from "@/lib/utils/validation";
+import { getBookingSummaryById } from "@/lib/db/queries";
+import { createTicketDataFromBooking, generateTicketPDF } from "@/lib/services/pdf-generator";
+import BookingModel from "@/models/booking/Booking";
 
 export const runtime = "nodejs";
 

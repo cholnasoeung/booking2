@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import PromoCodeModel from "@/models/PromoCode";
-import { isValidObjectId } from "@/lib/validation";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import PromoCodeModel from "@/models/commerce/PromoCode";
+import { isValidObjectId } from "@/lib/utils/validation";
 
 export const runtime = "nodejs";
 

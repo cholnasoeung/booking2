@@ -1,7 +1,7 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import PayrollModel from "@/models/Payroll";
-import EmployeeModel from "@/models/Employee";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import PayrollModel from "@/models/hr/Payroll";
+import EmployeeModel from "@/models/hr/Employee";
 
 export const runtime = "nodejs";
 

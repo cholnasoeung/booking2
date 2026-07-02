@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { User, Bus, MapPin, Star } from "lucide-react";
 
-import DashboardBookings from "@/components/dashboard-bookings";
-import LoyaltyCard from "@/components/loyalty-card";
-import LogoutButton from "@/components/logout-button";
-import Navbar from "@/components/navbar";
-import WaitlistCard from "@/components/waitlist-card";
+import DashboardBookings from "@/components/dashboard/dashboard-bookings";
+import LoyaltyCard from "@/components/dashboard/loyalty-card";
+import LogoutButton from "@/components/auth/logout-button";
+import Navbar from "@/components/layout/navbar";
+import WaitlistCard from "@/components/booking/waitlist-card";
 import { requireUser } from "@/lib/auth";
-import { getUserBookings } from "@/lib/queries";
+import { getUserBookings } from "@/lib/db/queries";
 
 export default async function DashboardPage() {
   const user = await requireUser("/login?callbackUrl=%2Fdashboard");

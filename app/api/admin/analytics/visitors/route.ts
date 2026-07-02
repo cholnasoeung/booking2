@@ -1,6 +1,6 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import PageViewModel from "@/models/PageView";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import PageViewModel from "@/models/system/PageView";
 
 export const runtime = "nodejs";
 

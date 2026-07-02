@@ -1,5 +1,5 @@
-import { connectToDatabase } from "@/lib/mongodb";
-import BusModel from "@/models/Bus";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import BusModel from "@/models/transport/Bus";
 
 export const runtime = "nodejs";
 

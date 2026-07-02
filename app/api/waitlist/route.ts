@@ -1,8 +1,8 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import { isValidObjectId } from "@/lib/validation";
-import WaitingListModel from "@/models/WaitingList";
-import LoyaltyModel, { type LoyaltyTier } from "@/models/Loyalty";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { isValidObjectId } from "@/lib/utils/validation";
+import WaitingListModel from "@/models/booking/WaitingList";
+import LoyaltyModel, { type LoyaltyTier } from "@/models/commerce/Loyalty";
 
 const TIER_PRIORITY: Record<LoyaltyTier, number> = {
   bronze: 1,

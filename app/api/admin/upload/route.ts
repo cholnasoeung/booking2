@@ -2,11 +2,11 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import { isValidObjectId } from "@/lib/validation";
-import UserModel from "@/models/User";
-import EmployeeModel from "@/models/Employee";
-import DriverModel from "@/models/Driver";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { isValidObjectId } from "@/lib/utils/validation";
+import UserModel from "@/models/user/User";
+import EmployeeModel from "@/models/hr/Employee";
+import DriverModel from "@/models/hr/Driver";
 
 export const runtime = "nodejs";
 

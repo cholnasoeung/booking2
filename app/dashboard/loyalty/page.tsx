@@ -4,10 +4,10 @@ import {
   Star, Trophy, Gift, Zap, ArrowLeft, Shield,
   XCircle, CheckCircle2, TrendingUp, Bus, Ticket,
 } from "lucide-react";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/layout/navbar";
 import { requireUser } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import LoyaltyModel, { LOYALTY_TIERS, type LoyaltyTier } from "@/models/Loyalty";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import LoyaltyModel, { LOYALTY_TIERS, type LoyaltyTier } from "@/models/commerce/Loyalty";
 import { cn } from "@/lib/utils";
 
 const TIER_CONFIG: Record<LoyaltyTier, { label: string; color: string; gradient: string; ring: string; icon: React.ElementType; minPoints: number }> = {

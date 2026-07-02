@@ -1,8 +1,8 @@
 import { hash } from "bcryptjs";
 
-import { connectToDatabase } from "@/lib/mongodb";
-import { normalizeEmail } from "@/lib/validation";
-import UserModel from "@/models/User";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { normalizeEmail } from "@/lib/utils/validation";
+import UserModel from "@/models/user/User";
 
 export const runtime = "nodejs";
 

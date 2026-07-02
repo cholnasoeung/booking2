@@ -1,7 +1,7 @@
 import { getCurrentSession } from "@/lib/auth";
-import { isValidDateInput, toTravelDate } from "@/lib/date";
-import { connectToDatabase } from "@/lib/mongodb";
-import BusModel from "@/models/Bus";
+import { isValidDateInput, toTravelDate } from "@/lib/utils/date";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import BusModel from "@/models/transport/Bus";
 import mongoose from "mongoose";
 
 export const runtime = "nodejs";

@@ -1,8 +1,8 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import DriverEarningModel from "@/models/DriverEarning";
-import DriverModel from "@/models/Driver";
-import BusDetailModel from "@/models/BusDetail";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import DriverEarningModel from "@/models/hr/DriverEarning";
+import DriverModel from "@/models/hr/Driver";
+import BusDetailModel from "@/models/transport/BusDetail";
 
 export const runtime = "nodejs";
 

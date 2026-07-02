@@ -6,15 +6,15 @@ import {
   Clock, Download, MapPin, Star, Ticket, Users, XCircle,
 } from "lucide-react";
 
-import Navbar from "@/components/navbar";
-import BookingDetailActions from "@/components/booking-detail-actions";
+import Navbar from "@/components/layout/navbar";
+import BookingDetailActions from "@/components/booking/booking-detail-actions";
 import { requireUser } from "@/lib/auth";
-import { getBookingSummaryById } from "@/lib/queries";
-import { isValidObjectId } from "@/lib/validation";
+import { getBookingSummaryById } from "@/lib/db/queries";
+import { isValidObjectId } from "@/lib/utils/validation";
 import {
   formatBusType, formatCurrency, formatDateTime,
   formatSeatList, formatTravelDate,
-} from "@/lib/formatters";
+} from "@/lib/utils/formatters";
 
 type Props = { params: Promise<{ id: string }> };
 

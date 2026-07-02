@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
+import { connectToDatabase } from "@/lib/db/mongodb";
 import {
   checkAllAlerts,
   runAlertCheck,
   DEFAULT_ALERT_CONFIG,
   type AlertConfig,
-} from "@/lib/alert-service";
-import UserModel from "@/models/User";
+} from "@/lib/services/alert-service";
+import UserModel from "@/models/user/User";
 
 export const runtime = "nodejs";
 

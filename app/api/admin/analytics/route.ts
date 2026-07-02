@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
+import { connectToDatabase } from "@/lib/db/mongodb";
 import {
   getRevenueMetrics,
   getKPIs,
   getRoutePerformance,
   getOccupancyReport,
   getBookingTrends,
-} from "@/lib/analytics-service";
-import UserModel from "@/models/User";
+} from "@/lib/services/analytics-service";
+import UserModel from "@/models/user/User";
 
 export const runtime = "nodejs";
 

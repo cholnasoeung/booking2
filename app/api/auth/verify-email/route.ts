@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import UserModel from "@/models/User";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import UserModel from "@/models/user/User";
 import crypto from "crypto";
-import { sendEmailVerificationEmail } from "@/lib/email-service";
+import { sendEmailVerificationEmail } from "@/lib/services/email-service";
 
 export const runtime = "nodejs";
 

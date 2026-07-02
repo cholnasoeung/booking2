@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 
-import Navbar from "@/components/navbar";
-import RegisterForm from "@/components/register-form";
+import Navbar from "@/components/layout/navbar";
+import RegisterForm from "@/components/auth/register-form";
 import { getCurrentUser } from "@/lib/auth";
-import { getFirstSearchParam } from "@/lib/validation";
+import { getFirstSearchParam } from "@/lib/utils/validation";
 
 type RegisterPageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

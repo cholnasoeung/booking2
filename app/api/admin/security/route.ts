@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import { checkFraud, getRateLimitStats } from "@/lib/rate-limit-service";
-import UserModel from "@/models/User";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { checkFraud, getRateLimitStats } from "@/lib/services/rate-limit-service";
+import UserModel from "@/models/user/User";
 
 export const runtime = "nodejs";
 

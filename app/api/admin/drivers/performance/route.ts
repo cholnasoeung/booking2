@@ -1,9 +1,9 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import BookingModel from "@/models/Booking";
-import BusModel from "@/models/Bus";
-import DriverModel from "@/models/Driver";
-import IncidentModel from "@/models/Incident";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import BookingModel from "@/models/booking/Booking";
+import BusModel from "@/models/transport/Bus";
+import DriverModel from "@/models/hr/Driver";
+import IncidentModel from "@/models/operations/Incident";
 import mongoose from "mongoose";
 
 export const runtime = "nodejs";

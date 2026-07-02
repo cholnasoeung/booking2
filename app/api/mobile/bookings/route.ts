@@ -1,12 +1,12 @@
-import { connectToDatabase } from "@/lib/mongodb";
-import { requireMobileAuthUser } from "@/lib/mobile-auth";
-import { normalizeBusSeatLayout } from "@/lib/seat-layout";
-import { isValidObjectId, parseSeatSelection } from "@/lib/validation";
-import BookingModel from "@/models/Booking";
-import BusModel from "@/models/Bus";
-import PromoCodeModel from "@/models/PromoCode";
-import UserModel from "@/models/User";
-import { sendBookingConfirmationEmail } from "@/lib/email-service";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { requireMobileAuthUser } from "@/lib/auth/mobile-auth";
+import { normalizeBusSeatLayout } from "@/lib/seat/seat-layout";
+import { isValidObjectId, parseSeatSelection } from "@/lib/utils/validation";
+import BookingModel from "@/models/booking/Booking";
+import BusModel from "@/models/transport/Bus";
+import PromoCodeModel from "@/models/commerce/PromoCode";
+import UserModel from "@/models/user/User";
+import { sendBookingConfirmationEmail } from "@/lib/services/email-service";
 
 export const runtime = "nodejs";
 

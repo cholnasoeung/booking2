@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import ProfileView from "@/components/profile-view";
+import ProfileView from "@/components/dashboard/profile-view";
 import { requireUser } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/auth";
 

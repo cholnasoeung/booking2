@@ -1,12 +1,12 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import { normalizeBusSeatLayout } from "@/lib/seat-layout";
-import { parseSeatSelection, isValidObjectId } from "@/lib/validation";
-import BookingModel from "@/models/Booking";
-import BusModel from "@/models/Bus";
-import RouteModel from "@/models/Route";
-import PromoCodeModel from "@/models/PromoCode";
-import UserModel from "@/models/User";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { normalizeBusSeatLayout } from "@/lib/seat/seat-layout";
+import { parseSeatSelection, isValidObjectId } from "@/lib/utils/validation";
+import BookingModel from "@/models/booking/Booking";
+import BusModel from "@/models/transport/Bus";
+import RouteModel from "@/models/transport/Route";
+import PromoCodeModel from "@/models/commerce/PromoCode";
+import UserModel from "@/models/user/User";
 
 export const runtime = "nodejs";
 

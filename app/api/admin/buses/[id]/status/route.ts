@@ -1,7 +1,7 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import { isValidObjectId } from "@/lib/validation";
-import BusModel, { type BusDepartureStatus } from "@/models/Bus";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { isValidObjectId } from "@/lib/utils/validation";
+import BusModel, { type BusDepartureStatus } from "@/models/transport/Bus";
 
 export const runtime = "nodejs";
 

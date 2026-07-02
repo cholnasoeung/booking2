@@ -22,9 +22,9 @@ import {
   formatDateTime,
   formatSeatList,
   formatTravelDate,
-} from "@/lib/formatters";
-import { getBookingSummaryById } from "@/lib/queries";
-import Navbar from "@/components/navbar";
+} from "@/lib/utils/formatters";
+import { getBookingSummaryById } from "@/lib/db/queries";
+import Navbar from "@/components/layout/navbar";
 
 type ConfirmationPageProps = {
   params: Promise<{ bookingId: string }>;

@@ -1,11 +1,11 @@
 import { requireAdmin } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import { sendCancellationEmail } from "@/lib/email-service";
-import { isValidObjectId } from "@/lib/validation";
-import BookingModel from "@/models/Booking";
-import BusModel from "@/models/Bus";
-import RouteModel from "@/models/Route";
-import UserModel from "@/models/User";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { sendCancellationEmail } from "@/lib/services/email-service";
+import { isValidObjectId } from "@/lib/utils/validation";
+import BookingModel from "@/models/booking/Booking";
+import BusModel from "@/models/transport/Bus";
+import RouteModel from "@/models/transport/Route";
+import UserModel from "@/models/user/User";
 
 export const runtime = "nodejs";
 

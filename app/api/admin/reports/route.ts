@@ -1,10 +1,10 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import BookingModel from "@/models/Booking";
-import FuelLogModel from "@/models/FuelLog";
-import MaintenanceModel from "@/models/Maintenance";
-import DriverEarningModel from "@/models/DriverEarning";
-import PayrollModel from "@/models/Payroll";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import BookingModel from "@/models/booking/Booking";
+import FuelLogModel from "@/models/operations/FuelLog";
+import MaintenanceModel from "@/models/operations/Maintenance";
+import DriverEarningModel from "@/models/hr/DriverEarning";
+import PayrollModel from "@/models/hr/Payroll";
 
 export const runtime = "nodejs";
 

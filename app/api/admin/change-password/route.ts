@@ -1,8 +1,8 @@
 import bcrypt from "bcryptjs";
 
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import UserModel from "@/models/User";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import UserModel from "@/models/user/User";
 
 export const runtime = "nodejs";
 

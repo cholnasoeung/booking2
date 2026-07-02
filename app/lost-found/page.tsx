@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { ArrowLeft, PackageSearch } from "lucide-react";
-import Navbar from "@/components/navbar";
-import { connectToDatabase } from "@/lib/mongodb";
-import LostFoundModel from "@/models/LostFound";
-import LostFoundClient from "@/components/lost-found-client";
+import Navbar from "@/components/layout/navbar";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import LostFoundModel from "@/models/communication/LostFound";
+import LostFoundClient from "@/components/common/lost-found-client";
 import { getCurrentSession } from "@/lib/auth";
 
 export default async function LostFoundPage() {

@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import IncidentModel from "@/models/Incident";
-import { isValidObjectId } from "@/lib/validation";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import IncidentModel from "@/models/operations/Incident";
+import { isValidObjectId } from "@/lib/utils/validation";
 
 export async function PATCH(
   req: Request,

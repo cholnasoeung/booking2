@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import { isValidObjectId } from "@/lib/validation";
-import DriverModel from "@/models/Driver";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { isValidObjectId } from "@/lib/utils/validation";
+import DriverModel from "@/models/hr/Driver";
 
 export const runtime = "nodejs";
 

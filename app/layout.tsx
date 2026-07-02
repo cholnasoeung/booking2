@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { JetBrains_Mono, Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 import { getServerSession } from "next-auth/next";
 
-import Providers from "@/components/providers";
-import AnalyticsTracker from "@/components/analytics-tracker";
+import Providers from "@/components/layout/providers";
+import AnalyticsTracker from "@/components/common/analytics-tracker";
 import { authOptions } from "@/lib/auth";
-import { APP_NAME } from "@/lib/constants";
+import { APP_NAME } from "@/lib/utils/constants";
 
 import "./globals.css";
 

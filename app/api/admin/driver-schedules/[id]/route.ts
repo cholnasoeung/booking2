@@ -1,7 +1,7 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import { isValidObjectId } from "@/lib/validation";
-import DriverScheduleModel from "@/models/DriverSchedule";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { isValidObjectId } from "@/lib/utils/validation";
+import DriverScheduleModel from "@/models/hr/DriverSchedule";
 
 export const runtime = "nodejs";
 

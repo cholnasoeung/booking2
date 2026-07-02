@@ -1,5 +1,5 @@
-import { requireMobileAuthUser } from "@/lib/mobile-auth";
-import { getUserBookings } from "@/lib/queries";
+import { requireMobileAuthUser } from "@/lib/auth/mobile-auth";
+import { getUserBookings } from "@/lib/db/queries";
 
 export const runtime = "nodejs";
 

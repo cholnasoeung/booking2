@@ -1,12 +1,12 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import { normalizeBusSeatLayout } from "@/lib/seat-layout";
-import { parseSeatSelection, isValidObjectId } from "@/lib/validation";
-import BookingModel, { type IPassenger } from "@/models/Booking";
-import BusModel from "@/models/Bus";
-import PromoCodeModel from "@/models/PromoCode";
-import { sendBookingConfirmationEmail } from "@/lib/email-service";
-import { sendBookingConfirmationSMS } from "@/lib/sms-service";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { normalizeBusSeatLayout } from "@/lib/seat/seat-layout";
+import { parseSeatSelection, isValidObjectId } from "@/lib/utils/validation";
+import BookingModel, { type IPassenger } from "@/models/booking/Booking";
+import BusModel from "@/models/transport/Bus";
+import PromoCodeModel from "@/models/commerce/PromoCode";
+import { sendBookingConfirmationEmail } from "@/lib/services/email-service";
+import { sendBookingConfirmationSMS } from "@/lib/services/sms-service";
 
 export const runtime = "nodejs";
 
@@ -153,7 +153,7 @@ export async function POST(request: Request) {
     });
 
     // Send confirmation email
-    const UserModel = require("@/models/User").default;
+    const UserModel = require("@/models/user/User").default;
     const user = await UserModel.findById(session.user.id);
 
     if (user) {

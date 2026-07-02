@@ -2,8 +2,8 @@ import { mkdir, readdir, rm, writeFile } from "fs/promises";
 import path from "path";
 
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import SettingsModel from "@/models/Settings";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import SettingsModel from "@/models/system/Settings";
 
 export const runtime = "nodejs";
 

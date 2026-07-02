@@ -1,5 +1,5 @@
-import Navbar from "@/components/navbar";
-import SupportChat from "@/components/support-chat";
+import Navbar from "@/components/layout/navbar";
+import SupportChat from "@/components/common/support-chat";
 import { getCurrentUser } from "@/lib/auth";
 
 export default async function SupportPage() {

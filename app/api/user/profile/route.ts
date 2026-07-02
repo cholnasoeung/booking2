@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, requireUser } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import User from "@/models/User";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import User from "@/models/user/User";
 
 export const runtime = "nodejs";
 

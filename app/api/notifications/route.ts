@@ -1,6 +1,6 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import NotificationModel from "@/models/Notification";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import NotificationModel from "@/models/communication/Notification";
 
 export const runtime = "nodejs";
 

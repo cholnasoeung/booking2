@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import BusDetailModel from "@/models/BusDetail";
-import { isValidObjectId } from "@/lib/validation";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import BusDetailModel from "@/models/transport/BusDetail";
+import { isValidObjectId } from "@/lib/utils/validation";
 
 export async function GET(
   _req: Request,

@@ -1,10 +1,10 @@
 import crypto from "crypto";
-import { connectToDatabase } from "@/lib/mongodb";
-import PendingBookingModel from "@/models/PendingBooking";
-import BookingModel from "@/models/Booking";
-import BusModel from "@/models/Bus";
-import SettingsModel from "@/models/Settings";
-import { normalizeBusSeatLayout } from "@/lib/seat-layout";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import PendingBookingModel from "@/models/booking/PendingBooking";
+import BookingModel from "@/models/booking/Booking";
+import BusModel from "@/models/transport/Bus";
+import SettingsModel from "@/models/system/Settings";
+import { normalizeBusSeatLayout } from "@/lib/seat/seat-layout";
 
 export const runtime = "nodejs";
 
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     let appliedPromoCode: string | undefined;
 
     if (pending.promoCode) {
-      const PromoCodeModel = (await import("@/models/PromoCode")).default;
+      const PromoCodeModel = (await import("@/models/commerce/PromoCode")).default;
       const promo = await PromoCodeModel.findOne({ code: pending.promoCode.toUpperCase(), isActive: true });
       if (promo && promo.isValid()) {
         const result = promo.calculateDiscount(pending.totalPrice);

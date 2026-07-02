@@ -1,9 +1,9 @@
 import { hash } from "bcryptjs";
 
-import { connectToDatabase } from "@/lib/mongodb";
-import { createMobileAuthToken } from "@/lib/mobile-auth";
-import { normalizeEmail } from "@/lib/validation";
-import UserModel from "@/models/User";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { createMobileAuthToken } from "@/lib/auth/mobile-auth";
+import { normalizeEmail } from "@/lib/utils/validation";
+import UserModel from "@/models/user/User";
 
 export const runtime = "nodejs";
 

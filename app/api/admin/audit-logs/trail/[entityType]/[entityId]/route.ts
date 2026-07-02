@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import { getEntityAuditTrail } from "@/lib/audit-service";
-import UserModel from "@/models/User";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { getEntityAuditTrail } from "@/lib/services/audit-service";
+import UserModel from "@/models/user/User";
 
 export const runtime = "nodejs";
 

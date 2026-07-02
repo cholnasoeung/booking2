@@ -1,4 +1,4 @@
-import { requireMobileAuthUser } from "@/lib/mobile-auth";
+import { requireMobileAuthUser } from "@/lib/auth/mobile-auth";
 
 export const runtime = "nodejs";
 

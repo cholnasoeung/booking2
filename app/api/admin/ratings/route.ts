@@ -1,6 +1,6 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import RatingModel from "@/models/Rating";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import RatingModel from "@/models/commerce/Rating";
 
 export const runtime = "nodejs";
 

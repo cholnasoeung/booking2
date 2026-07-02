@@ -1,8 +1,8 @@
-import Navbar from "@/components/navbar";
-import SearchPageClient from "@/components/search-page-client";
-import { getTomorrowDateInput, isValidDateInput } from "@/lib/date";
-import { searchBuses } from "@/lib/queries";
-import { getFirstSearchParam, parsePassengerCount } from "@/lib/validation";
+import Navbar from "@/components/layout/navbar";
+import SearchPageClient from "@/components/search/search-page-client";
+import { getTomorrowDateInput, isValidDateInput } from "@/lib/utils/date";
+import { searchBuses } from "@/lib/db/queries";
+import { getFirstSearchParam, parsePassengerCount } from "@/lib/utils/validation";
 
 type SearchPageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

@@ -1,5 +1,5 @@
 import { getCurrentSession } from "@/lib/auth";
-import { getUserBookings } from "@/lib/queries";
+import { getUserBookings } from "@/lib/db/queries";
 
 export const runtime = "nodejs";
 

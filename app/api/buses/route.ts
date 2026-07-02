@@ -1,8 +1,8 @@
 import type { NextRequest } from "next/server";
 
-import { isValidDateInput } from "@/lib/date";
-import { searchBuses } from "@/lib/queries";
-import { getFirstSearchParam, parsePassengerCount } from "@/lib/validation";
+import { isValidDateInput } from "@/lib/utils/date";
+import { searchBuses } from "@/lib/db/queries";
+import { getFirstSearchParam, parsePassengerCount } from "@/lib/utils/validation";
 
 export const runtime = "nodejs";
 

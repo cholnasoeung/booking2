@@ -3,7 +3,7 @@ import {
   performHealthCheck,
   getReadinessStatus,
   getLivenessStatus,
-} from "@/lib/health-service";
+} from "@/lib/services/health-service";
 
 export const runtime = "nodejs";
 

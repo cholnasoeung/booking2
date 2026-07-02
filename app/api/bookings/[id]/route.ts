@@ -1,11 +1,11 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import { isValidObjectId } from "@/lib/validation";
-import BookingModel from "@/models/Booking";
-import BusModel from "@/models/Bus";
-import WaitingListModel from "@/models/WaitingList";
-import { sendCancellationEmail, sendWaitlistNotificationEmail } from "@/lib/email-service";
-import { sendCancellationSMS } from "@/lib/sms-service";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { isValidObjectId } from "@/lib/utils/validation";
+import BookingModel from "@/models/booking/Booking";
+import BusModel from "@/models/transport/Bus";
+import WaitingListModel from "@/models/booking/WaitingList";
+import { sendCancellationEmail, sendWaitlistNotificationEmail } from "@/lib/services/email-service";
+import { sendCancellationSMS } from "@/lib/services/sms-service";
 
 export const runtime = "nodejs";
 

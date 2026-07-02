@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { getSystemStatus } from "@/lib/health-service";
-import UserModel from "@/models/User";
+import { getSystemStatus } from "@/lib/services/health-service";
+import UserModel from "@/models/user/User";
 
 export const runtime = "nodejs";
 

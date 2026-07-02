@@ -1,7 +1,7 @@
 import { getCurrentSession } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import { escapeRegExp, normalizeCity } from "@/lib/validation";
-import RouteModel from "@/models/Route";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { escapeRegExp, normalizeCity } from "@/lib/utils/validation";
+import RouteModel from "@/models/transport/Route";
 
 export const runtime = "nodejs";
 

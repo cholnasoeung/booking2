@@ -1,8 +1,8 @@
 import { requireAdmin } from "@/lib/auth";
-import { connectToDatabase } from "@/lib/mongodb";
-import IncidentModel from "@/models/Incident";
-import BusDetailModel from "@/models/BusDetail";
-import { isValidObjectId } from "@/lib/validation";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import IncidentModel from "@/models/operations/Incident";
+import BusDetailModel from "@/models/transport/BusDetail";
+import { isValidObjectId } from "@/lib/utils/validation";
 
 const INCIDENT_TYPES = ["breakdown", "accident", "flat_tire", "engine_failure", "electrical", "flood_damage", "other"];
 const SEVERITIES     = ["low", "medium", "high"];

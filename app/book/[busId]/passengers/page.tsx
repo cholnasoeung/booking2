@@ -1,11 +1,11 @@
 import { notFound, redirect } from "next/navigation";
-import { getBusSummary } from "@/lib/queries";
-import PassengerDetailsForm from "@/components/passenger-details-form";
+import { getBusSummary } from "@/lib/db/queries";
+import PassengerDetailsForm from "@/components/booking/passenger-details-form";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireUser } from "@/lib/auth";
-import { formatBusType, formatCurrency, formatTravelDate } from "@/lib/formatters";
-import { getFirstSearchParam } from "@/lib/validation";
+import { formatBusType, formatCurrency, formatTravelDate } from "@/lib/utils/formatters";
+import { getFirstSearchParam } from "@/lib/utils/validation";
 import type { Passenger } from "@/types/passenger";
 
 type PassengersPageProps = {
@@ -33,7 +33,7 @@ async function initiateBookingPayment(
 
   // Call the payment initiation function directly (no HTTP — avoids session/cookie issues)
   try {
-    const { initiatePayment } = await import("@/lib/initiate-payment");
+    const { initiatePayment } = await import("@/lib/payment/initiate-payment");
     const result = await initiatePayment({ userId, busId, seats: selectedSeats, passengers, totalPrice, promoCode, boardingStop, droppingStop });
 
     if ("error" in result) {
@@ -52,7 +52,7 @@ async function initiateBookingPayment(
   }
 
   // Fallback: no gateway active — create booking directly
-  const { createBooking } = await import("@/lib/actions");
+  const { createBooking } = await import("@/lib/utils/actions");
   try {
     const booking = await createBooking({ busId, userId, seats: selectedSeats, passengers, totalPrice, promoCode, boardingStop, droppingStop });
     return { success: true, bookingId: booking.id };

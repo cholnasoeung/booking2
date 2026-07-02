@@ -1,20 +1,20 @@
 import { getCurrentSession } from "@/lib/auth";
-import { isValidDateInput, toTravelDate } from "@/lib/date";
-import { connectToDatabase } from "@/lib/mongodb";
-import { getBusSummary } from "@/lib/queries";
+import { isValidDateInput, toTravelDate } from "@/lib/utils/date";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import { getBusSummary } from "@/lib/db/queries";
 import {
   type SeatLayout,
   getSeatLayoutTemplate,
   isBusType,
   normalizeBusSeatLayout,
-} from "@/lib/seat-layout";
-import { normalizeStops } from "@/lib/stops";
-import { isValidObjectId } from "@/lib/validation";
-import BookingModel from "@/models/Booking";
-import BusModel from "@/models/Bus";
-import DriverModel from "@/models/Driver";
-import BusDetailModel from "@/models/BusDetail";
-import RouteModel from "@/models/Route";
+} from "@/lib/seat/seat-layout";
+import { normalizeStops } from "@/lib/utils/stops";
+import { isValidObjectId } from "@/lib/utils/validation";
+import BookingModel from "@/models/booking/Booking";
+import BusModel from "@/models/transport/Bus";
+import DriverModel from "@/models/hr/Driver";
+import BusDetailModel from "@/models/transport/BusDetail";
+import RouteModel from "@/models/transport/Route";
 
 export const runtime = "nodejs";
 
