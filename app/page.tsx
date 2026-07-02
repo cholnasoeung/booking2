@@ -8,6 +8,7 @@ import CTASection from "@/components/landing/cta-section";
 import FAQSection from "@/components/landing/faq-section";
 import Footer from "@/components/layout/footer";
 import HeroSearchForm from "@/components/landing/hero-search-form";
+import PromoBanner from "@/components/landing/promo-banner";
 import { POPULAR_ROUTES } from "@/lib/utils/constants";
 import { getTomorrowDateInput } from "@/lib/utils/date";
 import { formatCurrency } from "@/lib/utils/formatters";
@@ -18,6 +19,7 @@ export default function Home() {
   return (
     <>
       <Navbar />
+      <PromoBanner />
       <main>
         {/* ── HERO ─────────────────────────────────────────────────────── */}
         <section className="relative overflow-hidden bg-gradient-to-r from-red-700 to-orange-500 pb-32 pt-14 text-white">

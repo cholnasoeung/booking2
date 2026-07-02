@@ -15,6 +15,8 @@ export interface IPromoCode extends Document {
   applicableRoutes?: string[]; // Route IDs this applies to (empty = all routes)
   applicableBusTypes?: string[]; // Bus types this applies to (empty = all)
   isActive: boolean;
+  title?: string | null;
+  imageUrl?: string | null;
   createdAt: Date;
   updatedAt: Date;
   isValid(): boolean;
@@ -86,6 +88,14 @@ const PromoCodeSchema = new Schema<IPromoCode>(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    title: {
+      type: String,
+      default: null,
+    },
+    imageUrl: {
+      type: String,
+      default: null,
     },
   },
   {
