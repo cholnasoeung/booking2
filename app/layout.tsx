@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth/next";
 
 import Providers from "@/components/layout/providers";
 import AnalyticsTracker from "@/components/common/analytics-tracker";
+import NotificationBell from "@/components/dashboard/notification-bell";
 import { authOptions } from "@/lib/auth";
 import { APP_NAME } from "@/lib/utils/constants";
 
@@ -64,6 +65,11 @@ export default async function RootLayout({
             </div>
 
             {children}
+
+            {/* Global notification bell — fixed to bottom-right on every page */}
+            <div className="fixed bottom-6 right-6 z-50">
+              <NotificationBell />
+            </div>
           </div>
         </Providers>
       </body>
