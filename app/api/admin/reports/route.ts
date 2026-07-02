@@ -9,6 +9,7 @@ import PayrollModel from "@/models/hr/Payroll";
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
+  try {
   const session = await getCurrentSession();
   if (session?.user?.role !== "admin") {
     return Response.json({ message: "Forbidden" }, { status: 403 });
@@ -260,4 +261,11 @@ export async function GET(request: Request) {
       profitLoss,
     },
   });
+  } catch (err) {
+    console.error("[reports] GET error:", err);
+    return Response.json(
+      { message: err instanceof Error ? err.message : "Internal server error" },
+      { status: 500 }
+    );
+  }
 }
