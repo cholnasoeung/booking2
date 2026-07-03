@@ -7,6 +7,7 @@ import LogoutButton from "@/components/auth/logout-button";
 import Navbar from "@/components/layout/navbar";
 import WaitlistCard from "@/components/booking/waitlist-card";
 import { requireUser } from "@/lib/auth";
+import EmailVerificationBanner from "@/components/auth/email-verification-banner";
 import { getUserBookings } from "@/lib/db/queries";
 
 export default async function DashboardPage() {
@@ -24,6 +25,8 @@ export default async function DashboardPage() {
   return (
     <>
       <Navbar />
+
+      <EmailVerificationBanner />
 
       {/* Hero banner */}
       <div className="border-b border-slate-200 bg-white">

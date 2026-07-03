@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import {
   Users, Search, ShieldCheck, ShieldOff, CheckCircle2, XCircle,
   RefreshCw, ChevronLeft, ChevronRight, MoreVertical,
-  Ban, CircleCheck, Trash2,
+  Ban, CircleCheck, Trash2, KeyRound, Eye, EyeOff, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +47,12 @@ export default function AdminUsersManager() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
   const [page,       setPage]       = useState(1);
   const [pendingId,  setPendingId]  = useState<string | null>(null);
+  const [pwModal,    setPwModal]    = useState<AdminUser | null>(null);
+  const [newPw,      setNewPw]      = useState("");
+  const [confirmPw,  setConfirmPw]  = useState("");
+  const [showPw,     setShowPw]     = useState(false);
+  const [pwSaving,   setPwSaving]   = useState(false);
+  const [pwError,    setPwError]    = useState("");
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -146,6 +152,37 @@ export default function AdminUsersManager() {
       toastError("Request failed");
     } finally {
       setPendingId(null);
+    }
+  }
+
+  function openPwModal(user: AdminUser) {
+    setPwModal(user);
+    setNewPw("");
+    setConfirmPw("");
+    setShowPw(false);
+    setPwError("");
+  }
+
+  async function resetPassword() {
+    if (!pwModal) return;
+    setPwError("");
+    if (newPw.length < 6) { setPwError("Password must be at least 6 characters."); return; }
+    if (newPw !== confirmPw) { setPwError("Passwords do not match."); return; }
+    setPwSaving(true);
+    try {
+      const res = await fetch(`/api/admin/users/${pwModal.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newPassword: newPw }),
+      });
+      const json = await res.json();
+      if (!res.ok) { setPwError(json.message ?? "Failed to update password"); return; }
+      toastSuccess(`Password updated for ${pwModal.name}`);
+      setPwModal(null);
+    } catch {
+      setPwError("Request failed. Please try again.");
+    } finally {
+      setPwSaving(false);
     }
   }
 
@@ -364,6 +401,14 @@ export default function AdminUsersManager() {
                             </DropdownMenuItem>
                           )}
 
+                          <DropdownMenuItem
+                            onClick={() => openPwModal(user)}
+                            className="gap-2 text-slate-700 focus:text-slate-700 focus:bg-slate-50"
+                          >
+                            <KeyRound className="w-4 h-4" />
+                            Reset Password
+                          </DropdownMenuItem>
+
                           <DropdownMenuSeparator />
 
                           {/* Suspend / Unsuspend */}
@@ -425,6 +470,95 @@ export default function AdminUsersManager() {
           </div>
         )}
       </div>
+
+      {/* ── Reset Password Modal ── */}
+      {pwModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200/60 overflow-hidden">
+            <div className="h-1 w-full bg-gradient-to-r from-indigo-500 to-violet-500" />
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-100">
+                    <KeyRound className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">Reset Password</h3>
+                    <p className="text-xs text-slate-500">{pwModal.name} &middot; {pwModal.email}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setPwModal(null)}
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700">New password</label>
+                  <div className="relative">
+                    <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type={showPw ? "text" : "password"}
+                      value={newPw}
+                      onChange={(e) => setNewPw(e.target.value)}
+                      placeholder="Min. 6 characters"
+                      className="w-full h-11 rounded-xl border border-input bg-slate-50 pl-10 pr-11 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPw(!showPw)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      tabIndex={-1}
+                    >
+                      {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-slate-700">Confirm new password</label>
+                  <div className="relative">
+                    <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="password"
+                      value={confirmPw}
+                      onChange={(e) => setConfirmPw(e.target.value)}
+                      placeholder="Repeat new password"
+                      className="w-full h-11 rounded-xl border border-input bg-slate-50 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"
+                    />
+                  </div>
+                </div>
+
+                {pwError && (
+                  <div className="flex items-start gap-2.5 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3">
+                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-rose-400 text-white text-[10px] font-bold">!</span>
+                    <p className="text-sm text-rose-700">{pwError}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setPwModal(null)}
+                  className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={resetPassword}
+                  disabled={pwSaving}
+                  className="flex-1 h-11 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-sm font-semibold text-white shadow-md shadow-indigo-200 hover:from-indigo-700 hover:to-violet-700 disabled:opacity-60 transition-all"
+                >
+                  {pwSaving ? "Updating..." : "Update Password"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

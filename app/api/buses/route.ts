@@ -7,12 +7,14 @@ import { getFirstSearchParam, parsePassengerCount } from "@/lib/utils/validation
 export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
-  const from = getFirstSearchParam(request.nextUrl.searchParams.getAll("from"));
-  const to = getFirstSearchParam(request.nextUrl.searchParams.getAll("to"));
-  const date = request.nextUrl.searchParams.get("date") ?? undefined;
-  const passengers = parsePassengerCount(
-    request.nextUrl.searchParams.get("passengers")
-  );
+  const sp = request.nextUrl.searchParams;
+  const from       = getFirstSearchParam(sp.getAll("from"));
+  const to         = getFirstSearchParam(sp.getAll("to"));
+  const date       = sp.get("date") ?? undefined;
+  const passengers = parsePassengerCount(sp.get("passengers"));
+  const busType    = sp.get("busType") ?? undefined;
+  const maxPrice   = sp.get("maxPrice") ? Number(sp.get("maxPrice")) : undefined;
+  const amenities  = sp.getAll("amenities").filter(Boolean);
 
   if (date && !isValidDateInput(date)) {
     return Response.json(
@@ -22,7 +24,15 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const buses = await searchBuses({ from, to, date, passengers });
+    const buses = await searchBuses({
+      from,
+      to,
+      date,
+      passengers,
+      busType,
+      maxPrice,
+      amenities: amenities.length > 0 ? amenities : undefined,
+    });
     return Response.json({ buses });
   } catch {
     return Response.json(

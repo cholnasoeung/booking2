@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { getCurrentSession } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { isValidObjectId } from "@/lib/utils/validation";
@@ -20,7 +21,7 @@ export async function PATCH(
   }
 
   if (id === session.user.id) {
-    return Response.json({ message: "Cannot modify your own account" }, { status: 400 });
+    return Response.json({ message: "Cannot modify your own account here" }, { status: 400 });
   }
 
   const body = await request.json().catch(() => ({}));
@@ -38,6 +39,13 @@ export async function PATCH(
     } else if (!body.isSuspended) {
       update.suspendedReason = null;
     }
+  }
+
+  if (typeof body.newPassword === "string") {
+    if (body.newPassword.length < 6) {
+      return Response.json({ message: "Password must be at least 6 characters" }, { status: 400 });
+    }
+    update.password = await bcrypt.hash(body.newPassword, 10);
   }
 
   if (Object.keys(update).length === 0) {

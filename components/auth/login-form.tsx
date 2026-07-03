@@ -99,9 +99,14 @@ export default function LoginForm({ callbackUrl }: LoginFormProps) {
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="login-password" className="text-sm font-medium text-slate-700">
-              Password
-            </Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="login-password" className="text-sm font-medium text-slate-700">
+                Password
+              </Label>
+              <Link href="/forgot-password" className="text-xs font-semibold text-amber-600 hover:text-amber-700 hover:underline">
+                Forgot password?
+              </Link>
+            </div>
             <div className="relative">
               <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input

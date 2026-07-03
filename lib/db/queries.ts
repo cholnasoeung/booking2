@@ -404,6 +404,9 @@ export async function searchBuses(filters: {
   to?: string;
   date?: string;
   passengers?: number;
+  busType?: string;
+  maxPrice?: number;
+  amenities?: string[];
 }) {
   await connectToDatabase();
 
@@ -439,6 +442,18 @@ export async function searchBuses(filters: {
       $gte: start,
       $lte: end,
     };
+  }
+
+  if (filters.busType) {
+    busQuery.busType = filters.busType;
+  }
+
+  if (filters.maxPrice !== undefined && filters.maxPrice > 0) {
+    busQuery.pricePerSeat = { $lte: filters.maxPrice };
+  }
+
+  if (filters.amenities && filters.amenities.length > 0) {
+    busQuery.amenities = { $all: filters.amenities };
   }
 
   const buses = (await BusModel.find(busQuery)
