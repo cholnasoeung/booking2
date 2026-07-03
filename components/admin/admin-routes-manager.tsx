@@ -208,8 +208,8 @@ export default function AdminRoutesManager({
 
   return (
     <>
-      <Card className="border border-slate-200 bg-white shadow-sm">
-        <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+      <Card className="border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40">
+        <CardHeader className="border-b border-indigo-50 bg-slate-50/50">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg">
@@ -229,7 +229,7 @@ export default function AdminRoutesManager({
                   value={routeQuery}
                   onChange={(event) => setRouteQuery(event.target.value)}
                   placeholder="Search by city, duration, or distance"
-                  className="h-11 rounded-xl border-slate-200 bg-white/90 pl-9"
+                  className="h-11 rounded-xl border-indigo-100 bg-white/90 pl-9"
                 />
               </div>
               <Button
@@ -259,10 +259,10 @@ export default function AdminRoutesManager({
             />
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white">
+          <div className="rounded-2xl border border-indigo-100/80 bg-white">
             <Table>
               <TableHeader>
-                <TableRow className="bg-slate-50 hover:bg-slate-50">
+                <TableRow className="bg-slate-50 hover:bg-indigo-50/40">
                   <TableHead className="font-bold text-slate-700">Route</TableHead>
                   <TableHead className="font-bold text-slate-700">Duration</TableHead>
                   <TableHead className="font-bold text-slate-700">Distance</TableHead>
@@ -291,7 +291,7 @@ export default function AdminRoutesManager({
                     return (
                       <TableRow
                         key={route.id}
-                        className="transition-colors hover:bg-slate-50/50"
+                        className="transition-colors hover:bg-indigo-50/40/50"
                       >
                         <TableCell className="whitespace-normal">
                           <div className="space-y-1">
@@ -355,8 +355,8 @@ export default function AdminRoutesManager({
       </Card>
 
       <Dialog open={routeDialogOpen} onOpenChange={(open) => !open && resetRouteDialog()}>
-        <DialogContent className="sm:max-w-lg border border-slate-200 bg-white shadow-lg">
-          <DialogHeader className="border-b border-slate-100 pb-4">
+        <DialogContent className="sm:max-w-lg border border-indigo-100 bg-white shadow-lg">
+          <DialogHeader className="border-b border-indigo-50 pb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg">
                 {isEditingRoute ? <PencilLine className="size-5" /> : <Plus className="size-5" />}
@@ -386,7 +386,7 @@ export default function AdminRoutesManager({
                   onChange={(event) =>
                     setRouteForm((current) => ({ ...current, from: event.target.value }))
                   }
-                  className="h-11 rounded-xl border-slate-200 bg-white/90"
+                  className="h-11 rounded-xl border-indigo-100 bg-white/90"
                   placeholder="e.g., Phnom Penh"
                   required
                 />
@@ -401,7 +401,7 @@ export default function AdminRoutesManager({
                   onChange={(event) =>
                     setRouteForm((current) => ({ ...current, to: event.target.value }))
                   }
-                  className="h-11 rounded-xl border-slate-200 bg-white/90"
+                  className="h-11 rounded-xl border-indigo-100 bg-white/90"
                   placeholder="e.g., Siem Reap"
                   required
                 />
@@ -423,7 +423,7 @@ export default function AdminRoutesManager({
                     }))
                   }
                   placeholder="6h 15m"
-                  className="h-11 rounded-xl border-slate-200 bg-white/90"
+                  className="h-11 rounded-xl border-indigo-100 bg-white/90"
                   required
                 />
               </div>
@@ -442,7 +442,7 @@ export default function AdminRoutesManager({
                       distance: event.target.value,
                     }))
                   }
-                  className="h-11 rounded-xl border-slate-200 bg-white/90"
+                  className="h-11 rounded-xl border-indigo-100 bg-white/90"
                   placeholder="e.g., 320"
                   required
                 />
@@ -459,7 +459,7 @@ export default function AdminRoutesManager({
               <Button
                 type="button"
                 variant="outline"
-                className="h-11 rounded-xl border-2 border-slate-200 hover:bg-slate-50"
+                className="h-11 rounded-xl border-2 border-slate-200 hover:bg-indigo-50/40"
                 onClick={resetRouteDialog}
               >
                 Cancel

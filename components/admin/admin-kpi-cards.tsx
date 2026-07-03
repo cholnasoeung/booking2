@@ -47,7 +47,7 @@ export default function AdminKPICards({ onFilterChange }: AdminKPICardsProps) {
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-32 rounded-2xl border-2 border-slate-200 bg-slate-50 animate-pulse" />
+          <div key={i} className="h-32 rounded-2xl border-2 border-indigo-100 bg-indigo-50/40 animate-pulse" />
         ))}
       </div>
     );

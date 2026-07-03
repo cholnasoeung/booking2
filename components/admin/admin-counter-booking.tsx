@@ -95,7 +95,7 @@ function Receipt({ result, onNew }: { result: ConfirmResult; onNew: () => void }
         <p className="text-sm text-slate-500 mt-1">Counter ticket issued successfully</p>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-white border border-indigo-100 rounded-2xl overflow-hidden shadow-sm">
         {/* ticket header */}
         <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-4 text-white">
           <div className="flex items-center justify-between">
@@ -139,7 +139,7 @@ function Receipt({ result, onNew }: { result: ConfirmResult; onNew: () => void }
 
       <div className="flex gap-3 mt-5">
         <button onClick={() => window.print()}
-          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors">
+          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-slate-200 text-slate-700 font-semibold hover:bg-indigo-50/40 transition-colors">
           <Printer className="w-4 h-4" /> Print Receipt
         </button>
         <button onClick={onNew}
@@ -261,7 +261,7 @@ export default function AdminCounterBooking() {
       </div>
 
       {/* ── Wizard card ── */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
+      <div className="bg-white rounded-2xl border border-indigo-100 shadow-sm">
         <div className="px-8 pt-8 pb-2">
           <StepBar current={step} />
         </div>
@@ -282,7 +282,7 @@ export default function AdminCounterBooking() {
                   <select
                     value={selectedRouteId}
                     onChange={(e) => setSelectedRouteId(e.target.value)}
-                    className="w-full h-12 rounded-xl border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-slate-800"
+                    className="w-full h-12 rounded-xl border border-indigo-100 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-slate-800"
                   >
                     <option value="">— Select route —</option>
                     {routes.map((r) => (
@@ -297,7 +297,7 @@ export default function AdminCounterBooking() {
                     value={selectedDate}
                     min={new Date().toISOString().slice(0, 10)}
                     onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-full h-12 rounded-xl border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800"
+                    className="w-full h-12 rounded-xl border border-indigo-100 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800"
                   />
                 </div>
               </div>
@@ -347,7 +347,7 @@ export default function AdminCounterBooking() {
                         <p className="font-bold text-slate-900 text-base">{bus.departureTime} – {bus.arrivalTime}</p>
                         <p className="text-xs text-slate-400 mt-0.5 capitalize">{bus.busType.replace(/-/g, " ")}</p>
                       </div>
-                      <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+                      <div className="flex items-center justify-between pt-1 border-t border-indigo-50">
                         <span className="text-xs text-slate-500 font-medium">{bus.availableSeats.length} seats left</span>
                         <span className="font-bold text-indigo-600">{formatCurrency(bus.pricePerSeat)}<span className="text-[10px] font-normal text-slate-400">/seat</span></span>
                       </div>
@@ -384,7 +384,7 @@ export default function AdminCounterBooking() {
 
               {/* Selection summary sidebar */}
               <div className="space-y-4">
-                <div className="rounded-xl border border-slate-200 bg-white overflow-hidden sticky top-4">
+                <div className="rounded-xl border border-indigo-100/80 bg-white overflow-hidden sticky top-4">
                   <div className="px-4 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white">
                     <p className="text-xs font-bold uppercase tracking-wider opacity-80">Seat Summary</p>
                   </div>
@@ -412,7 +412,7 @@ export default function AdminCounterBooking() {
                       )}
                     </div>
                     {selectedSeats.length > 0 && (
-                      <div className="border-t border-slate-100 pt-3 flex justify-between font-bold">
+                      <div className="border-t border-indigo-50 pt-3 flex justify-between font-bold">
                         <span className="text-slate-700">Total</span>
                         <span className="text-indigo-600 text-lg">{formatCurrency(totalPrice)}</span>
                       </div>
@@ -444,8 +444,8 @@ export default function AdminCounterBooking() {
                 </div>
 
                 {/* Passenger info */}
-                <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-                  <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-2">
+                <div className="rounded-xl border border-indigo-100/80 bg-white overflow-hidden">
+                  <div className="px-4 py-3 bg-slate-50 border-b border-indigo-50 flex items-center gap-2">
                     <User className="w-4 h-4 text-slate-500" />
                     <span className="text-sm font-semibold text-slate-700">Passenger Information</span>
                   </div>
@@ -454,26 +454,26 @@ export default function AdminCounterBooking() {
                       <label className="block text-xs font-semibold text-slate-600 mb-1.5">Full Name *</label>
                       <input type="text" value={guestName} onChange={(e) => setGuestName(e.target.value)}
                         placeholder="Sokha Chan"
-                        className="w-full h-10 rounded-xl border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800" />
+                        className="w-full h-10 rounded-xl border border-indigo-100 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800" />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-600 mb-1.5">Phone</label>
                       <input type="tel" value={guestPhone} onChange={(e) => setGuestPhone(e.target.value)}
                         placeholder="012 345 678"
-                        className="w-full h-10 rounded-xl border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800" />
+                        className="w-full h-10 rounded-xl border border-indigo-100 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800" />
                     </div>
                     <div className="sm:col-span-2">
                       <label className="block text-xs font-semibold text-slate-600 mb-1.5">Email (optional)</label>
                       <input type="email" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)}
                         placeholder="sokha@email.com"
-                        className="w-full h-10 rounded-xl border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800" />
+                        className="w-full h-10 rounded-xl border border-indigo-100 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800" />
                     </div>
                   </div>
                 </div>
 
                 {/* Payment */}
-                <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-                  <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-2">
+                <div className="rounded-xl border border-indigo-100/80 bg-white overflow-hidden">
+                  <div className="px-4 py-3 bg-slate-50 border-b border-indigo-50 flex items-center gap-2">
                     <Wallet className="w-4 h-4 text-slate-500" />
                     <span className="text-sm font-semibold text-slate-700">Payment Method</span>
                   </div>
@@ -487,7 +487,7 @@ export default function AdminCounterBooking() {
                         className={`flex flex-col items-center gap-1.5 py-3 rounded-xl text-sm font-semibold border-2 transition-all ${
                           paymentMethod === m.value
                             ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                            : "border-slate-200 text-slate-600 hover:border-slate-300"
+                            : "border-slate-200 text-slate-600 hover:border-indigo-200"
                         }`}>
                         <span className="text-xl">{m.label}</span>
                         <span className="text-xs">{m.name}</span>
@@ -504,20 +504,20 @@ export default function AdminCounterBooking() {
                     </label>
                     <input type="text" value={promoCode} onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                       placeholder="DISCOUNT10"
-                      className="w-full h-10 rounded-xl border border-slate-200 px-3 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800" />
+                      className="w-full h-10 rounded-xl border border-indigo-100 px-3 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800" />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-600 mb-1.5">Agent Note</label>
                     <input type="text" value={note} onChange={(e) => setNote(e.target.value)}
                       placeholder="e.g. VIP passenger, wheelchair"
-                      className="w-full h-10 rounded-xl border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800" />
+                      className="w-full h-10 rounded-xl border border-indigo-100 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-800" />
                   </div>
                 </div>
               </div>
 
               {/* Order summary sidebar */}
               <div className="space-y-4">
-                <div className="rounded-xl border border-slate-200 bg-white overflow-hidden sticky top-4">
+                <div className="rounded-xl border border-indigo-100/80 bg-white overflow-hidden sticky top-4">
                   <div className="px-4 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white">
                     <p className="text-xs font-bold uppercase tracking-wider opacity-80">Order Summary</p>
                   </div>
@@ -538,7 +538,7 @@ export default function AdminCounterBooking() {
                         ))}
                       </div>
                     </div>
-                    <div className="border-t border-slate-100 pt-3 flex justify-between font-bold text-base text-slate-900">
+                    <div className="border-t border-indigo-50 pt-3 flex justify-between font-bold text-base text-slate-900">
                       <span>Total</span>
                       <span className="text-indigo-600">{formatCurrency(totalPrice)}</span>
                     </div>
@@ -565,9 +565,9 @@ export default function AdminCounterBooking() {
 
       {/* ── Recent counter bookings ── */}
       {recentBookings.length > 0 && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-indigo-100 shadow-sm overflow-hidden">
           {/* section header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/60">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-indigo-50 bg-slate-50/60">
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
                 <Clock className="size-4" />
@@ -583,15 +583,15 @@ export default function AdminCounterBooking() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/40">
+                <tr className="border-b border-indigo-50 bg-slate-50/40">
                   {["Booking ID", "Passenger", "Route", "Travel Date", "Seats", "Payment", "Total", "Issued"].map((h) => (
                     <th key={h} className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wide text-slate-500 whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-indigo-50">
                 {recentBookings.map((bk) => (
-                  <tr key={bk.id} className="hover:bg-slate-50/50 transition-colors">
+                  <tr key={bk.id} className="hover:bg-indigo-50/40/50 transition-colors">
                     <td className="px-4 py-3 font-mono text-xs font-bold text-indigo-600">{bk.id.slice(-8).toUpperCase()}</td>
                     <td className="px-4 py-3">
                       <p className="font-semibold text-slate-800">{bk.guestName}</p>

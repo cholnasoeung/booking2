@@ -107,7 +107,7 @@ function fillPct(booked: number, total: number) {
 const STATUS_COLORS: Record<string, string> = {
   scheduled: "bg-sky-100 text-sky-700",
   departed: "bg-emerald-100 text-emerald-700",
-  arrived: "bg-gray-100 text-gray-600",
+  arrived: "bg-indigo-50 text-gray-600",
   delayed: "bg-amber-100 text-amber-700",
   cancelled: "bg-red-100 text-red-700",
 };
@@ -127,7 +127,7 @@ function KpiCard({
   color: string;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5 flex items-start gap-4">
+    <div className="bg-white rounded-xl border border-indigo-100 p-5 flex items-start gap-4">
       <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${color}`}>
         <Icon className="w-5 h-5" />
       </div>
@@ -186,7 +186,7 @@ function BookingCard({ b }: { b: BookingEntry }) {
           <span className="font-medium text-gray-700">{formatKHR(b.totalPrice)}</span>
           <span>{b.passengerCount} seat{b.passengerCount !== 1 ? "s" : ""}</span>
           {b.seats.length > 0 && (
-            <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-[10px]">
+            <span className="font-mono bg-indigo-50 px-1.5 py-0.5 rounded text-[10px]">
               {b.seats.slice(0, 3).join(", ")}
               {b.seats.length > 3 ? ` +${b.seats.length - 3}` : ""}
             </span>
@@ -217,7 +217,7 @@ function BookingCard({ b }: { b: BookingEntry }) {
 function DepartureRow({ d }: { d: DepartureEntry }) {
   const pct = fillPct(d.bookedCount, d.totalSeats);
   const statusClass =
-    STATUS_COLORS[d.departureStatus] ?? "bg-gray-100 text-gray-600";
+    STATUS_COLORS[d.departureStatus] ?? "bg-indigo-50 text-gray-600";
 
   return (
     <div className="flex items-center gap-4 py-3 border-b border-gray-100 last:border-0">
@@ -236,7 +236,7 @@ function DepartureRow({ d }: { d: DepartureEntry }) {
             <span className="text-sm text-gray-400 italic">Unknown route</span>
           )}
           {d.busNumber && (
-            <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-mono">
+            <span className="text-[10px] bg-indigo-50 text-gray-600 px-1.5 py-0.5 rounded font-mono">
               {d.busNumber}
             </span>
           )}
@@ -289,7 +289,7 @@ function DepartureRow({ d }: { d: DepartureEntry }) {
 function HourlyTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-md px-3 py-2 text-xs">
+    <div className="bg-white border border-indigo-100 rounded-lg shadow-md px-3 py-2 text-xs">
       <p className="font-semibold text-gray-700 mb-1">{label}</p>
       <p className="text-indigo-600">Bookings: {payload[0]?.value ?? 0}</p>
       <p className="text-emerald-600">Revenue: {formatKHR(payload[1]?.value ?? 0)}</p>
@@ -424,7 +424,7 @@ export default function AdminTodayTab() {
 
       {/* Hourly Booking Chart */}
       {data && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-white rounded-xl border border-indigo-100 p-6">
           <div className="flex items-center gap-2 mb-4">
             <Activity className="w-5 h-5 text-indigo-500" />
             <h3 className="font-semibold text-gray-900">Bookings by Hour (Today)</h3>
@@ -464,7 +464,7 @@ export default function AdminTodayTab() {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Booking Feed */}
-        <div className="lg:col-span-3 bg-white rounded-xl border border-gray-200 flex flex-col overflow-hidden">
+        <div className="lg:col-span-3 bg-white rounded-xl border border-indigo-100 flex flex-col overflow-hidden">
           {/* Feed header */}
           <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
             <h3 className="font-semibold text-gray-900">Today's Bookings</h3>
@@ -476,7 +476,7 @@ export default function AdminTodayTab() {
                   className={`px-3 py-1 rounded-lg text-xs font-medium capitalize transition-colors ${
                     bookingFilter === f
                       ? "bg-indigo-600 text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      : "bg-indigo-50 text-gray-600 hover:bg-gray-200"
                   }`}
                 >
                   {f}
@@ -506,7 +506,7 @@ export default function AdminTodayTab() {
         </div>
 
         {/* Today's Departures */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 flex flex-col overflow-hidden">
+        <div className="lg:col-span-2 bg-white rounded-xl border border-indigo-100 flex flex-col overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100">
             <h3 className="font-semibold text-gray-900">Today's Departures</h3>
             <p className="text-xs text-gray-400 mt-0.5">

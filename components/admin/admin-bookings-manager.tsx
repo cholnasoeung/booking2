@@ -294,10 +294,10 @@ export default function AdminBookingsManager({
   return (
     <>
       <div className="space-y-5">
-        <Card className="border border-slate-200 bg-white shadow-sm">
+        <Card className="border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40">
 
           {/* ── Header ── */}
-          <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-0">
+          <CardHeader className="border-b border-indigo-50 bg-slate-50/50 pb-0">
             <div className="flex flex-col gap-4 pb-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md">
@@ -324,16 +324,16 @@ export default function AdminBookingsManager({
             </div>
 
             {/* Filters */}
-            <div className="border-t border-slate-100 pt-3 pb-4 space-y-2.5">
+            <div className="border-t border-indigo-50 pt-3 pb-4 space-y-2.5">
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="relative sm:col-span-2 lg:col-span-1">
                   <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
                   <Input value={bookingQuery} onChange={(e) => setBookingQuery(e.target.value)}
                     placeholder="Search booking, passenger, route…"
-                    className="h-9 rounded-xl border-slate-200 bg-white pl-9 text-sm" />
+                    className="h-9 rounded-xl border-indigo-100 bg-white pl-9 text-sm" />
                 </div>
                 <Select value={bookingStatusFilter} onValueChange={(v) => { if (v) setBookingStatusFilter(v); }}>
-                  <SelectTrigger className="h-9 rounded-xl border-slate-200 bg-white text-sm"><SelectValue placeholder="All statuses" /></SelectTrigger>
+                  <SelectTrigger className="h-9 rounded-xl border-indigo-100 bg-white text-sm"><SelectValue placeholder="All statuses" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All statuses</SelectItem>
                     <SelectItem value="confirmed">Confirmed</SelectItem>
@@ -341,7 +341,7 @@ export default function AdminBookingsManager({
                   </SelectContent>
                 </Select>
                 <Select value={bookingRouteFilter} onValueChange={(v) => { if (v) setBookingRouteFilter(v); }}>
-                  <SelectTrigger className="h-9 rounded-xl border-slate-200 bg-white text-sm"><SelectValue placeholder="All routes" /></SelectTrigger>
+                  <SelectTrigger className="h-9 rounded-xl border-indigo-100 bg-white text-sm"><SelectValue placeholder="All routes" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All routes</SelectItem>
                     {routes.map((r) => <SelectItem key={r.id} value={r.id}>{r.from} → {r.to}</SelectItem>)}
@@ -367,7 +367,7 @@ export default function AdminBookingsManager({
 
           <CardContent className="p-0">
             {/* ── Calendar navigation ── */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 bg-white">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-indigo-50 bg-white">
               <div className="flex items-center gap-2">
                 <Button type="button" variant="outline" size="icon" className="h-8 w-8 rounded-xl" onClick={prevMonth}>
                   <ChevronLeft className="size-4" />
@@ -389,7 +389,7 @@ export default function AdminBookingsManager({
             </div>
 
             {/* ── Day-of-week headers ── */}
-            <div className="grid grid-cols-7 border-b border-slate-100">
+            <div className="grid grid-cols-7 border-b border-indigo-50">
               {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => (
                 <div key={d} className="py-2.5 text-center text-[11px] font-bold uppercase tracking-wider text-slate-500 border-r border-slate-100 last:border-r-0">
                   {d}
@@ -411,7 +411,7 @@ export default function AdminBookingsManager({
                       "min-h-[88px] p-1.5 border-b border-r border-slate-100 cursor-pointer transition-colors select-none",
                       idx % 7 === 6 ? "border-r-0" : "",
                       !day.isCurrentMonth ? "bg-slate-50/60" : "bg-white",
-                      isSelected ? "bg-indigo-50 ring-2 ring-inset ring-indigo-400" : "hover:bg-slate-50",
+                      isSelected ? "bg-indigo-50 ring-2 ring-inset ring-indigo-400" : "hover:bg-indigo-50/40",
                     ].join(" ")}
                   >
                     {/* Day number */}
@@ -453,7 +453,7 @@ export default function AdminBookingsManager({
             {selectedDay && (
               <div className="border-t border-slate-200">
                 {/* Panel header */}
-                <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/60 px-5 py-3">
+                <div className="flex items-center justify-between gap-3 border-b border-indigo-50 bg-slate-50/60 px-5 py-3">
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-1 rounded-full bg-indigo-500" />
                     <div>
@@ -483,10 +483,10 @@ export default function AdminBookingsManager({
                     <p className="text-sm font-medium text-slate-500">No bookings on this day</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-slate-100">
+                  <div className="divide-y divide-indigo-50">
                     {selectedDayBookings.map((booking) => (
                       <div key={booking.id}
-                        className={`flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-slate-50/60 ${selectedIds.has(booking.id) ? "bg-indigo-50/40" : ""}`}>
+                        className={`flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-indigo-50/40/60 ${selectedIds.has(booking.id) ? "bg-indigo-50/40" : ""}`}>
                         {/* Checkbox */}
                         <button type="button"
                           disabled={booking.status !== "confirmed"}
@@ -526,12 +526,12 @@ export default function AdminBookingsManager({
                         {/* Actions */}
                         <div className="flex shrink-0 items-center gap-1.5">
                           <Button type="button" size="sm" variant="outline"
-                            className="h-7 rounded-lg px-2.5 text-xs border-slate-200 text-slate-700 hover:bg-slate-50"
+                            className="h-7 rounded-lg px-2.5 text-xs border-slate-200 text-slate-700 hover:bg-indigo-50/40"
                             onClick={() => setSelectedBooking(booking)}>
                             <Eye className="size-3.5 mr-1" />Details
                           </Button>
                           <Link href={`/booking/confirmation/${booking.id}`}
-                            className="inline-flex h-7 items-center rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                            className="inline-flex h-7 items-center rounded-lg border border-indigo-100 bg-white px-2.5 text-xs font-medium text-slate-700 hover:bg-indigo-50/40 transition-colors">
                             <Ticket className="size-3.5 mr-1" />Ticket
                           </Link>
                           <Button type="button" size="sm" variant="outline"
@@ -555,11 +555,11 @@ export default function AdminBookingsManager({
         open={Boolean(selectedBooking)}
         onOpenChange={(open) => !open && setSelectedBooking(null)}
       >
-        <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-2xl p-0 gap-0 border border-slate-200 bg-white shadow-2xl rounded-2xl">
+        <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-2xl p-0 gap-0 border border-indigo-100 bg-white shadow-2xl rounded-2xl">
           {selectedBooking ? (
             <>
               {/* ── Dialog Header ── */}
-              <div className="flex items-start justify-between gap-4 px-6 py-5 border-b border-slate-100 bg-slate-50/60 rounded-t-2xl">
+              <div className="flex items-start justify-between gap-4 px-6 py-5 border-b border-indigo-50 bg-slate-50/60 rounded-t-2xl">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md">
                     <Ticket className="size-5" />
@@ -593,8 +593,8 @@ export default function AdminBookingsManager({
                 {/* ── Customer & Trip ── */}
                 <div className="grid gap-3 sm:grid-cols-2">
                   {/* Customer */}
-                  <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-                    <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100">
+                  <div className="rounded-xl border border-indigo-100/80 bg-white overflow-hidden">
+                    <div className="px-4 py-2.5 bg-slate-50 border-b border-indigo-50">
                       <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Customer</p>
                     </div>
                     <div className="px-4 py-3 space-y-1.5">
@@ -605,8 +605,8 @@ export default function AdminBookingsManager({
                   </div>
 
                   {/* Trip */}
-                  <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-                    <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100">
+                  <div className="rounded-xl border border-indigo-100/80 bg-white overflow-hidden">
+                    <div className="px-4 py-2.5 bg-slate-50 border-b border-indigo-50">
                       <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Trip</p>
                     </div>
                     <div className="px-4 py-3 space-y-1.5">
@@ -624,8 +624,8 @@ export default function AdminBookingsManager({
                 </div>
 
                 {/* ── Seats ── */}
-                <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-                  <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                <div className="rounded-xl border border-indigo-100/80 bg-white overflow-hidden">
+                  <div className="px-4 py-2.5 bg-slate-50 border-b border-indigo-50 flex items-center justify-between">
                     <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Reserved Seats</p>
                     <span className="text-xs font-bold text-indigo-600 bg-indigo-50 rounded-full px-2.5 py-0.5">{selectedBooking.seats.length}</span>
                   </div>
@@ -644,15 +644,15 @@ export default function AdminBookingsManager({
                 </div>
 
                 {/* ── Passengers ── */}
-                <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-                  <div className="px-4 py-2.5 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                <div className="rounded-xl border border-indigo-100/80 bg-white overflow-hidden">
+                  <div className="px-4 py-2.5 bg-slate-50 border-b border-indigo-50 flex items-center justify-between">
                     <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Passengers</p>
                     <Badge variant="outline" className="text-xs">
                       {selectedBooking.passengers.length || selectedBooking.seats.length} listed
                     </Badge>
                   </div>
                   {selectedBooking.passengers.length > 0 ? (
-                    <div className="divide-y divide-slate-100">
+                    <div className="divide-y divide-indigo-50">
                       {selectedBooking.passengers.map((passenger, index) => (
                         <div key={`${selectedBooking.id}-${index}`} className="flex items-center justify-between px-4 py-3 gap-4">
                           <div>
@@ -675,10 +675,10 @@ export default function AdminBookingsManager({
               </div>
 
               {/* ── Footer ── */}
-              <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/40 rounded-b-2xl">
+              <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-indigo-50 bg-slate-50/40 rounded-b-2xl">
                 <Link
                   href={`/booking/confirmation/${selectedBooking.id}`}
-                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-indigo-100/80 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-indigo-50/40 transition-colors"
                 >
                   <Ticket className="size-4" />View Ticket
                 </Link>

@@ -32,7 +32,7 @@ const INCIDENT_TYPES: Record<string, { label: string; icon: React.ElementType; c
   engine_failure: { label: "Engine Failure", icon: Flame,         color: "bg-rose-100 text-rose-700 border-rose-200"       },
   electrical:     { label: "Electrical",     icon: Zap,           color: "bg-yellow-100 text-yellow-700 border-yellow-200" },
   flood_damage:   { label: "Flood Damage",   icon: CloudRain,     color: "bg-blue-100 text-blue-700 border-blue-200"       },
-  other:          { label: "Other",          icon: Bus,           color: "bg-slate-100 text-slate-600 border-slate-200"    },
+  other:          { label: "Other",          icon: Bus,           color: "bg-indigo-50 text-indigo-600 border-indigo-100"    },
 };
 
 const SEVERITIES: Record<string, { label: string; color: string }> = {
@@ -273,7 +273,7 @@ export default function AdminIncidentTab() {
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      <div className="rounded-2xl border border-indigo-100/80 bg-white overflow-hidden shadow-sm">
         {filtered.length === 0 && !loading ? (
           <div className="flex flex-col items-center justify-center py-16 text-slate-400">
             <AlertTriangle className="h-12 w-12 mb-3 opacity-30" />
@@ -293,13 +293,13 @@ export default function AdminIncidentTab() {
                 <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-indigo-50">
               {filtered.map((incident) => {
                 const cfg = INCIDENT_TYPES[incident.incidentType] ?? INCIDENT_TYPES.other;
                 const Icon = cfg.icon;
                 const sev  = SEVERITIES[incident.severity] ?? SEVERITIES.medium;
                 return (
-                  <tr key={incident._id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={incident._id} className="hover:bg-indigo-50/40 transition-colors">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border", cfg.color)}>
@@ -343,7 +343,7 @@ export default function AdminIncidentTab() {
                     </td>
                     <td className="px-5 py-4 text-right">
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 w-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors">
+                        <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 w-8 rounded-xl border border-indigo-100/80 bg-white hover:bg-indigo-50/40 transition-colors">
                           <MoreVertical className="h-3.5 w-3.5 text-slate-500" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">

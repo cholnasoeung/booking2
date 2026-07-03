@@ -207,7 +207,7 @@ export default function AdminVehicleDocuments({ busDetailId, busName }: Props) {
                     ? "border-red-200 bg-red-50/40"
                     : expiryStatus(doc.expiryDate).label.endsWith("left")
                     ? "border-amber-200 bg-amber-50/30"
-                    : "border-slate-200 bg-white"
+                    : "border-indigo-100 bg-white"
                 )}
               >
                 <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border", cfg.color)}>
@@ -231,11 +231,11 @@ export default function AdminVehicleDocuments({ busDetailId, busName }: Props) {
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <button type="button" onClick={() => openEdit(doc)}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-indigo-600 hover:border-indigo-200 transition-colors">
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-indigo-100 bg-white text-slate-500 hover:text-indigo-600 hover:border-indigo-200 transition-colors">
                     <Pencil className="h-3.5 w-3.5" />
                   </button>
                   <button type="button" onClick={() => handleDelete(doc)}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-red-600 hover:border-red-200 transition-colors">
+                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-indigo-100 bg-white text-slate-500 hover:text-red-600 hover:border-red-200 transition-colors">
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>

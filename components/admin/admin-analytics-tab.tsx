@@ -240,7 +240,7 @@ export default function AdminAnalyticsTab() {
           <select
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value)}
-            className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="h-10 rounded-xl border border-indigo-100/80 bg-white px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400"
           >
             <option value="7">Last 7 days</option>
             <option value="30">Last 30 days</option>

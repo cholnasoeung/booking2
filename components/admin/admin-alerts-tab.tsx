@@ -55,7 +55,7 @@ export default function AdminAlertsTab() {
       case "low":
         return "bg-green-100 text-green-800 border-green-200";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-indigo-50 text-gray-800 border-indigo-100";
     }
   };
 
@@ -107,7 +107,7 @@ export default function AdminAlertsTab() {
       {/* Summary Cards */}
       {summary && (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <div className="bg-white rounded-xl border border-indigo-100 p-4">
             <p className="text-sm text-gray-600">Total Alerts</p>
             <p className="text-2xl font-bold text-gray-900">{summary.totalAlerts}</p>
           </div>
@@ -171,7 +171,7 @@ export default function AdminAlertsTab() {
           })}
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+        <div className="bg-white rounded-xl border border-indigo-100 p-12 text-center">
           <CheckCircle className="mx-auto h-12 w-12 text-green-500 mb-4" />
           <p className="text-gray-900 font-medium">No alerts</p>
           <p className="text-sm text-gray-600">System is running smoothly</p>

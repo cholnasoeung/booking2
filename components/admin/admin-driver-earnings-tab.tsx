@@ -63,7 +63,7 @@ function StatCard({ icon: Icon, label, value, sub, color }: {
   icon: React.ElementType; label: string; value: string; sub?: string; color: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-4 shadow-sm">
+    <div className="rounded-2xl border border-indigo-100/80 bg-white p-4 flex items-center gap-4 shadow-sm">
       <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl", color)}>
         <Icon className="size-5 text-white" />
       </div>
@@ -186,7 +186,7 @@ function EarningFormFields({ form, onChange, drivers, buses }: {
 
       {/* Auto earnings breakdown */}
       {form.basePay && (
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-1.5 text-sm">
+        <div className="rounded-xl border border-indigo-100 bg-slate-50 p-3 space-y-1.5 text-sm">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Earnings Breakdown</p>
           <div className="flex justify-between">
             <span className="text-slate-600">Regular ({form.regularTrips || 0} × ${form.basePay || 0})</span>
@@ -399,7 +399,7 @@ export default function AdminDriverEarningsTab() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Monthly bar chart */}
         {monthly.length > 0 && (
-          <div className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="lg:col-span-2 rounded-2xl border border-indigo-100/80 bg-white p-5 shadow-sm">
             <h3 className="text-sm font-semibold text-slate-700 mb-4">Monthly Payroll</h3>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={monthly} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
@@ -420,7 +420,7 @@ export default function AdminDriverEarningsTab() {
 
         {/* Top earners */}
         {topDrivers.length > 0 && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-indigo-100/80 bg-white p-5 shadow-sm">
             <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
               <Trophy className="size-4 text-amber-500" /> Top Earners This Month
             </h3>
@@ -446,7 +446,7 @@ export default function AdminDriverEarningsTab() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-indigo-100/80 bg-white p-4 shadow-sm">
         <ListFilter className="size-4 text-slate-400 shrink-0" />
 
         <Select value={filterDriver} onValueChange={(v) => { setFD(v == null || v === "_all" ? "" : v); setPage(1); }}>
@@ -474,11 +474,11 @@ export default function AdminDriverEarningsTab() {
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/70">
+              <tr className="border-b border-indigo-50 bg-slate-50/70">
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Driver</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Vehicle</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Date</th>
@@ -490,13 +490,13 @@ export default function AdminDriverEarningsTab() {
                 <th className="px-4 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-indigo-50">
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
                     {Array.from({ length: 9 }).map((__, j) => (
                       <td key={j} className="px-4 py-3">
-                        <div className="h-4 rounded bg-slate-100 animate-pulse" />
+                        <div className="h-4 rounded bg-indigo-50/60 animate-pulse" />
                       </td>
                     ))}
                   </tr>
@@ -511,7 +511,7 @@ export default function AdminDriverEarningsTab() {
                 </tr>
               ) : (
                 entries.map((e) => (
-                  <tr key={e.id} className="hover:bg-slate-50/60 transition-colors">
+                  <tr key={e.id} className="hover:bg-indigo-50/40/60 transition-colors">
                     <td className="px-4 py-3 font-medium text-slate-800">{e.driverName}</td>
                     <td className="px-4 py-3">
                       {e.busName ? (
@@ -569,7 +569,7 @@ export default function AdminDriverEarningsTab() {
         </div>
 
         {data && data.totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3">
+          <div className="flex items-center justify-between border-t border-indigo-50 px-4 py-3">
             <p className="text-xs text-slate-500">Page {data.page} of {data.totalPages} · {data.total} records</p>
             <div className="flex gap-1">
               <Button variant="outline" size="icon" className="h-8 w-8"

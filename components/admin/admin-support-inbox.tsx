@@ -44,7 +44,7 @@ interface FullConversation {
 const STATUS_COLORS: Record<string, string> = {
   open: "bg-emerald-100 text-emerald-700 border-emerald-200",
   resolved: "bg-blue-100 text-blue-700 border-blue-200",
-  closed: "bg-gray-100 text-gray-600 border-gray-200",
+  closed: "bg-indigo-50 text-gray-600 border-indigo-100",
 };
 
 export default function AdminSupportInbox() {
@@ -180,7 +180,7 @@ export default function AdminSupportInbox() {
             className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
               statusFilter === s
                 ? "bg-indigo-600 text-white border-indigo-600"
-                : "bg-white text-gray-600 border-gray-200 hover:border-indigo-300"
+                : "bg-white text-gray-600 border-indigo-100 hover:border-indigo-300"
             }`}
           >
             {s === "" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
@@ -197,11 +197,11 @@ export default function AdminSupportInbox() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-[600px]">
         {/* Left: conversation list */}
         <div
-          className={`lg:col-span-2 rounded-2xl border border-gray-200 bg-white overflow-hidden shadow-sm flex flex-col ${
+          className={`lg:col-span-2 rounded-2xl border border-indigo-100 bg-white overflow-hidden shadow-sm flex flex-col ${
             selected ? "hidden lg:flex" : "flex"
           }`}
         >
-          <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
+          <div className="px-4 py-3 border-b border-gray-100 bg-indigo-50/40">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
               {visible.length} conversation{visible.length !== 1 ? "s" : ""}
             </p>
@@ -252,7 +252,7 @@ export default function AdminSupportInbox() {
 
         {/* Right: thread view */}
         <div
-          className={`lg:col-span-3 rounded-2xl border border-gray-200 bg-white shadow-sm flex flex-col overflow-hidden ${
+          className={`lg:col-span-3 rounded-2xl border border-indigo-100 bg-white shadow-sm flex flex-col overflow-hidden ${
             !selected && !loadingThread ? "hidden lg:flex" : "flex"
           }`}
         >
@@ -264,7 +264,7 @@ export default function AdminSupportInbox() {
           ) : selected ? (
             <>
               {/* Thread header */}
-              <div className="px-5 py-4 border-b border-gray-100 bg-gray-50 flex items-start gap-3">
+              <div className="px-5 py-4 border-b border-gray-100 bg-indigo-50/40 flex items-start gap-3">
                 <button
                   onClick={() => setSelected(null)}
                   className="lg:hidden p-1.5 rounded-lg hover:bg-gray-200 shrink-0"
@@ -298,7 +298,7 @@ export default function AdminSupportInbox() {
                     <button
                       onClick={() => changeStatus("closed")}
                       disabled={changingStatus}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gray-50 border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-50/40 border border-indigo-100 text-xs font-medium text-gray-600 hover:bg-indigo-50 disabled:opacity-50 transition-colors"
                     >
                       <X className="w-3.5 h-3.5" />
                       Close
@@ -341,7 +341,7 @@ export default function AdminSupportInbox() {
                         className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                           msg.sender === "admin"
                             ? "bg-indigo-600 text-white rounded-tr-sm"
-                            : "bg-gray-100 text-gray-800 rounded-tl-sm"
+                            : "bg-indigo-50 text-gray-800 rounded-tl-sm"
                         }`}
                       >
                         {msg.text}
@@ -355,10 +355,10 @@ export default function AdminSupportInbox() {
 
               {/* Reply box */}
               {selected.status !== "closed" && (
-                <div className="border-t border-gray-100 px-5 py-4 bg-gray-50">
+                <div className="border-t border-gray-100 px-5 py-4 bg-indigo-50/40">
                   <div className="flex gap-3 items-end">
                     <Textarea
-                      className="flex-1 min-h-[80px] rounded-xl resize-none border-gray-200 bg-white text-sm"
+                      className="flex-1 min-h-[80px] rounded-xl resize-none border-indigo-100 bg-white text-sm"
                       placeholder="Type your reply…"
                       value={reply}
                       onChange={(e) => setReply(e.target.value)}
@@ -383,7 +383,7 @@ export default function AdminSupportInbox() {
               )}
 
               {selected.status === "closed" && (
-                <div className="border-t border-gray-100 px-5 py-4 bg-gray-50 text-center text-sm text-gray-400">
+                <div className="border-t border-gray-100 px-5 py-4 bg-indigo-50/40 text-center text-sm text-gray-400">
                   This conversation is closed. Reopen it to reply.
                 </div>
               )}

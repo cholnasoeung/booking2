@@ -137,7 +137,7 @@ function ImageUploadField({
           {images.map((url, i) => (
             <div
               key={`${url}-${i}`}
-              className="group relative aspect-video overflow-hidden rounded-xl border border-slate-200 bg-slate-100"
+              className="group relative aspect-video overflow-hidden rounded-xl border border-indigo-100 bg-slate-100"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -187,7 +187,7 @@ function ImageUploadField({
               uploading && "cursor-not-allowed opacity-60",
               isDragging
                 ? "border-indigo-400 bg-indigo-50"
-                : "border-slate-300 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50/40"
+                : "border-indigo-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50/40"
             )}
           >
             {uploading ? (
@@ -199,7 +199,7 @@ function ImageUploadField({
               <>
                 <div className={cn(
                   "flex h-9 w-9 items-center justify-center rounded-xl transition-colors",
-                  isDragging ? "bg-indigo-100" : "bg-white border border-slate-200"
+                  isDragging ? "bg-indigo-100" : "bg-white border border-indigo-100"
                 )}>
                   <ImagePlus className={cn("h-5 w-5", isDragging ? "text-indigo-600" : "text-slate-400")} />
                 </div>
@@ -292,7 +292,7 @@ function BusFormFields({
                   onChange({ ...form, amenities: [...existing, a.label].join(", ") });
                 }
               }}
-              className="text-[11px] px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 transition-colors"
+              className="text-[11px] px-2 py-0.5 rounded-full border border-indigo-100 bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-700 transition-colors"
             >
               <AmenityIcon value={a.value} className="size-3 inline-block mr-1" />{a.label}
             </button>
@@ -545,7 +545,7 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
       )}
 
       {/* Fleet table */}
-      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      <div className="rounded-2xl border border-indigo-100/80 bg-white overflow-hidden shadow-sm">
         {details.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-slate-400">
             <Bus className="h-12 w-12 mb-3 opacity-30" />
@@ -564,9 +564,9 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
                 <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-indigo-50">
               {details.map((detail) => (
-                <tr key={detail.id} className="hover:bg-slate-50 transition-colors">
+                <tr key={detail.id} className="hover:bg-indigo-50/40 transition-colors">
                   {/* Vehicle name */}
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
@@ -603,12 +603,12 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
                     {detail.amenities.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
                         {detail.amenities.slice(0, 3).map((a) => (
-                          <span key={a} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-600">
+                          <span key={a} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 border border-indigo-100 text-slate-600">
                             {a}
                           </span>
                         ))}
                         {detail.amenities.length > 3 && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-500">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 border border-indigo-100 text-slate-500">
                             +{detail.amenities.length - 3}
                           </span>
                         )}
@@ -620,7 +620,7 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
                   {/* Actions */}
                   <td className="px-5 py-4 text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 w-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors">
+                      <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 w-8 rounded-xl border border-indigo-100/80 bg-white hover:bg-indigo-50/40 transition-colors">
                         <MoreVertical className="h-3.5 w-3.5 text-slate-500" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-44">
@@ -668,7 +668,7 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
           </DialogHeader>
           <form onSubmit={handleAdd} className="space-y-5 mt-2">
             <BusFormFields form={addForm} onChange={setAddForm} disabled={isPending} />
-            <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
+            <div className="flex justify-end gap-3 pt-2 border-t border-indigo-50">
               <Button type="button" variant="outline" className="rounded-xl" onClick={() => setShowAdd(false)} disabled={isPending}>
                 Cancel
               </Button>
@@ -692,7 +692,7 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
           </DialogHeader>
           <form onSubmit={handleEdit} className="space-y-5 mt-2">
             <BusFormFields form={editForm} onChange={setEditForm} disabled={isPending} />
-            <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
+            <div className="flex justify-end gap-3 pt-2 border-t border-indigo-50">
               <Button type="button" variant="outline" className="rounded-xl" onClick={() => setEditTarget(null)} disabled={isPending}>
                 Cancel
               </Button>
@@ -716,7 +716,7 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
           {detailTarget && (
             <div className="space-y-4 mt-2">
               {/* Hero */}
-              <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-indigo-100">
                 <BusAvatar busType={detailTarget.busType} />
                 <div>
                   <p className="font-bold text-slate-900 text-lg leading-tight">{detailTarget.name}</p>
@@ -738,7 +738,7 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
                   { icon: Layers,   label: "Bus Type",   value: BUS_TYPE_LABELS[detailTarget.busType] ?? detailTarget.busType },
                   { icon: Calendar, label: "Added",       value: new Date(detailTarget.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) },
                 ].map(({ icon: Icon, label, value }) => (
-                  <div key={label} className="rounded-xl bg-slate-50 border border-slate-200 p-3">
+                  <div key={label} className="rounded-xl bg-slate-50 border border-indigo-100 p-3">
                     <div className="flex items-center gap-1.5 mb-1">
                       <Icon className="h-3.5 w-3.5 text-slate-400" />
                       <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400">{label}</p>
@@ -750,11 +750,11 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
 
               {/* Amenities */}
               {detailTarget.amenities.length > 0 && (
-                <div className="rounded-xl bg-slate-50 border border-slate-200 p-4">
+                <div className="rounded-xl bg-slate-50 border border-indigo-100 p-4">
                   <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 mb-2">Amenities</p>
                   <div className="flex flex-wrap gap-2">
                     {detailTarget.amenities.map((a) => (
-                      <span key={a} className="text-xs px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-700 font-medium">
+                      <span key={a} className="text-xs px-2.5 py-1 rounded-full bg-white border border-indigo-100 text-slate-700 font-medium">
                         {a}
                       </span>
                     ))}
@@ -764,7 +764,7 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
 
               {/* Images */}
               {detailTarget.images && detailTarget.images.length > 0 && (
-                <div className="rounded-xl bg-slate-50 border border-slate-200 p-4">
+                <div className="rounded-xl bg-slate-50 border border-indigo-100 p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-1.5">
                       <Image className="h-3.5 w-3.5 text-slate-400" />
@@ -777,7 +777,7 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
                     {detailTarget.images.map((url, i) => (
                       <a
                         key={i} href={url} target="_blank" rel="noopener noreferrer"
-                        className="group relative overflow-hidden rounded-lg border border-slate-200 bg-slate-100 aspect-video block"
+                        className="group relative overflow-hidden rounded-lg border border-indigo-100 bg-slate-100 aspect-video block"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
@@ -823,7 +823,7 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
               busName={`${docsTarget.name} · ${docsTarget.registrationNumber}`}
             />
           )}
-          <div className="flex justify-end pt-2 border-t border-slate-100 mt-2">
+          <div className="flex justify-end pt-2 border-t border-indigo-50 mt-2">
             <Button variant="outline" className="rounded-xl" onClick={() => setDocsTarget(null)}>Close</Button>
           </div>
         </DialogContent>

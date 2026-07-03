@@ -243,8 +243,8 @@ export default function AdminBusesManager({
 
   return (
     <>
-      <Card className="border border-slate-200 bg-white shadow-sm">
-        <CardHeader className="border-b border-slate-100 bg-slate-50/50">
+      <Card className="border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40">
+        <CardHeader className="border-b border-indigo-50 bg-slate-50/50">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
               <div className="flex items-center gap-3">
@@ -260,11 +260,11 @@ export default function AdminBusesManager({
               </div>
               <div className="flex items-center gap-2">
                 {/* View toggle */}
-                <div className="flex rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+                <div className="flex rounded-xl border border-indigo-100/80 bg-white overflow-hidden shadow-sm">
                   <button
                     type="button"
                     onClick={() => setGroupedView(true)}
-                    className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors ${groupedView ? "bg-indigo-600 text-white" : "text-slate-500 hover:bg-slate-50"}`}
+                    className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors ${groupedView ? "bg-indigo-600 text-white" : "text-slate-500 hover:bg-indigo-50/40"}`}
                     title="Group by route"
                   >
                     <Layers className="size-3.5" /> Grouped
@@ -272,7 +272,7 @@ export default function AdminBusesManager({
                   <button
                     type="button"
                     onClick={() => setGroupedView(false)}
-                    className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors ${!groupedView ? "bg-indigo-600 text-white" : "text-slate-500 hover:bg-slate-50"}`}
+                    className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold transition-colors ${!groupedView ? "bg-indigo-600 text-white" : "text-slate-500 hover:bg-indigo-50/40"}`}
                     title="Flat list"
                   >
                     <LayoutList className="size-3.5" /> List
@@ -298,7 +298,7 @@ export default function AdminBusesManager({
                   value={busQuery}
                   onChange={(event) => setBusQuery(event.target.value)}
                   placeholder="Search by route, type, or time"
-                  className="h-11 rounded-xl border-slate-200 bg-white/90 pl-9"
+                  className="h-11 rounded-xl border-indigo-100 bg-white/90 pl-9"
                 />
               </div>
               <Select
@@ -309,7 +309,7 @@ export default function AdminBusesManager({
                   }
                 }}
               >
-                <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-white/90">
+                <SelectTrigger className="h-11 rounded-xl border-indigo-100 bg-white/90">
                   <SelectValue placeholder="All routes" />
                 </SelectTrigger>
                 <SelectContent>
@@ -325,7 +325,7 @@ export default function AdminBusesManager({
                 type="date"
                 value={busDateFilter}
                 onChange={(event) => setBusDateFilter(event.target.value)}
-                className="h-11 rounded-xl border-slate-200 bg-white/90"
+                className="h-11 rounded-xl border-indigo-100 bg-white/90"
               />
             </div>
           </div>
@@ -353,7 +353,7 @@ export default function AdminBusesManager({
 
           {/* ── Bulk action bar ── */}
           {selectedIds.size > 0 && (
-            <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm animate-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center gap-3 rounded-2xl border border-indigo-100 bg-slate-50 px-4 py-3 shadow-sm animate-in slide-in-from-top-2 duration-200">
               <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                 <CheckSquare2 className="size-4 text-indigo-600" />
                 {selectedIds.size} departure{selectedIds.size !== 1 ? "s" : ""} selected
@@ -362,7 +362,7 @@ export default function AdminBusesManager({
                 <button
                   type="button"
                   onClick={() => setSelectedIds(new Set())}
-                  className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                  className="flex items-center gap-1.5 rounded-xl border border-indigo-100/80 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-indigo-50/40 transition-colors"
                 >
                   <X className="size-3" /> Clear selection
                 </button>
@@ -378,7 +378,7 @@ export default function AdminBusesManager({
           )}
 
           {buses.length === 0 ? (
-            <div className="rounded-2xl border-2 border-dashed border-slate-300/50 bg-gradient-to-br from-slate-50/50 to-slate-100/50 px-8 py-12 text-center">
+            <div className="rounded-2xl border-2 border-dashed border-indigo-200/50 bg-gradient-to-br from-slate-50/50 to-slate-100/50 px-8 py-12 text-center">
               <BusFront className="mx-auto mb-4 size-12 text-slate-400" />
               <p className="text-sm text-muted-foreground">
                 No buses yet. Create your first departure to start selling seats.
@@ -417,7 +417,7 @@ export default function AdminBusesManager({
                   return (
                     <div
                       key={group.key}
-                      className="rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-shadow hover:shadow-md"
+                      className="rounded-2xl border border-indigo-100 shadow-sm overflow-hidden transition-shadow hover:shadow-md"
                     >
                       {/* Route header — click navigates to route calendar page */}
                       <div
@@ -453,7 +453,7 @@ export default function AdminBusesManager({
 
                         {/* Stat pills */}
                         <div className="hidden sm:flex items-center gap-2 shrink-0">
-                          <span className="rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[11px] font-bold text-slate-700">
+                          <span className="rounded-full bg-slate-100 border border-indigo-100 px-2.5 py-0.5 text-[11px] font-bold text-slate-700">
                             {group.totalBuses} dep{group.totalBuses !== 1 ? "s" : ""}
                           </span>
                           <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold border ${
@@ -467,7 +467,7 @@ export default function AdminBusesManager({
 
                         {/* Fill bar */}
                         <div className="hidden md:flex flex-col gap-1 w-20 shrink-0">
-                          <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                          <div className="h-1.5 w-full rounded-full bg-indigo-50 overflow-hidden">
                             <div
                               className={`h-full rounded-full ${fillPct >= 90 ? "bg-red-500" : fillPct >= 60 ? "bg-amber-500" : "bg-emerald-500"}`}
                               style={{ width: `${fillPct}%` }}
@@ -487,7 +487,7 @@ export default function AdminBusesManager({
             </div>
           ) : (
             /* ════════ FLAT LIST VIEW (existing) ════════ */
-            <div className="rounded-2xl border border-slate-200/50 bg-white/80 overflow-hidden">
+            <div className="rounded-2xl border border-indigo-100/50 bg-white/80 overflow-hidden">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-50 hover:bg-transparent">
@@ -539,7 +539,7 @@ export default function AdminBusesManager({
                       return (
                         <TableRow
                           key={bus.id}
-                          className={`transition-colors group ${isSelected ? "bg-slate-50/70" : "hover:bg-slate-50/40"}`}
+                          className={`transition-colors group ${isSelected ? "bg-slate-50/70" : "hover:bg-indigo-50/40/40"}`}
                         >
                           {/* Checkbox */}
                           <TableCell className="py-3 pl-4">
@@ -596,7 +596,7 @@ export default function AdminBusesManager({
                                 ({fillPct}% full)
                               </span>
                             </div>
-                            <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+                            <div className="h-1.5 w-full rounded-full bg-indigo-50 overflow-hidden">
                               <div
                                 className={`h-full rounded-full transition-all ${
                                   fillPct >= 90 ? "bg-red-500"

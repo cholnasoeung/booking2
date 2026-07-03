@@ -272,7 +272,7 @@ export default function AdminUsersManager() {
       )}
 
       {/* Table */}
-      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      <div className="rounded-2xl border border-indigo-100/80 bg-white overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-slate-50 border-b border-slate-200">
@@ -285,7 +285,7 @@ export default function AdminUsersManager() {
                 <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-indigo-50">
               {loading && !data ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-12 text-center text-slate-400">
@@ -306,7 +306,7 @@ export default function AdminUsersManager() {
                     key={user.id}
                     className={cn(
                       "transition-colors",
-                      user.isSuspended ? "bg-orange-50/40 hover:bg-orange-50" : "hover:bg-slate-50"
+                      user.isSuspended ? "bg-orange-50/40 hover:bg-orange-50" : "hover:bg-indigo-50/40"
                     )}
                   >
                     {/* User */}
@@ -372,7 +372,7 @@ export default function AdminUsersManager() {
                         <DropdownMenuTrigger
                           disabled={pendingId === user.id}
                           className={cn(
-                            "inline-flex items-center justify-center h-8 w-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors",
+                            "inline-flex items-center justify-center h-8 w-8 rounded-xl border border-indigo-100/80 bg-white hover:bg-indigo-50/40 transition-colors",
                             pendingId === user.id && "opacity-50 cursor-not-allowed"
                           )}
                         >
@@ -452,7 +452,7 @@ export default function AdminUsersManager() {
 
         {/* Pagination */}
         {data && data.totalPages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100 bg-slate-50">
+          <div className="flex items-center justify-between px-5 py-3 border-t border-indigo-50 bg-slate-50">
             <p className="text-xs text-slate-500">
               Page <span className="font-semibold">{data.page}</span> of{" "}
               <span className="font-semibold">{data.totalPages}</span>
@@ -543,7 +543,7 @@ export default function AdminUsersManager() {
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={() => setPwModal(null)}
-                  className="flex-1 h-11 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                  className="flex-1 h-11 rounded-xl border border-indigo-100 text-sm font-semibold text-slate-700 hover:bg-indigo-50/40 transition-colors"
                 >
                   Cancel
                 </button>

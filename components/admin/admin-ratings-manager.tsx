@@ -140,7 +140,7 @@ export default function AdminRatingsManager() {
             className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${
               statusFilter === s
                 ? "bg-indigo-600 text-white border-indigo-600"
-                : "bg-white text-gray-700 border-gray-200 hover:border-indigo-300"
+                : "bg-white text-gray-700 border-indigo-100 hover:border-indigo-300"
             }`}
           >
             {STATUS_CONFIG[s].label}
@@ -155,7 +155,7 @@ export default function AdminRatingsManager() {
           Loading ratings…
         </div>
       ) : data?.ratings.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-16 text-center">
+        <div className="rounded-2xl border border-dashed border-indigo-100 bg-white p-16 text-center">
           <Star className="mx-auto w-12 h-12 text-gray-200 mb-3" />
           <p className="text-gray-500 font-medium">No {statusFilter} ratings</p>
           <p className="text-sm text-gray-400 mt-1">
@@ -169,10 +169,10 @@ export default function AdminRatingsManager() {
           {data?.ratings.map((r) => (
             <div
               key={r.id}
-              className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden"
+              className="rounded-2xl border border-indigo-100 bg-white shadow-sm overflow-hidden"
             >
               {/* Card header */}
-              <div className="flex items-start justify-between px-5 py-4 border-b border-gray-100 bg-gray-50 gap-4">
+              <div className="flex items-start justify-between px-5 py-4 border-b border-gray-100 bg-indigo-50/40 gap-4">
                 <div className="flex items-start gap-3 flex-1 min-w-0">
                   {/* Avatar */}
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 text-white text-sm font-bold">
@@ -229,7 +229,7 @@ export default function AdminRatingsManager() {
                       ["Comfort", r.aspects.comfort],
                     ] as [string, number][]
                   ).map(([label, val]) => (
-                    <div key={label} className="rounded-xl bg-gray-50 border border-gray-100 px-3 py-2">
+                    <div key={label} className="rounded-xl bg-indigo-50/40 border border-gray-100 px-3 py-2">
                       <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">{label}</p>
                       <StarRow value={val} />
                     </div>
@@ -248,7 +248,7 @@ export default function AdminRatingsManager() {
               </div>
 
               {/* Actions */}
-              <div className="px-5 py-3 border-t border-gray-100 bg-gray-50 flex items-center gap-3 flex-wrap">
+              <div className="px-5 py-3 border-t border-gray-100 bg-indigo-50/40 flex items-center gap-3 flex-wrap">
                 {r.status !== "approved" && (
                   <button
                     onClick={() => setStatus(r, "approved")}

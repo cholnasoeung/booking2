@@ -70,7 +70,7 @@ const STATUS_MAP: Record<LFStatus, { label: string; color: string; bg: string; i
   found:        { label: "Found",        color: "text-teal-700",   bg: "bg-teal-100    border border-teal-300",    icon: CheckCircle },
   returned:     { label: "Returned",     color: "text-emerald-700",bg: "bg-emerald-100 border border-emerald-300", icon: CheckCircle },
   not_found:    { label: "Not Found",    color: "text-red-700",    bg: "bg-red-100     border border-red-300",     icon: XCircle     },
-  closed:       { label: "Closed",       color: "text-slate-600",  bg: "bg-slate-100   border border-slate-300",   icon: XCircle     },
+  closed:       { label: "Closed",       color: "text-slate-600",  bg: "bg-slate-100   border border-indigo-200",   icon: XCircle     },
 };
 
 const CATEGORY_MAP: Record<LFCategory, { label: string; icon: React.ElementType; color: string; bg: string }> = {
@@ -265,7 +265,7 @@ export default function AdminLostFoundTab() {
             onClick={fetchData}
             variant="outline"
             size="sm"
-            className="text-slate-500 border-slate-200 hover:bg-slate-50"
+            className="text-slate-500 border-slate-200 hover:bg-indigo-50/40"
           >
             <RefreshCw className="size-4" />
           </Button>
@@ -273,7 +273,7 @@ export default function AdminLostFoundTab() {
             onClick={() => { setCatMgrOpen(true); setCatErr(""); setNewCatLabel(""); setNewCatColor(CUSTOM_CAT_COLORS[0].label); }}
             variant="outline"
             size="sm"
-            className="gap-1.5 text-slate-600 border-slate-200 hover:bg-slate-50"
+            className="gap-1.5 text-slate-600 border-slate-200 hover:bg-indigo-50/40"
           >
             <Settings2 className="size-4" /> Categories
           </Button>
@@ -348,13 +348,13 @@ export default function AdminLostFoundTab() {
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search ref#, item name, reporter…"
-            className="pl-9 border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 focus:border-teal-400"
+            className="pl-9 border-indigo-100 bg-white text-slate-800 placeholder:text-slate-400 focus:border-teal-400"
           />
         </div>
         <select
           value={statusFilter}
           onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400/40"
+          className="rounded-xl border border-indigo-100/80 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400/40"
         >
           <option value="">All Statuses</option>
           {ALL_STATUSES.map(s => (
@@ -364,7 +364,7 @@ export default function AdminLostFoundTab() {
         <select
           value={categoryFilter}
           onChange={e => { setCategoryFilter(e.target.value); setPage(1); }}
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400/40"
+          className="rounded-xl border border-indigo-100/80 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400/40"
         >
           <option value="">All Categories</option>
           {allCategories.map(c => (
@@ -386,7 +386,7 @@ export default function AdminLostFoundTab() {
         </div>
       ) : (
         <>
-          <div className="rounded-2xl border border-slate-200 overflow-x-auto shadow-sm">
+          <div className="rounded-2xl border border-indigo-100 overflow-x-auto shadow-sm">
             <table className="w-full text-sm min-w-[860px]">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50">
@@ -395,14 +395,14 @@ export default function AdminLostFoundTab() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-indigo-50">
                 {records.map((rec) => {
                   const status   = STATUS_MAP[rec.status];
                   const category = getCategoryInfo(rec.itemCategory);
                   const CatIcon  = category.icon;
                   const SIcon    = status.icon;
                   return (
-                    <tr key={rec.id} className="hover:bg-slate-50/80 transition-colors">
+                    <tr key={rec.id} className="hover:bg-indigo-50/40/80 transition-colors">
                       <td className="px-4 py-3.5">
                         <span className="font-mono text-xs text-teal-600 font-bold">{rec.refNumber}</span>
                       </td>
@@ -476,14 +476,14 @@ export default function AdminLostFoundTab() {
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page <= 1}
-                  className="flex items-center justify-center size-8 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 disabled:opacity-30"
+                  className="flex items-center justify-center size-8 rounded-lg border border-indigo-100 text-slate-500 hover:text-slate-800 hover:bg-indigo-50/40 disabled:opacity-30"
                 >
                   <ChevronLeft className="size-4" />
                 </button>
                 <button
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page >= totalPages}
-                  className="flex items-center justify-center size-8 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 disabled:opacity-30"
+                  className="flex items-center justify-center size-8 rounded-lg border border-indigo-100 text-slate-500 hover:text-slate-800 hover:bg-indigo-50/40 disabled:opacity-30"
                 >
                   <ChevronRight className="size-4" />
                 </button>
@@ -510,7 +510,7 @@ export default function AdminLostFoundTab() {
 
           <div className="space-y-5 py-2">
             {/* Reporter */}
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <div className="rounded-xl border border-indigo-100 bg-slate-50 p-4 space-y-3">
               <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Reporter Details</h4>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
@@ -529,7 +529,7 @@ export default function AdminLostFoundTab() {
             </div>
 
             {/* Trip */}
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <div className="rounded-xl border border-indigo-100 bg-slate-50 p-4 space-y-3">
               <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                 Trip Info <span className="text-slate-400 normal-case font-normal">(optional)</span>
               </h4>
@@ -550,7 +550,7 @@ export default function AdminLostFoundTab() {
             </div>
 
             {/* Item */}
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <div className="rounded-xl border border-indigo-100 bg-slate-50 p-4 space-y-3">
               <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Item Details</h4>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
@@ -562,7 +562,7 @@ export default function AdminLostFoundTab() {
                   <select
                     value={form.itemCategory}
                     onChange={setF("itemCategory")}
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400/40"
+                    className="w-full rounded-md border border-indigo-100 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400/40"
                   >
                     {allCategories.map(c => (
                       <option key={c.value} value={c.value}>{c.label}</option>
@@ -584,7 +584,7 @@ export default function AdminLostFoundTab() {
                     onChange={setF("itemDescription")}
                     rows={2}
                     placeholder="Detailed description of the item…"
-                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400/40"
+                    className="w-full rounded-md border border-indigo-100 bg-white px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400/40"
                   />
                 </div>
                 <div className="col-span-2 space-y-1">
@@ -673,7 +673,7 @@ export default function AdminLostFoundTab() {
             )}
 
             {/* Add new category form */}
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <div className="rounded-xl border border-indigo-100 bg-slate-50 p-4 space-y-3">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Add New Category</p>
               <div className="space-y-1">
                 <Label className="text-slate-600 text-xs font-semibold">Category Name</Label>
@@ -742,7 +742,7 @@ export default function AdminLostFoundTab() {
 
               <div className="space-y-4 py-2">
                 {/* Reporter */}
-                <div className="grid grid-cols-3 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
+                <div className="grid grid-cols-3 gap-3 rounded-xl border border-indigo-100 bg-slate-50 p-4 text-sm">
                   <div>
                     <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Reporter</p>
                     <p className="text-slate-800 font-semibold">{viewTarget.reporterName}</p>
@@ -758,7 +758,7 @@ export default function AdminLostFoundTab() {
                 </div>
 
                 {/* Item */}
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2 text-sm">
+                <div className="rounded-xl border border-indigo-100 bg-slate-50 p-4 space-y-2 text-sm">
                   <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Item Details</h4>
                   <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm">
                     <div><span className="text-slate-400">Color:</span><span className="text-slate-700 ml-1 font-medium">{viewTarget.color ?? "—"}</span></div>
@@ -774,7 +774,7 @@ export default function AdminLostFoundTab() {
 
                 {/* Trip */}
                 {(viewTarget.routeLabel || viewTarget.travelDate || viewTarget.bookingId) && (
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
+                  <div className="rounded-xl border border-indigo-100 bg-slate-50 p-4 text-sm">
                     <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Trip Info</h4>
                     <div className="grid grid-cols-2 gap-y-2 gap-x-4">
                       {viewTarget.routeLabel && <div><span className="text-slate-400">Route:</span><span className="text-slate-700 ml-1 font-medium">{viewTarget.routeLabel}</span></div>}
@@ -798,7 +798,7 @@ export default function AdminLostFoundTab() {
                       <select
                         value={editForm.status}
                         onChange={e => setEditForm(p => ({ ...p, status: e.target.value as LFStatus }))}
-                        className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400/40"
+                        className="w-full rounded-md border border-indigo-100 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400/40"
                       >
                         {ALL_STATUSES.map(s => (
                           <option key={s} value={s}>{STATUS_MAP[s].label}</option>
@@ -839,7 +839,7 @@ export default function AdminLostFoundTab() {
                         onChange={e => setEditForm(p => ({ ...p, adminNotes: e.target.value }))}
                         rows={3}
                         placeholder="Internal notes about this report…"
-                        className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400/40"
+                        className="w-full rounded-md border border-indigo-100 bg-white px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400/40"
                       />
                     </div>
                   </div>

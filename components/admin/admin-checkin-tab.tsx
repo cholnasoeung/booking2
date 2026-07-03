@@ -40,7 +40,7 @@ interface Passenger {
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<CheckInStatus, { label: string; color: string; bg: string }> = {
-  "pending":    { label: "Not Arrived",  color: "text-gray-500",   bg: "bg-gray-100" },
+  "pending":    { label: "Not Arrived",  color: "text-gray-500",   bg: "bg-indigo-50" },
   "checked-in": { label: "Arrived",      color: "text-blue-700",   bg: "bg-blue-100" },
   "boarded":    { label: "Boarded",      color: "text-emerald-700",bg: "bg-emerald-100" },
   "no-show":    { label: "No-Show",      color: "text-red-700",    bg: "bg-red-100" },
@@ -70,7 +70,7 @@ function BoardingBar({ dep }: { dep: Departure }) {
         <span>{arrived}/{dep.bookedCount} arrived</span>
         <span>{pct}%</span>
       </div>
-      <div className="h-2 rounded-full bg-gray-100 overflow-hidden relative">
+      <div className="h-2 rounded-full bg-indigo-50 overflow-hidden relative">
         {/* boarded (darker) */}
         <div
           className="absolute left-0 h-full bg-emerald-500 rounded-full transition-all"
@@ -106,7 +106,7 @@ function PassengerRow({
       p.checkInStatus === "boarded" ? "border-emerald-200 bg-emerald-50/40"
       : p.checkInStatus === "checked-in" ? "border-blue-200 bg-blue-50/30"
       : p.checkInStatus === "no-show" ? "border-red-200 bg-red-50/30"
-      : "border-gray-200 bg-white hover:bg-gray-50"
+      : "border-indigo-100 bg-white hover:bg-indigo-50/40"
     }`}>
       {/* Avatar + info */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -129,7 +129,7 @@ function PassengerRow({
             )}
           </div>
           <div className="flex flex-wrap gap-3 text-xs text-gray-400 mt-0.5">
-            <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-[11px]">
+            <span className="font-mono bg-indigo-50 px-1.5 py-0.5 rounded text-[11px]">
               {p.seats.join(", ")}
             </span>
             {p.phone && <span>{p.phone}</span>}
@@ -166,7 +166,7 @@ function PassengerRow({
           <button
             disabled={updating}
             onClick={() => onUpdate(p.id, "pending")}
-            className="px-3 py-2 rounded-lg border border-gray-200 text-gray-500 text-xs hover:bg-gray-100 disabled:opacity-50"
+            className="px-3 py-2 rounded-lg border border-indigo-100 text-gray-500 text-xs hover:bg-indigo-50 disabled:opacity-50"
           >
             Undo
           </button>
@@ -185,7 +185,7 @@ function PassengerRow({
           <button
             disabled={updating}
             onClick={() => onUpdate(p.id, "pending")}
-            className="px-3 py-2 rounded-lg border border-gray-200 text-gray-500 text-xs hover:bg-gray-100 disabled:opacity-50"
+            className="px-3 py-2 rounded-lg border border-indigo-100 text-gray-500 text-xs hover:bg-indigo-50 disabled:opacity-50"
           >
             Restore
           </button>
@@ -330,7 +330,7 @@ export default function AdminCheckinTab() {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="h-10 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="h-10 rounded-xl border border-indigo-100 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             <button
               onClick={loadDepartures}
@@ -361,7 +361,7 @@ export default function AdminCheckinTab() {
                 <button
                   key={dep.id}
                   onClick={() => setSelectedDep(dep)}
-                  className="text-left bg-white rounded-2xl border border-gray-200 p-5 hover:border-indigo-300 hover:shadow-md transition-all group"
+                  className="text-left bg-white rounded-2xl border border-indigo-100 p-5 hover:border-indigo-300 hover:shadow-md transition-all group"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div>
@@ -391,7 +391,7 @@ export default function AdminCheckinTab() {
                       { label: "Missing", value: missing, color: missing > 0 ? "text-amber-600" : "text-gray-400" },
                       { label: "No-show", value: dep.noShow, color: dep.noShow > 0 ? "text-red-600" : "text-gray-400" },
                     ].map((stat) => (
-                      <div key={stat.label} className="bg-gray-50 rounded-lg py-2">
+                      <div key={stat.label} className="bg-indigo-50/40 rounded-lg py-2">
                         <p className={`text-lg font-bold ${stat.color}`}>{stat.value}</p>
                         <p className="text-[10px] text-gray-400">{stat.label}</p>
                       </div>
@@ -435,7 +435,7 @@ export default function AdminCheckinTab() {
         <button
           onClick={() => loadPassengers(selectedDep.id)}
           disabled={loadingPass}
-          className="flex items-center gap-2 h-9 px-4 rounded-xl border border-gray-200 text-gray-600 text-sm hover:bg-gray-50 disabled:opacity-50"
+          className="flex items-center gap-2 h-9 px-4 rounded-xl border border-indigo-100 text-gray-600 text-sm hover:bg-indigo-50/40 disabled:opacity-50"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loadingPass ? "animate-spin" : ""}`} />
           Refresh
@@ -443,11 +443,11 @@ export default function AdminCheckinTab() {
       </div>
 
       {/* Stats bar */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-5">
+      <div className="bg-white rounded-2xl border border-indigo-100 p-5">
         <BoardingBar dep={selectedDep} />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
           {[
-            { label: "Not Arrived", value: counts.pending, icon: Users, color: "text-gray-600", bg: "bg-gray-50" },
+            { label: "Not Arrived", value: counts.pending, icon: Users, color: "text-gray-600", bg: "bg-indigo-50/40" },
             { label: "Arrived", value: counts["checked-in"], icon: LogIn, color: "text-blue-600", bg: "bg-blue-50" },
             { label: "Boarded", value: counts.boarded, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
             { label: "No-Show", value: counts["no-show"], icon: XCircle, color: "text-red-600", bg: "bg-red-50" },
@@ -472,7 +472,7 @@ export default function AdminCheckinTab() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, seat, phone…"
-            className="w-full h-10 pl-9 pr-4 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full h-10 pl-9 pr-4 rounded-xl border border-indigo-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -483,7 +483,7 @@ export default function AdminCheckinTab() {
               className={`px-3 py-2 rounded-xl text-xs font-medium capitalize transition-colors ${
                 statusFilter === s
                   ? "bg-indigo-600 text-white"
-                  : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  : "bg-white border border-indigo-100 text-gray-600 hover:bg-indigo-50/40"
               }`}
             >
               {s === "all" ? `All (${passengers.length})` : s.replace("-", " ")}

@@ -27,7 +27,7 @@ import {
 const STATUS_MAP: Record<string, { label: string; color: string; dot: string; icon: React.ElementType }> = {
   scheduled:  { label: "Scheduled",  color: "bg-blue-100 text-blue-700",     dot: "bg-blue-500",    icon: Calendar },
   active:     { label: "Active",     color: "bg-emerald-100 text-emerald-700", dot: "bg-emerald-500", icon: PlayCircle },
-  completed:  { label: "Completed",  color: "bg-slate-100 text-slate-600",   dot: "bg-slate-400",   icon: CheckCircle2 },
+  completed:  { label: "Completed",  color: "bg-indigo-50 text-indigo-600",   dot: "bg-slate-400",   icon: CheckCircle2 },
   cancelled:  { label: "Cancelled",  color: "bg-red-100 text-red-600",       dot: "bg-red-400",     icon: XCircle },
   no_show:    { label: "No Show",    color: "bg-orange-100 text-orange-700", dot: "bg-orange-500",  icon: AlertTriangle },
 };
@@ -90,7 +90,7 @@ function StatCard({ icon: Icon, label, value, color }: {
   icon: React.ElementType; label: string; value: number | string; color: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-4 shadow-sm">
+    <div className="rounded-2xl border border-indigo-100/80 bg-white p-4 flex items-center gap-4 shadow-sm">
       <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl", color)}>
         <Icon className="size-5 text-white" />
       </div>
@@ -497,7 +497,7 @@ export default function AdminDriverScheduleTab() {
           <Button variant="outline" size="sm" onClick={() => fetchData(weekStart)} disabled={loading}>
             <RefreshCw className={cn("size-4", loading && "animate-spin")} />
           </Button>
-          <div className="flex rounded-lg border border-slate-200 overflow-hidden">
+          <div className="flex rounded-lg border border-indigo-100 overflow-hidden">
             <Button variant="ghost" size="sm"
               className={cn("rounded-none h-9 px-3 text-xs font-medium", view === "week" && "bg-slate-100")}
               onClick={() => setView("week")}>
@@ -542,9 +542,9 @@ export default function AdminDriverScheduleTab() {
 
       {/* ── WEEK VIEW ─────────────────────────────────────────── */}
       {view === "week" && (
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
           {/* Week nav */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/60">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-indigo-50 bg-slate-50/60">
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" className="h-8 w-8" onClick={prevWeek}>
                 <ChevronLeft className="size-4" />
@@ -560,7 +560,7 @@ export default function AdminDriverScheduleTab() {
           </div>
 
           {/* 7-day grid */}
-          <div className="grid grid-cols-7 divide-x divide-slate-100">
+          <div className="grid grid-cols-7 divide-x divide-indigo-50">
             {weekDays.map((day, i) => {
               const daySchedules = getDay(day);
               const today = isToday(day);
@@ -594,7 +594,7 @@ export default function AdminDriverScheduleTab() {
                   {/* Schedule cards */}
                   {loading ? (
                     <div className="space-y-1.5">
-                      <div className="h-16 rounded-lg bg-slate-100 animate-pulse" />
+                      <div className="h-16 rounded-lg bg-indigo-50/60 animate-pulse" />
                     </div>
                   ) : daySchedules.length === 0 ? (
                     <div className="flex-1 flex items-center justify-center">
@@ -610,7 +610,7 @@ export default function AdminDriverScheduleTab() {
                   {/* Quick add for this day */}
                   <button
                     onClick={() => { setForm({ ...emptyForm(), date: day }); setFormError(""); setShowAdd(true); }}
-                    className="mt-auto w-full rounded-lg border border-dashed border-slate-300 py-1 text-xs text-slate-500 font-medium hover:border-indigo-400 hover:text-indigo-600 transition-colors"
+                    className="mt-auto w-full rounded-lg border border-dashed border-indigo-200 py-1 text-xs text-slate-500 font-medium hover:border-indigo-400 hover:text-indigo-600 transition-colors"
                   >
                     + Add
                   </button>
@@ -623,23 +623,23 @@ export default function AdminDriverScheduleTab() {
 
       {/* ── LIST VIEW ─────────────────────────────────────────── */}
       {view === "list" && (
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/70">
+                <tr className="border-b border-indigo-50 bg-slate-50/70">
                   {["Driver","Vehicle","Date","Shift","Status","Notes",""].map((h) => (
                     <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-indigo-50">
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i}>
                       {Array.from({ length: 7 }).map((__, j) => (
                         <td key={j} className="px-4 py-3">
-                          <div className="h-4 rounded bg-slate-100 animate-pulse" />
+                          <div className="h-4 rounded bg-indigo-50/60 animate-pulse" />
                         </td>
                       ))}
                     </tr>
@@ -657,7 +657,7 @@ export default function AdminDriverScheduleTab() {
                     const st = STATUS_MAP[s.status] ?? STATUS_MAP.scheduled;
                     return (
                       <tr key={s.id} className={cn(
-                        "hover:bg-slate-50/60 transition-colors",
+                        "hover:bg-indigo-50/40/60 transition-colors",
                         s.status === "cancelled" && "opacity-50"
                       )}>
                         <td className="px-4 py-3">

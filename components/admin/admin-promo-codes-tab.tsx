@@ -117,7 +117,7 @@ function PromoForm({
         <div>
           <Label>Banner Image</Label>
           {imagePreview ? (
-            <div className="mt-1 relative rounded-lg overflow-hidden border border-gray-200">
+            <div className="mt-1 relative rounded-lg overflow-hidden border border-indigo-100">
               <img src={imagePreview} alt="Preview" className="w-full h-44 object-cover" />
               <button
                 type="button"
@@ -458,10 +458,10 @@ export default function AdminPromoCodesTab() {
 
       {/* Create panel */}
       {showCreate && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-white rounded-xl border border-indigo-100 p-6">
           <div className="flex items-center justify-between mb-5">
             <h3 className="font-semibold text-lg">Create New Promo Code</h3>
-            <button onClick={() => setShowCreate(false)} className="p-1 hover:bg-gray-100 rounded-lg">
+            <button onClick={() => setShowCreate(false)} className="p-1 hover:bg-indigo-50 rounded-lg">
               <X className="w-5 h-5 text-gray-500" />
             </button>
           </div>
@@ -488,7 +488,7 @@ export default function AdminPromoCodesTab() {
       {/* Edit dialog */}
       {editTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl border border-indigo-100 shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
               <h3 className="font-semibold text-lg flex items-center gap-2">
                 <Edit2 className="w-4 h-4 text-indigo-500" />
@@ -497,7 +497,7 @@ export default function AdminPromoCodesTab() {
                   {editTarget.code}
                 </span>
               </h3>
-              <button onClick={() => setEditTarget(null)} className="p-1 hover:bg-gray-100 rounded-lg">
+              <button onClick={() => setEditTarget(null)} className="p-1 hover:bg-indigo-50 rounded-lg">
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
@@ -525,10 +525,10 @@ export default function AdminPromoCodesTab() {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-indigo-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-indigo-50/40 border-b border-indigo-100">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Code / Banner</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>
@@ -541,14 +541,14 @@ export default function AdminPromoCodesTab() {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {promoCodes.map((promo) => (
-                <tr key={promo._id} className="hover:bg-gray-50">
+                <tr key={promo._id} className="hover:bg-indigo-50/40">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       {promo.imageUrl ? (
                         <img src={promo.imageUrl} alt="banner"
-                          className="w-12 h-8 rounded object-cover border border-gray-200 shrink-0" />
+                          className="w-12 h-8 rounded object-cover border border-indigo-100 shrink-0" />
                       ) : (
-                        <div className="w-12 h-8 rounded bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
+                        <div className="w-12 h-8 rounded bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
                           <ImageIcon className="w-4 h-4 text-gray-400" />
                         </div>
                       )}
@@ -608,14 +608,14 @@ export default function AdminPromoCodesTab() {
                       </button>
                       <button
                         onClick={() => handleToggleActive(promo._id, promo.isActive)}
-                        className="p-2 hover:bg-gray-100 rounded-lg"
+                        className="p-2 hover:bg-indigo-50 rounded-lg"
                         title={promo.isActive ? "Deactivate" : "Activate"}
                       >
                         {promo.isActive
                           ? <XCircle className="w-4 h-4 text-red-500" />
                           : <CheckCircle className="w-4 h-4 text-green-500" />}
                       </button>
-                      <button onClick={() => handleDelete(promo._id)} className="p-2 hover:bg-gray-100 rounded-lg" title="Delete">
+                      <button onClick={() => handleDelete(promo._id)} className="p-2 hover:bg-indigo-50 rounded-lg" title="Delete">
                         <Trash2 className="w-4 h-4 text-gray-500" />
                       </button>
                     </div>

@@ -44,7 +44,7 @@ function BarList({ items, total }: { items: { name: string; count: number }[]; t
         return (
           <div key={item.name} className="flex items-center gap-3">
             <div className="w-24 shrink-0 text-xs font-medium text-slate-600 truncate">{item.name || "Unknown"}</div>
-            <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden">
+            <div className="flex-1 h-2 rounded-full bg-indigo-50 overflow-hidden">
               <div
                 className="h-2 rounded-full transition-all"
                 style={{ width: `${pct}%`, backgroundColor: PALETTE[i % PALETTE.length] }}
@@ -166,7 +166,7 @@ export default function AdminVisitorAnalytics() {
       {/* Devices + Browsers + OS */}
       <div className="grid gap-5 lg:grid-cols-3">
         {/* Devices donut */}
-        <div className="rounded-2xl border-2 border-slate-200 bg-white p-5">
+        <div className="rounded-2xl border-2 border-indigo-100 bg-white p-5">
           <h4 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
             <Monitor className="h-4 w-4 text-indigo-500" />Devices
           </h4>
@@ -205,7 +205,7 @@ export default function AdminVisitorAnalytics() {
         </div>
 
         {/* Browsers */}
-        <div className="rounded-2xl border-2 border-slate-200 bg-white p-5">
+        <div className="rounded-2xl border-2 border-indigo-100 bg-white p-5">
           <h4 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
             <Globe2 className="h-4 w-4 text-emerald-500" />Browsers
           </h4>
@@ -217,7 +217,7 @@ export default function AdminVisitorAnalytics() {
         </div>
 
         {/* Operating Systems */}
-        <div className="rounded-2xl border-2 border-slate-200 bg-white p-5">
+        <div className="rounded-2xl border-2 border-indigo-100 bg-white p-5">
           <h4 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
             <Monitor className="h-4 w-4 text-violet-500" />Operating Systems
           </h4>
@@ -230,7 +230,7 @@ export default function AdminVisitorAnalytics() {
       </div>
 
       {/* Hourly traffic chart (today) */}
-      <div className="rounded-2xl border-2 border-slate-200 bg-white p-5">
+      <div className="rounded-2xl border-2 border-indigo-100 bg-white p-5">
         <h4 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-indigo-500" />
           Today&apos;s Traffic by Hour
@@ -258,7 +258,7 @@ export default function AdminVisitorAnalytics() {
       {/* Top Pages + Referrers */}
       <div className="grid gap-5 lg:grid-cols-2">
         {/* Top Pages */}
-        <div className="rounded-2xl border-2 border-slate-200 bg-white p-5">
+        <div className="rounded-2xl border-2 border-indigo-100 bg-white p-5">
           <h4 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
             <FileText className="h-4 w-4 text-indigo-500" />Top Pages
           </h4>
@@ -267,7 +267,7 @@ export default function AdminVisitorAnalytics() {
           ) : (
             <div className="space-y-1">
               {topPages.slice(0, 8).map((p, i) => (
-                <div key={p.page} className="flex items-center gap-3 py-2 border-b border-slate-100 last:border-0">
+                <div key={p.page} className="flex items-center gap-3 py-2 border-b border-indigo-50 last:border-0">
                   <span className="text-[11px] font-bold text-slate-400 w-5 shrink-0">{i + 1}</span>
                   <span className="flex-1 text-sm text-slate-700 font-medium truncate"
                     title={p.page}>{p.page || "/"}</span>
@@ -281,7 +281,7 @@ export default function AdminVisitorAnalytics() {
         </div>
 
         {/* Referrers */}
-        <div className="rounded-2xl border-2 border-slate-200 bg-white p-5">
+        <div className="rounded-2xl border-2 border-indigo-100 bg-white p-5">
           <h4 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
             <ExternalLink className="h-4 w-4 text-emerald-500" />Traffic Sources
           </h4>
@@ -290,7 +290,7 @@ export default function AdminVisitorAnalytics() {
           ) : (
             <div className="space-y-1">
               {referrers.slice(0, 8).map((r, i) => (
-                <div key={r.source} className="flex items-center gap-3 py-2 border-b border-slate-100 last:border-0">
+                <div key={r.source} className="flex items-center gap-3 py-2 border-b border-indigo-50 last:border-0">
                   <span className="text-[11px] font-bold text-slate-400 w-5 shrink-0">{i + 1}</span>
                   <div className="flex-1 min-w-0">
                     <span className="text-sm text-slate-700 font-medium">

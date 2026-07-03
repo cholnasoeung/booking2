@@ -140,14 +140,14 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
     <div className="space-y-5">
 
       {/* ── Filter bar ─────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mr-1">
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-indigo-100/80 bg-white px-4 py-3 shadow-sm shadow-indigo-50/40">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-400 mr-1">
           <Filter className="size-3.5" />
           Filters
         </div>
 
         {/* Date range pills */}
-        <div className="flex items-center gap-1 rounded-xl bg-slate-50 border border-slate-200 p-0.5">
+        <div className="flex items-center gap-1 rounded-xl bg-indigo-50/60 border border-indigo-100 p-0.5">
           {DATE_RANGE_OPTS.map((opt) => (
             <button
               key={opt.value}
@@ -167,7 +167,7 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
         <select
           value={routeFilter}
           onChange={(e) => setRouteFilter(e.target.value)}
-          className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+          className="rounded-xl border border-indigo-100 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
         >
           <option value="all">All routes</option>
           {routes.map((r) => (
@@ -179,7 +179,7 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+          className="rounded-xl border border-indigo-100 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
         >
           <option value="all">All statuses</option>
           <option value="confirmed">Confirmed</option>
@@ -239,7 +239,7 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
 
       {/* ── Route performance bar ──────────────────────────────────────── */}
       {routes.length > 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-5">
+        <div className="rounded-2xl border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 p-5">
           <div className="flex items-center gap-2 mb-4">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow">
               <MapPinned className="size-3.5" />
@@ -266,7 +266,7 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
                       <span className="text-xs font-bold text-slate-800 w-16 text-right">{formatCurrency(u.revenue)}</span>
                     </div>
                   </div>
-                  <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+                  <div className="h-2 w-full rounded-full bg-indigo-50 overflow-hidden">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-500"
                       style={{ width: `${pct}%` }}
@@ -282,8 +282,8 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
       {/* ── Charts row ─────────────────────────────────────────────────── */}
       <div className="grid gap-5 xl:grid-cols-[1.6fr_1fr]">
         {/* Line chart */}
-        <Card className="border border-slate-200 bg-white shadow-sm">
-          <CardHeader className="border-b border-slate-100 pb-3 pt-4 px-5">
+        <Card className="border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40">
+          <CardHeader className="border-b border-indigo-50 pb-3 pt-4 px-5">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow">
@@ -294,7 +294,7 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
                   <CardDescription className="text-xs">Bookings & revenue over time</CardDescription>
                 </div>
               </div>
-              <div className="flex gap-1 rounded-xl bg-slate-50 border border-slate-100 p-0.5">
+              <div className="flex gap-1 rounded-xl bg-indigo-50/60 border border-indigo-100 p-0.5">
                 {TREND_DAYS.map((d) => (
                   <button key={d}
                     onClick={() => setTrendDays(d)}
@@ -316,11 +316,11 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 <LineChart data={trendData} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" />
                   <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
                   <YAxis yAxisId="left" tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} width={28} />
                   <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} width={44} tickFormatter={(v) => `$${v}`} />
-                  <Tooltip contentStyle={{ borderRadius: "10px", border: "1px solid #e2e8f0", fontSize: 11 }}
+                  <Tooltip contentStyle={{ borderRadius: "10px", border: "1px solid #e0e7ff", background: "#fff", fontSize: 11 }}
                     formatter={(value, name) => name === "revenue" ? [`$${value}`, "Revenue"] : [value, "Bookings"]} />
                   <Legend wrapperStyle={{ fontSize: 11, paddingTop: 6 }} formatter={(v) => v === "revenue" ? "Revenue ($)" : "Bookings"} />
                   <Line yAxisId="left"  type="monotone" dataKey="bookings" stroke="#6366f1" strokeWidth={2} dot={{ r: 2.5 }} activeDot={{ r: 4 }} />
@@ -333,8 +333,8 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
 
         {/* Donut charts stacked */}
         <div className="space-y-4">
-          <Card className="border border-slate-200 bg-white shadow-sm">
-            <CardHeader className="border-b border-slate-100 pb-2 pt-3 px-4">
+          <Card className="border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40">
+            <CardHeader className="border-b border-indigo-50 pb-2 pt-3 px-4">
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow">
                   <Ticket className="size-3.5" />
@@ -354,7 +354,7 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
                 <ResponsiveContainer width="100%" height={120}>
                   <PieChart>
                     <Pie data={statusDonut} cx="50%" cy="50%" innerRadius={32} outerRadius={50} paddingAngle={3} dataKey="value" />
-                    <Tooltip contentStyle={{ borderRadius: "8px", fontSize: 11 }} />
+                    <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e0e7ff", fontSize: 11 }} />
                     <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 10 }} />
                   </PieChart>
                 </ResponsiveContainer>
@@ -362,8 +362,8 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
             </CardContent>
           </Card>
 
-          <Card className="border border-slate-200 bg-white shadow-sm">
-            <CardHeader className="border-b border-slate-100 pb-2 pt-3 px-4">
+          <Card className="border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40">
+            <CardHeader className="border-b border-indigo-50 pb-2 pt-3 px-4">
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow">
                   <MapPinned className="size-3.5" />
@@ -381,7 +381,7 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
                 <ResponsiveContainer width="100%" height={120}>
                   <PieChart>
                     <Pie data={routeDonut} cx="50%" cy="50%" innerRadius={32} outerRadius={50} paddingAngle={3} dataKey="value" />
-                    <Tooltip contentStyle={{ borderRadius: "8px", fontSize: 11 }} formatter={(v) => [`$${Number(v).toLocaleString()}`, "Revenue"]} />
+                    <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e0e7ff", fontSize: 11 }} formatter={(v) => [`$${Number(v).toLocaleString()}`, "Revenue"]} />
                     <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 10 }} />
                   </PieChart>
                 </ResponsiveContainer>
@@ -395,8 +395,8 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
       <div className="grid gap-5 xl:grid-cols-3">
 
         {/* Recent Bookings (filtered) */}
-        <Card className="border border-slate-200 bg-white shadow-sm">
-          <CardHeader className="border-b border-slate-100 px-5 py-3">
+        <Card className="border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40">
+          <CardHeader className="border-b border-indigo-50 px-5 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow">
@@ -407,7 +407,7 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
                   <CardDescription className="text-xs">Latest customer activity</CardDescription>
                 </div>
               </div>
-              <Badge className="text-[10px] bg-slate-100 text-slate-600 border-slate-200">
+              <Badge className="text-[10px] bg-indigo-50 text-indigo-600 border-indigo-100">
                 {filteredBookings.length}
               </Badge>
             </div>
@@ -418,11 +418,11 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
                 <EmptyState icon={<Ticket className="size-8 text-slate-300" />} title="No bookings" description="Try adjusting the filters." />
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-indigo-50">
                 {filteredBookings.slice(0, 6).map((bk) => (
-                  <div key={bk.id} className="flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                  <div key={bk.id} className="flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-indigo-50/40 transition-colors">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-indigo-700 text-xs font-bold">
                         {(bk.user?.name ?? "?")[0].toUpperCase()}
                       </div>
                       <div className="min-w-0">
@@ -442,8 +442,8 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
         </Card>
 
         {/* Operations Snapshot */}
-        <Card className="border border-slate-200 bg-white shadow-sm">
-          <CardHeader className="border-b border-slate-100 px-5 py-3">
+        <Card className="border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40">
+          <CardHeader className="border-b border-indigo-50 px-5 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow">
@@ -454,7 +454,7 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
                   <CardDescription className="text-xs">Route performance</CardDescription>
                 </div>
               </div>
-              <Badge className="text-[10px] bg-slate-100 text-slate-600 border-slate-200">
+              <Badge className="text-[10px] bg-indigo-50 text-indigo-600 border-indigo-100">
                 {routes.length} routes
               </Badge>
             </div>
@@ -465,12 +465,12 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
                 <EmptyState icon={<MapPinned className="size-8 text-slate-300" />} title="No routes yet" description="Create a route to build your network." />
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-indigo-50">
                 {routes.map((route) => {
                   const u = routeUsage.get(route.id) ?? emptyRouteUsage();
                   if (routeFilter !== "all" && route.id !== routeFilter) return null;
                   return (
-                    <div key={route.id} className="flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                    <div key={route.id} className="flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-indigo-50/40 transition-colors">
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-slate-800 truncate">{route.from} → {route.to}</p>
                         <p className="text-xs text-slate-400">{route.duration} · {route.distance} km</p>
@@ -488,8 +488,8 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
         </Card>
 
         {/* Upcoming Departures (filtered) */}
-        <Card className="border border-slate-200 bg-white shadow-sm">
-          <CardHeader className="border-b border-slate-100 px-5 py-3">
+        <Card className="border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40">
+          <CardHeader className="border-b border-indigo-50 px-5 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-500 to-red-600 text-white shadow">
@@ -500,7 +500,7 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
                   <CardDescription className="text-xs">Published buses</CardDescription>
                 </div>
               </div>
-              <Badge className="text-[10px] bg-slate-100 text-slate-600 border-slate-200">
+              <Badge className="text-[10px] bg-indigo-50 text-indigo-600 border-indigo-100">
                 {filteredBuses.length}
               </Badge>
             </div>
@@ -511,9 +511,9 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
                 <EmptyState icon={<BusFront className="size-8 text-slate-300" />} title="No departures" description="Try adjusting the route filter." />
               </div>
             ) : (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-indigo-50">
                 {filteredBuses.slice(0, 6).map((bus) => (
-                  <div key={bus.id} className="flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-slate-50 transition-colors">
+                  <div key={bus.id} className="flex items-center justify-between gap-3 px-4 py-2.5 hover:bg-indigo-50/40 transition-colors">
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-slate-800 truncate">{bus.from} → {bus.to}</p>
                       <p className="text-xs text-slate-400 truncate">
@@ -537,7 +537,7 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
         const noDriver   = filteredBuses.filter((b) => !b.driver).length;
         const withDriver = filteredBuses.length - noDriver;
         return (
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm px-5 py-4">
+          <div className="rounded-2xl border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 px-5 py-4">
             <div className="flex items-center gap-2 mb-3">
               <Users className="size-4 text-indigo-500" />
               <p className="text-sm font-bold text-slate-900">Driver Utilisation</p>
@@ -545,7 +545,7 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
               <span className="text-xs text-slate-400">across {filteredBuses.length} departures</span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden">
+              <div className="flex-1 h-3 rounded-full bg-indigo-50 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all"
                   style={{ width: `${filteredBuses.length > 0 ? Math.round((withDriver / filteredBuses.length) * 100) : 0}%` }}
@@ -577,7 +577,7 @@ function KpiCard({
   value: string; sub: string; trend: number | null;
 }) {
   return (
-    <Card className="border border-slate-200 bg-white shadow-sm">
+    <Card className="border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40">
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white shadow-md`}>
@@ -586,8 +586,8 @@ function KpiCard({
           {trend !== null && (
             <div className={`flex items-center gap-0.5 text-[11px] font-bold rounded-full px-2 py-0.5 ${
               trend >= 0
-                ? "bg-emerald-50 text-emerald-600"
-                : "bg-red-50 text-red-500"
+                ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100"
+                : "bg-red-50 text-red-600 ring-1 ring-red-100"
             }`}>
               {trend >= 0
                 ? <ArrowUpRight className="size-3" />

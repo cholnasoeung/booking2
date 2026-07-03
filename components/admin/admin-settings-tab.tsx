@@ -109,7 +109,7 @@ function ToggleRow({ label, description, checked, onChange }: {
   label: string; description: string; checked: boolean; onChange: (v: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-between gap-6 py-3 border-b border-slate-100 last:border-0">
+    <div className="flex items-center justify-between gap-6 py-3 border-b border-indigo-50 last:border-0">
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-slate-800">{label}</p>
         <p className="text-xs text-slate-500 mt-0.5">{description}</p>
@@ -123,7 +123,7 @@ function SaveBar({ saving, saved, error, onSave }: {
   saving: boolean; saved: boolean; error: string | null; onSave: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between pt-5 mt-2 border-t border-slate-100">
+    <div className="flex items-center justify-between pt-5 mt-2 border-t border-indigo-50">
       <div className="text-sm">
         {error && <p className="text-red-600">{error}</p>}
         {saved && (
@@ -329,7 +329,7 @@ export default function AdminSettingsTab() {
 
       <div className="flex gap-6 items-start">
         {/* Left tab nav */}
-        <div className="w-52 shrink-0 rounded-2xl border-2 border-slate-200 bg-white p-2 space-y-0.5">
+        <div className="w-52 shrink-0 rounded-2xl border-2 border-indigo-100 bg-white p-2 space-y-0.5">
           {tabs.map((tab) => {
             const active = activeTab === tab.id;
             return (
@@ -341,7 +341,7 @@ export default function AdminSettingsTab() {
                   "w-full flex items-center gap-3 rounded-xl px-3 py-3 text-left transition-all duration-150",
                   active
                     ? "bg-indigo-600 shadow-md shadow-indigo-200"
-                    : "hover:bg-slate-50"
+                    : "hover:bg-indigo-50/40"
                 )}
               >
                 <div className={cn(
@@ -360,7 +360,7 @@ export default function AdminSettingsTab() {
         </div>
 
         {/* Right panel */}
-        <div className="flex-1 rounded-2xl border-2 border-slate-200 bg-white p-7">
+        <div className="flex-1 rounded-2xl border-2 border-indigo-100 bg-white p-7">
 
           {/* ── GENERAL ── */}
           {activeTab === "general" && (
@@ -465,7 +465,7 @@ export default function AdminSettingsTab() {
                   </div>
                 </div>
               </div>
-              <div className="rounded-xl bg-slate-50 border border-slate-200 px-5 py-1">
+              <div className="rounded-xl bg-slate-50 border border-indigo-100 px-5 py-1">
                 <ToggleRow
                   label="Auto-confirm Bookings"
                   description="Automatically confirm bookings without manual review"
@@ -500,7 +500,7 @@ export default function AdminSettingsTab() {
                 </div>
                 <p className="text-xs text-slate-500">All system alerts will be sent to this address</p>
               </div>
-              <div className="rounded-xl bg-slate-50 border border-slate-200 px-5 py-1">
+              <div className="rounded-xl bg-slate-50 border border-indigo-100 px-5 py-1">
                 <ToggleRow
                   label="Email Notifications"
                   description="Send booking confirmations and updates via email"
@@ -541,7 +541,7 @@ export default function AdminSettingsTab() {
               </div>
 
               {/* Current logo */}
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+              <div className="rounded-2xl border border-indigo-100 bg-slate-50 p-5">
                 <p className="text-sm font-semibold text-slate-700 mb-3">Current Logo</p>
                 <div className="flex items-center gap-4">
                   {currentLogoUrl ? (
@@ -550,7 +550,7 @@ export default function AdminSettingsTab() {
                       <img
                         src={currentLogoUrl}
                         alt="Current logo"
-                        className="h-16 w-16 rounded-2xl object-contain border border-slate-200 bg-white p-1 shadow-sm"
+                        className="h-16 w-16 rounded-2xl object-contain border border-indigo-100 bg-white p-1 shadow-sm"
                       />
                       <div className="flex-1">
                         <p className="text-sm font-semibold text-slate-800">Logo is set</p>
@@ -608,12 +608,12 @@ export default function AdminSettingsTab() {
                     "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-8 transition-colors",
                     isDragging
                       ? "border-indigo-400 bg-indigo-50"
-                      : "border-slate-300 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50/40"
+                      : "border-indigo-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50/40"
                   )}
                 >
                   <div className={cn(
                     "flex h-12 w-12 items-center justify-center rounded-2xl transition-colors",
-                    isDragging ? "bg-indigo-100" : "bg-white border border-slate-200"
+                    isDragging ? "bg-indigo-100" : "bg-white border border-indigo-100"
                   )}>
                     <ImageIcon className={cn("h-6 w-6", isDragging ? "text-indigo-600" : "text-slate-400")} />
                   </div>
@@ -668,7 +668,7 @@ export default function AdminSettingsTab() {
               )}
 
               {/* Upload button */}
-              <div className="border-t border-slate-100 pt-5">
+              <div className="border-t border-indigo-50 pt-5">
                 <Button
                   onClick={uploadLogo}
                   disabled={!selectedFile || logoUploading}
@@ -718,7 +718,7 @@ export default function AdminSettingsTab() {
               </div>
 
               {/* Enable toggle */}
-              <div className="rounded-xl bg-slate-50 border border-slate-200 px-5 py-1">
+              <div className="rounded-xl bg-slate-50 border border-indigo-100 px-5 py-1">
                 <ToggleRow
                   label="Enable SMS Notifications"
                   description="Send SMS to passengers when announcements are broadcast"
@@ -767,10 +767,10 @@ export default function AdminSettingsTab() {
               </div>
 
               {/* Setup hint */}
-              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-500 space-y-1">
+              <div className="rounded-xl border border-indigo-100 bg-slate-50 px-4 py-3 text-xs text-slate-500 space-y-1">
                 <p className="font-semibold text-slate-700">Environment variables (optional)</p>
                 <p>You can also set these in your <code className="bg-slate-200 rounded px-1">.env.local</code> file:</p>
-                <pre className="mt-1 text-[11px] text-slate-600 bg-white border border-slate-200 rounded-lg px-3 py-2 overflow-x-auto">
+                <pre className="mt-1 text-[11px] text-slate-600 bg-white border border-indigo-100 rounded-lg px-3 py-2 overflow-x-auto">
 {`TWILIO_ACCOUNT_SID=ACxxxxxxxx
 TWILIO_AUTH_TOKEN=your_token
 TWILIO_FROM_NUMBER=+1234567890`}
@@ -841,7 +841,7 @@ TWILIO_FROM_NUMBER=+1234567890`}
                 </div>
               )}
 
-              <div className="border-t border-slate-100 pt-5">
+              <div className="border-t border-indigo-50 pt-5">
                 <Button
                   onClick={changePassword}
                   disabled={pwSaving || !pwData.current || !pwData.next || !pwData.confirm}
@@ -934,7 +934,7 @@ function PaymentTab({ payment, onChange, saving, saved, error, onSave }: Payment
                   "flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all",
                   active
                     ? "border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm"
-                    : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
+                    : "border-indigo-100 bg-white text-slate-500 hover:border-indigo-200"
                 )}
               >
                 <CircleDot className={cn("h-4 w-4", active ? "text-indigo-500" : "text-slate-300")} />
@@ -1143,7 +1143,7 @@ function AuthTab({ auth, onChange, saving, saved, error, onSave }: AuthTabProps)
       )}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-slate-200 shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-indigo-100 shadow-sm">
               <svg className="h-5 w-5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>

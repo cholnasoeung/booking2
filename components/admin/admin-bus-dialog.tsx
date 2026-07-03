@@ -428,10 +428,10 @@ export default function AdminBusDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-6xl bg-white shadow-2xl border border-slate-200 p-0 gap-0">
+      <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-6xl bg-white shadow-2xl border border-indigo-100 p-0 gap-0">
 
         {/* ── Header ── */}
-        <DialogHeader className="px-6 py-5 border-b border-slate-100 bg-slate-50/60 rounded-t-2xl">
+        <DialogHeader className="px-6 py-5 border-b border-indigo-50 bg-slate-50/60 rounded-t-2xl">
           <div className="flex items-center gap-4">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-md">
               <svg className="size-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -452,8 +452,8 @@ export default function AdminBusDialog({
         <form onSubmit={submitBus} className="px-6 py-6 space-y-6">
 
           {/* ── Section 1: Route & Schedule ── */}
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
+          <div className="rounded-2xl border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
+            <div className="px-4 py-3 bg-slate-50 border-b border-indigo-50">
               <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Route & Schedule</p>
             </div>
             <div className="p-4 grid gap-4 xl:grid-cols-6">
@@ -466,7 +466,7 @@ export default function AdminBusDialog({
                     setForm((current) => ({ ...current, routeId: value }));
                   }}
                 >
-                  <SelectTrigger id="bus-route" className="h-10 w-full rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20">
+                  <SelectTrigger id="bus-route" className="h-10 w-full rounded-xl border-indigo-100 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20">
                     <SelectValue placeholder="Select a route">
                       {(() => {
                         const r = routes.find((route) => route.id === form.routeId);
@@ -491,7 +491,7 @@ export default function AdminBusDialog({
                   type="date"
                   value={form.date}
                   onChange={(event) => setForm((current) => ({ ...current, date: event.target.value }))}
-                  className="h-10 rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
+                  className="h-10 rounded-xl border-indigo-100 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
                   required
                 />
               </div>
@@ -505,7 +505,7 @@ export default function AdminBusDialog({
                   type="date"
                   value={form.endDate}
                   onChange={(event) => setForm((current) => ({ ...current, endDate: event.target.value }))}
-                  className="h-10 rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
+                  className="h-10 rounded-xl border-indigo-100 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
                 />
                 <p className="text-[11px] text-slate-400 leading-snug">Repeats daily until this date. Leave empty for a single departure.</p>
               </div>
@@ -517,7 +517,7 @@ export default function AdminBusDialog({
                   type="time"
                   value={form.departureTime}
                   onChange={(event) => setForm((current) => ({ ...current, departureTime: event.target.value }))}
-                  className="h-10 rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
+                  className="h-10 rounded-xl border-indigo-100 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
                   required
                 />
               </div>
@@ -529,7 +529,7 @@ export default function AdminBusDialog({
                   type="time"
                   value={form.arrivalTime}
                   onChange={(event) => setForm((current) => ({ ...current, arrivalTime: event.target.value }))}
-                  className="h-10 rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
+                  className="h-10 rounded-xl border-indigo-100 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
                   required
                 />
               </div>
@@ -537,8 +537,8 @@ export default function AdminBusDialog({
           </div>
 
           {/* ── Section 2: Vehicle & Driver ── */}
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
+          <div className="rounded-2xl border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
+            <div className="px-4 py-3 bg-slate-50 border-b border-indigo-50">
               <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Vehicle & Driver Assignment</p>
             </div>
             <div className="p-4 grid gap-5 md:grid-cols-2">
@@ -564,7 +564,7 @@ export default function AdminBusDialog({
                     });
                   }}
                 >
-                  <SelectTrigger className="h-10 rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20">
+                  <SelectTrigger className="h-10 rounded-xl border-indigo-100 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20">
                     <SelectValue placeholder="Select a vehicle or leave blank" />
                   </SelectTrigger>
                   <SelectContent>
@@ -613,7 +613,7 @@ export default function AdminBusDialog({
                   value={form.driverId}
                   onValueChange={(value) => setForm((current) => ({ ...current, driverId: value }))}
                 >
-                  <SelectTrigger id="bus-driver" className="h-10 rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20">
+                  <SelectTrigger id="bus-driver" className="h-10 rounded-xl border-indigo-100 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20">
                     <SelectValue placeholder="Select a driver" />
                   </SelectTrigger>
                   <SelectContent>
@@ -649,8 +649,8 @@ export default function AdminBusDialog({
           </div>
 
           {/* ── Section 3: Bus Type & Price ── */}
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
+          <div className="rounded-2xl border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
+            <div className="px-4 py-3 bg-slate-50 border-b border-indigo-50">
               <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Bus Type & Pricing</p>
             </div>
             <div className="p-4 grid gap-4 md:grid-cols-2">
@@ -664,7 +664,7 @@ export default function AdminBusDialog({
                     setForm((current) => ({ ...current, busType: value, seatLayout: getSeatLayoutTemplate(value) }));
                   }}
                 >
-                  <SelectTrigger id="bus-type" className="h-10 w-full rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20">
+                  <SelectTrigger id="bus-type" className="h-10 w-full rounded-xl border-indigo-100 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20">
                     <SelectValue placeholder="Choose bus type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -682,7 +682,7 @@ export default function AdminBusDialog({
                   min={1}
                   value={form.pricePerSeat}
                   onChange={(event) => setForm((current) => ({ ...current, pricePerSeat: event.target.value }))}
-                  className="h-10 rounded-xl border-slate-200 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
+                  className="h-10 rounded-xl border-indigo-100 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
                   required
                 />
               </div>
@@ -697,7 +697,7 @@ export default function AdminBusDialog({
                 </p>
               </div>
               <div className="grid grid-cols-3 gap-3 text-sm">
-                <div className="rounded-xl bg-white border border-slate-200 p-3 text-center">
+                <div className="rounded-xl bg-white border border-indigo-100 p-3 text-center">
                   <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Standard</p>
                   <p className="text-base font-bold text-slate-700 mt-1">1.0×</p>
                   <p className="text-[10px] text-slate-400">${Number(form.pricePerSeat || 0).toFixed(2)}</p>
@@ -733,8 +733,8 @@ export default function AdminBusDialog({
           </div>
 
           {/* ── Section 4: Amenities ── */}
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+          <div className="rounded-2xl border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
+            <div className="px-4 py-3 bg-slate-50 border-b border-indigo-50 flex items-center justify-between">
               <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Bus Amenities</p>
               <span className="rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-semibold text-indigo-700">
                 {form.amenities.length} selected
@@ -750,7 +750,7 @@ export default function AdminBusDialog({
                       className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 transition-all ${
                         checked
                           ? "border-indigo-300 bg-indigo-50 shadow-sm"
-                          : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                          : "border-indigo-100 bg-white hover:border-indigo-200 hover:bg-indigo-50/40"
                       }`}
                     >
                       <Checkbox
@@ -764,7 +764,7 @@ export default function AdminBusDialog({
                               : current.amenities.filter((a) => a !== amenity.value),
                           }));
                         }}
-                        className="border-slate-300 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                        className="border-indigo-200 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                       />
                       <span className={`flex items-center gap-2 text-sm font-medium ${checked ? "text-indigo-800" : "text-slate-700"}`}>
                         <AmenityIcon value={amenity.value} className="size-4 shrink-0" />
@@ -778,8 +778,8 @@ export default function AdminBusDialog({
           </div>
 
           {/* ── Section 5: Stops ── */}
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+          <div className="rounded-2xl border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
+            <div className="px-4 py-3 bg-slate-50 border-b border-indigo-50 flex items-center justify-between">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Boarding & Drop-off Stops</p>
                 <p className="text-[11px] text-slate-400 mt-0.5">First stop = main boarding point · Last stop = final drop-off</p>
@@ -790,18 +790,18 @@ export default function AdminBusDialog({
             </div>
             <div className="p-4 space-y-2.5">
               {form.stops.map((stop, index) => (
-                <div key={stop.id} className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50/50 p-3 md:grid-cols-[1fr_auto_auto_auto]">
+                <div key={stop.id} className="grid grid-cols-1 gap-3 rounded-xl border border-indigo-100 bg-slate-50/50 p-3 md:grid-cols-[1fr_auto_auto_auto]">
                   <Input
                     value={stop.location}
                     onChange={(event) => updateStop(stop.id, { location: event.target.value })}
                     placeholder="Stop location"
-                    className="h-9 rounded-xl border-slate-200 bg-white text-sm"
+                    className="h-9 rounded-xl border-indigo-100 bg-white text-sm"
                   />
                   <div className="flex items-center gap-2">
                     <Checkbox
                       checked={stop.boarding}
                       onCheckedChange={(checked) => updateStop(stop.id, { boarding: Boolean(checked) })}
-                      className="border-slate-300 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                      className="border-indigo-200 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                     />
                     <span className="text-sm font-medium text-slate-700">Boarding</span>
                   </div>
@@ -809,7 +809,7 @@ export default function AdminBusDialog({
                     <Checkbox
                       checked={stop.dropping}
                       onCheckedChange={(checked) => updateStop(stop.id, { dropping: Boolean(checked) })}
-                      className="border-slate-300 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                      className="border-indigo-200 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                     />
                     <span className="text-sm font-medium text-slate-700">Drop-off</span>
                   </div>
@@ -829,8 +829,8 @@ export default function AdminBusDialog({
           </div>
 
           {/* ── Section 6: Seat Layout ── */}
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-            <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
+          <div className="rounded-2xl border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
+            <div className="px-4 py-3 bg-slate-50 border-b border-indigo-50 flex flex-wrap items-center justify-between gap-2">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Seat Layout & Blocking</p>
                 <p className="text-[11px] text-slate-400 mt-0.5">
@@ -847,7 +847,7 @@ export default function AdminBusDialog({
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-8 rounded-xl text-xs font-semibold border-slate-300 hover:border-indigo-400 hover:text-indigo-600"
+                  className="h-8 rounded-xl text-xs font-semibold border-indigo-200 hover:border-indigo-400 hover:text-indigo-600"
                   disabled={isSavingTemplate || !form.busDetailId || Boolean(layoutValidation)}
                   onClick={saveSeatTemplate}
                 >
@@ -888,7 +888,7 @@ export default function AdminBusDialog({
             <Button
               type="button"
               variant="outline"
-              className="h-10 rounded-xl border-slate-300 text-slate-700 hover:bg-slate-50"
+              className="h-10 rounded-xl border-indigo-200 text-slate-700 hover:bg-indigo-50/40"
               onClick={() => onOpenChange(false)}
             >
               Cancel

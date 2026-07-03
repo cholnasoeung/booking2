@@ -256,7 +256,7 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
       </div>
 
       {/* Driver list */}
-      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      <div className="rounded-2xl border border-indigo-100/80 bg-white overflow-hidden shadow-sm">
         {drivers.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-slate-400">
             <Users className="h-12 w-12 mb-3 opacity-30" />
@@ -275,13 +275,13 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
                 <th className="px-5 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-indigo-50">
               {drivers.map((driver) => (
                 <tr
                   key={driver.id}
                   className={cn(
                     "transition-colors",
-                    driver.status === "inactive" ? "bg-orange-50/30 hover:bg-orange-50/60" : "hover:bg-slate-50"
+                    driver.status === "inactive" ? "bg-orange-50/30 hover:bg-orange-50/60" : "hover:bg-indigo-50/40"
                   )}
                 >
                   <td className="px-5 py-4">
@@ -329,7 +329,7 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
                       <DropdownMenuTrigger
                         disabled={actionPendingId === driver.id}
                         className={cn(
-                          "inline-flex items-center justify-center h-8 w-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors",
+                          "inline-flex items-center justify-center h-8 w-8 rounded-xl border border-indigo-100/80 bg-white hover:bg-indigo-50/40 transition-colors",
                           actionPendingId === driver.id && "opacity-50 cursor-not-allowed"
                         )}
                       >
@@ -451,7 +451,7 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
           {detailTarget && (
             <div className="space-y-5 mt-2">
               {/* Avatar + name */}
-              <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-indigo-100">
                 <AvatarUpload
                   entityType="driver"
                   entityId={detailTarget.id}
@@ -485,7 +485,7 @@ export default function AdminDriversManager({ drivers: initialDrivers }: { drive
                   { icon: Car,      label: "Vehicle No.",    value: detailTarget.vehicleNumber ?? "Not assigned" },
                   { icon: Calendar, label: "Joined",         value: new Date(detailTarget.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) },
                 ].map(({ icon: Icon, label, value }) => (
-                  <div key={label} className="rounded-xl bg-slate-50 border border-slate-200 p-3">
+                  <div key={label} className="rounded-xl bg-slate-50 border border-indigo-100 p-3">
                     <div className="flex items-center gap-1.5 mb-1">
                       <Icon className="h-3.5 w-3.5 text-slate-400" />
                       <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-400">{label}</p>

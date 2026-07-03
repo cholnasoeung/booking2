@@ -129,8 +129,8 @@ function StatCard({
   icon: React.ReactNode; label: string; value: string; sub?: string;
 }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-500">
+    <div className="rounded-lg border border-indigo-100 bg-white p-5 shadow-sm">
+      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg border border-indigo-100 bg-slate-50 text-slate-500">
         {icon}
       </div>
       <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">{label}</p>
@@ -162,12 +162,12 @@ function SectionHeading({ icon, title, action }: { icon: React.ReactNode; title:
 
 /* ── Clean table wrappers ── */
 const TH = ({ children }: { children: React.ReactNode }) => (
-  <th className="border border-slate-300 bg-slate-100 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wide text-slate-600 whitespace-nowrap">
+  <th className="border border-indigo-200 bg-slate-100 px-3 py-2 text-left text-[11px] font-bold uppercase tracking-wide text-slate-600 whitespace-nowrap">
     {children}
   </th>
 );
 const TD = ({ children, red, bold, mono }: { children: React.ReactNode; red?: boolean; bold?: boolean; mono?: boolean }) => (
-  <td className={`border border-slate-200 px-3 py-2 text-sm ${red ? "text-red-600 font-semibold" : bold ? "font-semibold text-slate-900" : "text-slate-700"} ${mono ? "font-mono text-xs" : ""}`}>
+  <td className={`border border-indigo-100 px-3 py-2 text-sm ${red ? "text-red-600 font-semibold" : bold ? "font-semibold text-slate-900" : "text-slate-700"} ${mono ? "font-mono text-xs" : ""}`}>
     {children}
   </td>
 );
@@ -708,7 +708,7 @@ export default function AdminReportsTab() {
             type="button"
             onClick={handleGeneratePdf}
             disabled={pdfLoading}
-            className="flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-800 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-900 disabled:opacity-60 transition-colors shadow-sm"
+            className="flex items-center gap-2 rounded-lg border border-indigo-200 bg-slate-800 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-900 disabled:opacity-60 transition-colors shadow-sm"
           >
             {pdfLoading
               ? <><Loader2 className="h-4 w-4 animate-spin" /> Generating PDF…</>
@@ -719,7 +719,7 @@ export default function AdminReportsTab() {
       </div>
 
       {/* ── Date range picker ── */}
-      <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-blue-50 p-4 shadow-sm sm:flex-row sm:items-end">
+      <div className="flex flex-col gap-3 rounded-lg border border-indigo-100 bg-blue-50 p-4 shadow-sm sm:flex-row sm:items-end">
         <div className="flex items-center gap-2">
           <CalendarRange className="h-4 w-4 shrink-0 text-slate-600" />
           <span className="text-sm font-semibold text-slate-700">Date Range</span>
@@ -729,25 +729,25 @@ export default function AdminReportsTab() {
             <label className="text-xs text-slate-500">From</label>
             <input type="date" value={startDate} max={endDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400/40 [color-scheme:light]" />
+              className="rounded border border-indigo-200 bg-white px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400/40 [color-scheme:light]" />
           </div>
           <div className="flex items-center gap-2">
             <label className="text-xs text-slate-500">To</label>
             <input type="date" value={endDate} min={startDate} max={today}
               onChange={(e) => setEndDate(e.target.value)}
-              className="rounded border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400/40 [color-scheme:light]" />
+              className="rounded border border-indigo-200 bg-white px-3 py-1.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400/40 [color-scheme:light]" />
           </div>
           <div className="flex gap-1.5 flex-wrap">
             {[{ label: "7d", days: 7 }, { label: "30d", days: 30 }, { label: "90d", days: 90 }, { label: "1Y", days: 365 }, { label: "All", days: 3650 }].map(({ label, days }) => (
               <button key={label} type="button"
                 onClick={() => { setStartDate(new Date(Date.now() - days * 86400000).toISOString().slice(0, 10)); setEndDate(today); }}
-                className="rounded border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 hover:border-slate-500 hover:bg-slate-50 transition-colors">
+                className="rounded border border-indigo-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 hover:border-slate-500 hover:bg-indigo-50/40 transition-colors">
                 {label === "7d" || label === "30d" || label === "90d" || label === "1Y" ? `Last ${label}` : label}
               </button>
             ))}
           </div>
           <button type="button" onClick={fetchReport} disabled={isPending}
-            className="ml-auto flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-800 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-900 disabled:opacity-60 transition-all shadow-sm">
+            className="ml-auto flex items-center gap-2 rounded-lg border border-indigo-200 bg-slate-800 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-900 disabled:opacity-60 transition-all shadow-sm">
             {isPending
               ? <><RefreshCw className="h-4 w-4 animate-spin" /> Generating…</>
               : <><BarChart3 className="h-4 w-4" /> Generate Report</>
@@ -763,7 +763,7 @@ export default function AdminReportsTab() {
       )}
 
       {!data && !isPending && (
-        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 bg-white py-20 text-center">
+        <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-indigo-100 bg-white py-20 text-center">
           <BarChart3 className="h-12 w-12 text-slate-300 mb-3" />
           <p className="text-sm font-semibold text-slate-600">Select a date range and click Generate Report</p>
           <p className="mt-1 text-xs text-slate-400">Revenue, bookings, and route data will appear here.</p>
@@ -775,7 +775,7 @@ export default function AdminReportsTab() {
         <div className="space-y-8">
 
           {/* ── Report header banner ── */}
-          <div className="overflow-hidden rounded-lg shadow-sm border border-slate-200">
+          <div className="overflow-hidden rounded-lg shadow-sm border border-indigo-100">
             <div className="bg-[#1e3a5f] px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded bg-white/15 overflow-hidden border border-white/20">
@@ -832,7 +832,7 @@ export default function AdminReportsTab() {
             </div>
 
             {data.revenue.byDay.length > 1 && (
-              <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="rounded-lg border border-indigo-100 bg-white p-5 shadow-sm">
                 <p className="mb-4 text-sm font-bold text-slate-900">Revenue Trend</p>
                 <ResponsiveContainer width="100%" height={220}>
                   <AreaChart data={data.revenue.byDay} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
@@ -865,7 +865,7 @@ export default function AdminReportsTab() {
             )}
 
             {data.revenue.byDay.length > 0 && (
-              <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+              <div className="rounded-lg border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
                 <div className="flex items-center justify-between border-b border-slate-200 bg-[#1e3a5f] px-5 py-3">
                   <p className="text-sm font-bold text-white">Daily Breakdown</p>
                   <button type="button" onClick={exportRevenueCsv}
@@ -882,7 +882,7 @@ export default function AdminReportsTab() {
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-indigo-50">
                       {data.revenue.byDay.map((d, i) => (
                         <tr key={d.date} className={i % 2 === 1 ? "bg-slate-50" : "bg-white"}>
                           <TD mono>{d.date}</TD>
@@ -890,22 +890,22 @@ export default function AdminReportsTab() {
                           <TD red>{fmt(d.refunds)}</TD>
                           <TD red>{fmt(d.discounts)}</TD>
                           <TD bold>{fmt(d.net)}</TD>
-                          <td className="border border-slate-200 px-3 py-2 text-sm text-slate-700">{d.confirmed}</td>
+                          <td className="border border-indigo-100 px-3 py-2 text-sm text-slate-700">{d.confirmed}</td>
                           <TD red>{d.cancelled}</TD>
-                          <td className="border border-slate-200 px-3 py-2"><MiniBar value={d.net} max={maxDayNet} /></td>
+                          <td className="border border-indigo-100 px-3 py-2"><MiniBar value={d.net} max={maxDayNet} /></td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
                       <TFoot>
-                        <td className="border border-slate-300 px-3 py-2 text-xs font-bold text-slate-800">TOTAL</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-slate-900">{fmt(data.revenue.gross)}</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-red-600">{fmt(data.revenue.refunds)}</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-red-600">{fmt(data.revenue.discounts)}</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-slate-900">{fmt(data.revenue.net)}</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-slate-900">{data.bookings.confirmed}</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-red-600">{data.bookings.cancelled}</td>
-                        <td className="border border-slate-300 px-3 py-2" />
+                        <td className="border border-indigo-200 px-3 py-2 text-xs font-bold text-slate-800">TOTAL</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-slate-900">{fmt(data.revenue.gross)}</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-red-600">{fmt(data.revenue.refunds)}</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-red-600">{fmt(data.revenue.discounts)}</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-slate-900">{fmt(data.revenue.net)}</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-slate-900">{data.bookings.confirmed}</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-red-600">{data.bookings.cancelled}</td>
+                        <td className="border border-indigo-200 px-3 py-2" />
                       </TFoot>
                     </tfoot>
                   </table>
@@ -924,7 +924,7 @@ export default function AdminReportsTab() {
               <StatCard icon={<Users className="h-4 w-4" />}        label="Total Passengers" value={data.bookings.totalPassengers.toLocaleString()}                                         sub={`Avg ticket ${fmt(data.bookings.avgTicketValue)}`} />
             </div>
 
-            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="rounded-lg border border-indigo-100 bg-white p-5 shadow-sm">
               <p className="mb-3 text-sm font-bold text-slate-900">Booking Status Split</p>
               <div className="flex flex-col items-center gap-4 sm:flex-row">
                 <div className="w-40 h-40 shrink-0">
@@ -972,7 +972,7 @@ export default function AdminReportsTab() {
             </div>
 
             {data.bookings.byRoute.length > 0 && (
-              <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+              <div className="rounded-lg border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
                 <div className="flex items-center justify-between border-b border-slate-200 bg-[#1e3a5f] px-5 py-3">
                   <p className="text-sm font-bold text-white">Bookings by Route</p>
                   <button type="button" onClick={exportBookingsCsv}
@@ -989,16 +989,16 @@ export default function AdminReportsTab() {
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-indigo-50">
                       {data.bookings.byRoute.map((r, i) => (
                         <tr key={r.route} className={i % 2 === 1 ? "bg-slate-50" : "bg-white"}>
-                          <td className="border border-slate-200 px-3 py-2 text-xs font-bold text-slate-400">#{i + 1}</td>
+                          <td className="border border-indigo-100 px-3 py-2 text-xs font-bold text-slate-400">#{i + 1}</td>
                           <TD bold>{r.route}</TD>
-                          <td className="border border-slate-200 px-3 py-2 text-sm text-slate-700">{r.confirmed}</td>
+                          <td className="border border-indigo-100 px-3 py-2 text-sm text-slate-700">{r.confirmed}</td>
                           <TD red>{r.cancelled}</TD>
-                          <td className="border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700">{r.total}</td>
+                          <td className="border border-indigo-100 px-3 py-2 text-sm font-semibold text-slate-700">{r.total}</td>
                           <TD bold>{fmt(r.revenue)}</TD>
-                          <td className="border border-slate-200 px-3 py-2"><MiniBar value={r.total} max={maxRouteBook} /></td>
+                          <td className="border border-indigo-100 px-3 py-2"><MiniBar value={r.total} max={maxRouteBook} /></td>
                         </tr>
                       ))}
                     </tbody>
@@ -1012,7 +1012,7 @@ export default function AdminReportsTab() {
           <div className="space-y-4">
             <SectionHeading icon={<MapPin className="h-4 w-4" />} title="Route Performance" />
             {data.routes.length > 0 && (
-              <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="rounded-lg border border-indigo-100 bg-white p-5 shadow-sm">
                 <p className="mb-4 text-sm font-bold text-slate-900">Revenue by Route</p>
                 <ResponsiveContainer width="100%" height={Math.min(data.routes.length * 46 + 40, 320)}>
                   <BarChart
@@ -1043,7 +1043,7 @@ export default function AdminReportsTab() {
             {data.routes.length === 0 ? (
               <p className="text-sm text-slate-500 py-6 text-center">No route data for this period.</p>
             ) : (
-              <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+              <div className="rounded-lg border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
                 <div className="flex items-center justify-between border-b border-slate-200 bg-[#1e3a5f] px-5 py-3">
                   <p className="text-sm font-bold text-white">
                     {data.routes.length} route{data.routes.length !== 1 ? "s" : ""} active in period
@@ -1062,34 +1062,34 @@ export default function AdminReportsTab() {
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-indigo-50">
                       {data.routes.map((r, i) => (
                         <tr key={r.routeId} className={i % 2 === 1 ? "bg-slate-50" : "bg-white"}>
-                          <td className="border border-slate-200 px-3 py-2">
+                          <td className="border border-indigo-100 px-3 py-2">
                             <span className="font-semibold text-slate-900">{r.from}</span>
                             <span className="mx-1.5 text-slate-400">→</span>
                             <span className="font-semibold text-slate-900">{r.to}</span>
                           </td>
-                          <td className="border border-slate-200 px-3 py-2 text-sm text-slate-700">{r.totalBookings}</td>
-                          <td className="border border-slate-200 px-3 py-2 text-sm text-slate-700">{r.confirmedBookings}</td>
+                          <td className="border border-indigo-100 px-3 py-2 text-sm text-slate-700">{r.totalBookings}</td>
+                          <td className="border border-indigo-100 px-3 py-2 text-sm text-slate-700">{r.confirmedBookings}</td>
                           <TD red>{r.cancelledBookings}</TD>
-                          <td className="border border-slate-200 px-3 py-2 text-sm text-slate-700">{r.totalSeats}</td>
+                          <td className="border border-indigo-100 px-3 py-2 text-sm text-slate-700">{r.totalSeats}</td>
                           <TD bold>{fmt(r.revenue)}</TD>
                           <TD red>{fmt(r.refunds)}</TD>
-                          <td className="border border-slate-200 px-3 py-2"><MiniBar value={r.revenue} max={maxRouteRev} /></td>
+                          <td className="border border-indigo-100 px-3 py-2"><MiniBar value={r.revenue} max={maxRouteRev} /></td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
                       <TFoot>
-                        <td className="border border-slate-300 px-3 py-2 text-xs font-bold text-slate-800">TOTAL</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-slate-900">{data.bookings.total}</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-slate-900">{data.bookings.confirmed}</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-red-600">{data.bookings.cancelled}</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-slate-900">{data.routes.reduce((s, r) => s + r.totalSeats, 0)}</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-slate-900">{fmt(data.revenue.gross)}</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-red-600">{fmt(data.revenue.refunds)}</td>
-                        <td className="border border-slate-300 px-3 py-2" />
+                        <td className="border border-indigo-200 px-3 py-2 text-xs font-bold text-slate-800">TOTAL</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-slate-900">{data.bookings.total}</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-slate-900">{data.bookings.confirmed}</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-red-600">{data.bookings.cancelled}</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-slate-900">{data.routes.reduce((s, r) => s + r.totalSeats, 0)}</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-slate-900">{fmt(data.revenue.gross)}</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-red-600">{fmt(data.revenue.refunds)}</td>
+                        <td className="border border-indigo-200 px-3 py-2" />
                       </TFoot>
                     </tfoot>
                   </table>
@@ -1105,7 +1105,7 @@ export default function AdminReportsTab() {
               title="Expense Report"
               action={
                 <button type="button" onClick={exportExpensesCsv}
-                  className="flex items-center gap-1.5 rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+                  className="flex items-center gap-1.5 rounded border border-indigo-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-indigo-50/40 transition-colors">
                   <FileSpreadsheet className="h-3.5 w-3.5" /> Export CSV
                 </button>
               }
@@ -1133,7 +1133,7 @@ export default function AdminReportsTab() {
             </div>
 
             {data.expenses.totalExpenses > 0 && (
-              <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="rounded-lg border border-indigo-100 bg-white p-5 shadow-sm">
                 <p className="mb-3 text-sm font-bold text-slate-900">Expense Breakdown</p>
                 <div className="flex flex-col items-center gap-4 sm:flex-row">
                   <div className="w-44 h-44 shrink-0">
@@ -1186,7 +1186,7 @@ export default function AdminReportsTab() {
             )}
 
             {data.expenses.fuel.byDay.length > 0 && (
-              <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+              <div className="rounded-lg border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
                 <div className="border-b border-slate-200 bg-[#1e3a5f] px-5 py-3">
                   <p className="text-sm font-bold text-white flex items-center gap-2">
                     <Fuel className="h-4 w-4" /> Fuel Costs by Day
@@ -1199,22 +1199,22 @@ export default function AdminReportsTab() {
                         {["Date","Cost","Liters","Fills"].map((h) => <TH key={h}>{h}</TH>)}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-indigo-50">
                       {data.expenses.fuel.byDay.map((d, i) => (
                         <tr key={d.date} className={i % 2 === 1 ? "bg-slate-50" : "bg-white"}>
                           <TD mono>{d.date}</TD>
                           <TD red>{fmt(d.cost)}</TD>
-                          <td className="border border-slate-200 px-3 py-2 text-sm text-slate-700">{d.liters.toFixed(1)} L</td>
-                          <td className="border border-slate-200 px-3 py-2 text-sm text-slate-700">{d.count}</td>
+                          <td className="border border-indigo-100 px-3 py-2 text-sm text-slate-700">{d.liters.toFixed(1)} L</td>
+                          <td className="border border-indigo-100 px-3 py-2 text-sm text-slate-700">{d.count}</td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
                       <TFoot>
-                        <td className="border border-slate-300 px-3 py-2 text-xs font-bold text-slate-800">TOTAL</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-red-600">{fmt(data.expenses.fuel.total)}</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-slate-900">{data.expenses.fuel.liters.toFixed(1)} L</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-slate-900">{data.expenses.fuel.count}</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-xs font-bold text-slate-800">TOTAL</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-red-600">{fmt(data.expenses.fuel.total)}</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-slate-900">{data.expenses.fuel.liters.toFixed(1)} L</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-slate-900">{data.expenses.fuel.count}</td>
                       </TFoot>
                     </tfoot>
                   </table>
@@ -1223,7 +1223,7 @@ export default function AdminReportsTab() {
             )}
 
             {data.expenses.maintenance.byType.length > 0 && (
-              <div className="rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+              <div className="rounded-lg border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
                 <div className="border-b border-slate-200 bg-[#1e3a5f] px-5 py-3">
                   <p className="text-sm font-bold text-white flex items-center gap-2">
                     <Wrench className="h-4 w-4" /> Maintenance Costs by Type
@@ -1236,13 +1236,13 @@ export default function AdminReportsTab() {
                         {["Type","Cost","Jobs","Share"].map((h) => <TH key={h}>{h}</TH>)}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-indigo-50">
                       {data.expenses.maintenance.byType.map((t, i) => (
                         <tr key={t.type} className={i % 2 === 1 ? "bg-slate-50" : "bg-white"}>
                           <TD bold>{MAINT_LABEL[t.type] ?? t.type}</TD>
                           <TD red>{fmt(t.total)}</TD>
-                          <td className="border border-slate-200 px-3 py-2 text-sm text-slate-700">{t.count}</td>
-                          <td className="border border-slate-200 px-3 py-2">
+                          <td className="border border-indigo-100 px-3 py-2 text-sm text-slate-700">{t.count}</td>
+                          <td className="border border-indigo-100 px-3 py-2">
                             <MiniBar value={t.total} max={Math.max(...data.expenses.maintenance.byType.map((x) => x.total), 1)} />
                           </td>
                         </tr>
@@ -1250,10 +1250,10 @@ export default function AdminReportsTab() {
                     </tbody>
                     <tfoot>
                       <TFoot>
-                        <td className="border border-slate-300 px-3 py-2 text-xs font-bold text-slate-800">TOTAL</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-red-600">{fmt(data.expenses.maintenance.total)}</td>
-                        <td className="border border-slate-300 px-3 py-2 text-sm font-bold text-slate-900">{data.expenses.maintenance.count}</td>
-                        <td className="border border-slate-300 px-3 py-2" />
+                        <td className="border border-indigo-200 px-3 py-2 text-xs font-bold text-slate-800">TOTAL</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-red-600">{fmt(data.expenses.maintenance.total)}</td>
+                        <td className="border border-indigo-200 px-3 py-2 text-sm font-bold text-slate-900">{data.expenses.maintenance.count}</td>
+                        <td className="border border-indigo-200 px-3 py-2" />
                       </TFoot>
                     </tfoot>
                   </table>
@@ -1263,7 +1263,7 @@ export default function AdminReportsTab() {
           </div>
 
           {/* ── Export all ── */}
-          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-indigo-100 bg-slate-50 p-4">
             <Download className="h-4 w-4 text-slate-500 shrink-0" />
             <span className="text-sm font-semibold text-slate-700">Export all data:</span>
             {[
@@ -1273,7 +1273,7 @@ export default function AdminReportsTab() {
               { label: "Expenses CSV", fn: exportExpensesCsv },
             ].map(({ label, fn }) => (
               <button key={label} type="button" onClick={fn}
-                className="flex items-center gap-1.5 rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors shadow-sm">
+                className="flex items-center gap-1.5 rounded border border-indigo-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors shadow-sm">
                 <FileSpreadsheet className="h-3.5 w-3.5" /> {label}
               </button>
             ))}

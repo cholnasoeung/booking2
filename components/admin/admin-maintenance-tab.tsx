@@ -36,7 +36,7 @@ const TYPES: Record<string, { label: string; color: string; bar: string }> = {
   inspection:  { label: "Inspection",   color: "bg-purple-100 text-purple-700", bar: "#a855f7" },
   electrical:  { label: "Electrical",   color: "bg-yellow-100 text-yellow-700", bar: "#eab308" },
   bodywork:    { label: "Bodywork",     color: "bg-pink-100 text-pink-700",     bar: "#ec4899" },
-  other:       { label: "Other",        color: "bg-slate-100 text-slate-600",   bar: "#94a3b8" },
+  other:       { label: "Other",        color: "bg-indigo-50 text-indigo-600",   bar: "#94a3b8" },
 };
 
 const STATUSES: Record<string, { label: string; color: string; icon: React.ElementType }> = {
@@ -81,7 +81,7 @@ function StatCard({ icon: Icon, label, value, sub, color }: {
   icon: React.ElementType; label: string; value: string; sub?: string; color: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-4 shadow-sm">
+    <div className="rounded-2xl border border-indigo-100/80 bg-white p-4 flex items-center gap-4 shadow-sm">
       <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl", color)}>
         <Icon className="size-5 text-white" />
       </div>
@@ -376,7 +376,7 @@ export default function AdminMaintenanceTab() {
       {/* Chart + By-type breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {monthly.length > 0 && (
-          <div className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="lg:col-span-2 rounded-2xl border border-indigo-100/80 bg-white p-5 shadow-sm">
             <h3 className="text-sm font-semibold text-slate-700 mb-4">Monthly Maintenance Spending</h3>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart data={monthly} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
@@ -401,7 +401,7 @@ export default function AdminMaintenanceTab() {
 
         {/* Cost by type */}
         {byType.length > 0 && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-indigo-100/80 bg-white p-5 shadow-sm">
             <h3 className="text-sm font-semibold text-slate-700 mb-4">Cost by Type</h3>
             <div className="space-y-2.5">
               {byType.map((t) => {
@@ -413,7 +413,7 @@ export default function AdminMaintenanceTab() {
                       <span className={cn("text-xs font-semibold px-2 py-0.5 rounded-full", info.color)}>{info.label}</span>
                       <span className="text-xs font-bold text-slate-700">${t.totalCost.toFixed(0)}</span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                    <div className="h-1.5 rounded-full bg-indigo-50 overflow-hidden">
                       <div className="h-full rounded-full transition-all duration-500"
                         style={{ width: `${(t.totalCost / max) * 100}%`, backgroundColor: info.bar }} />
                     </div>
@@ -459,7 +459,7 @@ export default function AdminMaintenanceTab() {
       )}
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-indigo-100/80 bg-white p-4 shadow-sm">
         <ListFilter className="size-4 text-slate-400 shrink-0" />
         <Select value={filterBus} onValueChange={(v) => { setFB(v == null || v === "_all" ? "" : v); setPage(1); }}>
           <SelectTrigger className="h-9 w-52"><SelectValue placeholder="All vehicles" /></SelectTrigger>
@@ -486,11 +486,11 @@ export default function AdminMaintenanceTab() {
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/70">
+              <tr className="border-b border-indigo-50 bg-slate-50/70">
                 {["Vehicle","Type","Status","Date","Cost","Workshop","Odometer","Next Due",""].map((h) => (
                   <th key={h} className={cn(
                     "px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide",
@@ -499,13 +499,13 @@ export default function AdminMaintenanceTab() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-indigo-50">
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
                     {Array.from({ length: 9 }).map((__, j) => (
                       <td key={j} className="px-4 py-3">
-                        <div className="h-4 rounded bg-slate-100 animate-pulse" />
+                        <div className="h-4 rounded bg-indigo-50/60 animate-pulse" />
                       </td>
                     ))}
                   </tr>
@@ -524,7 +524,7 @@ export default function AdminMaintenanceTab() {
                   const statusInfo = STATUSES[r.status] ?? STATUSES.completed;
                   const StatusIcon = statusInfo.icon;
                   return (
-                    <tr key={r.id} className="hover:bg-slate-50/60 transition-colors">
+                    <tr key={r.id} className="hover:bg-indigo-50/40/60 transition-colors">
                       <td className="px-4 py-3">
                         <p className="font-medium text-slate-800 truncate max-w-[130px]">{r.busName}</p>
                         {r.busReg && <p className="text-[11px] text-slate-400">{r.busReg}</p>}
@@ -583,7 +583,7 @@ export default function AdminMaintenanceTab() {
           </table>
         </div>
         {data && data.totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3">
+          <div className="flex items-center justify-between border-t border-indigo-50 px-4 py-3">
             <p className="text-xs text-slate-500">Page {data.page} of {data.totalPages} · {data.total} records</p>
             <div className="flex gap-1">
               <Button variant="outline" size="icon" className="h-8 w-8"

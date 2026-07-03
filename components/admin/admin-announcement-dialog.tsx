@@ -117,7 +117,7 @@ export default function AdminAnnouncementDialog({ busId, busLabel, open, onOpenC
           <div className="space-y-4 py-2">
             {/* Trip info */}
             {preview && (
-              <div className="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 flex items-center justify-between">
+              <div className="rounded-xl bg-slate-50 border border-indigo-100 px-4 py-3 flex items-center justify-between">
                 <div>
                   <p className="font-semibold text-slate-900 text-sm">{preview.route}</p>
                   <p className="text-xs text-slate-500">{preview.date} · {preview.departureTime}</p>
@@ -144,7 +144,7 @@ export default function AdminAnnouncementDialog({ busId, busLabel, open, onOpenC
                       onClick={() => setType(t.value)}
                       className={cn(
                         "flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all text-left",
-                        active ? t.color : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                        active ? t.color : "border-indigo-100 bg-white text-slate-600 hover:bg-indigo-50/40"
                       )}
                     >
                       <Icon className="h-4 w-4 shrink-0" />
@@ -190,11 +190,11 @@ export default function AdminAnnouncementDialog({ busId, busLabel, open, onOpenC
 
             {/* Recipient preview */}
             {preview && preview.recipients.length > 0 && (
-              <div className="rounded-xl border border-slate-200 overflow-hidden">
+              <div className="rounded-xl border border-indigo-100 overflow-hidden">
                 <p className="px-4 py-2 bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wide">
                   Recipients ({preview.reachable})
                 </p>
-                <div className="divide-y divide-slate-100 max-h-32 overflow-y-auto">
+                <div className="divide-y divide-indigo-50 max-h-32 overflow-y-auto">
                   {preview.recipients.slice(0, 20).map((r, i) => (
                     <div key={i} className="flex items-center justify-between px-4 py-2 text-sm">
                       <p className="font-medium text-slate-800">{r.name}</p>

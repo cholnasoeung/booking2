@@ -59,7 +59,7 @@ function StatCard({
   icon: React.ElementType; label: string; value: string; sub?: string; color: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-4 shadow-sm">
+    <div className="rounded-2xl border border-indigo-100/80 bg-white p-4 flex items-center gap-4 shadow-sm">
       <div className={cn("flex h-11 w-11 shrink-0 items-center justify-center rounded-xl", color)}>
         <Icon className="size-5 text-white" />
       </div>
@@ -381,7 +381,7 @@ export default function AdminFuelLogsTab() {
 
       {/* Monthly cost chart */}
       {monthly.length > 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border border-indigo-100/80 bg-white p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-700 mb-4">Monthly Fuel Cost</h3>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={monthly} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
@@ -405,7 +405,7 @@ export default function AdminFuelLogsTab() {
       )}
 
       {/* Filter bar */}
-      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-indigo-100/80 bg-white p-4 shadow-sm">
         <ListFilter className="size-4 text-slate-400 shrink-0" />
 
         <Select value={filterBus} onValueChange={(v) => { setFilterBus(v == null || v === "_all" ? "" : v); setPage(1); }}>
@@ -443,11 +443,11 @@ export default function AdminFuelLogsTab() {
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/70">
+              <tr className="border-b border-indigo-50 bg-slate-50/70">
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Vehicle</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Driver</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">Date</th>
@@ -459,13 +459,13 @@ export default function AdminFuelLogsTab() {
                 <th className="px-4 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-indigo-50">
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i}>
                     {Array.from({ length: 9 }).map((__, j) => (
                       <td key={j} className="px-4 py-3">
-                        <div className="h-4 rounded bg-slate-100 animate-pulse" />
+                        <div className="h-4 rounded bg-indigo-50/60 animate-pulse" />
                       </td>
                     ))}
                   </tr>
@@ -480,7 +480,7 @@ export default function AdminFuelLogsTab() {
                 </tr>
               ) : (
                 logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-50/60 transition-colors">
+                  <tr key={log.id} className="hover:bg-indigo-50/40/60 transition-colors">
                     <td className="px-4 py-3">
                       <div>
                         <p className="font-medium text-slate-800 truncate max-w-[140px]">{log.busName}</p>
@@ -533,7 +533,7 @@ export default function AdminFuelLogsTab() {
 
         {/* Pagination */}
         {data && data.totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3">
+          <div className="flex items-center justify-between border-t border-indigo-50 px-4 py-3">
             <p className="text-xs text-slate-500">
               Page {data.page} of {data.totalPages} · {data.total} entries
             </p>

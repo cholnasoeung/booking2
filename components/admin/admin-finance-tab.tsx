@@ -203,7 +203,7 @@ export default function AdminFinanceTab() {
       </div>
 
       {/* Revenue chart */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-2xl border border-indigo-100/80 bg-white p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <p className="font-semibold text-slate-900">Net Revenue Over Time</p>
           {loading && <RefreshCw className="h-4 w-4 animate-spin text-slate-400" />}
@@ -226,8 +226,8 @@ export default function AdminFinanceTab() {
       </div>
 
       {/* Route breakdown */}
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div className="flex items-center gap-2 px-5 py-4 border-b border-slate-100">
+      <div className="rounded-2xl border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
+        <div className="flex items-center gap-2 px-5 py-4 border-b border-indigo-50">
           <Route className="h-4 w-4 text-slate-500" />
           <p className="font-semibold text-slate-900">Revenue by Route</p>
         </div>
@@ -243,9 +243,9 @@ export default function AdminFinanceTab() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-indigo-50">
                 {data.routeBreakdown.map((r, i) => (
-                  <tr key={i} className="hover:bg-slate-50 transition-colors">
+                  <tr key={i} className="hover:bg-indigo-50/40 transition-colors">
                     <td className="px-5 py-3 font-semibold text-slate-800 whitespace-nowrap">{r.from} → {r.to}</td>
                     <td className="px-5 py-3 text-slate-700">{r.bookings}</td>
                     <td className="px-5 py-3 text-slate-700">{r.seats}</td>
@@ -263,12 +263,12 @@ export default function AdminFinanceTab() {
 
       {/* Payment method breakdown */}
       {data && data.paymentBreakdown.length > 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="flex items-center gap-2 px-5 py-4 border-b border-slate-100">
+        <div className="rounded-2xl border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
+          <div className="flex items-center gap-2 px-5 py-4 border-b border-indigo-50">
             <CreditCard className="h-4 w-4 text-slate-500" />
             <p className="font-semibold text-slate-900">Payment Methods</p>
           </div>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-indigo-50">
             {data.paymentBreakdown.map((p, i) => {
               const pct = s?.totalRevenue ? Math.round((p.revenue / s.totalRevenue) * 100) : 0;
               return (

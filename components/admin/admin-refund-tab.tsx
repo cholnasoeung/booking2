@@ -148,7 +148,7 @@ export default function AdminRefundTab() {
           onClick={fetchData}
           variant="outline"
           size="sm"
-          className="text-slate-500 border-slate-200 hover:bg-slate-50"
+          className="text-slate-500 border-slate-200 hover:bg-indigo-50/40"
         >
           <RefreshCw className="size-4" />
         </Button>
@@ -213,11 +213,11 @@ export default function AdminRefundTab() {
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search by customer name, email, route…"
-            className="pl-9 border-slate-200 bg-white text-slate-800 placeholder:text-slate-400"
+            className="pl-9 border-indigo-100 bg-white text-slate-800 placeholder:text-slate-400"
           />
         </div>
         {/* Status tabs */}
-        <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1">
+        <div className="flex items-center gap-1 rounded-xl border border-indigo-100/80 bg-white p-1">
           {[
             { key: "",          label: "All" },
             { key: "pending",   label: `Pending (${summary.pending})` },
@@ -231,7 +231,7 @@ export default function AdminRefundTab() {
                 "rounded-lg px-3 py-1.5 text-xs font-semibold transition-all",
                 statusFilter === tab.key
                   ? "bg-slate-800 text-white shadow-sm"
-                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                  : "text-slate-500 hover:text-slate-700 hover:bg-indigo-50/40"
               )}
             >
               {tab.label}
@@ -255,7 +255,7 @@ export default function AdminRefundTab() {
         </div>
       ) : (
         <>
-          <div className="rounded-2xl border border-slate-200 overflow-x-auto shadow-sm">
+          <div className="rounded-2xl border border-indigo-100 overflow-x-auto shadow-sm">
             <table className="w-full text-sm min-w-[920px]">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50">
@@ -264,13 +264,13 @@ export default function AdminRefundTab() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-indigo-50">
                 {records.map((rec) => {
                   const st = REFUND_STATUS[rec.refundStatus] ?? REFUND_STATUS.pending;
                   const SIcon = st.icon;
                   const isPending = rec.refundStatus === "pending";
                   return (
-                    <tr key={rec.id} className="hover:bg-slate-50/80 transition-colors">
+                    <tr key={rec.id} className="hover:bg-indigo-50/40/80 transition-colors">
                       {/* Booking ID */}
                       <td className="px-4 py-3.5">
                         <span className="font-mono text-xs font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-lg">
@@ -300,7 +300,7 @@ export default function AdminRefundTab() {
                       <td className="px-4 py-3.5">
                         <div className="flex flex-wrap gap-1 max-w-[80px]">
                           {rec.seats.slice(0, 3).map(s => (
-                            <span key={s} className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono">{s}</span>
+                            <span key={s} className="text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded font-mono">{s}</span>
                           ))}
                           {rec.seats.length > 3 && (
                             <span className="text-[10px] text-slate-400">+{rec.seats.length - 3}</span>
@@ -393,14 +393,14 @@ export default function AdminRefundTab() {
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page <= 1}
-                  className="flex items-center justify-center size-8 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 disabled:opacity-30"
+                  className="flex items-center justify-center size-8 rounded-lg border border-indigo-100 text-slate-500 hover:text-slate-800 hover:bg-indigo-50/40 disabled:opacity-30"
                 >
                   <ChevronLeft className="size-4" />
                 </button>
                 <button
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page >= totalPages}
-                  className="flex items-center justify-center size-8 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 disabled:opacity-30"
+                  className="flex items-center justify-center size-8 rounded-lg border border-indigo-100 text-slate-500 hover:text-slate-800 hover:bg-indigo-50/40 disabled:opacity-30"
                 >
                   <ChevronRight className="size-4" />
                 </button>
@@ -433,7 +433,7 @@ export default function AdminRefundTab() {
 
               <div className="space-y-4 py-1">
                 {/* Customer */}
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-xl border border-indigo-100 bg-slate-50 p-4">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Customer</p>
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-400 to-violet-500 text-white text-sm font-bold">
@@ -448,7 +448,7 @@ export default function AdminRefundTab() {
                 </div>
 
                 {/* Trip */}
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="rounded-xl border border-indigo-100 bg-slate-50 p-4">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Trip</p>
                   <div className="grid grid-cols-2 gap-y-1.5 text-sm">
                     <div><span className="text-slate-400">Route:</span><span className="text-slate-700 ml-1 font-medium">{viewTarget.routeFrom} → {viewTarget.routeTo}</span></div>
@@ -501,7 +501,7 @@ export default function AdminRefundTab() {
                       onChange={e => setAdminNote(e.target.value)}
                       rows={2}
                       placeholder="Transaction ID, notes for records…"
-                      className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-rose-400/40"
+                      className="w-full rounded-md border border-indigo-100 bg-white px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-rose-400/40"
                     />
                   </div>
                 )}

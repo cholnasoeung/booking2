@@ -33,7 +33,7 @@ export function Paginator({ page, totalPages, totalItems, pageSize, onPageChange
   }
 
   return (
-    <div className="flex flex-col items-center gap-3 border-t border-slate-100 px-4 py-3 sm:flex-row sm:justify-between">
+    <div className="flex flex-col items-center gap-3 border-t border-indigo-50 px-4 py-3 sm:flex-row sm:justify-between">
       <p className="text-xs text-slate-500">
         Showing <span className="font-semibold text-slate-700">{from}–{to}</span> of{" "}
         <span className="font-semibold text-slate-700">{totalItems}</span> results
@@ -96,7 +96,7 @@ export function SummaryTile({
   tone?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+    <div className="rounded-2xl border border-indigo-100/80 bg-white px-4 py-3 shadow-sm">
       <p className="text-xs uppercase tracking-[0.16em] text-slate-500">{label}</p>
       <p className="mt-2 font-heading text-2xl font-semibold text-slate-800">{value}</p>
     </div>
@@ -133,7 +133,7 @@ export function StatusBadge({
       Confirmed
     </Badge>
   ) : (
-    <Badge className="border-gray-300 bg-gray-100 text-gray-700">
+    <Badge className="border-gray-300 bg-indigo-50 text-gray-700">
       Cancelled
     </Badge>
   );

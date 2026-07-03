@@ -68,7 +68,7 @@ export default function AdminAuditLogsTab() {
         return "bg-orange-100 text-orange-800";
       case "login":
       case "logout":
-        return "bg-gray-100 text-gray-800";
+        return "bg-indigo-50 text-gray-800";
       default:
         return "bg-purple-100 text-purple-800";
     }
@@ -85,7 +85,7 @@ export default function AdminAuditLogsTab() {
       case "low":
         return "bg-green-500";
       default:
-        return "bg-gray-500";
+        return "bg-indigo-50/400";
     }
   };
 
@@ -106,7 +106,7 @@ export default function AdminAuditLogsTab() {
               className="pl-10 pr-4 py-2 border rounded-lg"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-50">
+          <button className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-indigo-50/40">
             <Filter className="w-4 h-4" />
             Filters
           </button>
@@ -123,10 +123,10 @@ export default function AdminAuditLogsTab() {
       </div>
 
       {/* Logs Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-indigo-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-indigo-50/40 border-b border-indigo-100">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                   Timestamp
@@ -153,7 +153,7 @@ export default function AdminAuditLogsTab() {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {logs.map((log) => (
-                <tr key={log._id} className="hover:bg-gray-50">
+                <tr key={log._id} className="hover:bg-indigo-50/40">
                   <td className="px-6 py-4 text-sm text-gray-900">
                     {new Date(log.timestamp).toLocaleString()}
                   </td>

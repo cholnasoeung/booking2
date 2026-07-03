@@ -128,7 +128,7 @@ export default function AdminTripCancellationDialog({
                 </div>
 
                 {/* Trip info */}
-                <div className="rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 space-y-1">
+                <div className="rounded-xl bg-slate-50 border border-indigo-100 px-4 py-3 space-y-1">
                   <p className="font-semibold text-slate-900">{preview.route}</p>
                   <p className="text-sm text-slate-500">{preview.date} · Departure {preview.departureTime}</p>
                 </div>
@@ -155,11 +155,11 @@ export default function AdminTripCancellationDialog({
 
                 {/* Passenger list (collapsed if many) */}
                 {preview.passengers.length > 0 && (
-                  <div className="rounded-xl border border-slate-200 overflow-hidden">
+                  <div className="rounded-xl border border-indigo-100 overflow-hidden">
                     <p className="px-4 py-2 bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wide">
                       Passengers to notify ({preview.passengers.length})
                     </p>
-                    <div className="divide-y divide-slate-100 max-h-40 overflow-y-auto">
+                    <div className="divide-y divide-indigo-50 max-h-40 overflow-y-auto">
                       {preview.passengers.map((p, i) => (
                         <div key={i} className="flex items-center justify-between px-4 py-2.5 text-sm">
                           <div>

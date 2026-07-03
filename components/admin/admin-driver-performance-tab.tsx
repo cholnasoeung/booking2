@@ -172,7 +172,7 @@ export default function AdminDriverPerformanceTab() {
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40 overflow-hidden">
         {filtered.length === 0 && !loading ? (
           <div className="py-16 text-center text-slate-400 text-sm">No drivers found</div>
         ) : (
@@ -189,9 +189,9 @@ export default function AdminDriverPerformanceTab() {
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-indigo-50">
                 {filtered.map((driver) => (
-                  <tr key={driver.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={driver.id} className="hover:bg-indigo-50/40 transition-colors">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm shrink-0">

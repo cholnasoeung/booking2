@@ -83,7 +83,7 @@ export default function AdminSecurityTab() {
       </div>
 
       {/* Fraud Detection */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-white rounded-xl border border-indigo-100 p-6">
         <h3 className="font-semibold mb-4">Fraud Detection</h3>
         <p className="text-sm text-gray-600 mb-4">
           Check user activity for suspicious patterns like excessive bookings, high
@@ -124,7 +124,7 @@ export default function AdminSecurityTab() {
 
             {/* Dropdown */}
             {dropdownOpen && userOptions.length > 0 && !selectedUser && (
-              <div className="absolute z-20 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+              <div className="absolute z-20 left-0 right-0 mt-1 bg-white border border-indigo-100 rounded-xl shadow-lg overflow-hidden">
                 {userOptions.map((u) => (
                   <button
                     key={u.id}
@@ -143,7 +143,7 @@ export default function AdminSecurityTab() {
                       <p className="text-sm font-medium text-gray-900">{u.name}</p>
                       <p className="text-xs text-gray-500">{u.email}</p>
                     </div>
-                    <span className={`ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full ${u.role === "admin" ? "bg-indigo-100 text-indigo-700" : "bg-gray-100 text-gray-600"}`}>
+                    <span className={`ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full ${u.role === "admin" ? "bg-indigo-100 text-indigo-700" : "bg-indigo-50 text-gray-600"}`}>
                       {u.role}
                     </span>
                   </button>
@@ -231,13 +231,13 @@ export default function AdminSecurityTab() {
       </div>
 
       {/* Rate Limiting Stats */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-white rounded-xl border border-indigo-100 p-6">
         <h3 className="font-semibold mb-4">Rate Limiting Status</h3>
 
         {rateLimitStats ? (
           <div>
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-indigo-50/40 rounded-lg p-4">
                 <p className="text-sm text-gray-600">Active Rate Limits</p>
                 <p className="text-2xl font-bold text-gray-900">
                   {rateLimitStats.totalEntries}
@@ -252,7 +252,7 @@ export default function AdminSecurityTab() {
                   ([endpoint, count]: [string, any]) => (
                     <div
                       key={endpoint}
-                      className="flex items-center justify-between bg-gray-50 rounded px-3 py-2"
+                      className="flex items-center justify-between bg-indigo-50/40 rounded px-3 py-2"
                     >
                       <span className="text-sm font-mono">{endpoint}</span>
                       <span className="text-sm font-medium">{count} requests</span>

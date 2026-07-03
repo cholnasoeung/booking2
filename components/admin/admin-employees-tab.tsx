@@ -538,7 +538,7 @@ export default function AdminEmployeesTab() {
           </Button>
         </div>
       ) : (
-        <div className="rounded-2xl border border-slate-200 overflow-x-auto shadow-sm">
+        <div className="rounded-2xl border border-indigo-100 overflow-x-auto shadow-sm">
           <table className="w-full text-sm min-w-[800px]">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50">
@@ -547,13 +547,13 @@ export default function AdminEmployeesTab() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-indigo-50">
               {employees.map((emp) => {
                 const role       = ROLES[emp.role]       ?? ROLES.other;
                 const dept       = DEPTS[emp.department] ?? DEPTS.operations;
                 const status     = STATUSES[emp.status]  ?? STATUSES.active;
                 return (
-                  <tr key={emp.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={emp.id} className="hover:bg-indigo-50/40 transition-colors">
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-3">
                         <AvatarUpload

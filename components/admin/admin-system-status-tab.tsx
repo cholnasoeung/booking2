@@ -61,7 +61,7 @@ export default function AdminSystemStatusTab() {
       case "down":
         return "text-red-600 bg-red-100";
       default:
-        return "text-gray-600 bg-gray-100";
+        return "text-gray-600 bg-indigo-50";
     }
   };
 
@@ -153,7 +153,7 @@ export default function AdminSystemStatusTab() {
           {/* Services Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Database */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-indigo-100 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900">Database</h3>
                 <span
@@ -173,7 +173,7 @@ export default function AdminSystemStatusTab() {
             </div>
 
             {/* Email Service */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-indigo-100 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900">Email Service</h3>
                 <span
@@ -193,7 +193,7 @@ export default function AdminSystemStatusTab() {
             </div>
 
             {/* Auth */}
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <div className="bg-white rounded-xl border border-indigo-100 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900">Authentication</h3>
                 <span
@@ -211,7 +211,7 @@ export default function AdminSystemStatusTab() {
           </div>
 
           {/* Metrics */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
+          <div className="bg-white rounded-xl border border-indigo-100 p-6">
             <h3 className="font-semibold mb-4">System Metrics</h3>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div className="text-center">

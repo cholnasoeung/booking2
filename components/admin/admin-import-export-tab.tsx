@@ -103,7 +103,7 @@ export default function AdminImportExportTab() {
       </div>
 
       {/* Data Exports */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-white rounded-xl border border-indigo-100 p-6">
         <h3 className="font-semibold text-lg mb-1">Data Exports</h3>
         <p className="text-sm text-gray-500 mb-4">Download your business data as CSV for reporting and accounting.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -139,7 +139,7 @@ export default function AdminImportExportTab() {
         </div>
       </div>
 
-      <hr className="border-gray-200" />
+      <hr className="border-indigo-100" />
 
       <h3 className="text-lg font-semibold text-gray-800">Seat Layout Import / Export</h3>
 
@@ -212,7 +212,7 @@ export default function AdminImportExportTab() {
 
       {/* Import Results */}
       {importResult && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="bg-white rounded-xl border border-indigo-100 p-6">
           <h3 className="font-semibold mb-4">Import Results</h3>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -259,8 +259,8 @@ export default function AdminImportExportTab() {
       )}
 
       {/* CSV Format Reference */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
+      <div className="bg-white rounded-xl border border-indigo-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-indigo-100">
           <h3 className="font-semibold text-gray-900">CSV Format Reference</h3>
         </div>
         <div className="p-6">
