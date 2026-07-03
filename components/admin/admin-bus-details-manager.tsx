@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState, useTransition, useEffect } from "react";
 import {
   Bus, Plus, MoreVertical, Eye, Pencil, Trash2, RefreshCw, X,
   Hash, Users, Calendar, Layers, Image, ImagePlus, FileText,
+  AlertTriangle, ShieldAlert, ChevronDown, ChevronUp,
 } from "lucide-react";
 import AdminVehicleDocuments from "@/components/admin/admin-vehicle-documents";
 import { Button } from "@/components/ui/button";
@@ -307,6 +308,24 @@ function BusFormFields({
   );
 }
 
+type ExpiryAlert = {
+  busId: string;
+  busName: string;
+  registrationNumber: string;
+  docType: string;
+  docNumber: string;
+  expiryDate: string;
+  status: "expired" | "expiring_soon";
+};
+
+const DOC_TYPE_LABEL: Record<string, string> = {
+  insurance: "Insurance",
+  road_tax: "Road Tax",
+  inspection: "Inspection",
+  permit: "Permit",
+  other: "Document",
+};
+
 export default function AdminBusDetailsManager({ busDetails: initial }: { busDetails: BusDetailSummary[] }) {
   const [details, setDetails] = useState<BusDetail[]>(initial);
   const [isPending, startTransition] = useTransition();
@@ -316,6 +335,19 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
   const [editTarget, setEditTarget] = useState<BusDetail | null>(null);
   const [detailTarget, setDetailTarget] = useState<BusDetail | null>(null);
   const [docsTarget, setDocsTarget] = useState<BusDetail | null>(null);
+
+  // Expiry alerts
+  const [expiryAlerts, setExpiryAlerts] = useState<{ expired: ExpiryAlert[]; expiringSoon: ExpiryAlert[] } | null>(null);
+  const [alertsExpanded, setAlertsExpanded] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/admin/bus-details/expiry-alerts")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.expired || d.expiringSoon) setExpiryAlerts(d);
+      })
+      .catch(() => {});
+  }, []);
 
 
   // Form state
@@ -428,6 +460,89 @@ export default function AdminBusDetailsManager({ busDetails: initial }: { busDet
           </div>
         ))}
       </div>
+
+      {/* Document Expiry Alerts */}
+      {expiryAlerts && (expiryAlerts.expired.length > 0 || expiryAlerts.expiringSoon.length > 0) && (
+        <div className={cn(
+          "rounded-2xl border overflow-hidden",
+          expiryAlerts.expired.length > 0
+            ? "border-red-200 bg-red-50"
+            : "border-amber-200 bg-amber-50"
+        )}>
+          <button
+            type="button"
+            onClick={() => setAlertsExpanded((p) => !p)}
+            className="w-full flex items-center justify-between px-5 py-3.5 text-left"
+          >
+            <div className="flex items-center gap-3">
+              {expiryAlerts.expired.length > 0
+                ? <ShieldAlert className="h-5 w-5 text-red-600 shrink-0" />
+                : <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />}
+              <div>
+                <p className={cn("font-semibold text-sm", expiryAlerts.expired.length > 0 ? "text-red-800" : "text-amber-800")}>
+                  {expiryAlerts.expired.length > 0
+                    ? `${expiryAlerts.expired.length} expired document${expiryAlerts.expired.length > 1 ? "s" : ""} require attention`
+                    : `${expiryAlerts.expiringSoon.length} document${expiryAlerts.expiringSoon.length > 1 ? "s" : ""} expiring within 30 days`}
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {expiryAlerts.expired.length > 0 && expiryAlerts.expiringSoon.length > 0
+                    ? `Also ${expiryAlerts.expiringSoon.length} expiring soon`
+                    : "Click to view details"}
+                </p>
+              </div>
+            </div>
+            {alertsExpanded
+              ? <ChevronUp className="h-4 w-4 text-slate-500 shrink-0" />
+              : <ChevronDown className="h-4 w-4 text-slate-500 shrink-0" />}
+          </button>
+
+          {alertsExpanded && (
+            <div className="border-t border-inherit px-5 pb-4 space-y-2 pt-3">
+              {[...expiryAlerts.expired, ...expiryAlerts.expiringSoon].map((a, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "flex items-center gap-4 rounded-xl border px-4 py-2.5 text-sm bg-white",
+                    a.status === "expired" ? "border-red-200" : "border-amber-200"
+                  )}
+                >
+                  <div className={cn(
+                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+                    a.status === "expired" ? "bg-red-100 text-red-600" : "bg-amber-100 text-amber-700"
+                  )}>
+                    <FileText className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-slate-900 truncate">{a.busName}</p>
+                    <p className="text-xs text-slate-500">{DOC_TYPE_LABEL[a.docType] ?? a.docType} · {a.docNumber}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className={cn(
+                      "text-[11px] font-bold px-2 py-0.5 rounded-full",
+                      a.status === "expired" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-800"
+                    )}>
+                      {a.status === "expired" ? "EXPIRED" : "EXPIRING SOON"}
+                    </span>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {new Date(a.expiryDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const bus = details.find((d) => d.id === a.busId);
+                      if (bus) setDocsTarget(bus);
+                    }}
+                    className="text-xs font-semibold text-indigo-600 hover:underline shrink-0"
+                  >
+                    View docs
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Fleet table */}
       <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">

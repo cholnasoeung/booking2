@@ -36,6 +36,12 @@ export default async function BookingDetailPage({ params }: Props) {
   const tripDate = bus?.travelDate ? new Date(bus.travelDate) : null;
   const tripIsPast = tripDate ? tripDate < new Date() : false;
   const canRate = isConfirmed && tripIsPast;
+  const isCancellable = isConfirmed && !tripIsPast;
+
+  // Build departure ISO string for refund policy computation in the client
+  const departureAt = bus
+    ? `${bus.travelDate}T${bus.departureTime}:00`
+    : new Date(0).toISOString();
 
   const qrDataUrl = await QRCode.toDataURL(
     `BOOKING:${booking.id}`,
@@ -230,6 +236,9 @@ export default async function BookingDetailPage({ params }: Props) {
             busId={bus?.id ?? ""}
             isConfirmed={isConfirmed}
             canRate={canRate}
+            isCancellable={isCancellable}
+            finalPrice={booking.totalPrice}
+            departureAt={departureAt}
           />
         </div>
       </div>

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeft, Download, Star, CheckCircle2, X,
+  ArrowLeft, Download, Star, CheckCircle2, X, XCircle, AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +18,9 @@ type Props = {
   busId: string;
   isConfirmed: boolean;
   canRate: boolean;
+  isCancellable: boolean;
+  finalPrice: number;
+  departureAt: string; // ISO datetime of departure
 };
 
 const ASPECTS = [
@@ -28,7 +32,24 @@ const ASPECTS = [
 
 type AspectKey = typeof ASPECTS[number]["key"];
 
-export default function BookingDetailActions({ bookingId, busId, isConfirmed, canRate }: Props) {
+function refundPercent(departureAt: string): number {
+  const hours = (new Date(departureAt).getTime() - Date.now()) / 3_600_000;
+  if (hours > 48) return 100;
+  if (hours > 24) return 75;
+  if (hours > 4)  return 50;
+  return 0;
+}
+
+function fmt(amount: number) {
+  return `$${amount.toFixed(2)}`;
+}
+
+export default function BookingDetailActions({
+  bookingId, busId, isConfirmed, canRate, isCancellable, finalPrice, departureAt,
+}: Props) {
+  const router = useRouter();
+
+  /* ── review state ── */
   const [reviewOpen,  setReviewOpen]  = useState(false);
   const [submitted,   setSubmitted]   = useState(false);
   const [rating,      setRating]      = useState(0);
@@ -40,6 +61,16 @@ export default function BookingDetailActions({ bookingId, busId, isConfirmed, ca
   });
   const [reviewErr,   setReviewErr]   = useState("");
   const [isPending,   startTransition] = useTransition();
+
+  /* ── cancel state ── */
+  const [cancelOpen,    setCancelOpen]    = useState(false);
+  const [cancelReason,  setCancelReason]  = useState("");
+  const [cancelling,    setCancelling]    = useState(false);
+  const [cancelErr,     setCancelErr]     = useState("");
+  const [cancelDone,    setCancelDone]    = useState<{ refundAmount: number; refundStatus: string } | null>(null);
+
+  const pct    = refundPercent(departureAt);
+  const refund = (finalPrice * pct) / 100;
 
   const handleReviewSubmit = () => {
     if (rating < 1) { setReviewErr("Please select a star rating."); return; }
@@ -66,6 +97,25 @@ export default function BookingDetailActions({ bookingId, busId, isConfirmed, ca
     });
   };
 
+  async function handleCancel() {
+    setCancelling(true);
+    setCancelErr("");
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: cancelReason.trim() || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setCancelErr(data.message ?? "Cancellation failed."); return; }
+      setCancelDone({ refundAmount: data.refundAmount ?? 0, refundStatus: data.refundStatus ?? "none" });
+    } catch {
+      setCancelErr("Network error. Please try again.");
+    } finally {
+      setCancelling(false);
+    }
+  }
+
   return (
     <>
       <div className="flex flex-wrap gap-3">
@@ -86,6 +136,16 @@ export default function BookingDetailActions({ bookingId, busId, isConfirmed, ca
           >
             <Star className="h-4 w-4 mr-2" />
             Rate this Trip
+          </Button>
+        )}
+        {isCancellable && (
+          <Button
+            variant="outline"
+            onClick={() => { setCancelDone(null); setCancelErr(""); setCancelReason(""); setCancelOpen(true); }}
+            className="rounded-full border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 px-5 py-2.5 h-auto text-sm font-semibold"
+          >
+            <XCircle className="h-4 w-4 mr-2" />
+            Cancel Booking
           </Button>
         )}
         <Link
@@ -216,6 +276,109 @@ export default function BookingDetailActions({ bookingId, busId, isConfirmed, ca
                 className="rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white hover:opacity-90"
               >
                 {isPending ? "Submitting…" : "Submit Review"}
+              </Button>
+            </DialogFooter>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Cancel Dialog ── */}
+      <Dialog open={cancelOpen} onOpenChange={(o) => { if (!o && cancelDone) { router.push("/dashboard"); } setCancelOpen(o); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <XCircle className="h-5 w-5" /> Cancel Booking
+            </DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. Your booking will be cancelled immediately.
+            </DialogDescription>
+          </DialogHeader>
+
+          {cancelDone ? (
+            <div className="flex flex-col items-center gap-3 py-6 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+                <CheckCircle2 className="h-7 w-7 text-emerald-500" />
+              </div>
+              <p className="text-base font-semibold text-slate-900">Booking Cancelled</p>
+              {cancelDone.refundAmount > 0 ? (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-3 text-center">
+                  <p className="text-sm text-slate-600">Refund amount</p>
+                  <p className="text-2xl font-bold text-emerald-600">{fmt(cancelDone.refundAmount)}</p>
+                  <p className="text-xs text-slate-500 mt-1 capitalize">Status: {cancelDone.refundStatus}</p>
+                </div>
+              ) : (
+                <p className="text-sm text-slate-500">No refund applicable based on the cancellation policy.</p>
+              )}
+              <Button onClick={() => router.push("/dashboard")} className="mt-2 rounded-full px-6">
+                Return to Dashboard
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4 py-2">
+              {/* Refund policy */}
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                  <p className="text-sm font-semibold text-amber-800">Refund Policy</p>
+                </div>
+                {[
+                  { label: "More than 48 hours before", pct: 100 },
+                  { label: "24 – 48 hours before",      pct: 75  },
+                  { label: "4 – 24 hours before",       pct: 50  },
+                  { label: "Less than 4 hours before",  pct: 0   },
+                ].map(({ label, pct: p }) => (
+                  <div key={p} className={cn(
+                    "flex items-center justify-between text-xs rounded-lg px-3 py-1.5",
+                    p === pct ? "bg-amber-200/60 font-semibold text-amber-900" : "text-slate-600"
+                  )}>
+                    <span>{label}</span>
+                    <span className={cn("font-bold", p > 0 ? "text-emerald-700" : "text-red-500")}>
+                      {p}% refund
+                    </span>
+                  </div>
+                ))}
+                <div className="border-t border-amber-200 mt-2 pt-2 flex items-center justify-between text-sm font-semibold text-slate-800">
+                  <span>Estimated refund</span>
+                  <span className={cn(refund > 0 ? "text-emerald-700" : "text-red-500")}>
+                    {fmt(refund)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Optional reason */}
+              <div className="space-y-1.5">
+                <Label className="text-sm font-semibold text-slate-700">
+                  Reason <span className="text-slate-400 font-normal">(optional)</span>
+                </Label>
+                <textarea
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder="Tell us why you're cancelling…"
+                  rows={2}
+                  maxLength={500}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-red-300/50"
+                />
+              </div>
+
+              {cancelErr && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <X className="h-3 w-3" /> {cancelErr}
+                </p>
+              )}
+            </div>
+          )}
+
+          {!cancelDone && (
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setCancelOpen(false)} className="rounded-full" disabled={cancelling}>
+                Keep Booking
+              </Button>
+              <Button
+                onClick={handleCancel}
+                disabled={cancelling}
+                className="rounded-full bg-red-600 hover:bg-red-700 text-white"
+              >
+                {cancelling ? "Cancelling…" : "Confirm Cancellation"}
               </Button>
             </DialogFooter>
           )}
