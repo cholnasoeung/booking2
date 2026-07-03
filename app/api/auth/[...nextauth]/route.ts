@@ -1,10 +1,15 @@
 import NextAuth from "next-auth";
-
-import { authOptions } from "@/lib/auth";
+import { buildAuthOptions } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const handler = NextAuth(authOptions);
+export async function GET(req: Request, ctx: { params: { nextauth: string[] } }) {
+  const options = await buildAuthOptions();
+  return (NextAuth(options) as Function)(req, ctx);
+}
 
-export { handler as GET, handler as POST };
+export async function POST(req: Request, ctx: { params: { nextauth: string[] } }) {
+  const options = await buildAuthOptions();
+  return (NextAuth(options) as Function)(req, ctx);
+}

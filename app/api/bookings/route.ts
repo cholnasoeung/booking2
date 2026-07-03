@@ -1,4 +1,4 @@
-import { getCurrentSession } from "@/lib/auth";
+﻿import { getCurrentSession } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import { normalizeBusSeatLayout } from "@/lib/seat/seat-layout";
 import { parseSeatSelection, isValidObjectId } from "@/lib/utils/validation";
@@ -18,6 +18,17 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Verify email before allowing booking
+    await connectToDatabase();
+    const UserModelCheck = require("@/models/user/User").default;
+    const bookingUser = await UserModelCheck.findById(session.user.id).select("isEmailVerified").lean();
+    if (bookingUser && (bookingUser as any).isEmailVerified === false) {
+      return Response.json(
+        { message: "Please verify your email address before making a booking." },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const busId = typeof body?.busId === "string" ? body.busId : "";
     const seats = parseSeatSelection(body?.seats);

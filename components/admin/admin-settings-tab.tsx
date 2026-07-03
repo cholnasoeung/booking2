@@ -5,7 +5,7 @@ import {
   Globe, BookOpen, Bell, Shield, Save, Check,
   Building2, Mail, Phone, Clock, Users, AlertTriangle,
   Lock, Eye, EyeOff, RefreshCw, Palette, Upload,
-  Trash2, ImageIcon, X, CreditCard, KeyRound, CircleDot,
+  Trash2, ImageIcon, X, CreditCard, KeyRound, CircleDot, LogIn,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,6 +57,13 @@ type SettingsData = {
       fromNumber: string;
     };
   };
+  auth: {
+    google: {
+      enabled: boolean;
+      clientId: string;
+      clientSecret: string;
+    };
+  };
 };
 
 const DEFAULT: SettingsData = {
@@ -71,9 +78,12 @@ const DEFAULT: SettingsData = {
   sms: {
     twilio: { enabled: false, accountSid: "", authToken: "", fromNumber: "" },
   },
+  auth: {
+    google: { enabled: false, clientId: "", clientSecret: "" },
+  },
 };
 
-type Tab = "general" | "booking" | "notifications" | "security" | "branding" | "payment" | "sms";
+type Tab = "general" | "booking" | "notifications" | "security" | "branding" | "payment" | "sms" | "auth";
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -177,6 +187,11 @@ export default function AdminSettingsTab() {
               ...DEFAULT.sms,
               ...(data.sms ?? {}),
               twilio: { ...DEFAULT.sms.twilio, ...(data.sms?.twilio ?? {}) },
+            },
+            auth: {
+              ...DEFAULT.auth,
+              ...(data.auth ?? {}),
+              google: { ...DEFAULT.auth.google, ...(data.auth?.google ?? {}) },
             },
           });
         }
@@ -292,6 +307,7 @@ export default function AdminSettingsTab() {
     { id: "payment" as Tab,       label: "Payment Keys",  icon: CreditCard,  desc: "Stripe & ABA PayWay" },
     { id: "sms" as Tab,           label: "SMS / Twilio",  icon: Phone,       desc: "Phone alerts via Twilio" },
     { id: "security" as Tab,      label: "Security",      icon: Shield,      desc: "Password & access" },
+    { id: "auth" as Tab,           label: "Auth / OAuth",  icon: LogIn,       desc: "Google sign-in" },
   ];
 
   if (loading) {
@@ -765,6 +781,18 @@ TWILIO_FROM_NUMBER=+1234567890`}
             </div>
           )}
 
+          {/* ── AUTH / GOOGLE OAUTH ── */}
+          {activeTab === "auth" && (
+            <AuthTab
+              auth={settings.auth}
+              onChange={(auth) => setSettings({ ...settings, auth })}
+              saving={saving}
+              saved={savedSection === "auth"}
+              error={saveError}
+              onSave={() => saveSection("auth")}
+            />
+          )}
+
           {/* ── SECURITY ── */}
           {activeTab === "security" && (
             <div className="space-y-6">
@@ -1038,6 +1066,130 @@ function PaymentTab({ payment, onChange, saving, saved, error, onSave }: Payment
           <code className="font-mono bg-amber-100 px-1 rounded">STRIPE_SECRET_KEY</code> and{" "}
           <code className="font-mono bg-amber-100 px-1 rounded">ABA_API_KEY</code> as environment
           variables — your payment code can prefer env vars over DB values.
+        </span>
+      </div>
+
+      <SaveBar saving={saving} saved={saved} error={error} onSave={onSave} />
+    </div>
+  );
+}
+
+// ── Google OAuth tab ─────────────────────────────────────────────────────────
+type AuthTabProps = {
+  auth: SettingsData["auth"];
+  onChange: (a: SettingsData["auth"]) => void;
+  saving: boolean; saved: boolean; error: string | null;
+  onSave: () => void;
+};
+
+function AuthTab({ auth, onChange, saving, saved, error, onSave }: AuthTabProps) {
+  const setGoogle = (patch: Partial<SettingsData["auth"]["google"]>) =>
+    onChange({ ...auth, google: { ...auth.google, ...patch } });
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-bold text-slate-900">Google OAuth</h3>
+        <p className="text-sm text-slate-500 mt-1">
+          Allow users to sign in with their Google account. Enter your Client ID and Secret from
+          the Google Cloud Console, then enable the toggle to activate.
+        </p>
+      </div>
+
+      {/* How-to banner */}
+      <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 flex gap-3">
+        <LogIn className="h-4 w-4 shrink-0 mt-0.5 text-blue-600" />
+        <div>
+          <p className="font-semibold mb-0.5">Setup guide</p>
+          <ol className="text-blue-700 text-xs leading-relaxed list-decimal ml-4 space-y-0.5">
+            <li>Go to Google Cloud Console → APIs &amp; Services → Credentials</li>
+            <li>Create an OAuth 2.0 Client ID (Web application)</li>
+            <li>Add <code className="bg-blue-100 rounded px-1">[your-site-url]/api/auth/callback/google</code> as an authorised redirect URI (e.g. <code className="bg-blue-100 rounded px-1">http://localhost:3000/api/auth/callback/google</code> for local dev)</li>
+            <li>Paste the Client ID and Secret below, then enable the toggle</li>
+          </ol>
+        </div>
+      </div>
+
+      {/* Missing credentials warning */}
+      {auth.google.enabled && (!auth.google.clientId || !auth.google.clientSecret) && (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 flex gap-3">
+          <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-rose-500" />
+          <div>
+            <p className="font-semibold">Google sign-in is enabled but credentials are missing</p>
+            <p className="text-rose-700 text-xs mt-0.5">
+              Enter your Client ID and Client Secret from Google Cloud Console below, then save.
+              The "Continue with Google" button will only appear on the login page once both fields are filled.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {auth.google.enabled && auth.google.clientId && auth.google.clientSecret && (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 flex gap-3">
+          <Check className="h-4 w-4 shrink-0 mt-0.5 text-emerald-600" />
+          <div>
+            <p className="font-semibold">Google sign-in is active</p>
+            <p className="text-emerald-700 text-xs mt-0.5">
+              The "Continue with Google" button is showing on the login page.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Google card */}
+      <div className={cn(
+        "rounded-2xl border-2 p-5 space-y-4 transition-colors",
+        auth.google.enabled ? "border-indigo-200 bg-indigo-50/30" : "border-slate-200 bg-slate-50/50"
+      )}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white border border-slate-200 shadow-sm">
+              <svg className="h-5 w-5" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-900">Google Sign-In</p>
+              <p className="text-xs text-slate-500">OAuth 2.0 — accounts.google.com</p>
+            </div>
+          </div>
+          <Toggle checked={auth.google.enabled} onChange={(v) => setGoogle({ enabled: v })} />
+        </div>
+
+        <div className="grid gap-4">
+          <div className="space-y-1.5">
+            <Label className="text-sm font-semibold text-slate-700">Client ID</Label>
+            <div className="relative">
+              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Input
+                className="pl-10 h-11 rounded-xl font-mono text-sm"
+                placeholder="xxxxxxxxxx.apps.googleusercontent.com"
+                value={auth.google.clientId}
+                onChange={(e) => setGoogle({ clientId: e.target.value })}
+              />
+            </div>
+            <p className="text-[11px] text-slate-400">Safe to expose — used to initiate the OAuth flow</p>
+          </div>
+
+          <SecretInput
+            label="Client Secret"
+            placeholder="GOCSPX-..."
+            value={auth.google.clientSecret}
+            onChange={(v) => setGoogle({ clientSecret: v })}
+            hint="From Google Cloud Console → Credentials. Masked after saving."
+          />
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800 flex items-start gap-2">
+        <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-amber-500" />
+        <span>
+          You can also set <code className="font-mono bg-amber-100 px-1 rounded">GOOGLE_CLIENT_ID</code> and{" "}
+          <code className="font-mono bg-amber-100 px-1 rounded">GOOGLE_CLIENT_SECRET</code> as environment
+          variables — env vars take precedence over the DB values.
         </span>
       </div>
 

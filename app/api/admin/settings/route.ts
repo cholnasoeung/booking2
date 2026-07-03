@@ -66,6 +66,17 @@ function maskSmsSettings(sms: typeof DEFAULT_SETTINGS.sms) {
   };
 }
 
+function maskAuthSettings(auth: any) {
+  if (!auth?.google) return auth;
+  return {
+    ...auth,
+    google: {
+      ...auth.google,
+      clientSecret: maskKey(auth.google.clientSecret ?? ""),
+    },
+  };
+}
+
 function isMasked(value: string): boolean {
   return value.includes("****");
 }
@@ -85,6 +96,9 @@ export async function GET() {
   }
   if (settings.sms) {
     settings.sms = maskSmsSettings(settings.sms);
+  }
+  if (settings.auth) {
+    settings.auth = maskAuthSettings(settings.auth);
   }
   return Response.json(settings);
 }
@@ -108,6 +122,9 @@ export async function PATCH(request: Request) {
   }
   if (body.sms?.twilio) {
     if (isMasked(body.sms.twilio.authToken ?? "")) delete body.sms.twilio.authToken;
+  }
+  if (body.auth?.google) {
+    if (isMasked(body.auth.google.clientSecret ?? "")) delete body.auth.google.clientSecret;
   }
 
   // Flatten nested payment fields for $set to avoid overwriting sibling keys
@@ -134,5 +151,6 @@ export async function PATCH(request: Request) {
   const updated = await SettingsModel.findOne().lean() as any;
   if (updated?.payment) updated.payment = maskPaymentSettings(updated.payment);
   if (updated?.sms) updated.sms = maskSmsSettings(updated.sms);
+  if (updated?.auth) updated.auth = maskAuthSettings(updated.auth);
   return Response.json(updated);
 }

@@ -2,6 +2,13 @@ import mongoose, { Schema, type Document } from "mongoose";
 
 export interface ISettings extends Document {
   logoUrl?: string;
+  auth: {
+    google: {
+      enabled: boolean;
+      clientId: string;
+      clientSecret: string;
+    };
+  };
   general: {
     businessName: string;
     contactEmail: string;
@@ -98,6 +105,16 @@ const SettingsSchema = new Schema<ISettings>(
   },
   { timestamps: true }
 );
+
+SettingsSchema.add({
+  auth: {
+    google: {
+      enabled:      { type: Boolean, default: false },
+      clientId:     { type: String,  default: "" },
+      clientSecret: { type: String,  default: "" },
+    },
+  },
+});
 
 export default (mongoose.models.Settings as mongoose.Model<ISettings>) ||
   mongoose.model<ISettings>("Settings", SettingsSchema);
