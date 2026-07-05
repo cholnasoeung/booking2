@@ -18,8 +18,8 @@ export default async function AdminPage() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col lg:ml-64">
 
-        {/* Header — mid-dark navy, lighter than sidebar */}
-        <header className="sticky top-0 z-10 bg-gradient-to-r from-[#1a2744] via-[#1e3058] to-[#1a2744] border-b border-white/10 shadow-lg shadow-black/20">
+        {/* Header */}
+        <header className="sticky top-0 z-10 bg-gradient-to-r from-[#1e3a72] via-[#2850a8] to-[#1e3a72] border-b border-white/[0.18] shadow-lg shadow-black/20">
           <div className="px-6 py-3.5 lg:px-8">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
@@ -28,7 +28,7 @@ export default async function AdminPage() {
                 <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl leading-tight">
                   Control Center
                 </h1>
-                <p className="text-xs text-slate-500 hidden sm:block mt-0.5">
+                <p className="text-xs text-blue-200/70 hidden sm:block mt-0.5">
                   Manage your bus booking system
                 </p>
               </div>
@@ -39,57 +39,57 @@ export default async function AdminPage() {
 
                 <div className="flex items-center gap-1.5">
                   {/* Routes */}
-                  <div className="flex items-center gap-2 rounded-xl bg-white/[0.08] border border-white/[0.15] px-2.5 py-1.5 hover:bg-white/[0.15] transition-colors">
+                  <div className="flex items-center gap-2 rounded-xl bg-white/[0.12] border border-white/[0.22] px-2.5 py-1.5 hover:bg-white/[0.22] transition-colors">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-500/20">
                       <MapPinned className="size-3.5 text-indigo-300" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-white leading-none">{snapshot.routes.length}</p>
-                      <p className="text-[9px] text-slate-400 uppercase tracking-wider mt-0.5">Routes</p>
+                      <p className="text-[9px] text-blue-100/70 uppercase tracking-wider mt-0.5">Routes</p>
                     </div>
                   </div>
 
                   {/* Buses */}
-                  <div className="flex items-center gap-2 rounded-xl bg-white/[0.08] border border-white/[0.15] px-2.5 py-1.5 hover:bg-white/[0.15] transition-colors">
+                  <div className="flex items-center gap-2 rounded-xl bg-white/[0.12] border border-white/[0.22] px-2.5 py-1.5 hover:bg-white/[0.22] transition-colors">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-500/20">
                       <BusFront className="size-3.5 text-violet-300" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-white leading-none">{snapshot.buses.length}</p>
-                      <p className="text-[9px] text-slate-400 uppercase tracking-wider mt-0.5">Buses</p>
+                      <p className="text-[9px] text-blue-100/70 uppercase tracking-wider mt-0.5">Buses</p>
                     </div>
                   </div>
 
                   {/* Fleet */}
-                  <div className="flex items-center gap-2 rounded-xl bg-white/[0.08] border border-white/[0.15] px-2.5 py-1.5 hover:bg-white/[0.15] transition-colors">
+                  <div className="flex items-center gap-2 rounded-xl bg-white/[0.12] border border-white/[0.22] px-2.5 py-1.5 hover:bg-white/[0.22] transition-colors">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-500/20">
                       <Package className="size-3.5 text-cyan-300" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-white leading-none">{snapshot.busDetails?.length ?? 0}</p>
-                      <p className="text-[9px] text-slate-400 uppercase tracking-wider mt-0.5">Fleet</p>
+                      <p className="text-[9px] text-blue-100/70 uppercase tracking-wider mt-0.5">Fleet</p>
                     </div>
                   </div>
 
                   {/* Drivers */}
-                  <div className="flex items-center gap-2 rounded-xl bg-white/[0.08] border border-white/[0.15] px-2.5 py-1.5 hover:bg-white/[0.15] transition-colors">
+                  <div className="flex items-center gap-2 rounded-xl bg-white/[0.12] border border-white/[0.22] px-2.5 py-1.5 hover:bg-white/[0.22] transition-colors">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/20">
                       <Users className="size-3.5 text-emerald-300" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-white leading-none">{snapshot.drivers.length}</p>
-                      <p className="text-[9px] text-slate-400 uppercase tracking-wider mt-0.5">Drivers</p>
+                      <p className="text-[9px] text-blue-100/70 uppercase tracking-wider mt-0.5">Drivers</p>
                     </div>
                   </div>
 
                   {/* Bookings */}
-                  <div className="flex items-center gap-2 rounded-xl bg-white/[0.08] border border-white/[0.15] px-2.5 py-1.5 hover:bg-white/[0.15] transition-colors">
+                  <div className="flex items-center gap-2 rounded-xl bg-white/[0.12] border border-white/[0.22] px-2.5 py-1.5 hover:bg-white/[0.22] transition-colors">
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-500/20">
                       <Ticket className="size-3.5 text-purple-300" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-white leading-none">{snapshot.bookings.length}</p>
-                      <p className="text-[9px] text-slate-400 uppercase tracking-wider mt-0.5">Bookings</p>
+                      <p className="text-[9px] text-blue-100/70 uppercase tracking-wider mt-0.5">Bookings</p>
                     </div>
                   </div>
                 </div>

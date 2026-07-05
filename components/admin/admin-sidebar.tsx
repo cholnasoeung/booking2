@@ -84,7 +84,7 @@ const sectionStyles = [
 
 type AdminSidebarProps = { userName: string; userEmail?: string };
 
-export default function AdminSidebar({ userName }: AdminSidebarProps) {
+export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -209,7 +209,7 @@ export default function AdminSidebar({ userName }: AdminSidebarProps) {
                     <span className={cn("w-1.5 h-1.5 rounded-full shrink-0 transition-all", style.dot, !showItems && "opacity-40")} />
                     <span className={cn(
                       "text-[10px] font-bold uppercase tracking-[0.14em] transition-colors",
-                      showItems ? style.text : "text-slate-600 group-hover:text-slate-500"
+                      showItems ? style.text : "text-slate-400 group-hover:text-slate-300"
                     )}>
                       {section.title}
                     </span>
@@ -217,7 +217,7 @@ export default function AdminSidebar({ userName }: AdminSidebarProps) {
                   {!search && (
                     <ChevronRight className={cn(
                       "size-3 transition-all duration-200",
-                      showItems ? cn(style.text, "rotate-90") : "text-slate-700 group-hover:text-slate-600"
+                      showItems ? cn(style.text, "rotate-90") : "text-slate-500 group-hover:text-slate-300"
                     )} />
                   )}
                 </button>
@@ -237,7 +237,7 @@ export default function AdminSidebar({ userName }: AdminSidebarProps) {
                             "group relative flex items-center gap-2.5 rounded-xl px-2.5 py-[7px] transition-all duration-150",
                             isActive
                               ? "bg-white/10 text-white"
-                              : "text-slate-500 hover:bg-white/[0.05] hover:text-slate-300"
+                              : "text-slate-300 hover:bg-white/[0.07] hover:text-white"
                           )}
                         >
                           {/* Active left bar */}
@@ -253,11 +253,11 @@ export default function AdminSidebar({ userName }: AdminSidebarProps) {
                             "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-150",
                             isActive
                               ? `bg-gradient-to-br ${item.gradient} shadow-sm`
-                              : "bg-white/[0.05] group-hover:bg-white/10"
+                              : "bg-white/[0.07] group-hover:bg-white/[0.13]"
                           )}>
                             <item.icon className={cn(
                               "size-3.5 transition-colors",
-                              isActive ? "text-white" : "text-slate-600 group-hover:text-slate-400"
+                              isActive ? "text-white" : "text-slate-400 group-hover:text-white"
                             )} />
                           </div>
 
@@ -288,10 +288,10 @@ export default function AdminSidebar({ userName }: AdminSidebarProps) {
           <div className="pt-1 mt-1 border-t border-white/[0.06]">
             <Link
               href="/dashboard"
-              className="group flex items-center gap-2.5 rounded-xl px-2.5 py-[7px] text-slate-600 hover:bg-white/[0.05] hover:text-slate-300 transition-all duration-150 mt-1"
+              className="group flex items-center gap-2.5 rounded-xl px-2.5 py-[7px] text-slate-300 hover:bg-white/[0.07] hover:text-white transition-all duration-150 mt-1"
             >
-              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.05] group-hover:bg-white/10 transition-all">
-                <Home className="size-3.5" />
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/[0.07] group-hover:bg-white/[0.13] transition-all">
+                <Home className="size-3.5 text-slate-400 group-hover:text-white transition-colors" />
               </div>
               <span className="text-[13px] font-medium">Back to Dashboard</span>
             </Link>
@@ -300,48 +300,56 @@ export default function AdminSidebar({ userName }: AdminSidebarProps) {
 
         {/* User card */}
         <div className="px-3 pb-3 pt-2 border-t border-white/[0.06]">
-          <div className="rounded-xl overflow-hidden ring-1 ring-white/[0.06] bg-white/[0.03]">
-            {/* Gradient accent strip */}
-            <div className="h-0.5 w-full bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500" />
+          <div className="relative rounded-2xl overflow-hidden ring-1 ring-white/[0.08] bg-gradient-to-b from-white/[0.05] to-white/[0.02]">
+            {/* Top glow bar */}
+            <div className="h-px w-full bg-gradient-to-r from-transparent via-indigo-500/60 to-transparent" />
 
-            <div className="px-3 py-3 flex items-center gap-3">
+            {/* Ambient glow behind avatar */}
+            <div className="absolute top-3 left-4 w-10 h-10 rounded-full bg-indigo-500/20 blur-xl pointer-events-none" />
+
+            <div className="px-3 pt-3 pb-2.5 flex items-center gap-3">
               {/* Avatar */}
               <div className="relative shrink-0">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white text-sm font-bold shadow-md shadow-indigo-900/60 ring-1 ring-white/10">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-400 via-violet-500 to-purple-600 text-white text-sm font-extrabold shadow-lg shadow-indigo-900/50 ring-2 ring-white/[0.12]">
                   {userInitials || "A"}
                 </div>
-                {/* Online indicator */}
-                <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
-                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500 border-[1.5px] border-[#0c1120]" />
+                {/* Online pulse */}
+                <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50" />
+                  <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500 border-2 border-[#0c1120]" />
                 </span>
               </div>
 
-              {/* Name + role */}
+              {/* Name + role + email */}
               <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-bold text-white leading-tight truncate">{userName}</p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="inline-block h-1 w-1 rounded-full bg-indigo-400" />
-                  <p className="text-[9px] text-indigo-400 uppercase tracking-[0.18em] font-semibold">Administrator</p>
+                {userEmail && (
+                  <p className="text-[10px] text-slate-500 leading-tight truncate mt-0.5">{userEmail}</p>
+                )}
+                <div className="flex items-center gap-1 mt-1">
+                  <span className="inline-flex items-center gap-1 bg-indigo-500/15 border border-indigo-500/25 text-indigo-300 text-[9px] font-bold uppercase tracking-[0.18em] px-1.5 py-0.5 rounded-full">
+                    <Shield className="size-2.5" />
+                    Administrator
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Buttons */}
-            <div className="px-3 pb-3 grid grid-cols-2 gap-1.5">
+            {/* Action buttons */}
+            <div className="px-2.5 pb-2.5 grid grid-cols-2 gap-1.5">
               <Link
                 href="/dashboard/profile"
-                className="flex items-center justify-center gap-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] hover:border-white/[0.14] px-2 py-1.5 text-[11px] font-semibold text-slate-400 hover:text-white transition-all duration-200"
+                className="group flex items-center justify-center gap-1.5 rounded-xl bg-white/[0.05] hover:bg-indigo-500/15 border border-white/[0.07] hover:border-indigo-500/30 px-2 py-2 text-[11px] font-semibold text-slate-400 hover:text-indigo-300 transition-all duration-200"
               >
-                <Users className="size-3 shrink-0" />
+                <Users className="size-3.5 shrink-0 group-hover:scale-110 transition-transform" />
                 Profile
               </Link>
               <button
                 type="button"
                 onClick={() => signOut({ callbackUrl: "/" })}
-                className="flex items-center justify-center gap-1.5 rounded-lg bg-white/[0.06] hover:bg-red-500/20 border border-white/[0.08] hover:border-red-500/30 px-2 py-1.5 text-[11px] font-semibold text-slate-400 hover:text-red-400 transition-all duration-200"
+                className="group flex items-center justify-center gap-1.5 rounded-xl bg-white/[0.05] hover:bg-red-500/15 border border-white/[0.07] hover:border-red-500/30 px-2 py-2 text-[11px] font-semibold text-slate-400 hover:text-red-400 transition-all duration-200"
               >
-                <LogOut className="size-3 shrink-0" />
+                <LogOut className="size-3.5 shrink-0 group-hover:translate-x-0.5 transition-transform" />
                 Sign out
               </button>
             </div>
