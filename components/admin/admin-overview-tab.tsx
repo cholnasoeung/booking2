@@ -7,7 +7,7 @@ import {
   ArrowDownRight, Armchair,
 } from "lucide-react";
 import {
-  CartesianGrid, Legend, Line, LineChart,
+  Area, AreaChart, CartesianGrid, Legend,
   Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 
@@ -281,27 +281,27 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
 
       {/* ── Charts row ─────────────────────────────────────────────────── */}
       <div className="grid gap-5 xl:grid-cols-[1.6fr_1fr]">
-        {/* Line chart */}
-        <Card className="border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40">
-          <CardHeader className="border-b border-indigo-50 pb-3 pt-4 px-5">
+        {/* Gradient Area Chart */}
+        <Card className="border border-slate-200 bg-white shadow-md overflow-hidden">
+          <CardHeader className="pb-3 pt-4 px-5 bg-gradient-to-r from-slate-50 to-indigo-50/40 border-b border-slate-100">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-200">
                   <TrendingUp className="size-4" />
                 </div>
                 <div>
-                  <CardTitle className="text-sm">Booking Trend</CardTitle>
-                  <CardDescription className="text-xs">Bookings & revenue over time</CardDescription>
+                  <CardTitle className="text-sm font-bold text-slate-800">Booking Trend</CardTitle>
+                  <CardDescription className="text-xs text-slate-400">Bookings & revenue over time</CardDescription>
                 </div>
               </div>
-              <div className="flex gap-1 rounded-xl bg-indigo-50/60 border border-indigo-100 p-0.5">
+              <div className="flex gap-0.5 rounded-xl bg-slate-100 border border-slate-200 p-0.5">
                 {TREND_DAYS.map((d) => (
                   <button key={d}
                     onClick={() => setTrendDays(d)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                       trendDays === d
-                        ? "bg-indigo-600 text-white shadow-sm"
-                        : "text-slate-500 hover:text-slate-800"
+                        ? "bg-white text-indigo-700 shadow-sm border border-indigo-100"
+                        : "text-slate-400 hover:text-slate-700"
                     }`}
                   >
                     {d}d
@@ -310,22 +310,86 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-4">
+          <CardContent className="p-4 pt-5">
             {bookings.length === 0 ? (
-              <div className="flex h-48 items-center justify-center text-sm text-slate-400">No booking data yet</div>
+              <div className="flex h-56 flex-col items-center justify-center gap-2 text-slate-300">
+                <TrendingUp className="size-10" />
+                <p className="text-sm text-slate-400">No booking data yet</p>
+              </div>
             ) : (
-              <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={trendData} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e7ff" />
-                  <XAxis dataKey="date" tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
-                  <YAxis yAxisId="left" tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} width={28} />
-                  <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} width={44} tickFormatter={(v) => `$${v}`} />
-                  <Tooltip contentStyle={{ borderRadius: "10px", border: "1px solid #e0e7ff", background: "#fff", fontSize: 11 }}
-                    formatter={(value, name) => name === "revenue" ? [`$${value}`, "Revenue"] : [value, "Bookings"]} />
-                  <Legend wrapperStyle={{ fontSize: 11, paddingTop: 6 }} formatter={(v) => v === "revenue" ? "Revenue ($)" : "Bookings"} />
-                  <Line yAxisId="left"  type="monotone" dataKey="bookings" stroke="#6366f1" strokeWidth={2} dot={{ r: 2.5 }} activeDot={{ r: 4 }} />
-                  <Line yAxisId="right" type="monotone" dataKey="revenue"  stroke="#10b981" strokeWidth={2} dot={{ r: 2.5 }} activeDot={{ r: 4 }} />
-                </LineChart>
+              <ResponsiveContainer width="100%" height={260}>
+                <AreaChart data={trendData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="bookingsAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%"   stopColor="#6366f1" stopOpacity={0.25} />
+                      <stop offset="100%" stopColor="#6366f1" stopOpacity={0.02} />
+                    </linearGradient>
+                    <linearGradient id="revenueAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%"   stopColor="#10b981" stopOpacity={0.2} />
+                      <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="4 4" stroke="#f1f5f9" vertical={false} />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 10, fill: "#94a3b8" }}
+                    tickLine={false} axisLine={false}
+                    dy={6}
+                  />
+                  <YAxis
+                    yAxisId="left"
+                    tick={{ fontSize: 10, fill: "#94a3b8" }}
+                    tickLine={false} axisLine={false}
+                    width={28}
+                  />
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    tick={{ fontSize: 10, fill: "#94a3b8" }}
+                    tickLine={false} axisLine={false}
+                    width={48}
+                    tickFormatter={(v) => `$${v}`}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "12px",
+                      border: "1px solid #e2e8f0",
+                      background: "#fff",
+                      fontSize: 12,
+                      boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                    }}
+                    formatter={(value, name) =>
+                      name === "revenue" ? [`$${value}`, "Revenue"] : [value, "Bookings"]
+                    }
+                    cursor={{ stroke: "#6366f1", strokeWidth: 1, strokeDasharray: "4 4" }}
+                  />
+                  <Legend
+                    wrapperStyle={{ fontSize: 11, paddingTop: 10 }}
+                    formatter={(v) => v === "revenue" ? "Revenue ($)" : "Bookings"}
+                    iconType="circle"
+                    iconSize={8}
+                  />
+                  <Area
+                    yAxisId="left"
+                    type="monotone"
+                    dataKey="bookings"
+                    stroke="#6366f1"
+                    strokeWidth={2.5}
+                    fill="url(#bookingsAreaGrad)"
+                    dot={false}
+                    activeDot={{ r: 5, fill: "#6366f1", strokeWidth: 2, stroke: "#fff" }}
+                  />
+                  <Area
+                    yAxisId="right"
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#10b981"
+                    strokeWidth={2.5}
+                    fill="url(#revenueAreaGrad)"
+                    dot={false}
+                    activeDot={{ r: 5, fill: "#10b981", strokeWidth: 2, stroke: "#fff" }}
+                  />
+                </AreaChart>
               </ResponsiveContainer>
             )}
           </CardContent>
@@ -333,58 +397,101 @@ export default function AdminOverviewTab({ routes, buses, bookings }: Props) {
 
         {/* Donut charts stacked */}
         <div className="space-y-4">
-          <Card className="border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40">
-            <CardHeader className="border-b border-indigo-50 pb-2 pt-3 px-4">
+          <Card className="border border-slate-200 bg-white shadow-md overflow-hidden">
+            <CardHeader className="border-b border-slate-100 pb-2 pt-3 px-4 bg-gradient-to-r from-slate-50 to-indigo-50/30">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-sm">
                   <Ticket className="size-3.5" />
                 </div>
                 <div>
-                  <CardTitle className="text-sm">Booking Status</CardTitle>
+                  <CardTitle className="text-sm font-bold text-slate-800">Booking Status</CardTitle>
                   <CardDescription className="text-xs">
                     {statusFilter === "all" ? "Confirmed vs Cancelled" : `Filtered: ${statusFilter}`}
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-2">
+            <CardContent className="p-3">
               {statusDonut.length === 0 ? (
-                <div className="flex h-28 items-center justify-center text-xs text-slate-400">No data</div>
+                <div className="flex h-32 items-center justify-center text-xs text-slate-400">No data yet</div>
               ) : (
-                <ResponsiveContainer width="100%" height={120}>
-                  <PieChart>
-                    <Pie data={statusDonut} cx="50%" cy="50%" innerRadius={32} outerRadius={50} paddingAngle={3} dataKey="value" />
-                    <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e0e7ff", fontSize: 11 }} />
-                    <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 10 }} />
-                  </PieChart>
-                </ResponsiveContainer>
+                <div className="flex items-center gap-3">
+                  <ResponsiveContainer width="55%" height={130}>
+                    <PieChart>
+                      <Pie
+                        data={statusDonut}
+                        cx="50%" cy="50%"
+                        innerRadius={36} outerRadius={56}
+                        paddingAngle={4}
+                        dataKey="value"
+                        strokeWidth={0}
+                      />
+                      <Tooltip
+                        contentStyle={{ borderRadius: "10px", border: "1px solid #e2e8f0", fontSize: 11, boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="flex-1 space-y-2">
+                    {statusDonut.map((d) => (
+                      <div key={d.name} className="flex items-center justify-between gap-1.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: d.fill }} />
+                          <span className="text-[11px] text-slate-600 font-medium">{d.name}</span>
+                        </div>
+                        <span className="text-[11px] font-bold text-slate-800">{d.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
 
-          <Card className="border border-indigo-100/80 bg-white shadow-sm shadow-indigo-50/40">
-            <CardHeader className="border-b border-indigo-50 pb-2 pt-3 px-4">
+          <Card className="border border-slate-200 bg-white shadow-md overflow-hidden">
+            <CardHeader className="border-b border-slate-100 pb-2 pt-3 px-4 bg-gradient-to-r from-slate-50 to-emerald-50/30">
               <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-sm">
                   <MapPinned className="size-3.5" />
                 </div>
                 <div>
-                  <CardTitle className="text-sm">Revenue by Route</CardTitle>
-                  <CardDescription className="text-xs">Top 5 routes</CardDescription>
+                  <CardTitle className="text-sm font-bold text-slate-800">Revenue by Route</CardTitle>
+                  <CardDescription className="text-xs">Top routes</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-2">
+            <CardContent className="p-3">
               {routeDonut.length === 0 ? (
-                <div className="flex h-28 items-center justify-center text-xs text-slate-400">No revenue yet</div>
+                <div className="flex h-32 items-center justify-center text-xs text-slate-400">No revenue yet</div>
               ) : (
-                <ResponsiveContainer width="100%" height={120}>
-                  <PieChart>
-                    <Pie data={routeDonut} cx="50%" cy="50%" innerRadius={32} outerRadius={50} paddingAngle={3} dataKey="value" />
-                    <Tooltip contentStyle={{ borderRadius: "8px", border: "1px solid #e0e7ff", fontSize: 11 }} formatter={(v) => [`$${Number(v).toLocaleString()}`, "Revenue"]} />
-                    <Legend iconType="circle" iconSize={7} wrapperStyle={{ fontSize: 10 }} />
-                  </PieChart>
-                </ResponsiveContainer>
+                <div className="flex items-center gap-3">
+                  <ResponsiveContainer width="55%" height={130}>
+                    <PieChart>
+                      <Pie
+                        data={routeDonut}
+                        cx="50%" cy="50%"
+                        innerRadius={36} outerRadius={56}
+                        paddingAngle={4}
+                        dataKey="value"
+                        strokeWidth={0}
+                      />
+                      <Tooltip
+                        contentStyle={{ borderRadius: "10px", border: "1px solid #e2e8f0", fontSize: 11, boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}
+                        formatter={(v) => [`$${Number(v).toLocaleString()}`, "Revenue"]}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="flex-1 space-y-2 min-w-0">
+                    {routeDonut.map((d) => (
+                      <div key={d.name} className="flex items-center justify-between gap-1.5 min-w-0">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: d.fill }} />
+                          <span className="text-[11px] text-slate-600 font-medium truncate">{d.name}</span>
+                        </div>
+                        <span className="text-[11px] font-bold text-slate-800 shrink-0">${d.value.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
             </CardContent>
           </Card>
