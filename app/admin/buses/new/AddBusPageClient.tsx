@@ -271,7 +271,7 @@ export default function AddBusPageClient({ routes }: { routes: RouteSummary[] })
 
       {/* ── Step content ────────────────────────────────────────────── */}
       <form id="add-bus-form" onSubmit={handleSubmit}>
-        <div className="mx-auto w-full max-w-3xl px-5 py-8">
+        <div className="w-full px-6 py-8">
 
           {/* Step heading */}
           <div className="mb-6 flex items-center gap-3">
@@ -318,7 +318,7 @@ export default function AddBusPageClient({ routes }: { routes: RouteSummary[] })
                 </div>
               </Card>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <Card>
                   <FieldLabel label="Start Date" required />
                   <Input type="date" required value={form.date}
@@ -432,7 +432,7 @@ export default function AddBusPageClient({ routes }: { routes: RouteSummary[] })
           {/* ── Step 3: Bus Type & Pricing ─── */}
           {step === 3 && (
             <div className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <Card>
                   <FieldLabel label="Bus Type" />
                   <Select value={form.busType} onValueChange={(v) => {
@@ -495,7 +495,7 @@ export default function AddBusPageClient({ routes }: { routes: RouteSummary[] })
                   {form.amenities.length} selected
                 </span>
               </div>
-              <div className="grid gap-2.5 sm:grid-cols-2">
+              <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {AMENITY_OPTIONS.map((a) => {
                   const checked = form.amenities.includes(a.value as AmenityValue);
                   return (

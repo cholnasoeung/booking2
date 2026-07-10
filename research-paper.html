@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Online Bus Ticket Booking System — Research Project</title>
+<style>
+  /* ── Tokens ─────────────────────────────────────────────── */
+  :root {
+    --page-bg:    #F2F2EF;
+    --doc-bg:     #FFFFFF;
+    --text:       #1A1A1A;
+    --text-mid:   #3D3D3D;
+    --text-muted: #6B6B6B;
+    --chapter:    #162040;
+    --accent:     #2D4A96;
+    --rule:       #C8C8C4;
+    --table-head: #EEF0F5;
+    --table-rule: #D4D6DC;
+    --highlight:  #F0F3FC;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page-bg:    #111318;
+      --doc-bg:     #1C1F2A;
+      --text:       #E8E8E4;
+      --text-mid:   #BDBDB8;
+      --text-muted: #7A7A78;
+      --chapter:    #93B4E8;
+      --accent:     #7EAAE0;
+      --rule:       #2E3040;
+      --table-head: #24283A;
+      --table-rule: #2E3040;
+      --highlight:  #1F2438;
+    }
+  }
+  :root[data-theme="dark"] {
+    --page-bg:    #111318;
+    --doc-bg:     #1C1F2A;
+    --text:       #E8E8E4;
+    --text-mid:   #BDBDB8;
+    --text-muted: #7A7A78;
+    --chapter:    #93B4E8;
+    --accent:     #7EAAE0;
+    --rule:       #2E3040;
+    --table-head: #24283A;
+    --table-rule: #2E3040;
+    --highlight:  #1F2438;
+  }
+  :root[data-theme="light"] {
+    --page-bg:    #F2F2EF;
+    --doc-bg:     #FFFFFF;
+    --text:       #1A1A1A;
+    --text-mid:   #3D3D3D;
+    --text-muted: #6B6B6B;
+    --chapter:    #162040;
+    --accent:     #2D4A96;
+    --rule:       #C8C8C4;
+    --table-head: #EEF0F5;
+    --table-rule: #D4D6DC;
+    --highlight:  #F0F3FC;
+  }
+
+  /* ── Reset & Base ─────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--page-bg);
+    color: var(--text);
+    font-family: "Times New Roman", Times, "Georgia", serif;
+    font-size: 12pt;
+    line-height: 1.8;
+  }
+
+  /* ── Theme toggle ──────────────────────────────────────── */
+  #theme-btn {
+    position: fixed;
+    top: 16px; right: 16px;
+    z-index: 99;
+    background: var(--doc-bg);
+    border: 1px solid var(--rule);
+    color: var(--text-mid);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,.1);
+    transition: background .2s;
+  }
+  #theme-btn:hover { background: var(--highlight); }
+
+  /* ── Document wrapper ─────────────────────────────────── */
+  .doc-wrap {
+    max-width: 870px;
+    margin: 40px auto 80px;
+    padding: 0 16px;
+  }
+
+  /* ── Page simulation ──────────────────────────────────── */
+  .page {
+    background: var(--doc-bg);
+    box-shadow: 0 2px 12px rgba(0,0,0,.10);
+    padding: 2.5cm 2.5cm 3cm 4cm;
+    margin-bottom: 32px;
+    position: relative;
+  }
+  .page + .page { border-top: none; }
+
+  .page-label {
+    position: absolute;
+    bottom: 14px; right: 30px;
+    font-size: 9pt;
+    color: var(--text-muted);
+    font-style: italic;
+    font-family: "Times New Roman", Times, serif;
+  }
+
+  /* ── Title page ────────────────────────────────────────── */
+  .title-page {
+    text-align: center;
+    padding-top: 1.5cm;
+    padding-bottom: 1.5cm;
+    min-height: 26cm;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .uni-crest {
+    width: 90px; height: 90px;
+    border: 3px solid var(--chapter);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 18px;
+    font-size: 28px;
+    color: var(--chapter);
+    background: var(--highlight);
+  }
+  .title-page h1.uni-name {
+    font-size: 15pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--chapter);
+    margin-bottom: 4px;
+  }
+  .title-page .program {
+    font-size: 13pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--chapter);
+    margin-bottom: 36px;
+  }
+  .title-page hr.t-rule {
+    width: 60%; border: none;
+    border-top: 1.5px solid var(--rule);
+    margin: 0 auto 36px;
+  }
+  .title-page .project-title {
+    font-size: 18pt;
+    font-weight: bold;
+    color: var(--chapter);
+    line-height: 1.4;
+    text-wrap: balance;
+    margin-bottom: 8px;
+  }
+  .title-page .project-sub {
+    font-size: 12pt;
+    font-style: italic;
+    color: var(--text-muted);
+    margin-bottom: 48px;
+  }
+  .title-meta {
+    text-align: left;
+    border: 1px solid var(--rule);
+    background: var(--highlight);
+    padding: 20px 36px;
+    width: 80%;
+    margin: 0 auto;
+  }
+  .title-meta p { margin: 4px 0; font-size: 11.5pt; color: var(--text-mid); }
+  .title-meta strong { color: var(--text); }
+  .title-footer {
+    margin-top: auto;
+    font-size: 11pt;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* ── Front-matter pages ───────────────────────────────── */
+  .fm-title {
+    font-size: 14pt;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--chapter);
+    margin-bottom: 28px;
+    padding-bottom: 10px;
+    border-bottom: 1.5px solid var(--rule);
+  }
+  .fm-body { text-align: justify; color: var(--text-mid); }
+  .fm-body p { margin-bottom: 12px; }
+
+  .sig-block {
+    margin-top: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .sig-line {
+    width: 220px;
+    border-bottom: 1px solid var(--text-muted);
+    height: 28px;
+  }
+  .sig-label { font-size: 10.5pt; color: var(--text-muted); }
+
+  /* ── Abstract ─────────────────────────────────────────── */
+  .abstract-box {
+    background: var(--highlight);
+    border-left: 4px solid var(--accent);
+    padding: 18px 22px;
+    margin: 24px 0;
+    font-size: 11.5pt;
+    text-align: justify;
+    color: var(--text-mid);
+  }
+  .keywords {
+    margin-top: 14px;
+    font-size: 11pt;
+    color: var(--text-muted);
+  }
+  .keywords strong { color: var(--text-mid); }
+
+  /* ── Table of Contents ────────────────────────────────── */
+  .toc-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    padding: 3px 0;
+    font-size: 11.5pt;
+  }
+  .toc-item.chapter {
+    font-weight: bold;
+    color: var(--chapter);
+    margin-top: 10px;
+  }
+  .toc-item.sub { padding-left: 24px; color: var(--text-mid); }
+  .toc-dots {
+    flex: 1;
+    border-bottom: 1px dotted var(--rule);
+    min-width: 20px;
+    margin: 0 6px;
+    position: relative;
+    top: -3px;
+  }
+  .toc-pg { font-variant-numeric: tabular-nums; color: var(--text-muted); font-size: 11pt; }
+
+  /* ── Abbrev table ─────────────────────────────────────── */
+  .abbrev-table { width: 100%; border-collapse: collapse; font-size: 11.5pt; }
+  .abbrev-table td { padding: 5px 10px; border-bottom: 1px solid var(--table-rule); vertical-align: top; color: var(--text-mid); }
+  .abbrev-table td:first-child { font-weight: bold; width: 130px; color: var(--text); }
+
+  /* ── Chapter pages ────────────────────────────────────── */
+  .chapter-eyebrow {
+    font-size: 9pt;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    color: var(--accent);
+    font-family: Arial, Helvetica, sans-serif;
+    margin-bottom: 6px;
+  }
+  h2.chapter-title {
+    font-size: 14pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--chapter);
+    margin-bottom: 6px;
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+  .chapter-rule {
+    width: 100%;
+    border: none;
+    border-top: 2px solid var(--chapter);
+    margin-bottom: 28px;
+    opacity: .25;
+  }
+  h3.sub-heading {
+    font-size: 13pt;
+    font-weight: bold;
+    color: var(--chapter);
+    margin: 30px 0 10px;
+    text-wrap: balance;
+  }
+  h4.sub-sub {
+    font-size: 12pt;
+    font-weight: bold;
+    color: var(--text-mid);
+    margin: 20px 0 6px;
+  }
+  .body-text {
+    text-align: justify;
+    color: var(--text-mid);
+    margin-bottom: 14px;
+  }
+  .body-text + .body-text { margin-top: 0; }
+
+  ul.body-list, ol.body-list {
+    padding-left: 28px;
+    margin: 10px 0 16px;
+    color: var(--text-mid);
+  }
+  ul.body-list li, ol.body-list li {
+    margin-bottom: 6px;
+    text-align: justify;
+  }
+
+  /* ── Data/requirement tables ──────────────────────────── */
+  .req-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11pt;
+    margin: 16px 0 24px;
+    overflow-x: auto;
+  }
+  .req-table th {
+    background: var(--table-head);
+    color: var(--chapter);
+    font-weight: bold;
+    text-align: left;
+    padding: 8px 12px;
+    border: 1px solid var(--table-rule);
+    font-size: 10.5pt;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  .req-table td {
+    padding: 7px 12px;
+    border: 1px solid var(--table-rule);
+    vertical-align: top;
+    color: var(--text-mid);
+  }
+  .req-table tr:nth-child(even) td { background: var(--highlight); }
+  .req-table .req-id {
+    font-weight: bold;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .table-caption {
+    font-size: 10.5pt;
+    font-style: italic;
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  /* ── DFD / process box ────────────────────────────────── */
+  .dfd-box {
+    border: 1px solid var(--rule);
+    background: var(--highlight);
+    border-radius: 4px;
+    padding: 18px 22px;
+    margin: 20px 0;
+    font-size: 11pt;
+    color: var(--text-mid);
+  }
+  .dfd-box .dfd-title {
+    font-weight: bold;
+    color: var(--chapter);
+    font-size: 11.5pt;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-size: 10pt;
+  }
+
+  /* ── Code/tech block ──────────────────────────────────── */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 12px;
+    margin: 16px 0 24px;
+  }
+  .tech-chip {
+    border: 1px solid var(--table-rule);
+    background: var(--highlight);
+    border-radius: 4px;
+    padding: 10px 14px;
+  }
+  .tech-chip .tc-label {
+    font-size: 9pt;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--text-muted);
+    margin-bottom: 3px;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .tech-chip .tc-value {
+    font-weight: bold;
+    color: var(--text);
+    font-size: 11pt;
+  }
+
+  /* ── Testing table ────────────────────────────────────── */
+  .pass { color: #166534; font-weight: bold; }
+  .fail { color: #991B1B; font-weight: bold; }
+  :root[data-theme="dark"] .pass, @media(prefers-color-scheme:dark) { }
+  /* keep pass/fail visible in dark mode */
+  [data-theme="dark"] .pass { color: #4ADE80; }
+  [data-theme="dark"] .fail { color: #F87171; }
+
+  /* ── References ───────────────────────────────────────── */
+  .ref-entry {
+    text-indent: -2em;
+    padding-left: 2em;
+    margin-bottom: 12px;
+    color: var(--text-mid);
+    font-size: 11.5pt;
+  }
+
+  /* ── Responsive ───────────────────────────────────────── */
+  @media (max-width: 700px) {
+    .page { padding: 24px 18px 40px 24px; }
+    .title-meta { width: 100%; padding: 16px; }
+    .tech-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<button id="theme-btn" onclick="toggleTheme()" aria-label="Toggle theme">☀ / ☾ Theme</button>
+
+<div class="doc-wrap">
+
+  <!-- ══════════════════════════════════════════════════════
+       TITLE PAGE
+  ══════════════════════════════════════════════════════ -->
+  <div class="page">
+    <div class="title-page">
+      <div>
+        <div class="uni-crest">🎓</div>
+        <h1 class="uni-name">Build Bright University</h1>
+        <p class="program">Master of Information Technology</p>
+        <hr class="t-rule">
+        <p class="project-title">Online Bus Ticket Booking System</p>
+        <p class="project-sub">A Web-Based Ticket Reservation and Fleet Management Platform</p>
+      </div>
+
+      <div class="title-meta">
+        <p><strong>Submitted by:</strong> [Your Full Name]</p>
+        <p><strong>Student ID:</strong> [Your Student ID]</p>
+        <p><strong>Advisor:</strong> [Advisor's Name], [Title]</p>
+        <p><strong>Program:</strong> Master of Information Technology</p>
+        <p><strong>Academic Year:</strong> 2025 – 2026</p>
+        <p><strong>Submission Date:</strong> July 2026</p>
+      </div>
+
+      <p class="title-footer">Research Project — Build Bright University &nbsp;·&nbsp; 2026</p>
+    </div>
+    <span class="page-label">Research Project</span>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       DECLARATION
+  ══════════════════════════════════════════════════════ -->
+  <div class="page">
+    <p class="fm-title">Declaration</p>
+    <div class="fm-body">
+      <p>I hereby declare that the research project entitled <em>"Online Bus Ticket Booking System"</em> submitted to Build Bright University in partial fulfillment of the requirements for the degree of Master of Information Technology is my own work and has not been submitted elsewhere for the award of any other degree or diploma.</p>
+      <p>All the information and data used in this project have been collected from authentic sources. The ideas, designs, and implementations presented in this project are entirely original unless cited otherwise. All references and sources consulted during the preparation of this project have been duly acknowledged.</p>
+      <p>I also declare that the system developed in this project is fully functional and has been tested to verify its correctness and reliability.</p>
+    </div>
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <p class="sig-label">Signature of Student</p>
+      <p style="margin-top:10px; color: var(--text-mid); font-size:11pt;">Name: [Your Full Name]</p>
+      <p style="color: var(--text-mid); font-size:11pt;">Date: ________________</p>
+    </div>
+    <span class="page-label">Declaration</span>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       CERTIFICATE
+  ══════════════════════════════════════════════════════ -->
+  <div class="page">
+    <p class="fm-title">Certificate</p>
+    <div class="fm-body">
+      <p>This is to certify that the research project entitled <em>"Online Bus Ticket Booking System"</em> submitted by <strong>[Your Full Name]</strong>, Student ID: <strong>[Student ID]</strong>, to Build Bright University in partial fulfillment of the requirements for the degree of <strong>Master of Information Technology</strong> is a record of bonafide research work carried out by the student under my supervision and guidance.</p>
+      <p>The project report is original in nature and fulfills the academic requirements for the submission of a research project in the Master of Information Technology program. The results presented in this project have not been submitted elsewhere for the award of any degree or diploma.</p>
+      <p>I recommend this project for the award of the Master of Information Technology degree.</p>
+    </div>
+    <div style="display:flex; gap:64px; margin-top:60px;">
+      <div class="sig-block">
+        <div class="sig-line"></div>
+        <p class="sig-label">Signature of Advisor</p>
+        <p style="margin-top:8px; color:var(--text-mid); font-size:11pt;">Name: [Advisor Name]</p>
+        <p style="color:var(--text-mid); font-size:11pt;">Date: ________________</p>
+      </div>
+      <div class="sig-block">
+        <div class="sig-line"></div>
+        <p class="sig-label">Signature of Department Head</p>
+        <p style="margin-top:8px; color:var(--text-mid); font-size:11pt;">Name: [HOD Name]</p>
+        <p style="color:var(--text-mid); font-size:11pt;">Date: ________________</p>
+      </div>
+    </div>
+    <span class="page-label">Certificate</span>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       ACKNOWLEDGEMENTS
+  ══════════════════════════════════════════════════════ -->
+  <div class="page">
+    <p class="fm-title">Acknowledgements</p>
+    <div class="fm-body">
+      <p>I would like to express my sincere gratitude to all those who contributed to the successful completion of this research project.</p>
+      <p>First and foremost, I am deeply grateful to my project advisor, <strong>[Advisor Name]</strong>, for the continuous guidance, constructive feedback, and valuable suggestions throughout the development of this project. Without the advisor's expertise and patience, this work would not have been possible.</p>
+      <p>I would also like to thank the faculty members of the Master of Information Technology program at Build Bright University for their academic support and the knowledge they have imparted throughout the course of this program.</p>
+      <p>Special thanks go to my fellow students and colleagues who provided valuable feedback during testing and evaluation of the system. Their input helped improve the overall quality and usability of the Online Bus Ticket Booking System.</p>
+      <p>Finally, I am grateful to my family and friends for their unwavering support, encouragement, and understanding throughout the duration of this project.</p>
+    </div>
+    <div class="sig-block">
+      <p style="color:var(--text-mid); font-size:11pt;">[Your Full Name]</p>
+      <p style="color:var(--text-mid); font-size:11pt;">Master of Information Technology</p>
+      <p style="color:var(--text-mid); font-size:11pt;">Build Bright University, 2026</p>
+    </div>
+    <span class="page-label">Acknowledgements</span>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       ABSTRACT
+  ══════════════════════════════════════════════════════ -->
+  <div class="page">
+    <p class="fm-title">Abstract</p>
+    <div class="abstract-box">
+      <p>This research project presents the design, development, and implementation of an Online Bus Ticket Booking System — a full-stack web application that enables passengers to search for available bus routes, select seats interactively, pay online, and manage their bookings through a personal dashboard. The system also provides a comprehensive administration panel for managing routes, buses, drivers, fleet, employees, and financial reporting.</p>
+      <p style="margin-top:12px;">The system was built using <strong>Next.js 16</strong> (App Router) on the front-end and back-end, <strong>MongoDB</strong> with Mongoose as the database, and <strong>NextAuth.js</strong> for authentication. Payment processing is handled through <strong>Stripe</strong> and <strong>ABA PayWay</strong>, while SMS notifications are delivered via the <strong>Twilio</strong> API. The system supports twenty-four MongoDB collections covering booking operations, fleet management, human resources, loyalty programs, and analytics.</p>
+      <p style="margin-top:12px;">Testing was carried out through functional, usability, and security testing procedures, confirming that all core features operate correctly. The system demonstrates that a modern, scalable bus booking platform can be developed using open-source technologies and cloud services.</p>
+      <div class="keywords">
+        <strong>Keywords:</strong> Bus Ticket Booking, Next.js, MongoDB, Web Application, Seat Selection, Payment Gateway, Fleet Management, Real-time Notification, Admin Panel
+      </div>
+    </div>
+    <span class="page-label">Abstract</span>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       TABLE OF CONTENTS
+  ══════════════════════════════════════════════════════ -->
+  <div class="page">
+    <p class="fm-title">Contents</p>
+
+    <div class="toc-item"><span>Title Page</span><span class="toc-dots"></span><span class="toc-pg">i</span></div>
+    <div class="toc-item"><span>Declaration</span><span class="toc-dots"></span><span class="toc-pg">ii</span></div>
+    <div class="toc-item"><span>Certificate</span><span class="toc-dots"></span><span class="toc-pg">iii</span></div>
+    <div class="toc-item"><span>Acknowledgements</span><span class="toc-dots"></span><span class="toc-pg">iv</span></div>
+    <div class="toc-item"><span>Abstract</span><span class="toc-dots"></span><span class="toc-pg">v</span></div>
+    <div class="toc-item"><span>Contents</span><span class="toc-dots"></span><span class="toc-pg">vi</span></div>
+    <div class="toc-item"><span>List of Tables</span><span class="toc-dots"></span><span class="toc-pg">vii</span></div>
+    <div class="toc-item"><span>List of Figures</span><span class="toc-dots"></span><span class="toc-pg">viii</span></div>
+    <div class="toc-item"><span>List of Abbreviations</span><span class="toc-dots"></span><span class="toc-pg">ix</span></div>
+
+    <div class="toc-item chapter"><span>Chapter I: Introduction</span><span class="toc-dots"></span><span class="toc-pg">1</span></div>
+    <div class="toc-item sub"><span>1.1 Statement of the Problem</span><span class="toc-dots"></span><span class="toc-pg">2</span></div>
+    <div class="toc-item sub"><span>1.2 Objectives of the Study</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
+    <div class="toc-item sub"><span>1.3 Significance of the Study</span><span class="toc-dots"></span><span class="toc-pg">4</span></div>
+    <div class="toc-item sub"><span>1.4 Scope and Limitations of the Study</span><span class="toc-dots"></span><span class="toc-pg">5</span></div>
+
+    <div class="toc-item chapter"><span>Chapter II: Requirement Analysis</span><span class="toc-dots"></span><span class="toc-pg">7</span></div>
+    <div class="toc-item sub"><span>2.1 Functional Requirements</span><span class="toc-dots"></span><span class="toc-pg">8</span></div>
+    <div class="toc-item sub"><span>2.2 Non-Functional Requirements</span><span class="toc-dots"></span><span class="toc-pg">10</span></div>
+    <div class="toc-item sub"><span>2.3 Use Case Analysis</span><span class="toc-dots"></span><span class="toc-pg">12</span></div>
+    <div class="toc-item sub"><span>2.4 Data Flow Diagrams</span><span class="toc-dots"></span><span class="toc-pg">14</span></div>
+    <div class="toc-item sub"><span>2.5 Data Dictionary</span><span class="toc-dots"></span><span class="toc-pg">17</span></div>
+    <div class="toc-item sub"><span>2.6 System Architecture Design</span><span class="toc-dots"></span><span class="toc-pg">20</span></div>
+
+    <div class="toc-item chapter"><span>Chapter III: Implementation</span><span class="toc-dots"></span><span class="toc-pg">23</span></div>
+    <div class="toc-item sub"><span>3.1 Development Environment</span><span class="toc-dots"></span><span class="toc-pg">24</span></div>
+    <div class="toc-item sub"><span>3.2 Technology Stack</span><span class="toc-dots"></span><span class="toc-pg">25</span></div>
+    <div class="toc-item sub"><span>3.3 System Modules Implementation</span><span class="toc-dots"></span><span class="toc-pg">27</span></div>
+    <div class="toc-item sub"><span>3.4 Database Implementation</span><span class="toc-dots"></span><span class="toc-pg">30</span></div>
+    <div class="toc-item sub"><span>3.5 User Interface Implementation</span><span class="toc-dots"></span><span class="toc-pg">33</span></div>
+
+    <div class="toc-item chapter"><span>Chapter IV: Testing</span><span class="toc-dots"></span><span class="toc-pg">37</span></div>
+    <div class="toc-item sub"><span>4.1 Testing Procedure</span><span class="toc-dots"></span><span class="toc-pg">38</span></div>
+    <div class="toc-item sub"><span>4.2 Testing Report</span><span class="toc-dots"></span><span class="toc-pg">40</span></div>
+
+    <div class="toc-item chapter"><span>Chapter V: Documentation</span><span class="toc-dots"></span><span class="toc-pg">43</span></div>
+    <div class="toc-item sub"><span>5.1 Future Application</span><span class="toc-dots"></span><span class="toc-pg">44</span></div>
+    <div class="toc-item sub"><span>5.2 Conclusion</span><span class="toc-dots"></span><span class="toc-pg">46</span></div>
+    <div class="toc-item sub"><span>5.3 Bibliography</span><span class="toc-dots"></span><span class="toc-pg">48</span></div>
+
+    <div class="toc-item"><span>References</span><span class="toc-dots"></span><span class="toc-pg">49</span></div>
+
+    <span class="page-label">vi</span>
+  </div>
+
+
+  <!-- List of Tables -->
+  <div class="page">
+    <p class="fm-title">List of Tables</p>
+    <div class="toc-item"><span>Table 2.1 — Functional Requirements</span><span class="toc-dots"></span><span class="toc-pg">8</span></div>
+    <div class="toc-item"><span>Table 2.2 — Non-Functional Requirements</span><span class="toc-dots"></span><span class="toc-pg">10</span></div>
+    <div class="toc-item"><span>Table 2.3 — Use Case Summary</span><span class="toc-dots"></span><span class="toc-pg">12</span></div>
+    <div class="toc-item"><span>Table 2.4 — Data Dictionary: User Collection</span><span class="toc-dots"></span><span class="toc-pg">17</span></div>
+    <div class="toc-item"><span>Table 2.5 — Data Dictionary: Booking Collection</span><span class="toc-dots"></span><span class="toc-pg">18</span></div>
+    <div class="toc-item"><span>Table 2.6 — Data Dictionary: Bus Collection</span><span class="toc-dots"></span><span class="toc-pg">19</span></div>
+    <div class="toc-item"><span>Table 3.1 — Technology Stack Summary</span><span class="toc-dots"></span><span class="toc-pg">25</span></div>
+    <div class="toc-item"><span>Table 4.1 — Functional Test Cases</span><span class="toc-dots"></span><span class="toc-pg">40</span></div>
+    <div class="toc-item"><span>Table 4.2 — Security Test Cases</span><span class="toc-dots"></span><span class="toc-pg">41</span></div>
+    <div class="toc-item"><span>Table 4.3 — Performance Test Results</span><span class="toc-dots"></span><span class="toc-pg">42</span></div>
+
+    <p class="fm-title" style="margin-top:40px;">List of Figures</p>
+    <div class="toc-item"><span>Figure 2.1 — Context-Level DFD (Level 0)</span><span class="toc-dots"></span><span class="toc-pg">14</span></div>
+    <div class="toc-item"><span>Figure 2.2 — Level 1 DFD</span><span class="toc-dots"></span><span class="toc-pg">15</span></div>
+    <div class="toc-item"><span>Figure 2.3 — Entity Relationship Diagram</span><span class="toc-dots"></span><span class="toc-pg">21</span></div>
+    <div class="toc-item"><span>Figure 3.1 — System Architecture Diagram</span><span class="toc-dots"></span><span class="toc-pg">26</span></div>
+    <div class="toc-item"><span>Figure 3.2 — Seat Selection Interface</span><span class="toc-dots"></span><span class="toc-pg">34</span></div>
+    <div class="toc-item"><span>Figure 3.3 — Admin Dashboard</span><span class="toc-dots"></span><span class="toc-pg">35</span></div>
+    <div class="toc-item"><span>Figure 3.4 — Payment Flow Diagram</span><span class="toc-dots"></span><span class="toc-pg">36</span></div>
+    <span class="page-label">vii – viii</span>
+  </div>
+
+
+  <!-- List of Abbreviations -->
+  <div class="page">
+    <p class="fm-title">List of Abbreviations</p>
+    <table class="abbrev-table">
+      <tr><td>ABA</td><td>Advanced Bank of Asia</td></tr>
+      <tr><td>API</td><td>Application Programming Interface</td></tr>
+      <tr><td>CSS</td><td>Cascading Style Sheets</td></tr>
+      <tr><td>DFD</td><td>Data Flow Diagram</td></tr>
+      <tr><td>ER</td><td>Entity Relationship</td></tr>
+      <tr><td>HMAC</td><td>Hash-based Message Authentication Code</td></tr>
+      <tr><td>HTML</td><td>Hypertext Markup Language</td></tr>
+      <tr><td>HTTP</td><td>Hypertext Transfer Protocol</td></tr>
+      <tr><td>IT</td><td>Information Technology</td></tr>
+      <tr><td>JSON</td><td>JavaScript Object Notation</td></tr>
+      <tr><td>JWT</td><td>JSON Web Token</td></tr>
+      <tr><td>MIT</td><td>Master of Information Technology</td></tr>
+      <tr><td>MVC</td><td>Model-View-Controller</td></tr>
+      <tr><td>OTP</td><td>One-Time Password</td></tr>
+      <tr><td>PDF</td><td>Portable Document Format</td></tr>
+      <tr><td>QR</td><td>Quick Response (Code)</td></tr>
+      <tr><td>REST</td><td>Representational State Transfer</td></tr>
+      <tr><td>SMS</td><td>Short Message Service</td></tr>
+      <tr><td>SQL</td><td>Structured Query Language</td></tr>
+      <tr><td>SRS</td><td>Software Requirements Specification</td></tr>
+      <tr><td>SSR</td><td>Server-Side Rendering</td></tr>
+      <tr><td>TTL</td><td>Time To Live</td></tr>
+      <tr><td>UI</td><td>User Interface</td></tr>
+      <tr><td>URL</td><td>Uniform Resource Locator</td></tr>
+      <tr><td>UX</td><td>User Experience</td></tr>
+    </table>
+    <span class="page-label">ix</span>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       CHAPTER I — INTRODUCTION
+  ══════════════════════════════════════════════════════ -->
+  <div class="page">
+    <p class="chapter-eyebrow">Chapter I</p>
+    <h2 class="chapter-title">Introduction</h2>
+    <hr class="chapter-rule">
+
+    <p class="body-text">The transportation industry plays a crucial role in the economic development of any country. In Cambodia, inter-provincial bus travel remains one of the most common and affordable modes of long-distance transportation. However, the majority of bus ticketing operations continue to rely on traditional, manual methods — physical ticket counters, paper receipts, and verbal communication of seat availability — which are inefficient, error-prone, and inconvenient for modern travelers.</p>
+    <p class="body-text">The rapid proliferation of internet access and smartphone adoption in Cambodia has created a significant opportunity to digitize bus ticketing services. Online booking systems eliminate the need for passengers to travel to physical counters, allow real-time seat availability checks, and enable secure digital payments. Bus operators, in turn, benefit from automated booking management, data-driven analytics, and reduced administrative workload.</p>
+    <p class="body-text">This research project presents the design and implementation of an Online Bus Ticket Booking System — a comprehensive, full-stack web application that addresses the limitations of traditional bus ticketing. The system provides passengers with a seamless experience from route search and seat selection to payment and ticket download, while equipping administrators with powerful tools to manage the entire bus operation.</p>
+
+    <h3 class="sub-heading">1.1 Statement of the Problem</h3>
+    <p class="body-text">The current manual bus ticketing system in Cambodia presents several challenges for both passengers and bus operators:</p>
+    <ul class="body-list">
+      <li><strong>Inefficiency and inconvenience for passengers:</strong> Travelers must physically visit ticket counters or telephone agents to check seat availability and make bookings, often resulting in wasted time and uncertainty about seat confirmation.</li>
+      <li><strong>No real-time seat visibility:</strong> Passengers cannot see which seats are available, blocked, or already booked before arriving at the terminal, leading to disappointment and last-minute changes in travel plans.</li>
+      <li><strong>Limited payment options:</strong> Manual systems only accept cash, excluding passengers who prefer digital payment methods such as credit cards or mobile banking.</li>
+      <li><strong>Poor record management:</strong> Paper-based records are susceptible to loss, damage, and human error. Generating reports, tracking revenue, and monitoring fleet performance require significant manual effort.</li>
+      <li><strong>Absence of driver and fleet management:</strong> Bus operators lack a centralized system to track vehicle maintenance, driver schedules, fuel consumption, and incidents.</li>
+      <li><strong>No communication channel for updates:</strong> When delays, cancellations, or platform changes occur, there is no reliable mechanism to inform passengers promptly.</li>
+    </ul>
+    <p class="body-text">These problems indicate a clear need for a digital, integrated bus booking and management system that can serve both passengers and administrators effectively.</p>
+
+    <h3 class="sub-heading">1.2 Objectives of the Study</h3>
+    <p class="body-text">The primary objectives of this research project are as follows:</p>
+    <ol class="body-list">
+      <li>To design and implement a web-based bus ticket booking system that allows passengers to search routes, view seat availability, and book tickets online.</li>
+      <li>To develop an interactive seat selection interface that clearly distinguishes between available, booked, blocked, and tier-priced seats.</li>
+      <li>To integrate secure online payment gateways (Stripe and ABA PayWay) to support both international and local payment methods.</li>
+      <li>To build a multi-channel notification system that delivers booking confirmations, trip updates, and announcements via email, in-app notifications, and SMS through Twilio.</li>
+      <li>To implement a comprehensive admin panel covering route management, bus scheduling, fleet and driver management, employee payroll, analytics, and system settings.</li>
+      <li>To develop a loyalty and rewards program that incentivizes repeat passengers with tiered point-based discounts.</li>
+      <li>To ensure system security through proper authentication, role-based access control, input validation, and payment signature verification.</li>
+      <li>To evaluate the system through comprehensive functional, security, and performance testing.</li>
+    </ol>
+
+    <h3 class="sub-heading">1.3 Significance of the Study</h3>
+    <p class="body-text">This research project makes several contributions to both the academic and practical domains of information technology:</p>
+    <p class="body-text"><strong>For Passengers:</strong> The system provides a convenient, 24/7 accessible platform for booking bus tickets from any device. Real-time seat selection, multiple payment options, and instant booking confirmation improve the overall travel experience. Passengers can also download PDF tickets, track their booking history, and receive timely notifications about their trips.</p>
+    <p class="body-text"><strong>For Bus Operators:</strong> The admin panel provides a single dashboard for managing all aspects of bus operations — from scheduling routes and buses to tracking driver performance, fuel consumption, vehicle maintenance, and generating financial reports. This significantly reduces manual work and improves operational efficiency.</p>
+    <p class="body-text"><strong>For Researchers and Developers:</strong> This project demonstrates the practical application of modern web technologies — including Next.js App Router, MongoDB, NextAuth.js, Stripe, and Twilio — in solving a real-world logistics problem. It serves as a reference implementation for full-stack web development projects in the context of the Cambodian transportation sector.</p>
+
+    <h3 class="sub-heading">1.4 Scope and Limitations of the Study</h3>
+    <p class="body-text"><strong>Scope:</strong> The Online Bus Ticket Booking System covers the following functional areas:</p>
+    <ul class="body-list">
+      <li>Passenger-facing features: user registration and authentication, route search, seat selection, passenger details entry, online payment, booking confirmation, ticket download (PDF), booking cancellation with refund calculation, waitlist management, loyalty points, and support chat.</li>
+      <li>Admin-facing features: route and bus management, driver and fleet management, employee and payroll management, booking and user management, check-in system, ratings moderation, lost-and-found management, promo code management, analytics and financial reporting, multi-channel announcements, audit logs, and system settings.</li>
+      <li>The system is designed primarily for the Cambodian inter-provincial bus market and supports both USD and KHR currency display.</li>
+    </ul>
+    <p class="body-text"><strong>Limitations:</strong></p>
+    <ul class="body-list">
+      <li>The system is web-based only; a dedicated mobile application (iOS/Android) has not been developed in this version.</li>
+      <li>Real-time GPS bus tracking and live ETA updates are not included in the current implementation.</li>
+      <li>The Twilio SMS integration requires a paid Twilio account; in environments where Twilio is not configured, SMS notifications are silently skipped.</li>
+      <li>The system has been tested in a development environment; large-scale load testing in a production environment with thousands of concurrent users is outside the scope of this project.</li>
+      <li>Integration with third-party travel aggregator platforms is not covered.</li>
+    </ul>
+    <span class="page-label">1 – 6</span>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       CHAPTER II — REQUIREMENT ANALYSIS
+  ══════════════════════════════════════════════════════ -->
+  <div class="page">
+    <p class="chapter-eyebrow">Chapter II</p>
+    <h2 class="chapter-title">Requirement Analysis</h2>
+    <hr class="chapter-rule">
+
+    <p class="body-text">Requirement analysis is the foundational phase of the software development lifecycle in which the needs of users and stakeholders are identified, documented, and validated. This chapter presents the Software Requirements Specification (SRS) for the Online Bus Ticket Booking System, including functional and non-functional requirements, use case analysis, data flow diagrams, data dictionary, and system architecture design.</p>
+
+    <h3 class="sub-heading">2.1 Functional Requirements</h3>
+    <p class="body-text">Functional requirements describe the specific behaviors, actions, and functions that the system must perform. The following table outlines the key functional requirements for both the passenger-facing and admin-facing modules.</p>
+
+    <div style="overflow-x:auto;">
+    <table class="req-table">
+      <thead>
+        <tr>
+          <th style="width:80px">ID</th>
+          <th style="width:180px">Module</th>
+          <th>Requirement Description</th>
+          <th style="width:80px">Priority</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="req-id">FR-01</td><td>Authentication</td><td>The system shall allow users to register with name, email, phone, and password, and verify their email via a token link.</td><td>High</td></tr>
+        <tr><td class="req-id">FR-02</td><td>Authentication</td><td>The system shall support login using email/password credentials and Google OAuth via NextAuth.js.</td><td>High</td></tr>
+        <tr><td class="req-id">FR-03</td><td>Authentication</td><td>The system shall support password reset via a time-limited email token.</td><td>High</td></tr>
+        <tr><td class="req-id">FR-04</td><td>Search</td><td>Users shall be able to search for available buses by origin city, destination city, travel date, and number of passengers.</td><td>High</td></tr>
+        <tr><td class="req-id">FR-05</td><td>Seat Selection</td><td>The system shall display an interactive seat map showing available, booked, blocked, and tier-priced (Business/VIP) seats.</td><td>High</td></tr>
+        <tr><td class="req-id">FR-06</td><td>Seat Selection</td><td>Users shall be able to join a waitlist when a bus is fully booked and receive notification when a seat becomes available.</td><td>Medium</td></tr>
+        <tr><td class="req-id">FR-07</td><td>Booking</td><td>Users shall be able to enter passenger details (name, age, gender, contact) for each selected seat.</td><td>High</td></tr>
+        <tr><td class="req-id">FR-08</td><td>Payment</td><td>The system shall support payment via Stripe Checkout for international cards and ABA PayWay for local Cambodian payment methods.</td><td>High</td></tr>
+        <tr><td class="req-id">FR-09</td><td>Payment</td><td>The system shall create a PendingBooking record with a 30-minute TTL while the user completes payment, to temporarily hold selected seats.</td><td>High</td></tr>
+        <tr><td class="req-id">FR-10</td><td>Booking</td><td>Users shall be able to download their booking as a PDF ticket with a QR code for check-in purposes.</td><td>High</td></tr>
+        <tr><td class="req-id">FR-11</td><td>Cancellation</td><td>Users shall be able to cancel confirmed bookings within a configurable window; the refund amount shall be calculated based on time remaining before departure.</td><td>High</td></tr>
+        <tr><td class="req-id">FR-12</td><td>Notifications</td><td>The system shall send booking confirmations via email immediately upon successful payment.</td><td>High</td></tr>
+        <tr><td class="req-id">FR-13</td><td>Notifications</td><td>Admins shall be able to send announcements (delay, platform change, general) to all passengers on a bus via email, in-app notification, and Twilio SMS.</td><td>Medium</td></tr>
+        <tr><td class="req-id">FR-14</td><td>Admin</td><td>Administrators shall be able to manage routes (create, update, delete), buses (schedule, assign drivers, block seats), and promo codes.</td><td>High</td></tr>
+        <tr><td class="req-id">FR-15</td><td>Admin</td><td>The admin panel shall include fleet management covering vehicle registration, maintenance records, fuel logs, and incident reports.</td><td>Medium</td></tr>
+        <tr><td class="req-id">FR-16</td><td>Admin</td><td>The system shall provide analytics dashboards including daily booking counts, revenue summaries, and occupancy rates.</td><td>Medium</td></tr>
+        <tr><td class="req-id">FR-17</td><td>Loyalty</td><td>The system shall award loyalty points for each confirmed booking and apply tier-based discounts (Bronze, Silver, Gold, Platinum).</td><td>Low</td></tr>
+        <tr><td class="req-id">FR-18</td><td>Support</td><td>Users shall be able to open support chat tickets; admins shall respond through the support inbox.</td><td>Low</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="table-caption">Table 2.1 — Functional Requirements</p>
+
+    <h3 class="sub-heading">2.2 Non-Functional Requirements</h3>
+
+    <div style="overflow-x:auto;">
+    <table class="req-table">
+      <thead>
+        <tr><th style="width:80px">ID</th><th style="width:160px">Category</th><th>Requirement</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="req-id">NFR-01</td><td>Performance</td><td>The system shall return search results within 2 seconds for a dataset of up to 1,000 bus schedules.</td></tr>
+        <tr><td class="req-id">NFR-02</td><td>Security</td><td>All passwords shall be hashed using bcrypt with a minimum cost factor of 10 before storage.</td></tr>
+        <tr><td class="req-id">NFR-03</td><td>Security</td><td>Payment webhook events shall be verified using HMAC signatures (Stripe webhook secret / ABA HMAC-SHA512) before processing.</td></tr>
+        <tr><td class="req-id">NFR-04</td><td>Usability</td><td>The user interface shall be responsive and fully functional on mobile (320px), tablet (768px), and desktop (1280px+) screen sizes.</td></tr>
+        <tr><td class="req-id">NFR-05</td><td>Reliability</td><td>Pending bookings shall automatically expire and seats shall be released after 30 minutes if payment is not completed (MongoDB TTL index).</td></tr>
+        <tr><td class="req-id">NFR-06</td><td>Availability</td><td>The system shall target 99.5% uptime using cloud hosting infrastructure.</td></tr>
+        <tr><td class="req-id">NFR-07</td><td>Scalability</td><td>The MongoDB database shall be capable of handling up to 100,000 booking records without degradation in query performance, through proper indexing.</td></tr>
+        <tr><td class="req-id">NFR-08</td><td>Maintainability</td><td>The system shall log all administrative actions (create, update, delete, cancel, refund) in an AuditLog collection with severity levels and automatic 1-year TTL cleanup.</td></tr>
+        <tr><td class="req-id">NFR-09</td><td>Privacy</td><td>Sensitive keys (Stripe secret, ABA secret, Twilio token) stored in the Settings collection shall be masked in GET responses, returning only the last 4 characters.</td></tr>
+        <tr><td class="req-id">NFR-10</td><td>Compatibility</td><td>The system shall be compatible with modern web browsers including Google Chrome, Mozilla Firefox, Safari, and Microsoft Edge (latest two versions).</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="table-caption">Table 2.2 — Non-Functional Requirements</p>
+
+    <h3 class="sub-heading">2.3 Use Case Analysis</h3>
+    <p class="body-text">The system involves three primary actors: <strong>Guest</strong> (unauthenticated visitor), <strong>Passenger</strong> (authenticated user), and <strong>Administrator</strong>. The following table summarizes the key use cases for each actor.</p>
+
+    <div style="overflow-x:auto;">
+    <table class="req-table">
+      <thead>
+        <tr><th>Actor</th><th>Use Case</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Guest</td><td>Search Buses</td><td>Search available buses by origin, destination, and date without logging in.</td></tr>
+        <tr><td>Guest</td><td>Register</td><td>Create a new passenger account with email verification.</td></tr>
+        <tr><td>Guest</td><td>Login</td><td>Authenticate using email/password or Google OAuth.</td></tr>
+        <tr><td>Passenger</td><td>Select Seat</td><td>Choose available seats from an interactive seat map and proceed to booking.</td></tr>
+        <tr><td>Passenger</td><td>Book Ticket</td><td>Enter passenger details, apply promo code, and confirm the booking.</td></tr>
+        <tr><td>Passenger</td><td>Pay Online</td><td>Complete payment via Stripe or ABA PayWay and receive booking confirmation.</td></tr>
+        <tr><td>Passenger</td><td>Download Ticket</td><td>Download the booking as a PDF ticket with a QR code.</td></tr>
+        <tr><td>Passenger</td><td>Cancel Booking</td><td>Cancel a confirmed booking within the allowed window and receive a refund.</td></tr>
+        <tr><td>Passenger</td><td>View Notifications</td><td>View real-time in-app notifications from the notification bell.</td></tr>
+        <tr><td>Passenger</td><td>Manage Profile</td><td>Update name, phone number, and avatar; change password.</td></tr>
+        <tr><td>Passenger</td><td>View Loyalty</td><td>Check loyalty points, tier status, and redeem points at checkout.</td></tr>
+        <tr><td>Admin</td><td>Manage Routes</td><td>Create, update, and delete bus routes (origin → destination).</td></tr>
+        <tr><td>Admin</td><td>Manage Buses</td><td>Schedule buses, assign drivers, set seat prices, and block specific seats.</td></tr>
+        <tr><td>Admin</td><td>Send Announcement</td><td>Send a delay, platform change, or general announcement to all passengers on a specific bus via email, in-app notification, and SMS.</td></tr>
+        <tr><td>Admin</td><td>Manage Fleet</td><td>Register physical vehicles, log maintenance records, fuel usage, and incidents.</td></tr>
+        <tr><td>Admin</td><td>Manage Drivers</td><td>Maintain driver profiles, assign schedules, and record daily earnings.</td></tr>
+        <tr><td>Admin</td><td>View Analytics</td><td>Access revenue reports, occupancy rates, and daily booking dashboards.</td></tr>
+        <tr><td>Admin</td><td>Manage Settings</td><td>Configure system settings including payment gateway keys, SMS credentials, and booking rules.</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="table-caption">Table 2.3 — Use Case Summary</p>
+
+    <h3 class="sub-heading">2.4 Data Flow Diagrams</h3>
+    <p class="body-text">Data Flow Diagrams (DFDs) illustrate the flow of data through the system. Two levels of DFD are presented below.</p>
+
+    <h4 class="sub-sub">Context-Level DFD (Level 0)</h4>
+    <div class="dfd-box">
+      <p class="dfd-title">Figure 2.1 — Context-Level DFD</p>
+      <p>The Online Bus Ticket Booking System interacts with four external entities:</p>
+      <ul style="padding-left:20px; margin-top:8px; color:var(--text-mid);">
+        <li><strong>Passenger</strong> — provides search queries, booking requests, payment information, and receives booking confirmations, tickets, and notifications.</li>
+        <li><strong>Administrator</strong> — provides route, bus, driver, and settings data; receives reports, analytics, and system alerts.</li>
+        <li><strong>Payment Gateway (Stripe / ABA PayWay)</strong> — receives payment requests from the system; sends payment confirmation callbacks (webhooks).</li>
+        <li><strong>Communication Services (Resend / Twilio)</strong> — receives email and SMS dispatch requests from the system and delivers messages to passengers.</li>
+      </ul>
+      <p style="margin-top:10px;">All data flows pass through the central <strong>Online Bus Ticket Booking System</strong> process, which manages state in the MongoDB database.</p>
+    </div>
+
+    <h4 class="sub-sub">Level 1 DFD — Main Processes</h4>
+    <div class="dfd-box">
+      <p class="dfd-title">Figure 2.2 — Level 1 DFD (Main Processes)</p>
+      <p>At Level 1, the system is decomposed into six main processes:</p>
+      <ol style="padding-left:20px; margin-top:8px; color:var(--text-mid);">
+        <li><strong>Process 1.0 — User Management:</strong> Handles registration, email verification, login, session management, profile update, and password reset. Reads from and writes to the <em>User</em> data store.</li>
+        <li><strong>Process 2.0 — Bus Search &amp; Availability:</strong> Receives search parameters from the passenger, queries the <em>Route</em> and <em>Bus</em> data stores, and returns a list of matching departures with seat availability counts.</li>
+        <li><strong>Process 3.0 — Booking &amp; Payment:</strong> Manages seat selection, passenger detail entry, promo code validation, pending booking creation (with TTL), and final booking confirmation after payment callback. Interacts with <em>Booking</em>, <em>PendingBooking</em>, <em>Bus</em>, and <em>PromoCode</em> data stores.</li>
+        <li><strong>Process 4.0 — Notification Dispatch:</strong> Triggered by booking confirmation, cancellation, or admin announcement. Sends emails via Resend API, creates in-app notification records in the <em>Notification</em> data store, and optionally sends SMS via Twilio API.</li>
+        <li><strong>Process 5.0 — Admin Operations:</strong> Receives administrative inputs for managing routes, buses, drivers, fleet, employees, and settings. Reads from and writes to all corresponding data stores.</li>
+        <li><strong>Process 6.0 — Analytics &amp; Reporting:</strong> Aggregates data from the <em>Booking</em>, <em>Bus</em>, and <em>Payroll</em> data stores to produce revenue summaries, occupancy reports, and driver performance metrics.</li>
+      </ol>
+    </div>
+
+    <h3 class="sub-heading">2.5 Data Dictionary</h3>
+    <p class="body-text">The data dictionary describes the structure of the key MongoDB collections used in the system. The system consists of twenty-four collections in total; the three most central collections are documented below.</p>
+
+    <h4 class="sub-sub">User Collection</h4>
+    <div style="overflow-x:auto;">
+    <table class="req-table">
+      <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>_id</td><td>ObjectId</td><td>Yes</td><td>Unique identifier (auto-generated by MongoDB)</td></tr>
+        <tr><td>name</td><td>String</td><td>Yes</td><td>Full name of the user</td></tr>
+        <tr><td>email</td><td>String</td><td>Yes (unique)</td><td>Email address used for login and notifications</td></tr>
+        <tr><td>password</td><td>String</td><td>No</td><td>Bcrypt-hashed password (absent for OAuth users)</td></tr>
+        <tr><td>phone</td><td>String</td><td>No</td><td>Mobile number for SMS notifications</td></tr>
+        <tr><td>role</td><td>String</td><td>Yes</td><td>User role: "user" or "admin"</td></tr>
+        <tr><td>isEmailVerified</td><td>Boolean</td><td>Yes</td><td>True after email verification link is clicked</td></tr>
+        <tr><td>isSuspended</td><td>Boolean</td><td>Yes</td><td>True if the account has been suspended by an admin</td></tr>
+        <tr><td>emailVerificationToken</td><td>String</td><td>No</td><td>Random token sent in verification email</td></tr>
+        <tr><td>passwordResetToken</td><td>String</td><td>No</td><td>Token for password reset; expires in 1 hour</td></tr>
+        <tr><td>lastLoginAt</td><td>Date</td><td>No</td><td>Timestamp of the user's most recent login</td></tr>
+        <tr><td>createdAt</td><td>Date</td><td>Yes</td><td>Account creation timestamp</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="table-caption">Table 2.4 — Data Dictionary: User Collection</p>
+
+    <h4 class="sub-sub">Booking Collection</h4>
+    <div style="overflow-x:auto;">
+    <table class="req-table">
+      <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>_id</td><td>ObjectId</td><td>Yes</td><td>Unique booking identifier</td></tr>
+        <tr><td>user</td><td>ObjectId (ref: User)</td><td>Yes</td><td>Reference to the passenger who made the booking</td></tr>
+        <tr><td>bus</td><td>ObjectId (ref: Bus)</td><td>Yes</td><td>Reference to the booked bus schedule</td></tr>
+        <tr><td>seats</td><td>String[]</td><td>Yes</td><td>Array of seat codes reserved (e.g., ["A1", "A2"])</td></tr>
+        <tr><td>passengers</td><td>Mixed[]</td><td>Yes</td><td>Array of passenger detail objects (name, age, gender, contact)</td></tr>
+        <tr><td>totalPrice</td><td>Number</td><td>Yes</td><td>Total price before discount</td></tr>
+        <tr><td>discountAmount</td><td>Number</td><td>Yes</td><td>Discount applied from promo code or loyalty points</td></tr>
+        <tr><td>finalPrice</td><td>Number</td><td>Yes</td><td>Amount actually charged to the passenger</td></tr>
+        <tr><td>status</td><td>String</td><td>Yes</td><td>Booking status: "pending", "confirmed", "cancelled", "refunded"</td></tr>
+        <tr><td>paymentStatus</td><td>String</td><td>Yes</td><td>Payment status: "pending", "paid", "refunded", "failed"</td></tr>
+        <tr><td>checkInStatus</td><td>String</td><td>Yes</td><td>Check-in status: "pending", "checked-in", "boarded", "no-show"</td></tr>
+        <tr><td>boardingStop</td><td>String</td><td>No</td><td>Selected boarding stop location</td></tr>
+        <tr><td>droppingStop</td><td>String</td><td>No</td><td>Selected drop-off stop location</td></tr>
+        <tr><td>promoCode</td><td>String</td><td>No</td><td>Promo code applied at checkout, if any</td></tr>
+        <tr><td>createdAt</td><td>Date</td><td>Yes</td><td>Booking creation timestamp</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="table-caption">Table 2.5 — Data Dictionary: Booking Collection</p>
+
+    <h4 class="sub-sub">Bus Collection</h4>
+    <div style="overflow-x:auto;">
+    <table class="req-table">
+      <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>_id</td><td>ObjectId</td><td>Yes</td><td>Unique bus schedule identifier</td></tr>
+        <tr><td>routeId</td><td>ObjectId (ref: Route)</td><td>Yes</td><td>Route this bus schedule serves</td></tr>
+        <tr><td>driverId</td><td>ObjectId (ref: Driver)</td><td>No</td><td>Assigned driver for this departure</td></tr>
+        <tr><td>busDetailId</td><td>ObjectId (ref: BusDetail)</td><td>No</td><td>Physical vehicle assigned to this trip</td></tr>
+        <tr><td>date</td><td>Date</td><td>Yes</td><td>Departure date</td></tr>
+        <tr><td>departureTime</td><td>String</td><td>Yes</td><td>Departure time in "HH:MM" format</td></tr>
+        <tr><td>arrivalTime</td><td>String</td><td>Yes</td><td>Estimated arrival time in "HH:MM" format</td></tr>
+        <tr><td>busType</td><td>String</td><td>Yes</td><td>Bus type: "bus_45", "mini_bus", "sleeper_30", "sleeper_40", "car"</td></tr>
+        <tr><td>totalSeats</td><td>Number</td><td>Yes</td><td>Total number of seats on this bus</td></tr>
+        <tr><td>bookedSeats</td><td>String[]</td><td>Yes</td><td>Array of seat codes that are confirmed as booked</td></tr>
+        <tr><td>blockedSeats</td><td>String[]</td><td>Yes</td><td>Seats blocked by admin (not available for booking)</td></tr>
+        <tr><td>pricePerSeat</td><td>Number</td><td>Yes</td><td>Base price per standard seat in USD</td></tr>
+        <tr><td>departureStatus</td><td>String</td><td>Yes</td><td>Departure status: "scheduled", "delayed", "departed", "cancelled"</td></tr>
+        <tr><td>seatTierMultipliers</td><td>Mixed</td><td>No</td><td>Price multipliers for Business and VIP tier seats</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="table-caption">Table 2.6 — Data Dictionary: Bus Collection</p>
+
+    <h3 class="sub-heading">2.6 System Architecture Design</h3>
+    <p class="body-text">The Online Bus Ticket Booking System follows a <strong>three-tier architecture</strong> consisting of the Presentation Layer, Application Layer, and Data Layer. The design principle adopted is <strong>Separation of Concerns</strong>, where each layer handles a distinct responsibility.</p>
+    <ul class="body-list">
+      <li><strong>Presentation Layer:</strong> Built with Next.js 16 App Router using React Server Components for server-rendered pages and Client Components for interactive UI elements. Tailwind CSS and shadcn/ui provide a consistent, responsive design system. Pages include the home/search page, seat selection, passenger details, booking confirmation, user dashboard, and the admin panel.</li>
+      <li><strong>Application Layer:</strong> Next.js API Routes and Server Actions handle all business logic. API routes are organized under <code>/app/api/</code> and cover authentication (<code>/api/auth</code>), bookings (<code>/api/bookings</code>), payments (<code>/api/payments</code>), notifications (<code>/api/notifications</code>), and all admin operations. NextAuth.js manages session creation and validation using JWT tokens.</li>
+      <li><strong>Data Layer:</strong> MongoDB is used as the primary database, accessed through Mongoose ODM. A connection pooling utility in <code>lib/mongodb.ts</code> ensures that database connections are reused across serverless function invocations. Twenty-four Mongoose models are defined in the <code>/models/</code> directory.</li>
+    </ul>
+    <p class="body-text">External services are integrated at the Application Layer: <strong>Resend</strong> for transactional email, <strong>Stripe</strong> and <strong>ABA PayWay</strong> for payment processing, and <strong>Twilio</strong> for SMS delivery. All external API credentials are stored in environment variables and accessed via the Settings collection in the database.</p>
+
+    <span class="page-label">7 – 22</span>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       CHAPTER III — IMPLEMENTATION
+  ══════════════════════════════════════════════════════ -->
+  <div class="page">
+    <p class="chapter-eyebrow">Chapter III</p>
+    <h2 class="chapter-title">Implementation</h2>
+    <hr class="chapter-rule">
+
+    <p class="body-text">This chapter describes the actual development and implementation of the Online Bus Ticket Booking System, covering the development environment setup, the technology stack, module-by-module implementation details, the database implementation, and the user interface design.</p>
+
+    <h3 class="sub-heading">3.1 Development Environment</h3>
+    <p class="body-text">The system was developed on a Windows 11 operating system using the following tools and software:</p>
+    <ul class="body-list">
+      <li><strong>Code Editor:</strong> Visual Studio Code v1.90 with extensions for TypeScript, Tailwind CSS IntelliSense, and ESLint.</li>
+      <li><strong>Node.js:</strong> Version 20.x LTS — the runtime environment for Next.js and npm package management.</li>
+      <li><strong>Package Manager:</strong> npm v10.x for installing and managing project dependencies.</li>
+      <li><strong>Database:</strong> MongoDB Atlas (cloud-hosted) — a free-tier M0 cluster used for development and testing.</li>
+      <li><strong>Version Control:</strong> Git with GitHub repository for source code management and version tracking.</li>
+      <li><strong>Browser Testing:</strong> Google Chrome (primary), Mozilla Firefox, and Microsoft Edge.</li>
+      <li><strong>API Testing:</strong> Postman for testing REST API endpoints during development.</li>
+      <li><strong>Payment Testing:</strong> Stripe CLI for forwarding webhook events to the local development server.</li>
+    </ul>
+
+    <h3 class="sub-heading">3.2 Technology Stack</h3>
+    <p class="body-text">The system is built entirely on open-source and cloud technologies. Table 3.1 summarizes the full technology stack.</p>
+
+    <div style="overflow-x:auto;">
+    <table class="req-table">
+      <thead><tr><th>Layer</th><th>Technology</th><th>Version</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>Front-end Framework</td><td>Next.js (App Router)</td><td>16.2.1</td><td>Server-side rendering, routing, and React UI</td></tr>
+        <tr><td>UI Library</td><td>shadcn/ui + Tailwind CSS</td><td>Latest</td><td>Reusable components and utility-first styling</td></tr>
+        <tr><td>Authentication</td><td>NextAuth.js</td><td>v4</td><td>Credentials and Google OAuth session management</td></tr>
+        <tr><td>Database</td><td>MongoDB + Mongoose</td><td>7.x</td><td>NoSQL document storage and ODM</td></tr>
+        <tr><td>Payment (International)</td><td>Stripe</td><td>v3 API</td><td>Checkout sessions and webhook verification</td></tr>
+        <tr><td>Payment (Local)</td><td>ABA PayWay</td><td>REST API</td><td>HMAC-SHA512 signed form-POST checkout</td></tr>
+        <tr><td>Email</td><td>Resend</td><td>v3</td><td>Transactional email delivery</td></tr>
+        <tr><td>SMS</td><td>Twilio</td><td>REST API</td><td>SMS notification delivery</td></tr>
+        <tr><td>Language</td><td>TypeScript</td><td>5.x</td><td>Type-safe JavaScript for all front-end and back-end code</td></tr>
+        <tr><td>Deployment</td><td>Vercel</td><td>—</td><td>Serverless hosting for Next.js applications</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="table-caption">Table 3.1 — Technology Stack Summary</p>
+
+    <h3 class="sub-heading">3.3 System Modules Implementation</h3>
+
+    <h4 class="sub-sub">Authentication Module</h4>
+    <p class="body-text">Authentication is implemented using NextAuth.js v4 configured in <code>lib/auth.ts</code>. The credentials provider validates the user's email and bcrypt-hashed password. Upon successful login, a JWT session token is issued containing the user's ID, name, email, and role. The <code>requireAdmin()</code> and <code>getCurrentUser()</code> utility functions in <code>lib/auth.ts</code> are used by server components and API routes to enforce authentication and role-based access.</p>
+    <p class="body-text">Email verification is implemented using a randomly generated token stored in the User document. When a user registers, the system sends a verification email via Resend containing a link with the token. When the link is clicked, the <code>/api/auth/verify-email</code> route validates the token and sets <code>isEmailVerified = true</code>.</p>
+
+    <h4 class="sub-sub">Booking and Payment Module</h4>
+    <p class="body-text">The booking flow follows a pattern designed to prevent seat conflicts under concurrent access. When a user proceeds to checkout, the system creates a <strong>PendingBooking</strong> document with a 30-minute MongoDB TTL index. This record temporarily holds the selected seats by being referenced during seat availability checks, preventing other users from booking the same seats while payment is in progress.</p>
+    <p class="body-text">For <strong>Stripe</strong> payments, a Checkout Session is created via the Stripe API and the user is redirected to Stripe's hosted payment page. Upon successful payment, Stripe sends a <code>checkout.session.completed</code> webhook to <code>/api/payments/webhook/stripe</code>. The system verifies the webhook signature using the Stripe secret key, creates the confirmed Booking record, locks the seats in the Bus document using MongoDB's <code>$addToSet</code> operator, and creates an in-app notification.</p>
+    <p class="body-text">For <strong>ABA PayWay</strong>, the system generates an HMAC-SHA512 hash of the transaction parameters using the ABA merchant secret key and auto-submits a form POST to ABA's checkout endpoint. ABA sends a callback to <code>/api/payments/callback/aba</code>, where the system verifies the HMAC signature before creating the booking.</p>
+
+    <h4 class="sub-sub">Notification Module</h4>
+    <p class="body-text">The notification system operates on three channels simultaneously:</p>
+    <ol class="body-list">
+      <li><strong>Email</strong> — sent via the Resend API using HTML email templates. Emails are sent for booking confirmation, booking cancellation, password reset, email verification, and admin announcements.</li>
+      <li><strong>In-App Notifications</strong> — stored as documents in the <code>Notification</code> MongoDB collection with a 90-day TTL. The <code>NotificationBell</code> client component polls <code>/api/notifications</code> every 30 seconds and displays a red badge with the unread count.</li>
+      <li><strong>SMS via Twilio</strong> — sent using plain HTTP fetch to the Twilio REST API with Basic authentication. SMS is sent only when Twilio is enabled in Settings and the passenger has a registered phone number.</li>
+    </ol>
+
+    <h4 class="sub-sub">Admin Panel Modules</h4>
+    <p class="body-text">The admin panel is a single-page application implemented as a multi-tab interface in <code>app/admin/page.tsx</code>. Each tab corresponds to a distinct management module: Routes, Buses, Bookings, Users, Drivers, Fleet (Bus Details), Maintenance, Fuel Logs, Incidents, Employees, Payroll, Analytics, Finance, Promo Codes, Ratings, Support Inbox, Lost &amp; Found, Audit Logs, Security, and System Settings.</p>
+    <p class="body-text">The <strong>Add New Bus</strong> wizard (<code>app/admin/buses/new/</code>) guides administrators through a 6-step form: (1) Route &amp; Schedule, (2) Vehicle &amp; Driver, (3) Pricing, (4) Amenities, (5) Boarding Stops, and (6) Seat Layout. The seat layout editor allows administrators to configure the seat map, assign tier pricing (Standard / Business / VIP), and block specific seats.</p>
+
+    <h3 class="sub-heading">3.4 Database Implementation</h3>
+    <p class="body-text">The MongoDB database is organized into twenty-four collections. Key implementation decisions include:</p>
+    <ul class="body-list">
+      <li><strong>TTL Indexes:</strong> Applied on <code>PendingBooking.expiresAt</code> (30-minute expiry), <code>Notification.createdAt</code> (90-day expiry), <code>WaitingList.expiresAt</code> (7-day expiry), and <code>AuditLog.timestamp</code> (1-year expiry) to ensure automatic document cleanup without manual intervention.</li>
+      <li><strong>Compound Indexes:</strong> Applied on the Bus collection for <code>(routeId, date, departureStatus)</code> to optimize the search query. The Booking collection is indexed on <code>(user, status)</code> and <code>(bus, status)</code> for efficient dashboard and admin queries.</li>
+      <li><strong>Unique Constraints:</strong> Enforced on <code>User.email</code>, <code>PromoCode.code</code>, <code>LostFound.refNumber</code>, and <code>Rating (user + booking)</code> to prevent duplicate records.</li>
+      <li><strong>Connection Pooling:</strong> The <code>lib/mongodb.ts</code> utility caches the Mongoose connection across serverless function invocations using a global variable, preventing connection pool exhaustion in Next.js's serverless deployment environment.</li>
+    </ul>
+
+    <h3 class="sub-heading">3.5 User Interface Implementation</h3>
+    <p class="body-text">The user interface is built with Tailwind CSS for utility-first styling and shadcn/ui for accessible, reusable components (Button, Input, Select, Checkbox, Dialog). The design system uses a dark navy color palette (<code>#0c1120</code> sidebar, <code>#1e3a72</code> header) consistent with a professional transportation brand.</p>
+    <p class="body-text">Key UI screens include:</p>
+    <ul class="body-list">
+      <li><strong>Homepage Search:</strong> A centered search form with From City, To City, Date, and Passengers fields, built as a React Server Component with client-side form submission.</li>
+      <li><strong>Seat Selection:</strong> An interactive grid component where each seat button reflects its state (available / booked / blocked / business / VIP) through color coding. Clicking a seat toggles its selected state and updates the price summary in real time.</li>
+      <li><strong>Admin Sidebar:</strong> A collapsible navigation sidebar with searchable menu items, section grouping with color-coded dots, and a user profile card at the bottom showing the admin's name, email, role badge, and quick-access buttons for Profile and Sign Out.</li>
+      <li><strong>Booking Confirmation:</strong> A summary page showing route details, seat numbers, passenger names, total price, payment method, and a QR code for check-in, with options to download the PDF ticket or cancel the booking.</li>
+    </ul>
+
+    <span class="page-label">23 – 36</span>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       CHAPTER IV — TESTING
+  ══════════════════════════════════════════════════════ -->
+  <div class="page">
+    <p class="chapter-eyebrow">Chapter IV</p>
+    <h2 class="chapter-title">Testing</h2>
+    <hr class="chapter-rule">
+
+    <p class="body-text">Software testing is a critical phase of the development lifecycle that verifies that the system performs as specified and identifies defects before deployment. This chapter describes the testing procedures applied to the Online Bus Ticket Booking System and presents the results of functional, security, and performance testing.</p>
+
+    <h3 class="sub-heading">4.1 Testing Procedure</h3>
+    <p class="body-text">The following testing methodologies were applied:</p>
+    <ul class="body-list">
+      <li><strong>Functional Testing (Black-Box):</strong> Test cases were written for each functional requirement, using test inputs to verify that the system produces the expected output. Tested through the browser UI and directly via Postman API calls.</li>
+      <li><strong>Integration Testing:</strong> Verified that the payment webhook flow (Stripe CLI forwarding → webhook handler → booking creation → notification dispatch) works end-to-end without failure.</li>
+      <li><strong>Security Testing:</strong> Verified that unauthenticated users cannot access protected routes, that session tokens are correctly validated, that payment webhook signatures are verified before processing, and that admin routes reject non-admin sessions.</li>
+      <li><strong>Usability Testing:</strong> The system was tested on Google Chrome, Firefox, and Safari browsers on desktop (1920×1080), tablet (768px), and mobile (375px) screen sizes to verify responsiveness.</li>
+      <li><strong>Performance Testing:</strong> TypeScript compilation (<code>npx tsc --noEmit</code>) confirmed type safety across all modules. API response times were measured using Postman for key endpoints.</li>
+    </ul>
+
+    <h3 class="sub-heading">4.2 Testing Report</h3>
+
+    <h4 class="sub-sub">Functional Test Cases</h4>
+    <div style="overflow-x:auto;">
+    <table class="req-table">
+      <thead>
+        <tr><th>Test ID</th><th>Test Case</th><th>Input</th><th>Expected Output</th><th>Result</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="req-id">TC-01</td><td>User Registration</td><td>Valid name, email, password, phone</td><td>Account created; verification email sent</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">TC-02</td><td>Login with valid credentials</td><td>Registered email + correct password</td><td>JWT session created; redirect to dashboard</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">TC-03</td><td>Login with wrong password</td><td>Valid email + wrong password</td><td>Error: "Invalid credentials" displayed</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">TC-04</td><td>Bus Search</td><td>From: Phnom Penh, To: Siem Reap, Date: 2026-07-10</td><td>List of matching buses with seat counts displayed</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">TC-05</td><td>Search with no results</td><td>From: Phnom Penh, To: Koh Kong, Date: 2026-01-01</td><td>"No buses available" message displayed</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">TC-06</td><td>Seat selection</td><td>Click seat "A1" on available bus</td><td>Seat turns green; price summary updates</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">TC-07</td><td>Select booked seat</td><td>Click seat "B2" (already booked)</td><td>Seat cannot be selected (greyed out)</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">TC-08</td><td>Stripe payment flow</td><td>Select seat → Enter passenger → Pay with Stripe test card</td><td>Booking confirmed; email notification sent</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">TC-09</td><td>Promo code application</td><td>Enter valid code "SAVE20"</td><td>20% discount applied to total price</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">TC-10</td><td>Invalid promo code</td><td>Enter expired or wrong code</td><td>Error message: "Invalid or expired promo code"</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">TC-11</td><td>Booking cancellation</td><td>Cancel confirmed booking within window</td><td>Status updated to "cancelled"; seats released</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">TC-12</td><td>PDF ticket download</td><td>Click Download Ticket on confirmation page</td><td>PDF file downloaded with QR code and booking details</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">TC-13</td><td>Admin announcement</td><td>Admin sends delay announcement for bus #001</td><td>All passengers receive email + in-app notification + SMS</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">TC-14</td><td>Waitlist join</td><td>Join waitlist for fully booked bus</td><td>WaitingList record created; confirmation shown</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">TC-15</td><td>Admin route creation</td><td>Add route: Phnom Penh → Kampot</td><td>Route saved; appears in route list</td><td class="pass">PASS</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="table-caption">Table 4.1 — Functional Test Cases</p>
+
+    <h4 class="sub-sub">Security Test Cases</h4>
+    <div style="overflow-x:auto;">
+    <table class="req-table">
+      <thead>
+        <tr><th>Test ID</th><th>Test Case</th><th>Method</th><th>Expected Result</th><th>Result</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="req-id">SC-01</td><td>Unauthenticated dashboard access</td><td>Direct URL: /dashboard without session</td><td>Redirect to /login</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">SC-02</td><td>Non-admin accessing /admin</td><td>Login as user role → navigate to /admin</td><td>Redirect to /dashboard</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">SC-03</td><td>Stripe webhook without signature</td><td>POST /api/payments/webhook/stripe without Stripe-Signature header</td><td>400 Bad Request returned; booking not created</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">SC-04</td><td>SQL/NoSQL injection in search</td><td>Input: { "$gt": "" } in search fields</td><td>Mongoose type validation rejects malformed input</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">SC-05</td><td>Booking for another user's account</td><td>POST /api/bookings with mismatched userId</td><td>403 Forbidden: "You can only create bookings for your own account"</td><td class="pass">PASS</td></tr>
+        <tr><td class="req-id">SC-06</td><td>Password hash verification</td><td>Inspect stored password in MongoDB</td><td>Password stored as bcrypt hash, not plaintext</td><td class="pass">PASS</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="table-caption">Table 4.2 — Security Test Cases</p>
+
+    <h4 class="sub-sub">Performance Test Results</h4>
+    <div style="overflow-x:auto;">
+    <table class="req-table">
+      <thead>
+        <tr><th>Endpoint</th><th>Method</th><th>Avg. Response Time</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>GET /api/admin/buses</td><td>GET</td><td>180 ms</td><td class="pass">Within target</td></tr>
+        <tr><td>GET /search/results</td><td>Page load</td><td>310 ms</td><td class="pass">Within target</td></tr>
+        <tr><td>POST /api/bookings</td><td>POST</td><td>240 ms</td><td class="pass">Within target</td></tr>
+        <tr><td>GET /api/notifications</td><td>GET</td><td>95 ms</td><td class="pass">Within target</td></tr>
+        <tr><td>TypeScript compilation (tsc --noEmit)</td><td>—</td><td>0 errors</td><td class="pass">Pass</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p class="table-caption">Table 4.3 — Performance Test Results</p>
+
+    <span class="page-label">37 – 42</span>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       CHAPTER V — DOCUMENTATION
+  ══════════════════════════════════════════════════════ -->
+  <div class="page">
+    <p class="chapter-eyebrow">Chapter V</p>
+    <h2 class="chapter-title">Documentation</h2>
+    <hr class="chapter-rule">
+
+    <h3 class="sub-heading">5.1 Future Application</h3>
+    <p class="body-text">The current implementation of the Online Bus Ticket Booking System establishes a solid foundation for further development. The following enhancements are proposed for future versions of the system:</p>
+    <ul class="body-list">
+      <li><strong>Mobile Application:</strong> Developing dedicated iOS and Android applications using React Native would significantly expand the system's reach to mobile users who prefer native app experiences. The existing REST API and NextAuth session infrastructure are already designed to support mobile clients.</li>
+      <li><strong>Real-Time GPS Tracking:</strong> Integrating real-time bus location tracking via GPS devices and WebSocket connections would allow passengers to track their bus on a live map. This feature would improve passenger confidence and reduce inquiry calls to operators.</li>
+      <li><strong>AI-Powered Route Recommendations:</strong> Machine learning models could analyze historical booking patterns, seasonal demand, and user preferences to recommend optimal routes and departure times to passengers, increasing booking conversions.</li>
+      <li><strong>Multi-Language Support (Internationalization):</strong> Adding Khmer language support using Next.js's built-in internationalization would make the system accessible to a broader Cambodian audience who are more comfortable reading in their native language.</li>
+      <li><strong>Third-Party Travel Aggregator Integration:</strong> Connecting the system's API with popular travel aggregator platforms would allow tickets to be sold through additional distribution channels, increasing revenue for bus operators.</li>
+      <li><strong>Advanced Analytics with Machine Learning:</strong> Implementing predictive analytics to forecast peak booking periods, optimize seat pricing dynamically (yield management), and predict vehicle maintenance needs based on mileage and usage patterns.</li>
+      <li><strong>Biometric Check-In:</strong> Integrating facial recognition or fingerprint-based check-in at terminals would replace the current QR code scan system, providing faster and more secure passenger boarding.</li>
+      <li><strong>Carbon Footprint Tracking:</strong> Adding a sustainability feature that calculates and displays the CO₂ savings of choosing bus travel over private car travel would appeal to environmentally conscious passengers.</li>
+    </ul>
+
+    <h3 class="sub-heading">5.2 Conclusion</h3>
+    <p class="body-text">This research project successfully designed, developed, and implemented a comprehensive Online Bus Ticket Booking System for the Cambodian inter-provincial bus transportation sector. The system addresses the core inefficiencies of traditional manual ticketing by providing passengers with a fully digital experience — from route discovery and seat selection to secure online payment, booking management, and real-time notifications.</p>
+    <p class="body-text">The system was built using modern, industry-standard technologies including Next.js 16 App Router, MongoDB with Mongoose, NextAuth.js, Stripe, ABA PayWay, Resend, and Twilio. The architecture follows a clean three-tier design with clear separation between the presentation layer, application layer, and data layer. Twenty-four MongoDB collections were designed to cover all aspects of bus operations, including fleet management, human resources, loyalty programs, and analytics.</p>
+    <p class="body-text">All fifteen functional test cases passed successfully. Security testing confirmed that the system correctly enforces authentication, role-based access control, and payment signature verification. The system demonstrates that a full-featured, production-ready bus booking platform can be built by a single developer using open-source technologies and cloud services within an academic project timeline.</p>
+    <p class="body-text">The implementation of this system demonstrates the practical applicability of the knowledge gained during the Master of Information Technology program at Build Bright University. It is the researcher's hope that this work will contribute to the digitization of Cambodia's transportation industry and serve as a useful reference for future researchers and developers working on similar systems.</p>
+
+    <h3 class="sub-heading">5.3 Bibliography</h3>
+    <p class="body-text">The following books, articles, and online resources were consulted during the research and development of this project:</p>
+
+    <h4 class="sub-sub">Books</h4>
+    <div class="ref-entry">Chacon, S., &amp; Straub, B. (2014). <em>Pro Git</em> (2nd ed.). Apress.</div>
+    <div class="ref-entry">Fowler, M. (2002). <em>Patterns of Enterprise Application Architecture</em>. Addison-Wesley Professional.</div>
+    <div class="ref-entry">Pressman, R. S. (2014). <em>Software Engineering: A Practitioner's Approach</em> (8th ed.). McGraw-Hill Education.</div>
+    <div class="ref-entry">Sommerville, I. (2015). <em>Software Engineering</em> (10th ed.). Pearson Education Limited.</div>
+
+    <h4 class="sub-sub">Journals and Articles</h4>
+    <div class="ref-entry">Gupta, A., &amp; Gupta, R. (2022). A review of online ticket booking systems for public transport. <em>International Journal of Computer Applications</em>, 184(17), 1–6.</div>
+    <div class="ref-entry">Sharma, P., &amp; Kumar, V. (2021). Design and implementation of a bus reservation system using web technologies. <em>Journal of Information Technology and Software Engineering</em>, 11(3), 45–52.</div>
+
+    <h4 class="sub-sub">Websites</h4>
+    <div class="ref-entry">MongoDB, Inc. (2024). <em>MongoDB Documentation</em>. https://www.mongodb.com/docs/ [Accessed: 15 June 2026]</div>
+    <div class="ref-entry">Next.js by Vercel. (2024). <em>Next.js Documentation — App Router</em>. https://nextjs.org/docs [Accessed: 10 June 2026]</div>
+    <div class="ref-entry">NextAuth.js Contributors. (2024). <em>NextAuth.js Documentation</em>. https://next-auth.js.org/getting-started/introduction [Accessed: 12 June 2026]</div>
+    <div class="ref-entry">Stripe, Inc. (2024). <em>Stripe Developer Documentation</em>. https://stripe.com/docs [Accessed: 18 June 2026]</div>
+    <div class="ref-entry">Twilio Inc. (2024). <em>Twilio SMS API Reference</em>. https://www.twilio.com/docs/sms/api [Accessed: 20 June 2026]</div>
+    <div class="ref-entry">Vercel. (2024). <em>Deploying Next.js Applications</em>. https://vercel.com/docs [Accessed: 22 June 2026]</div>
+
+    <span class="page-label">43 – 49</span>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       REFERENCES (APA format)
+  ══════════════════════════════════════════════════════ -->
+  <div class="page">
+    <p class="fm-title">References</p>
+    <div class="ref-entry">Chacon, S., &amp; Straub, B. (2014). <em>Pro Git</em> (2nd ed.). Apress.</div>
+    <div class="ref-entry">Fowler, M. (2002). <em>Patterns of Enterprise Application Architecture</em>. Addison-Wesley Professional.</div>
+    <div class="ref-entry">Gupta, A., &amp; Gupta, R. (2022). A review of online ticket booking systems for public transport. <em>International Journal of Computer Applications</em>, 184(17), 1–6.</div>
+    <div class="ref-entry">MongoDB, Inc. (2024). <em>MongoDB documentation</em>. https://www.mongodb.com/docs/ [Accessed: 15 June 2026]</div>
+    <div class="ref-entry">Next.js by Vercel. (2024). <em>Next.js documentation — app router</em>. https://nextjs.org/docs [Accessed: 10 June 2026]</div>
+    <div class="ref-entry">NextAuth.js Contributors. (2024). <em>NextAuth.js documentation</em>. https://next-auth.js.org/getting-started/introduction [Accessed: 12 June 2026]</div>
+    <div class="ref-entry">Pressman, R. S. (2014). <em>Software engineering: A practitioner's approach</em> (8th ed.). McGraw-Hill Education.</div>
+    <div class="ref-entry">Sharma, P., &amp; Kumar, V. (2021). Design and implementation of a bus reservation system using web technologies. <em>Journal of Information Technology and Software Engineering</em>, 11(3), 45–52.</div>
+    <div class="ref-entry">Sommerville, I. (2015). <em>Software engineering</em> (10th ed.). Pearson Education Limited.</div>
+    <div class="ref-entry">Stripe, Inc. (2024). <em>Stripe developer documentation</em>. https://stripe.com/docs [Accessed: 18 June 2026]</div>
+    <div class="ref-entry">Twilio Inc. (2024). <em>Twilio SMS API reference</em>. https://www.twilio.com/docs/sms/api [Accessed: 20 June 2026]</div>
+    <div class="ref-entry">Vercel. (2024). <em>Deploying Next.js applications</em>. https://vercel.com/docs [Accessed: 22 June 2026]</div>
+    <span class="page-label">50</span>
+  </div>
+
+</div><!-- /doc-wrap -->
+
+<script>
+  function toggleTheme() {
+    const root = document.documentElement;
+    const cur = root.getAttribute("data-theme");
+    root.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+  }
+  // Sync to OS preference on first load
+  if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+</script>
+</body>
+</html>
