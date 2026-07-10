@@ -3,12 +3,20 @@ import AdminSidebar from "@/components/admin/admin-sidebar";
 import NotificationBell from "@/components/dashboard/notification-bell";
 import { requireAdmin, getCurrentUser } from "@/lib/auth";
 import { getAdminSnapshot } from "@/lib/db/queries";
-import { BusFront, MapPinned, Package, Ticket, Users } from "lucide-react";
+import { BusFront, MapPinned, Package, Ticket, Users, LayoutDashboard } from "lucide-react";
 
 export default async function AdminPage() {
   await requireAdmin("/dashboard");
   const snapshot = await getAdminSnapshot();
   const user = await getCurrentUser();
+
+  const stats = [
+    { label: "Routes",   value: snapshot.routes.length,           icon: MapPinned },
+    { label: "Buses",    value: snapshot.buses.length,            icon: BusFront  },
+    { label: "Fleet",    value: snapshot.busDetails?.length ?? 0, icon: Package   },
+    { label: "Drivers",  value: snapshot.drivers.length,          icon: Users     },
+    { label: "Bookings", value: snapshot.bookings.length,         icon: Ticket    },
+  ];
 
   return (
     <div className="flex min-h-screen w-full">
@@ -19,86 +27,71 @@ export default async function AdminPage() {
       <div className="flex-1 flex flex-col lg:ml-64">
 
         {/* Header */}
-        <header className="sticky top-0 z-10 bg-gradient-to-r from-[#1e3a72] via-[#2850a8] to-[#1e3a72] border-b border-white/[0.18] shadow-lg shadow-black/20">
-          <div className="px-6 py-3.5 lg:px-8">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <header className="sticky top-0 z-10 bg-[#1a2035] border-b border-white/[0.08] shadow-lg">
+          <div className="px-5 py-3 lg:px-8">
+            <div className="flex items-center justify-between gap-4">
 
-              {/* Left: Title */}
-              <div>
-                <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl leading-tight">
-                  Control Center
-                </h1>
-                <p className="text-xs text-blue-200/70 hidden sm:block mt-0.5">
-                  Manage your bus booking system
-                </p>
+              {/* Left: Identity */}
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.1] border border-white/[0.12]">
+                  <LayoutDashboard className="size-4 text-slate-300" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-base font-bold text-white tracking-tight leading-none">
+                      Control Center
+                    </h1>
+                    <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.08] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-slate-300">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Live
+                    </span>
+                  </div>
+                  <p className="hidden sm:block text-[11px] text-slate-500 mt-0.5 leading-none">
+                    Bus Booking Management System
+                  </p>
+                </div>
               </div>
 
-              {/* Right: Bell + stat chips */}
-              <div className="flex items-center gap-2">
+              {/* Right: Bell + Stat chips */}
+              <div className="flex items-center gap-3">
                 <NotificationBell />
 
-                <div className="flex items-center gap-1.5">
-                  {/* Routes */}
-                  <div className="flex items-center gap-2 rounded-xl bg-white/[0.12] border border-white/[0.22] px-2.5 py-1.5 hover:bg-white/[0.22] transition-colors">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-indigo-500/20">
-                      <MapPinned className="size-3.5 text-indigo-300" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-white leading-none">{snapshot.routes.length}</p>
-                      <p className="text-[9px] text-blue-100/70 uppercase tracking-wider mt-0.5">Routes</p>
-                    </div>
-                  </div>
+                {/* Divider */}
+                <div className="hidden md:block h-7 w-px bg-white/[0.1]" />
 
-                  {/* Buses */}
-                  <div className="flex items-center gap-2 rounded-xl bg-white/[0.12] border border-white/[0.22] px-2.5 py-1.5 hover:bg-white/[0.22] transition-colors">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-500/20">
-                      <BusFront className="size-3.5 text-violet-300" />
+                {/* Stat chips */}
+                <div className="hidden md:flex items-center gap-1.5">
+                  {stats.map(({ label, value, icon: Icon }) => (
+                    <div
+                      key={label}
+                      className="flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.05] hover:bg-white/[0.09] px-3 py-2 transition-colors"
+                    >
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-white/[0.08]">
+                        <Icon className="size-3.5 text-slate-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-white leading-none">{value}</p>
+                        <p className="text-[9px] text-slate-500 uppercase tracking-widest mt-0.5 leading-none">{label}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-white leading-none">{snapshot.buses.length}</p>
-                      <p className="text-[9px] text-blue-100/70 uppercase tracking-wider mt-0.5">Buses</p>
-                    </div>
-                  </div>
+                  ))}
+                </div>
 
-                  {/* Fleet */}
-                  <div className="flex items-center gap-2 rounded-xl bg-white/[0.12] border border-white/[0.22] px-2.5 py-1.5 hover:bg-white/[0.22] transition-colors">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-500/20">
-                      <Package className="size-3.5 text-cyan-300" />
+                {/* Mobile: compact chips */}
+                <div className="flex md:hidden items-center gap-1.5">
+                  {stats.map(({ label, value, icon: Icon }) => (
+                    <div key={label} className="flex items-center gap-1 rounded-lg border border-white/[0.1] bg-white/[0.07] px-2 py-1">
+                      <Icon className="size-3 text-slate-400" />
+                      <span className="text-xs font-bold text-white">{value}</span>
                     </div>
-                    <div>
-                      <p className="text-sm font-bold text-white leading-none">{snapshot.busDetails?.length ?? 0}</p>
-                      <p className="text-[9px] text-blue-100/70 uppercase tracking-wider mt-0.5">Fleet</p>
-                    </div>
-                  </div>
-
-                  {/* Drivers */}
-                  <div className="flex items-center gap-2 rounded-xl bg-white/[0.12] border border-white/[0.22] px-2.5 py-1.5 hover:bg-white/[0.22] transition-colors">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/20">
-                      <Users className="size-3.5 text-emerald-300" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-white leading-none">{snapshot.drivers.length}</p>
-                      <p className="text-[9px] text-blue-100/70 uppercase tracking-wider mt-0.5">Drivers</p>
-                    </div>
-                  </div>
-
-                  {/* Bookings */}
-                  <div className="flex items-center gap-2 rounded-xl bg-white/[0.12] border border-white/[0.22] px-2.5 py-1.5 hover:bg-white/[0.22] transition-colors">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-purple-500/20">
-                      <Ticket className="size-3.5 text-purple-300" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-white leading-none">{snapshot.bookings.length}</p>
-                      <p className="text-[9px] text-blue-100/70 uppercase tracking-wider mt-0.5">Bookings</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
         </header>
 
-        {/* Main Content — blue-indigo tinted background */}
+        {/* Main Content */}
         <div className="flex-1 bg-[#eef1fb] px-6 py-6 lg:px-8 lg:py-8">
           <AdminPanel {...snapshot} />
         </div>

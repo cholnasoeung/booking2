@@ -256,13 +256,11 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
                           {/* Icon */}
                           <div className={cn(
                             "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-150",
-                            isActive
-                              ? `bg-gradient-to-br ${item.gradient} shadow-sm`
-                              : "bg-white/[0.07] group-hover:bg-white/[0.13]"
+                            isActive ? "bg-white/[0.15]" : "bg-white/[0.06] group-hover:bg-white/[0.11]"
                           )}>
                             <item.icon className={cn(
                               "size-3.5 transition-colors",
-                              isActive ? "text-white" : "text-slate-400 group-hover:text-white"
+                              isActive ? "text-white" : "text-slate-500 group-hover:text-slate-300"
                             )} />
                           </div>
 
