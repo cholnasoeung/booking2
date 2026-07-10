@@ -8,6 +8,7 @@ import {
   ChevronRight, Users, LogOut, UserCog, MessageSquare, Star,
   CalendarClock, MonitorCheck, ScanLine, Settings, Fuel, Wallet, Wrench, CalendarDays,
   Briefcase, Banknote, PackageSearch, RotateCcw, AlertTriangle, Search,
+  UserCheck, CalendarOff, Navigation, TrendingUp,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState, useMemo } from "react";
@@ -43,6 +44,8 @@ const navSections = [
       { title: "Support Inbox",   href: "/admin?tab=support-inbox", icon: MessageSquare, gradient: "from-sky-500 to-blue-600" },
       { title: "Ratings",         href: "/admin?tab=ratings",       icon: Star,          gradient: "from-amber-500 to-orange-600" },
       { title: "Employees",       href: "/admin?tab=employees",     icon: Briefcase,     gradient: "from-emerald-500 to-teal-600" },
+      { title: "Attendance",      href: "/admin?tab=attendance",    icon: UserCheck,     gradient: "from-indigo-500 to-blue-600" },
+      { title: "Leave Requests",  href: "/admin?tab=leave-requests",icon: CalendarOff,   gradient: "from-rose-500 to-pink-600" },
       { title: "Lost & Found",    href: "/admin?tab=lost-found",    icon: PackageSearch, gradient: "from-teal-500 to-cyan-600" },
     ],
   },
@@ -58,6 +61,8 @@ const navSections = [
       { title: "Maintenance",     href: "/admin?tab=maintenance",     icon: Wrench,          gradient: "from-rose-500 to-red-600" },
       { title: "Payroll",         href: "/admin?tab=payroll",         icon: Banknote,        gradient: "from-emerald-500 to-cyan-600" },
       { title: "Refunds",         href: "/admin?tab=refunds",         icon: RotateCcw,       gradient: "from-rose-500 to-pink-600" },
+      { title: "Route Stops",     href: "/admin?tab=route-stops",     icon: Navigation,      gradient: "from-teal-500 to-cyan-600" },
+      { title: "Pricing Rules",   href: "/admin?tab=pricing-rules",   icon: TrendingUp,      gradient: "from-orange-500 to-amber-600" },
       { title: "Promo Codes",     href: "/admin?tab=promo-codes",     icon: Tags,            gradient: "from-violet-500 to-purple-600" },
       { title: "Import/Export",   href: "/admin?tab=import-export",   icon: FileSpreadsheet, gradient: "from-amber-500 to-orange-600" },
       { title: "Settings",        href: "/admin?tab=settings",        icon: Settings,        gradient: "from-slate-500 to-slate-700" },

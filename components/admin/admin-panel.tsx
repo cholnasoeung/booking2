@@ -35,6 +35,10 @@ import AdminRefundTab from "@/components/admin/admin-refund-tab";
 import AdminIncidentTab from "@/components/admin/admin-incident-tab";
 import AdminFinanceTab from "@/components/admin/admin-finance-tab";
 import AdminDriverPerformanceTab from "@/components/admin/admin-driver-performance-tab";
+import AdminAttendanceTab from "@/components/admin/admin-attendance-tab";
+import AdminLeaveTab from "@/components/admin/admin-leave-tab";
+import AdminRouteStopsTab from "@/components/admin/admin-route-stops-tab";
+import AdminPricingRulesTab from "@/components/admin/admin-pricing-rules-tab";
 import type {
   AdminBookingSummary,
   BusDetailSummary,
@@ -163,6 +167,10 @@ export default function AdminPanel({
       {activeTab === "incidents"         ? <AdminIncidentTab />            : null}
       {activeTab === "finance"           ? <AdminFinanceTab />             : null}
       {activeTab === "driver-performance" ? <AdminDriverPerformanceTab /> : null}
+      {activeTab === "attendance"     ? <AdminAttendanceTab />    : null}
+      {activeTab === "leave-requests" ? <AdminLeaveTab />         : null}
+      {activeTab === "route-stops"    ? <AdminRouteStopsTab />    : null}
+      {activeTab === "pricing-rules"  ? <AdminPricingRulesTab /> : null}
     </div>
   );
 }
