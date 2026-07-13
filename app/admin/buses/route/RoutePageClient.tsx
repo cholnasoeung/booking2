@@ -512,7 +512,7 @@ export default function RoutePageClient({ from, to, buses, routes, drivers }: Pr
       {manifestBusId && (
         <AdminManifestDialog
           open={manifestOpen}
-          onOpenChange={(open) => { setManifestOpen(open); if (!open) { setManifestBusId(null); setManifestBusLabel(""); } }}
+          onClose={() => { setManifestOpen(false); setManifestBusId(null); setManifestBusLabel(""); }}
           busId={manifestBusId}
           busLabel={manifestBusLabel}
         />
@@ -525,7 +525,7 @@ export default function RoutePageClient({ from, to, buses, routes, drivers }: Pr
           onOpenChange={(open) => { setCancelOpen(open); if (!open) { setCancelBusId(null); setCancelBusLabel(""); } }}
           busId={cancelBusId}
           busLabel={cancelBusLabel}
-          onSuccess={() => { setFeedback({ kind: "success", message: "Trip cancelled." }); setCancelOpen(false); router.refresh(); }}
+          onCancelled={() => { setFeedback({ kind: "success", message: "Trip cancelled." }); setCancelOpen(false); router.refresh(); }}
         />
       )}
 

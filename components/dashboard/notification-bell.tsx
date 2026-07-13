@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   Bell, X, Check, Megaphone, CheckCircle2, XCircle, Bus, Info,
 } from "lucide-react";
@@ -48,7 +49,13 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount]     = useState(0);
   const [marking, setMarking]             = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [dropPos, setDropPos]             = useState({ top: 0, right: 0 });
+  const [mounted, setMounted]             = useState(false);
+
+  const dropRef   = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => { setMounted(true); }, []);
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -66,15 +73,36 @@ export default function NotificationBell() {
     return () => clearInterval(interval);
   }, [fetchNotifications]);
 
+  const updatePos = useCallback(() => {
+    if (!buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    setDropPos({
+      top:   rect.bottom + 8,
+      right: window.innerWidth - rect.right,
+    });
+  }, []);
+
   useEffect(() => {
-    function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+    function onClickOutside(e: MouseEvent) {
+      if (
+        dropRef.current && !dropRef.current.contains(e.target as Node) &&
+        buttonRef.current && !buttonRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     }
-    if (open) document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
+    if (open) {
+      updatePos();
+      document.addEventListener("mousedown", onClickOutside);
+      window.addEventListener("resize", updatePos);
+      window.addEventListener("scroll", updatePos, true);
+    }
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      window.removeEventListener("resize", updatePos);
+      window.removeEventListener("scroll", updatePos, true);
+    };
+  }, [open, updatePos]);
 
   async function markAllRead() {
     setMarking(true);
@@ -103,10 +131,117 @@ export default function NotificationBell() {
     setUnreadCount((c) => Math.max(0, c - 1));
   }
 
+  const dropdown = (
+    <div
+      ref={dropRef}
+      style={{ position: "fixed", top: dropPos.top, right: dropPos.right, zIndex: 9999 }}
+      className="w-80 sm:w-[22rem] rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10 overflow-hidden"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/60">
+        <div className="flex items-center gap-2">
+          <Bell className="h-4 w-4 text-indigo-600" />
+          <h3 className="text-sm font-bold text-slate-900">Notifications</h3>
+          {unreadCount > 0 && (
+            <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-bold text-indigo-700">
+              {unreadCount} new
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1">
+          {unreadCount > 0 && (
+            <button
+              onClick={markAllRead}
+              disabled={marking}
+              className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-colors"
+            >
+              <Check className="h-3 w-3" />
+              Mark all read
+            </button>
+          )}
+          <button
+            onClick={() => setOpen(false)}
+            className="rounded-lg p-1 hover:bg-slate-200 transition-colors"
+          >
+            <X className="h-4 w-4 text-slate-400" />
+          </button>
+        </div>
+      </div>
+
+      {/* List */}
+      <div className="max-h-[420px] overflow-y-auto divide-y divide-slate-50">
+        {notifications.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+            <Bell className="h-9 w-9 mb-3 opacity-25" />
+            <p className="text-sm font-medium">All caught up!</p>
+            <p className="text-xs mt-0.5">No notifications yet</p>
+          </div>
+        ) : (
+          notifications.map((n) => {
+            const Icon = TYPE_ICON[n.type] ?? Info;
+            const colorClass = TYPE_COLOR[n.type] ?? "text-slate-600 bg-slate-100";
+            return (
+              <div
+                key={n.id}
+                className={cn(
+                  "flex items-start gap-3 px-4 py-3 transition-colors",
+                  !n.read && "bg-indigo-50/40"
+                )}
+              >
+                <div
+                  className={cn(
+                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-full mt-0.5",
+                    colorClass
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <p
+                      className={cn(
+                        "text-[13px] font-semibold leading-tight",
+                        n.read ? "text-slate-600" : "text-slate-900"
+                      )}
+                    >
+                      {n.title}
+                    </p>
+                    <span className="text-[10px] text-slate-400 shrink-0 mt-0.5 whitespace-nowrap">
+                      {timeAgo(n.createdAt)}
+                    </span>
+                  </div>
+                  <p className="text-[12px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
+                    {n.message}
+                  </p>
+                  {n.bookingId && (
+                    <a
+                      href={`/booking/confirmation/${n.bookingId}`}
+                      className="text-[11px] text-indigo-600 hover:underline mt-1 inline-block font-medium"
+                    >
+                      View booking →
+                    </a>
+                  )}
+                </div>
+                {!n.read && (
+                  <button
+                    onClick={() => markRead(n.id)}
+                    title="Mark as read"
+                    className="mt-1.5 h-2 w-2 rounded-full bg-indigo-500 shrink-0 hover:bg-indigo-700 transition-colors"
+                  />
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="relative" ref={ref}>
+    <>
       {/* Bell button */}
       <button
+        ref={buttonRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
         className="relative flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white hover:bg-slate-50 transition-colors shadow-sm"
@@ -120,108 +255,8 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {/* Dropdown */}
-      {open && (
-        <div className="absolute right-0 top-11 z-50 w-80 sm:w-[22rem] rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10 overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/60">
-            <div className="flex items-center gap-2">
-              <Bell className="h-4 w-4 text-indigo-600" />
-              <h3 className="text-sm font-bold text-slate-900">Notifications</h3>
-              {unreadCount > 0 && (
-                <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-bold text-indigo-700">
-                  {unreadCount} new
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-1">
-              {unreadCount > 0 && (
-                <button
-                  onClick={markAllRead}
-                  disabled={marking}
-                  className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-colors"
-                >
-                  <Check className="h-3 w-3" />
-                  Mark all read
-                </button>
-              )}
-              <button
-                onClick={() => setOpen(false)}
-                className="rounded-lg p-1 hover:bg-slate-200 transition-colors"
-              >
-                <X className="h-4 w-4 text-slate-400" />
-              </button>
-            </div>
-          </div>
-
-          {/* List */}
-          <div className="max-h-[420px] overflow-y-auto divide-y divide-slate-50">
-            {notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-slate-400">
-                <Bell className="h-9 w-9 mb-3 opacity-25" />
-                <p className="text-sm font-medium">All caught up!</p>
-                <p className="text-xs mt-0.5">No notifications yet</p>
-              </div>
-            ) : (
-              notifications.map((n) => {
-                const Icon = TYPE_ICON[n.type] ?? Info;
-                const colorClass = TYPE_COLOR[n.type] ?? "text-slate-600 bg-slate-100";
-                return (
-                  <div
-                    key={n.id}
-                    className={cn(
-                      "flex items-start gap-3 px-4 py-3 transition-colors",
-                      !n.read && "bg-indigo-50/40"
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        "flex h-8 w-8 shrink-0 items-center justify-center rounded-full mt-0.5",
-                        colorClass
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <p
-                          className={cn(
-                            "text-[13px] font-semibold leading-tight",
-                            n.read ? "text-slate-600" : "text-slate-900"
-                          )}
-                        >
-                          {n.title}
-                        </p>
-                        <span className="text-[10px] text-slate-400 shrink-0 mt-0.5 whitespace-nowrap">
-                          {timeAgo(n.createdAt)}
-                        </span>
-                      </div>
-                      <p className="text-[12px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
-                        {n.message}
-                      </p>
-                      {n.bookingId && (
-                        <a
-                          href={`/booking/confirmation/${n.bookingId}`}
-                          className="text-[11px] text-indigo-600 hover:underline mt-1 inline-block font-medium"
-                        >
-                          View booking →
-                        </a>
-                      )}
-                    </div>
-                    {!n.read && (
-                      <button
-                        onClick={() => markRead(n.id)}
-                        title="Mark as read"
-                        className="mt-1.5 h-2 w-2 rounded-full bg-indigo-500 shrink-0 hover:bg-indigo-700 transition-colors"
-                      />
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-      )}
-    </div>
+      {/* Dropdown rendered via portal to escape any parent overflow clipping */}
+      {mounted && open && createPortal(dropdown, document.body)}
+    </>
   );
 }

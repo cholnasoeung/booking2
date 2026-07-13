@@ -1,0 +1,492 @@
+0	Normal	BUILD BRIGHT UNIVERSITY
+1	Normal	MASTER OF INFORMATION TECHNOLOGY
+3	Normal	──────────────────────────────────────────────────
+5	Normal	ONLINE BUS TICKET BOOKING SYSTEM
+6	Normal	A Web-Based Ticket Reservation and Fleet Management Platform
+9	Normal	Submitted by:
+10	Normal	[Your Full Name]
+11	Normal	Student ID: [Your Student ID]
+13	Normal	Advisor: [Advisor's Name, Title]
+14	Normal	Program: Master of Information Technology
+15	Normal	Academic Year: 2025 – 2026
+16	Normal	Submission Date: July 2026
+18	Normal	Research Project — Build Bright University · 2026
+20	Heading 1	DECLARATION
+21	Normal	I hereby declare that the research project entitled "Online Bus Ticket Booking System" submitted to 
+23	Normal	Signature of Student
+24	Normal	Name: [Your Full Name]
+25	Normal	Date: ________________
+27	Heading 1	CERTIFICATE
+28	Normal	This is to certify that the research project entitled "Online Bus Ticket Booking System" submitted b
+30	Normal	Signature of Advisor
+31	Normal	Name: [Advisor Name]
+32	Normal	Date: ________________
+34	Normal	Signature of Department Head
+35	Normal	Name: [HOD Name]
+36	Normal	Date: ________________
+38	Heading 1	ACKNOWLEDGEMENTS
+39	Normal	I would like to express my sincere gratitude to all those who contributed to the successful completi
+40	Normal	I would also like to thank the faculty members of the Master of Information Technology program at Bu
+41	Normal	Special thanks go to my fellow students and colleagues who provided valuable feedback during testing
+42	Normal	Finally, I am grateful to my family and friends for their unwavering support, encouragement, and und
+44	Normal	[Your Full Name]
+45	Normal	Master of Information Technology
+46	Normal	Build Bright University, 2026
+48	Heading 1	ABSTRACT
+49	Normal	This research project presents the design, development, and implementation of an Online Bus Ticket B
+50	Normal	The system was built using Next.js 16 (App Router) on the front-end and back-end, MongoDB with Mongo
+51	Normal	Testing was carried out through functional, usability, security, and performance testing procedures,
+53	Normal	Keywords: Bus Ticket Booking, Next.js, MongoDB, Web Application, Seat Selection, Payment Gateway, Fl
+55	Heading 1	CONTENTS
+56	Normal	Title Page	i
+57	Normal	Declaration	ii
+58	Normal	Certificate	iii
+59	Normal	Acknowledgements	iv
+60	Normal	Abstract	v
+61	Normal	Contents	vi
+62	Normal	List of Tables	vii
+63	Normal	List of Figures	viii
+64	Normal	List of Abbreviations	ix
+65	Normal	Chapter I: Introduction	1
+66	Normal	1.1 Statement of the Problem	2
+67	Normal	1.2 Objectives of the Study	3
+68	Normal	1.3 Significance of the Study	4
+69	Normal	1.4 Scope and Limitations of the Study	5
+70	Normal	Chapter II: Requirement Analysis	7
+71	Normal	2.1 Functional Requirements	8
+72	Normal	2.2 Non-Functional Requirements	13
+73	Normal	2.3 Use Case Analysis	15
+74	Normal	2.4 Data Flow Diagrams	18
+75	Normal	2.5 Data Dictionary	20
+76	Normal	2.6 System Architecture Design	28
+77	Normal	Chapter III: Implementation	31
+78	Normal	3.1 Development Environment	32
+79	Normal	3.2 Technology Stack	33
+80	Normal	3.3 System Modules Implementation	35
+81	Normal	3.4 Database Implementation	50
+82	Normal	3.5 User Interface Implementation	53
+83	Normal	Chapter IV: Testing	60
+84	Normal	4.1 Testing Procedure	61
+85	Normal	4.2 Testing Report	62
+86	Normal	Chapter V: Documentation	70
+87	Normal	5.1 Future Application	71
+88	Normal	5.2 Conclusion	73
+89	Normal	5.3 Bibliography	75
+90	Normal	References	76
+92	Heading 1	LIST OF TABLES
+93	Normal	Table 2.1 — Functional Requirements	8
+94	Normal	Table 2.2 — Non-Functional Requirements	13
+95	Normal	Table 2.3 — Use Case Summary	15
+96	Normal	Table 2.4 — Data Dictionary: User Collection	20
+97	Normal	Table 2.5 — Data Dictionary: Booking Collection	21
+98	Normal	Table 2.6 — Data Dictionary: Bus Collection	22
+99	Normal	Table 2.7 — Data Dictionary: Route Collection	23
+100	Normal	Table 2.8 — Data Dictionary: Attendance Collection	24
+101	Normal	Table 2.9 — Data Dictionary: LeaveRequest Collection	25
+102	Normal	Table 2.10 — Data Dictionary: RouteStop Collection	26
+103	Normal	Table 2.11 — Data Dictionary: PricingRule Collection	27
+104	Normal	Table 2.12 — Data Dictionary: Notification Collection	27
+105	Normal	Table 3.1 — Technology Stack Summary	33
+106	Normal	Table 4.1 — Functional Test Cases	62
+107	Normal	Table 4.2 — Security Test Cases	67
+108	Normal	Table 4.3 — Performance Test Results	68
+110	Heading 1	LIST OF FIGURES
+113	Normal	Figure 2.1 -- Passenger Booking Flow Diagram
+116	Normal	Figure 2.2 -- Admin Panel Operations Flow Diagram
+117	Normal	Figure 2.3 — Entity Relationship Diagram	29
+118	Normal	Figure 3.1 — System Architecture Diagram	34
+119	Normal	Figure 3.2 — Seat Selection Interface	53
+120	Normal	Figure 3.3 — Admin Dashboard Overview	54
+121	Normal	Figure 3.4 — Payment Flow Diagram	55
+122	Normal	Figure 3.5 — Check-In Management Interface	56
+123	Normal	Figure 3.6 — Leave Calendar View	57
+124	Normal	Figure 3.7 — Analytics Report Charts	58
+125	Normal	Figure 3.8 — Counter Booking Interface	59
+127	Heading 1	LIST OF ABBREVIATIONS
+128	Normal	ABA	Advanced Bank of Asia
+129	Normal	API	Application Programming Interface
+130	Normal	CDN	Content Delivery Network
+131	Normal	CRUD	Create, Read, Update, Delete
+132	Normal	CSS	Cascading Style Sheets
+133	Normal	CSV	Comma-Separated Values
+134	Normal	DFD	Data Flow Diagram
+135	Normal	ER	Entity Relationship
+136	Normal	HMAC	Hash-based Message Authentication Code
+137	Normal	HTML	Hypertext Markup Language
+138	Normal	HTTP	Hypertext Transfer Protocol
+139	Normal	IT	Information Technology
+140	Normal	JSON	JavaScript Object Notation
+141	Normal	JWT	JSON Web Token
+142	Normal	KHR	Cambodian Riel
+143	Normal	KPI	Key Performance Indicator
+144	Normal	MIT	Master of Information Technology
+145	Normal	MVC	Model-View-Controller
+146	Normal	ODM	Object Document Mapper
+147	Normal	OTP	One-Time Password
+148	Normal	PDF	Portable Document Format
+149	Normal	QR	Quick Response (Code)
+150	Normal	REST	Representational State Transfer
+151	Normal	SMS	Short Message Service
+152	Normal	SQL	Structured Query Language
+153	Normal	SRS	Software Requirements Specification
+154	Normal	SSR	Server-Side Rendering
+155	Normal	TTL	Time To Live
+156	Normal	UI	User Interface
+157	Normal	URL	Uniform Resource Locator
+158	Normal	USD	United States Dollar
+159	Normal	UX	User Experience
+161	Heading 1	CHAPTER I
+162	Heading 2	INTRODUCTION
+163	Normal	The transportation industry plays a crucial role in the economic development of any country. In Camb
+164	Normal	The rapid proliferation of internet access and smartphone adoption in Cambodia has created a signifi
+165	Normal	This research project presents the design and implementation of an Online Bus Ticket Booking System 
+166	Heading 2	1.1 Statement of the Problem
+167	Normal	The current manual bus ticketing system in Cambodia presents several challenges for both passengers 
+168	List Bullet	Inefficiency and inconvenience for passengers: Travelers must physically visit ticket counters or te
+169	List Bullet	No real-time seat visibility: Passengers cannot see which seats are available, blocked, or already b
+170	List Bullet	Limited payment options: Manual systems only accept cash, excluding passengers who prefer digital pa
+171	List Bullet	Poor record management: Paper-based records are susceptible to loss, damage, and human error. Genera
+172	List Bullet	Absence of integrated fleet and driver management: Bus operators lack a centralized system to track 
+173	List Bullet	No staff management tools: Tracking driver and employee attendance, processing leave requests, and m
+174	List Bullet	No communication channel for updates: When delays, cancellations, or platform changes occur, there i
+175	List Bullet	Inflexible pricing: Traditional systems cannot dynamically adjust ticket prices during peak seasons,
+176	Normal	These problems indicate a clear need for a digital, integrated bus booking and management system tha
+177	Heading 2	1.2 Objectives of the Study
+178	Normal	The primary objectives of this research project are as follows:
+179	List Number	To design and implement a web-based bus ticket booking system that allows passengers to search route
+180	List Number	To develop an interactive seat selection interface that clearly distinguishes between available, boo
+181	List Number	To integrate secure online payment gateways (Stripe and ABA PayWay) to support both international an
+182	List Number	To build a multi-channel notification system that delivers booking confirmations, trip updates, and 
+183	List Number	To implement a comprehensive admin panel covering route management, bus scheduling, fleet and driver
+184	List Number	To develop a loyalty and rewards program that incentivizes repeat passengers with tiered point-based
+185	List Number	To ensure system security through proper authentication, role-based access control, input validation
+186	List Number	To evaluate the system through comprehensive functional, security, and performance testing.
+187	List Number	To implement a staff attendance and leave request management system that allows administrators to tr
+188	List Number	To introduce route stop management and dynamic pricing rules that allow operators to define intermed
+189	List Number	To provide a counter booking module that enables ticket agents at physical terminals to create booki
+190	List Number	To implement data import and export capabilities, enabling administrators to bulk-import route data 
+191	Heading 2	1.3 Significance of the Study
+192	Normal	This research project makes several contributions to both the academic and practical domains of info
+193	Normal	For Passengers:
+194	Normal	The system provides a convenient, 24/7 accessible platform for booking bus tickets from any device. 
+195	Normal	For Bus Operators:
+196	Normal	The admin panel provides a single dashboard for managing all aspects of bus operations — from schedu
+197	Normal	For Researchers and Developers:
+198	Normal	This project demonstrates the practical application of modern web technologies — including Next.js A
+199	Heading 2	1.4 Scope and Limitations of the Study
+200	Normal	Scope:
+201	Normal	The Online Bus Ticket Booking System covers the following functional areas:
+202	Normal	Passenger-facing features:
+203	Normal	User registration and authentication (email/password and Google OAuth), route search, interactive se
+204	Normal	Admin-facing features:
+205	Normal	Route and bus management, driver and fleet management, employee and payroll management, booking and 
+206	Normal	The system is designed primarily for the Cambodian inter-provincial bus market and supports both USD
+207	Normal	Limitations:
+208	List Bullet	The system is web-based only; a dedicated mobile application (iOS/Android) has not been developed.
+209	List Bullet	Real-time GPS bus tracking and live ETA updates are not included in the current implementation.
+210	List Bullet	The Twilio SMS integration requires a paid Twilio account; in environments where Twilio is not confi
+211	List Bullet	The system has been tested in a development environment; large-scale load testing with thousands of 
+212	List Bullet	Integration with third-party travel aggregator platforms is not covered.
+214	Heading 1	CHAPTER II
+215	Heading 2	REQUIREMENT ANALYSIS
+216	Normal	Requirement analysis is the foundational phase of the software development lifecycle in which the ne
+217	Heading 2	2.1 Functional Requirements
+218	Normal	Functional requirements describe the specific behaviors, actions, and functions that the system must
+220	Normal	Table 2.1 — Functional Requirements
+222	Heading 2	2.2 Non-Functional Requirements
+223	Normal	Non-functional requirements define the quality attributes and constraints that the system must satis
+225	Normal	Table 2.2 — Non-Functional Requirements
+227	Heading 2	2.3 Use Case Analysis
+228	Normal	The system involves three primary actors: Guest (unauthenticated visitor), Passenger (authenticated 
+230	Normal	Table 2.3 — Use Case Summary
+232	Heading 2	2.4 Data Flow Diagrams
+233	Normal	Data Flow Diagrams (DFDs) illustrate the flow of data through the system at different levels of abst
+234	Normal	Context-Level DFD (Level 0) — Figure 2.1
+235	Normal	The Online Bus Ticket Booking System interacts with five external entities:
+236	List Bullet	Passenger — provides search queries, booking requests, payment information, and receives booking con
+237	List Bullet	Administrator — provides route, bus, driver, employee, and settings data; receives reports, analytic
+238	List Bullet	Payment Gateway (Stripe / ABA PayWay) — receives payment requests from the system; sends payment con
+239	List Bullet	Communication Services (Resend / Twilio) — receives email and SMS dispatch requests from the system 
+240	List Bullet	External Storage (Vercel Blob / Cloudinary) — stores uploaded files such as driver documents, vehicl
+241	Normal	All data flows pass through the central Online Bus Ticket Booking System process, which manages stat
+242	Normal	[Figure 2.1 — Context-Level DFD (Level 0)]
+243	Normal	Level 1 DFD — Main Processes — Figure 2.2
+244	Normal	At Level 1, the system is decomposed into eight main processes:
+245	List Number	Process 1.0 — User Management: Handles registration, email verification, login (credentials + OAuth)
+246	List Number	Process 2.0 — Bus Search & Availability: Receives search parameters from the passenger, queries the 
+247	List Number	Process 3.0 — Booking & Payment: Manages seat selection, passenger detail entry, promo code validati
+248	List Number	Process 4.0 — Notification Dispatch: Triggered by booking confirmation, cancellation, or admin annou
+249	List Number	Process 5.0 — Admin Operations: Receives administrative inputs for managing routes, buses, drivers, 
+250	List Number	Process 6.0 — Analytics & Reporting: Aggregates data from the Booking, Bus, Payroll, FuelLog, and Ma
+251	List Number	Process 7.0 — Check-In Management: Receives check-in status updates from terminal staff; reads Booki
+252	List Number	Process 8.0 — System Administration: Manages audit logging, system health monitoring, import/export 
+253	Normal	[Figure 2.2 — Level 1 DFD]
+254	Heading 2	2.5 Data Dictionary
+255	Normal	The data dictionary describes the structure of the key MongoDB collections used in the system. The s
+256	Normal	User Collection
+257	Normal	The User collection stores all registered accounts for both passengers and administrators.
+259	Normal	Table 2.4 — Data Dictionary: User Collection
+261	Normal	Booking Collection
+262	Normal	The Booking collection is the central transactional record, created upon successful payment.
+264	Normal	Table 2.5 — Data Dictionary: Booking Collection
+266	Normal	Bus Collection
+267	Normal	The Bus collection stores scheduled departures linking a route, driver, physical vehicle, and seat c
+269	Normal	Table 2.6 — Data Dictionary: Bus Collection
+271	Normal	Route Collection
+272	Normal	The Route collection defines the origin-to-destination connections that buses serve.
+274	Normal	Table 2.7 — Data Dictionary: Route Collection
+276	Normal	Attendance Collection
+277	Normal	The Attendance collection records daily attendance status for each driver and employee.
+279	Normal	Table 2.8 — Data Dictionary: Attendance Collection
+281	Normal	LeaveRequest Collection
+282	Normal	The LeaveRequest collection manages leave applications for drivers and employees.
+284	Normal	Table 2.9 — Data Dictionary: LeaveRequest Collection
+286	Normal	RouteStop Collection
+287	Normal	The RouteStop collection defines ordered intermediate stops along each route.
+289	Normal	Table 2.10 — Data Dictionary: RouteStop Collection
+291	Normal	PricingRule Collection
+292	Normal	The PricingRule collection stores dynamic pricing configurations applied during search.
+294	Normal	Table 2.11 — Data Dictionary: PricingRule Collection
+296	Normal	Notification Collection
+297	Normal	The Notification collection stores in-app notifications delivered to passengers and admins.
+299	Normal	Table 2.12 — Data Dictionary: Notification Collection
+301	Normal	Additional Collections Summary
+302	Normal	The remaining collections in the system are:
+304	Heading 2	2.6 System Architecture Design
+305	Normal	The Online Bus Ticket Booking System follows a three-tier architecture consisting of the Presentatio
+306	Normal	Presentation Layer:
+307	Normal	Built with Next.js 16 App Router using React Server Components for server-rendered pages and Client 
+308	Normal	Application Layer:
+309	Normal	Next.js API Routes and Server Actions handle all business logic. API routes are organized under /app
+310	Normal	Data Layer:
+311	Normal	MongoDB is used as the primary database, accessed through Mongoose ODM. A connection pooling utility
+312	Normal	External Services:
+313	List Bullet	Resend — transactional email delivery (booking confirmations, password reset, announcements)
+314	List Bullet	Stripe — international card payment processing (Checkout Sessions + webhook verification)
+315	List Bullet	ABA PayWay — local Cambodian payment processing (HMAC-SHA512 signed form POST)
+316	List Bullet	Twilio — SMS notification delivery to passenger phone numbers
+317	List Bullet	Vercel Blob / Cloudinary — file storage for driver documents, vehicle images, avatars
+318	Normal	[Figure 2.3 — Entity Relationship Diagram]
+320	Heading 1	CHAPTER III
+321	Heading 2	IMPLEMENTATION
+322	Normal	This chapter describes the actual development and implementation of the Online Bus Ticket Booking Sy
+323	Heading 2	3.1 Development Environment
+324	Normal	The system was developed on a Windows 11 operating system using the following tools:
+325	List Bullet	Code Editor: Visual Studio Code v1.90 with TypeScript, Tailwind CSS IntelliSense, and ESLint extensi
+326	List Bullet	Node.js: Version 20.x LTS — the runtime environment for Next.js and npm package management.
+327	List Bullet	Package Manager: npm v10.x for installing and managing project dependencies.
+328	List Bullet	Database: MongoDB Atlas (cloud-hosted) — a free-tier M0 cluster used for development and testing.
+329	List Bullet	Version Control: Git with GitHub repository for source code management and version tracking.
+330	List Bullet	Browser Testing: Google Chrome (primary), Mozilla Firefox, and Microsoft Edge.
+331	List Bullet	API Testing: Postman for testing REST API endpoints during development.
+332	List Bullet	Payment Testing: Stripe CLI for forwarding webhook events to the local development server.
+333	Heading 2	3.2 Technology Stack
+334	Normal	The system is built entirely on open-source and cloud technologies. Table 3.1 summarizes the full te
+336	Normal	Table 3.1 — Technology Stack Summary
+338	Normal	[Figure 3.1 — System Architecture Diagram]
+339	Heading 2	3.3 System Modules Implementation
+340	Normal	Authentication Module
+341	Normal	Authentication is implemented using NextAuth.js v4 configured in lib/auth.ts. The credentials provid
+342	Normal	Search and Availability Module
+343	Normal	The search page (app/search/results/page.tsx) is a Server Component that accepts origin, destination
+344	Normal	Booking and Payment Module
+345	Normal	The booking flow follows a pattern designed to prevent seat conflicts under concurrent access. When 
+346	Normal	For Stripe payments, a Checkout Session is created via the Stripe API and the user is redirected to 
+347	Normal	For ABA PayWay, the system generates an HMAC-SHA512 hash of the transaction parameters using the ABA
+348	Normal	Notification Module
+349	Normal	The notification system operates on three channels simultaneously:
+350	List Number	Email — sent via the Resend API using HTML email templates. Emails are sent for booking confirmation
+351	List Number	In-App Notifications — stored as documents in the Notification MongoDB collection with a 90-day TTL.
+352	List Number	SMS via Twilio — sent using plain HTTP fetch to the Twilio REST API with Basic authentication (Accou
+353	Normal	Admin Panel — Overview Structure
+354	Normal	The admin panel is a single-page application implemented as a multi-tab interface in app/admin/page.
+355	Normal	Admin Panel — Buses and Routes
+356	Normal	The buses management tab provides full CRUD for bus schedules. The Add New Bus wizard (app/admin/bus
+357	Normal	Admin Panel — Check-In Management Module
+358	Normal	The check-in module (components/admin/admin-checkin-tab.tsx) enables terminal staff to manage passen
+359	Normal	When a departure is selected, a passenger manifest is displayed with check-in status indicators. Adm
+360	List Bullet	Booking & Trip Details: booking ID, creation date, total price, payment method, booking source
+361	List Bullet	Seat & Stop Information: assigned seat codes, boarding stop, dropping stop
+362	List Bullet	Contact Information: passenger name, phone number, email address
+363	List Bullet	Passenger List: full details for each traveler on the booking (name, age, gender, contact)
+364	Normal	Action buttons within the expanded panel use event.stopPropagation() to prevent accidental row-colla
+365	Normal	[Figure 3.5 — Check-In Management Interface]
+366	Normal	Admin Panel — Counter Booking Module
+367	Normal	The counter booking module (components/admin/admin-counter-booking.tsx) enables ticket agents at phy
+368	List Number	Route Selection — the agent selects the origin/destination route.
+369	List Number	Bus Selection — available buses for the selected route on a chosen date are displayed with seat avai
+370	List Number	Seat & Passenger Details — the agent selects seats from an interactive seat map and enters passenger
+371	List Number	Payment & Confirmation — the agent selects a payment method (cash, card, ABA), the system records th
+372	Normal	Counter bookings are stored in the Booking collection with a bookingSource field set to "counter" to
+373	Normal	[Figure 3.8 — Counter Booking Interface]
+374	Normal	Admin Panel — Attendance Management Module
+375	Normal	The Attendance Management module (components/admin/admin-attendance-tab.tsx) enables administrators 
+376	List Bullet	Summary statistics: count of present, absent, late, and on-leave staff for the selected date
+377	List Bullet	Filterable, paginated table view with search by staff name
+378	List Bullet	Quick-action status update buttons per row
+379	List Bullet	Monthly report view aggregating attendance per staff member across a selected month
+380	Normal	Admin Panel — Leave Request Management Module
+381	Normal	The Leave Request Management module (components/admin/admin-leave-tab.tsx) implements a full leave a
+382	List Bullet	List View — a paginated table of all leave requests with filters by status, staff type, and date ran
+383	List Bullet	Calendar View — a monthly calendar grid that renders approved and pending leave periods as color-cod
+384	Normal	The calendar is implemented in pure React/Tailwind without external calendar libraries. The getLeave
+385	Normal	[Figure 3.6 — Leave Calendar View]
+386	Normal	Admin Panel — Route Stops Module
+387	Normal	The Route Stops module (components/admin/admin-route-stops-tab.tsx) allows administrators to define 
+388	Normal	Admin Panel — Pricing Rules Module
+389	Normal	The Pricing Rules module (components/admin/admin-pricing-rules-tab.tsx) enables administrators to co
+390	Normal	Admin Panel — Refund Management Module
+391	Normal	The Refund Management module (components/admin/admin-refund-tab.tsx) provides administrators with a 
+392	Normal	Admin Panel — Reports Module
+393	Normal	The Reports module (components/admin/admin-reports-tab.tsx) generates comprehensive financial and op
+394	List Bullet	Revenue Summary: gross revenue, total refunds, total discounts applied, and net revenue for the peri
+395	List Bullet	Daily Revenue Chart: an AreaChart (Recharts) with separate area fills for gross, refunds, and net va
+396	List Bullet	Booking Trends: confirmed vs. cancelled bookings per day, rendered as a BarChart.
+397	List Bullet	Route Performance Table: per-route breakdown of confirmed bookings, cancelled bookings, total revenu
+398	List Bullet	Fuel Cost Report: total fuel cost and liters consumed per day within the date range.
+399	List Bullet	Maintenance Cost Report: maintenance spend by type (scheduled service, repair, tire change, etc.).
+400	List Bullet	CSV Export: all report sections are downloadable as comma-separated files for import into Excel or a
+401	Normal	[Figure 3.7 — Analytics Report Charts]
+402	Normal	Admin Panel — Import/Export Module
+403	Normal	The Import/Export module (components/admin/admin-import-export-tab.tsx) provides two capabilities:
+404	List Bullet	CSV Import — administrators can upload a CSV file containing route data (from, to, distance, duratio
+405	List Bullet	CSV Export — administrators can download all current bookings or all routes as CSV files. The export
+406	Normal	Admin Panel — Analytics and Today's Overview Modules
+407	Normal	The Overview tab (components/admin/admin-overview-tab.tsx) displays KPI cards for today's key metric
+408	Normal	Admin Panel — Fleet, Driver, and Employee Management
+409	Normal	Fleet management covers physical vehicle registration (BusDetail collection) with plate number, mode
+410	Normal	Admin Panel — System Health Monitoring
+411	Normal	The System Status tab (components/admin/admin-system-status-tab.tsx) provides real-time visibility i
+412	Heading 2	3.4 Database Implementation
+413	Normal	The MongoDB database is organized into twenty-eight collections. Key implementation decisions includ
+414	Normal	TTL Indexes:
+415	List Bullet	PendingBooking.expiresAt — 30-minute expiry: automatically releases seat holds if payment is not com
+416	List Bullet	Notification.createdAt — 90-day expiry: keeps the notifications collection lean without manual clean
+417	List Bullet	WaitingList.expiresAt — 7-day expiry: removes stale waitlist entries automatically.
+418	List Bullet	AuditLog.timestamp — 1-year expiry: retains administrative action history for compliance while preve
+419	Normal	Compound Indexes:
+420	List Bullet	Bus: (routeId, date, departureStatus) — optimizes the primary search query.
+421	List Bullet	Booking: (user, status) and (bus, status) — enables efficient dashboard and admin queries.
+422	List Bullet	RouteStop: (routeId, order) — ensures stops are always returned in sequence order.
+423	List Bullet	PricingRule: (startDate, endDate) and (isActive, priority desc) — enables fast rule lookup during se
+424	Normal	Unique Constraints:
+425	List Bullet	User.email — prevents duplicate accounts.
+426	List Bullet	PromoCode.code — prevents duplicate discount codes.
+427	List Bullet	LostFound.refNumber — ensures unique lost item reference numbers.
+428	List Bullet	Rating: compound unique on (user + booking) — prevents a passenger from rating the same trip twice.
+429	Normal	Connection Pooling:
+430	Normal	The lib/mongodb.ts utility caches the Mongoose connection across serverless function invocations usi
+431	Normal	Model Organization:
+432	Normal	Mongoose models are organized into six subdirectories under /models/ to reflect domain boundaries: b
+433	Heading 2	3.5 User Interface Implementation
+434	Normal	The user interface is built with Tailwind CSS for utility-first styling and shadcn/ui for accessible
+435	Normal	Homepage Search Interface:
+436	Normal	A centered search form with From City, To City, Date, and Passengers fields, built as a React Server
+437	Normal	Seat Selection Interface:
+438	Normal	An interactive grid component (components/booking/seat-map.tsx) where each seat button reflects its 
+439	Normal	[Figure 3.2 — Seat Selection Interface]
+440	Normal	Admin Sidebar:
+441	Normal	A collapsible navigation sidebar with searchable menu items, section grouping with color-coded label
+442	Normal	Admin Analytics Dashboard:
+443	Normal	The overview tab was built with Recharts AreaChart components using SVG linearGradient fills, giving
+444	Normal	[Figure 3.3 — Admin Dashboard Overview]
+445	Normal	User Dashboard:
+446	Normal	The passenger dashboard (components/dashboard/dashboard-client.tsx) was redesigned from a long singl
+447	Normal	User Profile Page:
+448	Normal	The profile page (components/dashboard/profile-view.tsx) uses a tab-based layout with three sections
+449	Normal	Booking Detail Page:
+450	Normal	The booking detail page (app/dashboard/bookings/[id]/page.tsx) uses a ticket-style card layout with 
+451	Normal	Notification Bell Dropdown:
+452	Normal	The notification bell (components/dashboard/notification-bell.tsx) renders its dropdown via React.cr
+453	Normal	[Figure 3.4 — Payment Flow Diagram]
+455	Heading 1	CHAPTER IV
+456	Heading 2	TESTING
+457	Normal	Software testing is a critical phase of the development lifecycle that verifies that the system perf
+458	Heading 2	4.1 Testing Procedure
+459	Normal	The following testing methodologies were applied:
+460	Normal	Functional Testing (Black-Box):
+461	Normal	Test cases were written for each functional requirement, using defined test inputs to verify that th
+462	Normal	Integration Testing:
+463	Normal	Verified that the payment webhook flow (Stripe CLI forwarding → webhook handler → booking creation →
+464	Normal	Security Testing:
+465	Normal	Verified that unauthenticated users cannot access protected routes, that session tokens are correctl
+466	Normal	Usability Testing:
+467	Normal	The system was tested on Google Chrome, Firefox, and Safari browsers on desktop (1920×1080), tablet 
+468	Normal	Performance Testing:
+469	Normal	TypeScript compilation (npx tsc --noEmit) confirmed type safety across all modules. API response tim
+470	Heading 2	4.2 Testing Report
+471	Normal	Functional Test Cases
+473	Normal	Table 4.1 — Functional Test Cases
+475	Normal	Security Test Cases
+477	Normal	Table 4.2 — Security Test Cases
+479	Normal	Performance Test Results
+481	Normal	Table 4.3 — Performance Test Results
+484	Heading 1	CHAPTER V
+485	Heading 2	DOCUMENTATION
+486	Heading 2	5.1 Future Application
+487	Normal	The current implementation of the Online Bus Ticket Booking System establishes a solid foundation fo
+488	Normal	Mobile Application:
+489	Normal	Developing dedicated iOS and Android applications using React Native would significantly expand the 
+490	Normal	Real-Time GPS Tracking:
+491	Normal	Integrating real-time bus location tracking via GPS devices and WebSocket connections would allow pa
+492	Normal	AI-Powered Route Recommendations:
+493	Normal	Machine learning models could analyze historical booking patterns, seasonal demand, and user prefere
+494	Normal	Multi-Language Support (Khmer):
+495	Normal	Adding Khmer language support using Next.js's built-in internationalization (i18n) would make the sy
+496	Normal	Third-Party Travel Aggregator Integration:
+497	Normal	Connecting the system's API with popular travel aggregator platforms and OTA (Online Travel Agency) 
+498	Normal	Advanced Analytics with Machine Learning:
+499	Normal	Implementing predictive analytics to forecast peak booking periods, optimize seat pricing dynamicall
+500	Normal	Biometric Check-In:
+501	Normal	Integrating facial recognition or QR code scanning via a dedicated terminal app would replace the cu
+502	Normal	Carbon Footprint Tracking:
+503	Normal	Adding a sustainability feature that calculates and displays the CO2 savings of choosing bus travel 
+504	Normal	Dedicated Driver Mobile App:
+505	Normal	A lightweight companion app for drivers would allow them to view their schedule, report incidents, s
+506	Heading 2	5.2 Conclusion
+507	Normal	This research project successfully designed, developed, and implemented a comprehensive Online Bus T
+508	Normal	The system was built using modern, industry-standard technologies including Next.js 16 App Router, M
+509	Normal	The admin panel encompasses forty-plus management modules organized into thematic tabs within a coll
+510	Normal	All thirty-five functional test cases and ten security test cases passed successfully. TypeScript st
+511	Normal	The system demonstrates that a full-featured, production-ready bus booking platform can be built usi
+512	Heading 2	5.3 Bibliography
+513	Normal	Books
+514	List Number	Chacon, S., & Straub, B. (2014). Pro Git (2nd ed.). Apress.
+515	List Number	Fowler, M. (2002). Patterns of Enterprise Application Architecture. Addison-Wesley Professional.
+516	List Number	Pressman, R. S. (2014). Software Engineering: A Practitioner's Approach (8th ed.). McGraw-Hill Educa
+517	List Number	Sommerville, I. (2015). Software Engineering (10th ed.). Pearson Education Limited.
+518	List Number	Chinnathambi, K. (2018). Learning React: A Hands-On Guide to Building Web Applications Using React a
+519	Normal	Journals and Articles
+520	List Number	Gupta, A., & Gupta, R. (2022). A review of online ticket booking systems for public transport. Inter
+521	List Number	Sharma, P., & Kumar, V. (2021). Design and implementation of a bus reservation system using web tech
+522	List Number	Khan, S., & Ahmed, Z. (2023). MongoDB performance optimization strategies for high-volume transactio
+523	List Number	Patel, R. (2022). Serverless architecture patterns with Next.js and Vercel: A practical study. Journ
+524	Normal	Websites
+525	List Number	MongoDB, Inc. (2024). MongoDB Documentation. Retrieved from https://www.mongodb.com/docs/ [Accessed:
+526	List Number	Next.js by Vercel. (2024). Next.js Documentation — App Router. Retrieved from https://nextjs.org/doc
+527	List Number	NextAuth.js Contributors. (2024). NextAuth.js Documentation. Retrieved from https://next-auth.js.org
+528	List Number	Stripe, Inc. (2024). Stripe Developer Documentation. Retrieved from https://stripe.com/docs [Accesse
+529	List Number	Twilio Inc. (2024). Twilio SMS API Reference. Retrieved from https://www.twilio.com/docs/sms/api [Ac
+530	List Number	Vercel. (2024). Deploying Next.js Applications. Retrieved from https://vercel.com/docs [Accessed: 22
+531	List Number	Resend. (2024). Resend Email API Documentation. Retrieved from https://resend.com/docs [Accessed: 5 
+532	List Number	shadcn/ui. (2024). shadcn/ui Component Documentation. Retrieved from https://ui.shadcn.com [Accessed
+533	List Number	Recharts. (2024). Recharts — Redefined Chart Library. Retrieved from https://recharts.org [Accessed:
+535	Heading 1	REFERENCES
+536	List Paragraph	Chacon, S., & Straub, B. (2014). Pro Git (2nd ed.). Apress.
+537	List Paragraph	Chinnathambi, K. (2018). Learning React. Addison-Wesley Professional.
+538	List Paragraph	Fowler, M. (2002). Patterns of Enterprise Application Architecture. Addison-Wesley Professional.
+539	List Paragraph	Gupta, A., & Gupta, R. (2022). A review of online ticket booking systems for public transport. Inter
+540	List Paragraph	Khan, S., & Ahmed, Z. (2023). MongoDB performance optimization strategies for high-volume transactio
+541	List Paragraph	MongoDB, Inc. (2024). MongoDB documentation. Retrieved from https://www.mongodb.com/docs/ [Accessed:
+542	List Paragraph	Next.js by Vercel. (2024). Next.js documentation — app router. Retrieved from https://nextjs.org/doc
+543	List Paragraph	NextAuth.js Contributors. (2024). NextAuth.js documentation. Retrieved from https://next-auth.js.org
+544	List Paragraph	Patel, R. (2022). Serverless architecture patterns with Next.js and Vercel. Journal of Web Engineeri
+545	List Paragraph	Pressman, R. S. (2014). Software engineering: A practitioner's approach (8th ed.). McGraw-Hill Educa
+546	List Paragraph	Recharts. (2024). Recharts documentation. Retrieved from https://recharts.org [Accessed: 10 June 202
+547	List Paragraph	Resend. (2024). Resend email API documentation. Retrieved from https://resend.com/docs [Accessed: 5 
+548	List Paragraph	shadcn/ui. (2024). shadcn/ui component documentation. Retrieved from https://ui.shadcn.com [Accessed
+549	List Paragraph	Sharma, P., & Kumar, V. (2021). Design and implementation of a bus reservation system using web tech
+550	List Paragraph	Sommerville, I. (2015). Software engineering (10th ed.). Pearson Education Limited.
+551	List Paragraph	Stripe, Inc. (2024). Stripe developer documentation. Retrieved from https://stripe.com/docs [Accesse
+552	List Paragraph	Twilio Inc. (2024). Twilio SMS API reference. Retrieved from https://www.twilio.com/docs/sms/api [Ac
+553	List Paragraph	Vercel. (2024). Deploying Next.js applications. Retrieved from https://vercel.com/docs [Accessed: 22
