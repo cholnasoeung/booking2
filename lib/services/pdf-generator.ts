@@ -1,6 +1,6 @@
 import { jsPDF } from 'jspdf';
 import QRCode from 'qrcode';
-import type { AdminBookingSummary } from './queries';
+import type { AdminBookingSummary } from '../db/queries';
 
 interface TicketData {
   bookingId: string;

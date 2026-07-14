@@ -38,9 +38,10 @@ type Props = {
   busLabel?: string;
   open: boolean;
   onOpenChange: (o: boolean) => void;
+  onSuccess?: () => void;
 };
 
-export default function AdminAnnouncementDialog({ busId, busLabel, open, onOpenChange }: Props) {
+export default function AdminAnnouncementDialog({ busId, busLabel, open, onOpenChange, onSuccess }: Props) {
   const [preview, setPreview]       = useState<Preview | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [sending, setSending]       = useState(false);
@@ -80,6 +81,7 @@ export default function AdminAnnouncementDialog({ busId, busLabel, open, onOpenC
       setSentCount(json.sent ?? 0);
       setDone(true);
       toastSuccess(`Announcement sent to ${json.sent} passenger${json.sent !== 1 ? "s" : ""}`);
+      onSuccess?.();
     } catch {
       toastError("Request failed");
     } finally {

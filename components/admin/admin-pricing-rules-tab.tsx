@@ -36,7 +36,7 @@ const TYPE_CFG: Record<RuleType, { label: string; color: string; bg: string }> =
 
 const BUS_TYPES = ["bus_45", "mini_bus", "sleeper_30", "sleeper_40", "car"];
 
-const EMPTY: Partial<PricingRule> & { name: string; type: RuleType; scope: RuleScope; startDate: string; endDate: string; multiplier: string; priority: string; description: string; busType: string; routeId: string } = {
+const EMPTY: { name: string; type: RuleType; scope: RuleScope; startDate: string; endDate: string; multiplier: string; priority: string; description: string; busType: string; routeId: string } = {
   name: "", type: "seasonal", scope: "all", routeId: "", busType: "",
   startDate: "", endDate: "", multiplier: "1.2", priority: "1", description: "",
 };

@@ -206,7 +206,7 @@ function ScheduleFormFields({ form, onChange, onTripSelect, drivers, buses, trip
   const selectedTrip = trips.find((t) => t.id === form.busId) ?? null;
   const autoFilled   = selectedTrip !== null;
 
-  function handleTripChange(value: string) {
+  function handleTripChange(value: string | null) {
     if (!value || value === "_none") {
       onChange("busId", "");
       onTripSelect(null);

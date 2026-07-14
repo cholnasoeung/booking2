@@ -552,7 +552,7 @@ export default function RoutePageClient({ from, to, buses, routes, drivers }: Pr
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-600">Status</label>
-              <Select value={newStatus} onValueChange={setNewStatus}>
+              <Select value={newStatus} onValueChange={(v) => { if (v) setNewStatus(v); }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="scheduled">Scheduled</SelectItem>
@@ -594,7 +594,7 @@ export default function RoutePageClient({ from, to, buses, routes, drivers }: Pr
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <Select value={selectedDriverId} onValueChange={setSelectedDriverId}>
+            <Select value={selectedDriverId} onValueChange={(v) => setSelectedDriverId(v ?? "")}>
               <SelectTrigger><SelectValue placeholder="Select a driver…" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="">— Unassign —</SelectItem>

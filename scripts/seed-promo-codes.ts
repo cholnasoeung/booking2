@@ -1,5 +1,5 @@
-import { connectToDatabase } from "../lib/mongodb";
-import PromoCode from "../models/PromoCode";
+import { connectToDatabase } from "../lib/db/mongodb";
+import PromoCode from "../models/commerce/PromoCode";
 
 async function seedPromoCodes() {
   try {

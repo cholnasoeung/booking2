@@ -4,12 +4,13 @@ import RouteStopModel from "@/models/transport/RouteStop";
 
 export const runtime = "nodejs";
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getCurrentSession();
   if (session?.user?.role !== "admin") {
     return Response.json({ message: "Forbidden" }, { status: 403 });
   }
 
+  const { id } = await params;
   const body = await request.json().catch(() => ({}));
   const { name, city, arrivalOffset, order, isPickup, isDrop, address, landmark, lat, lng } = body;
 
@@ -27,19 +28,20 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   if (lat !== undefined)            update.lat           = lat ? Number(lat) : undefined;
   if (lng !== undefined)            update.lng           = lng ? Number(lng) : undefined;
 
-  const updated = await RouteStopModel.findByIdAndUpdate(params.id, update, { new: true }).lean() as any;
+  const updated = await RouteStopModel.findByIdAndUpdate(id, update, { new: true }).lean() as any;
   if (!updated) return Response.json({ message: "Not found." }, { status: 404 });
 
   return Response.json({ stop: { id: String(updated._id), ...updated } });
 }
 
-export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getCurrentSession();
   if (session?.user?.role !== "admin") {
     return Response.json({ message: "Forbidden" }, { status: 403 });
   }
+  const { id } = await params;
   await connectToDatabase();
-  const stop = await RouteStopModel.findByIdAndDelete(params.id).lean() as any;
+  const stop = await RouteStopModel.findByIdAndDelete(id).lean() as any;
   if (stop) {
     // Close the gap left by deleted stop
     await RouteStopModel.updateMany(

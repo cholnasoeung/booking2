@@ -5,12 +5,13 @@ import LeaveRequestModel from "@/models/hr/LeaveRequest";
 export const runtime = "nodejs";
 
 // Approve / Reject / Cancel with optional admin note
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getCurrentSession();
   if (session?.user?.role !== "admin") {
     return Response.json({ message: "Forbidden" }, { status: 403 });
   }
 
+  const { id } = await params;
   const body = await request.json().catch(() => ({}));
   const { status, adminNote } = body;
 
@@ -20,7 +21,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
   await connectToDatabase();
   const updated = await LeaveRequestModel.findByIdAndUpdate(
-    params.id,
+    id,
     {
       status,
       adminNote: adminNote?.trim() || undefined,
@@ -34,12 +35,13 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   return Response.json({ request: { id: String(updated._id), ...updated } });
 }
 
-export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getCurrentSession();
   if (session?.user?.role !== "admin") {
     return Response.json({ message: "Forbidden" }, { status: 403 });
   }
+  const { id } = await params;
   await connectToDatabase();
-  await LeaveRequestModel.findByIdAndDelete(params.id);
+  await LeaveRequestModel.findByIdAndDelete(id);
   return Response.json({ message: "Deleted." });
 }

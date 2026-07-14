@@ -4,12 +4,13 @@ import PricingRuleModel from "@/models/commerce/PricingRule";
 
 export const runtime = "nodejs";
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getCurrentSession();
   if (session?.user?.role !== "admin") {
     return Response.json({ message: "Forbidden" }, { status: 403 });
   }
 
+  const { id } = await params;
   const body = await request.json().catch(() => ({}));
   const update: Record<string, unknown> = {};
   if (body.name !== undefined)        update.name        = body.name.trim();
@@ -25,18 +26,19 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   if (body.description !== undefined) update.description = body.description?.trim() || undefined;
 
   await connectToDatabase();
-  const updated = await PricingRuleModel.findByIdAndUpdate(params.id, update, { new: true }).lean() as any;
+  const updated = await PricingRuleModel.findByIdAndUpdate(id, update, { new: true }).lean() as any;
   if (!updated) return Response.json({ message: "Not found." }, { status: 404 });
 
   return Response.json({ rule: { id: String(updated._id), ...updated } });
 }
 
-export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getCurrentSession();
   if (session?.user?.role !== "admin") {
     return Response.json({ message: "Forbidden" }, { status: 403 });
   }
+  const { id } = await params;
   await connectToDatabase();
-  await PricingRuleModel.findByIdAndDelete(params.id);
+  await PricingRuleModel.findByIdAndDelete(id);
   return Response.json({ message: "Deleted." });
 }

@@ -14,10 +14,10 @@ async function backfillSeatLayouts() {
     { default: BookingModel },
     { default: BusModel },
   ] = await Promise.all([
-    import("../lib/mongodb"),
-    import("../lib/seat-layout"),
-    import("../models/Booking"),
-    import("../models/Bus"),
+    import("../lib/db/mongodb"),
+    import("../lib/seat/seat-layout"),
+    import("../models/booking/Booking"),
+    import("../models/transport/Bus"),
   ]);
 
   await connectToDatabase();

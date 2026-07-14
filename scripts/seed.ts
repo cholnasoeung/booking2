@@ -22,13 +22,13 @@ async function seed() {
     { default: UserModel },
   ] = await Promise.all([
     import("bcryptjs"),
-    import("../lib/date"),
-    import("../lib/mongodb"),
-    import("../lib/seat-layout"),
-    import("../models/Booking"),
-    import("../models/Bus"),
-    import("../models/Route"),
-    import("../models/User"),
+    import("../lib/utils/date"),
+    import("../lib/db/mongodb"),
+    import("../lib/seat/seat-layout"),
+    import("../models/booking/Booking"),
+    import("../models/transport/Bus"),
+    import("../models/transport/Route"),
+    import("../models/user/User"),
   ]);
 
   await connectToDatabase();

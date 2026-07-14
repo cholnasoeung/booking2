@@ -5,13 +5,14 @@ import SupportConversationModel from "@/models/communication/SupportConversation
 export const runtime = "nodejs";
 
 // GET — full conversation with all messages
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getCurrentSession();
   if (session?.user?.role !== "admin") {
     return Response.json({ message: "Forbidden" }, { status: 403 });
   }
+  const { id } = await params;
   await connectToDatabase();
-  const convo = await SupportConversationModel.findById(params.id)
+  const convo = await SupportConversationModel.findById(id)
     .populate("user", "name email")
     .lean() as any;
 
@@ -36,12 +37,13 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
 }
 
 // POST — admin reply + optional status change
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getCurrentSession();
   if (session?.user?.role !== "admin") {
     return Response.json({ message: "Forbidden" }, { status: 403 });
   }
 
+  const { id } = await params;
   const body = await request.json().catch(() => ({}));
   const { text, status } = body;
 
@@ -55,7 +57,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
   if (status) update.status = status;
 
   const convo = await SupportConversationModel.findByIdAndUpdate(
-    params.id,
+    id,
     {
       ...update,
       ...(text?.trim() ? { $push: { messages: { sender: "admin", text: text.trim() } } } : {}),

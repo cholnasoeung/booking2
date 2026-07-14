@@ -41,6 +41,7 @@ type AdminBusDialogProps = {
   routes: RouteSummary[];
   bus?: BusSummary | null;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 };
 
 type BusFormState = {
@@ -70,6 +71,7 @@ export default function AdminBusDialog({
   routes,
   bus,
   onOpenChange,
+  onSuccess,
 }: AdminBusDialogProps) {
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
@@ -418,6 +420,7 @@ export default function AdminBusDialog({
       }
 
       onOpenChange(false);
+      onSuccess?.();
       router.refresh();
     } catch {
       setError("Unable to save the bus right now.");
