@@ -3,7 +3,7 @@ services:
     build: .
     restart: unless-stopped
     env_file:
-      - .env.production
+      - .env.local
     volumes:
       - uploads:/app/public/uploads
     expose:
