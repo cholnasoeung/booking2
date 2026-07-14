@@ -1,6 +1,34 @@
 node_modules
 .next
 .git
+.gitignore
+
 Dockerfile
 .dockerignore
-npm-debug.log
+docker-compose*.yml
+deploy
+nginx
+
+npm-debug.log*
+*.log
+
+.env
+.env.local
+.env.*.local
+
+# keep .env.production.example (template, no secrets) but drop real env files
+!.env.production.example
+
+.claude
+.vscode
+.idea
+
+*.md
+docs
+Research Paper
+paras_dump.txt
+research-paper.html
+tsconfig.tsbuildinfo
+
+coverage
+.DS_Store
