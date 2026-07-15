@@ -33,16 +33,16 @@ export default async function LostFoundPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/20 to-cyan-50/20 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50/20 to-violet-50/20 px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl space-y-6">
 
-          <Link href="/" className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-teal-600 transition-colors group">
+          <Link href="/" className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors group">
             <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
             Back to Home
           </Link>
 
           {/* Header */}
-          <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-teal-500 to-cyan-600 p-8 text-white shadow-xl shadow-teal-100">
+          <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-500 to-violet-600 p-8 text-white shadow-xl shadow-indigo-100">
             <div className="flex items-center gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20">
                 <PackageSearch className="h-7 w-7 text-white" />

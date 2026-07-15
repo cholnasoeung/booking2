@@ -23,13 +23,6 @@ const features = [
   },
 ];
 
-const stats = [
-  { value: "500+", label: "Buses Daily" },
-  { value: "50+", label: "Routes" },
-  { value: "10K+", label: "Happy Travelers" },
-  { value: "4.9", label: "User Rating" },
-];
-
 export default function AboutSection() {
   return (
     <section className="bg-slate-50 py-20">
@@ -64,18 +57,6 @@ export default function AboutSection() {
               </div>
             );
           })}
-        </div>
-
-        {/* Stats bar */}
-        <div className="mt-10 rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-            {stats.map(({ value, label }) => (
-              <div key={label} className="text-center">
-                <p className="text-3xl font-bold text-indigo-600">{value}</p>
-                <p className="mt-1 text-sm text-slate-500">{label}</p>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </section>

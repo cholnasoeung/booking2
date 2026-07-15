@@ -36,7 +36,7 @@ const CATEGORIES: { value: LFCategory; label: string; emoji: string }[] = [
 const STATUS_MAP: Record<LFStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {
   reported:     { label: "Reported",     color: "text-indigo-700",  bg: "bg-indigo-100  border border-indigo-300",  icon: PackageSearch },
   under_review: { label: "Under Review", color: "text-amber-700",   bg: "bg-amber-100   border border-amber-300",   icon: Clock         },
-  found:        { label: "Found",        color: "text-teal-700",    bg: "bg-teal-100    border border-teal-300",    icon: Search        },
+  found:        { label: "Found",        color: "text-blue-700",    bg: "bg-blue-100    border border-blue-300",    icon: Search        },
   returned:     { label: "Returned",     color: "text-emerald-700", bg: "bg-emerald-100 border border-emerald-300", icon: CheckCircle2  },
   not_found:    { label: "Not Found",    color: "text-red-700",     bg: "bg-red-100     border border-red-300",     icon: X             },
   closed:       { label: "Closed",       color: "text-slate-500",   bg: "bg-slate-100   border border-slate-200",   icon: X             },
@@ -129,7 +129,7 @@ export default function LostFoundClient({ initialRecords, userEmail = "", userNa
       {!showForm && (
         <Button
           onClick={() => setShowForm(true)}
-          className="w-full rounded-2xl bg-gradient-to-r from-teal-500 to-cyan-600 py-3 h-auto text-base font-bold text-white shadow-md shadow-teal-100 hover:from-teal-600 hover:to-cyan-700"
+          className="w-full rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 py-3 h-auto text-base font-bold text-white shadow-md shadow-indigo-500/30 hover:from-indigo-600 hover:to-violet-700"
         >
           <Plus className="h-5 w-5 mr-2" />
           Report a Lost Item
@@ -141,7 +141,7 @@ export default function LostFoundClient({ initialRecords, userEmail = "", userNa
         <div className="rounded-3xl border border-slate-200 bg-white shadow-xl p-6 space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-              <PackageSearch className="h-5 w-5 text-teal-500" />
+              <PackageSearch className="h-5 w-5 text-indigo-500" />
               New Lost Item Report
             </h2>
             <button onClick={() => setShowForm(false)} className="text-slate-400 hover:text-slate-700">
@@ -184,8 +184,8 @@ export default function LostFoundClient({ initialRecords, userEmail = "", userNa
           </div>
 
           {/* Item */}
-          <div className="rounded-2xl border border-teal-100 bg-teal-50/40 p-4 space-y-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-teal-600">Item Details</p>
+          <div className="rounded-2xl border border-indigo-100 bg-indigo-50/40 p-4 space-y-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-600">Item Details</p>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1">
                 <Label className="text-xs font-semibold text-slate-600">Item Name <span className="text-red-500">*</span></Label>
@@ -196,7 +196,7 @@ export default function LostFoundClient({ initialRecords, userEmail = "", userNa
                 <select
                   value={form.itemCategory}
                   onChange={set("itemCategory")}
-                  className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400/40"
+                  className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
                 >
                   <option value="">Select category…</option>
                   {CATEGORIES.map(c => (
@@ -223,7 +223,7 @@ export default function LostFoundClient({ initialRecords, userEmail = "", userNa
                   onChange={set("itemDescription")}
                   rows={3}
                   placeholder="Describe the item in detail — size, distinguishing marks, contents, etc."
-                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-teal-400/40"
+                  className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400/40"
                 />
               </div>
             </div>
@@ -243,7 +243,7 @@ export default function LostFoundClient({ initialRecords, userEmail = "", userNa
             <Button
               onClick={handleSubmit}
               disabled={isPending}
-              className="flex-1 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-semibold hover:from-teal-600 hover:to-cyan-700"
+              className="flex-1 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white font-semibold hover:from-indigo-600 hover:to-violet-700"
             >
               {isPending ? "Submitting…" : "Submit Report"}
             </Button>
@@ -262,7 +262,7 @@ export default function LostFoundClient({ initialRecords, userEmail = "", userNa
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-teal-200 border-t-teal-500" />
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-500" />
           </div>
         ) : records.length === 0 ? (
           <div className="rounded-2xl border-2 border-dashed border-slate-200 py-12 text-center">
@@ -280,7 +280,7 @@ export default function LostFoundClient({ initialRecords, userEmail = "", userNa
                 <div key={rec.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-lg">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-lg">
                         {cat?.emoji ?? "📦"}
                       </div>
                       <div className="min-w-0">
