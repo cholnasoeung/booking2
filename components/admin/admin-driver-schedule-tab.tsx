@@ -9,7 +9,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import {
   CalendarDays, Plus, MoreVertical, Pencil, Trash2, RefreshCw,
   ChevronLeft, ChevronRight, Users, Bus, Clock, AlertTriangle,
-  CheckCircle2, XCircle, PlayCircle, Calendar, Phone,
+  CheckCircle2, XCircle, PlayCircle, Calendar, Phone, Printer,
 } from "lucide-react";
 
 /* ─── constants ─────────────────────────────────────────────── */
@@ -206,6 +206,15 @@ function ScheduleFormFields({ form, onChange, onTripSelect, drivers, buses, trip
   const selectedTrip = trips.find((t) => t.id === form.busId) ?? null;
   const autoFilled   = selectedTrip !== null;
 
+  const tripSelectItems: Record<string, string> = { _none: "No specific trip" };
+  for (const t of trips) tripSelectItems[t.id] = t.label;
+
+  const driverSelectItems: Record<string, string> = {};
+  for (const d of drivers) driverSelectItems[d.id] = d.phone ? `${d.name} ${d.phone}` : d.name;
+
+  const busSelectItems: Record<string, string> = {};
+  for (const b of buses) busSelectItems[b.id] = b.reg ? `${b.name} (${b.reg})` : b.name;
+
   function handleTripChange(value: string | null) {
     if (!value || value === "_none") {
       onChange("busId", "");
@@ -227,8 +236,8 @@ function ScheduleFormFields({ form, onChange, onTripSelect, drivers, buses, trip
             Link to Trip
             <span className="text-slate-400 font-normal text-xs">(optional — auto-fills vehicle, date & shift)</span>
           </Label>
-          <Select value={form.busId || "_none"} onValueChange={handleTripChange}>
-            <SelectTrigger className={cn(autoFilled && "border-indigo-400 ring-1 ring-indigo-300")}>
+          <Select value={form.busId || "_none"} onValueChange={handleTripChange} items={tripSelectItems}>
+            <SelectTrigger className={cn("w-full", autoFilled && "border-indigo-400 ring-1 ring-indigo-300")}>
               <SelectValue placeholder="No specific trip" />
             </SelectTrigger>
             <SelectContent>
@@ -250,7 +259,7 @@ function ScheduleFormFields({ form, onChange, onTripSelect, drivers, buses, trip
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label>Driver *</Label>
-          <Select value={form.driverId} onValueChange={(v) => onChange("driverId", v ?? "")}>
+          <Select value={form.driverId} onValueChange={(v) => onChange("driverId", v ?? "")} items={driverSelectItems}>
             <SelectTrigger><SelectValue placeholder="Select driver" /></SelectTrigger>
             <SelectContent>
               {drivers.map((d) => (
@@ -269,7 +278,7 @@ function ScheduleFormFields({ form, onChange, onTripSelect, drivers, buses, trip
               <span className="text-[10px] font-semibold text-indigo-500 bg-indigo-50 border border-indigo-200 rounded-full px-1.5 py-0.5">auto</span>
             )}
           </Label>
-          <Select value={form.busDetailId} onValueChange={(v) => onChange("busDetailId", v ?? "")}>
+          <Select value={form.busDetailId} onValueChange={(v) => onChange("busDetailId", v ?? "")} items={busSelectItems}>
             <SelectTrigger className={cn(autoFilled && selectedTrip?.busDetailId && "border-indigo-300")}>
               <SelectValue placeholder="Select vehicle" />
             </SelectTrigger>
@@ -497,6 +506,14 @@ export default function AdminDriverScheduleTab() {
           <Button variant="outline" size="sm" onClick={() => fetchData(weekStart)} disabled={loading}>
             <RefreshCw className={cn("size-4", loading && "animate-spin")} />
           </Button>
+          <a
+            href={`/api/admin/driver-schedules/roster-pdf?week=${weekStart.toISOString().slice(0, 10)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants({ variant: "outline", size: "sm", className: "gap-1" })}
+          >
+            <Printer className="size-4" /> Print Roster
+          </a>
           <div className="flex rounded-lg border border-indigo-100 overflow-hidden">
             <Button variant="ghost" size="sm"
               className={cn("rounded-none h-9 px-3 text-xs font-medium", view === "week" && "bg-slate-100")}
