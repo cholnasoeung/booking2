@@ -24,15 +24,16 @@ export async function PATCH(
   const deductionTax       = body.deductionTax       !== undefined ? Number(body.deductionTax)       : existing.deductionTax;
   const deductionInsurance = body.deductionInsurance !== undefined ? Number(body.deductionInsurance) : existing.deductionInsurance;
   const deductionAdvance   = body.deductionAdvance   !== undefined ? Number(body.deductionAdvance)   : existing.deductionAdvance;
+  const deductionLeave     = body.deductionLeave     !== undefined ? Number(body.deductionLeave)     : existing.deductionLeave;
   const deductionOther     = body.deductionOther     !== undefined ? Number(body.deductionOther)     : existing.deductionOther;
   const bonus              = body.bonus              !== undefined ? Number(body.bonus)              : existing.bonus;
 
-  const totalDeductions = deductionTax + deductionInsurance + deductionAdvance + deductionOther;
+  const totalDeductions = deductionTax + deductionInsurance + deductionAdvance + deductionLeave + deductionOther;
   const grossPay        = existing.baseSalary + existing.totalAllowances + bonus;
   const netPay          = grossPay - totalDeductions;
 
   const update: Record<string, unknown> = {
-    deductionTax, deductionInsurance, deductionAdvance, deductionOther,
+    deductionTax, deductionInsurance, deductionAdvance, deductionLeave, deductionOther,
     totalDeductions, bonus, grossPay, netPay,
   };
 
@@ -58,6 +59,7 @@ export async function PATCH(
       deductionTax:       record.deductionTax,
       deductionInsurance: record.deductionInsurance,
       deductionAdvance:   record.deductionAdvance,
+      deductionLeave:     record.deductionLeave,
       deductionOther:     record.deductionOther,
       totalDeductions:    record.totalDeductions,
       bonus:              record.bonus,

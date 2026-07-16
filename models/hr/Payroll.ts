@@ -16,6 +16,7 @@ export interface IPayroll extends Document {
   deductionTax: number;
   deductionInsurance: number;
   deductionAdvance: number;
+  deductionLeave: number;
   deductionOther: number;
   totalDeductions: number;
   bonus: number;
@@ -43,6 +44,7 @@ const PayrollSchema = new Schema<IPayroll>(
     deductionTax:       { type: Number, default: 0 },
     deductionInsurance: { type: Number, default: 0 },
     deductionAdvance:   { type: Number, default: 0 },
+    deductionLeave:     { type: Number, default: 0 },
     deductionOther:     { type: Number, default: 0 },
     totalDeductions:    { type: Number, default: 0 },
     bonus:              { type: Number, default: 0 },

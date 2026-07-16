@@ -24,7 +24,7 @@ type PayrollRec = {
   id: string; employeeId: string; employeeName: string;
   employeeRole: string; employeeDept: string; month: string;
   baseSalary: number; totalAllowances: number;
-  deductionTax: number; deductionInsurance: number; deductionAdvance: number; deductionOther: number;
+  deductionTax: number; deductionInsurance: number; deductionAdvance: number; deductionLeave: number; deductionOther: number;
   totalDeductions: number; bonus: number; grossPay: number; netPay: number;
   status: string; paidAt: string | null; notes: string | null;
 };
@@ -38,9 +38,11 @@ type MonthlyPoint = { month: string; label: string; totalNet: number; count: num
 
 type DedForm = {
   deductionTax: string; deductionInsurance: string;
-  deductionAdvance: string; deductionOther: string;
+  deductionAdvance: string; deductionLeave: string; deductionOther: string;
   bonus: string; notes: string;
 };
+
+type LeaveSuggestion = { days: number; amount: number };
 
 const ROLE_COLORS: Record<string, string> = {
   driver: "text-cyan-400", mechanic: "text-orange-400", ticket_agent: "text-blue-400",
@@ -56,7 +58,7 @@ const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> =
 const fmt = (n: number) => `$${n.toLocaleString()}`;
 
 const emptyDedForm: DedForm = {
-  deductionTax: "0", deductionInsurance: "0", deductionAdvance: "0", deductionOther: "0",
+  deductionTax: "0", deductionInsurance: "0", deductionAdvance: "0", deductionLeave: "0", deductionOther: "0",
   bonus: "0", notes: "",
 };
 
@@ -86,6 +88,7 @@ export default function AdminPayrollTab() {
   const [editTarget,   setEditTarget]   = useState<PayrollRec | null>(null);
   const [dedForm,   setDedForm]   = useState<DedForm>(emptyDedForm);
   const [formErr,   setFormErr]   = useState("");
+  const [leaveSuggestion, setLeaveSuggestion] = useState<LeaveSuggestion | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const fetchData = useCallback(async () => {
@@ -116,11 +119,22 @@ export default function AdminPayrollTab() {
       deductionTax:       String(rec.deductionTax),
       deductionInsurance: String(rec.deductionInsurance),
       deductionAdvance:   String(rec.deductionAdvance),
+      deductionLeave:     String(rec.deductionLeave),
       deductionOther:     String(rec.deductionOther),
       bonus:              String(rec.bonus),
       notes:              rec.notes ?? "",
     });
     setFormErr(""); setEditOpen(true);
+    setLeaveSuggestion(null);
+    fetch(`/api/admin/payroll/leave-preview?employeeId=${rec.employeeId}&month=${rec.month}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data) setLeaveSuggestion(data); })
+      .catch(() => {});
+  };
+
+  const applyLeaveSuggestion = () => {
+    if (!leaveSuggestion) return;
+    setDedForm((p) => ({ ...p, deductionLeave: String(leaveSuggestion.amount) }));
   };
 
   const handleEditSave = () => {
@@ -132,6 +146,7 @@ export default function AdminPayrollTab() {
           deductionTax:       Number(dedForm.deductionTax),
           deductionInsurance: Number(dedForm.deductionInsurance),
           deductionAdvance:   Number(dedForm.deductionAdvance),
+          deductionLeave:     Number(dedForm.deductionLeave),
           deductionOther:     Number(dedForm.deductionOther),
           bonus:              Number(dedForm.bonus),
           notes:              dedForm.notes || undefined,
@@ -160,7 +175,7 @@ export default function AdminPayrollTab() {
 
   // Live deduction preview
   const liveDed = editTarget
-    ? (Number(dedForm.deductionTax) || 0) + (Number(dedForm.deductionInsurance) || 0) + (Number(dedForm.deductionAdvance) || 0) + (Number(dedForm.deductionOther) || 0)
+    ? (Number(dedForm.deductionTax) || 0) + (Number(dedForm.deductionInsurance) || 0) + (Number(dedForm.deductionAdvance) || 0) + (Number(dedForm.deductionLeave) || 0) + (Number(dedForm.deductionOther) || 0)
     : 0;
   const liveBonus  = Number(dedForm.bonus)  || 0;
   const liveGross  = editTarget ? (editTarget.baseSalary + editTarget.totalAllowances + liveBonus) : 0;
@@ -457,6 +472,28 @@ export default function AdminPayrollTab() {
                   <div className="space-y-1">
                     <Label className="text-slate-600 dark:text-slate-300 text-xs">Other ($)</Label>
                     <Input type="number" min="0" value={dedForm.deductionOther} onChange={setD("deductionOther")} className="bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-800 dark:text-white" />
+                  </div>
+                  <div className="space-y-1 col-span-2">
+                    <Label className="text-slate-600 dark:text-slate-300 text-xs">Unpaid Leave ($)</Label>
+                    <Input type="number" min="0" value={dedForm.deductionLeave} onChange={setD("deductionLeave")} className="bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-800 dark:text-white" />
+                    {leaveSuggestion && (
+                      <div className="flex items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-slate-400">
+                        <span>
+                          {leaveSuggestion.days > 0
+                            ? `${leaveSuggestion.days} approved unpaid day${leaveSuggestion.days !== 1 ? "s" : ""} this month → suggested ${fmt(leaveSuggestion.amount)} (base ÷ 26/day)`
+                            : "No approved unpaid leave found for this month."}
+                        </span>
+                        {leaveSuggestion.days > 0 && (
+                          <button
+                            type="button"
+                            onClick={applyLeaveSuggestion}
+                            className="shrink-0 font-semibold text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300"
+                          >
+                            Use
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

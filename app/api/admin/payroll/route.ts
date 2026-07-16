@@ -2,6 +2,7 @@ import { getCurrentSession } from "@/lib/auth";
 import { connectToDatabase } from "@/lib/db/mongodb";
 import PayrollModel from "@/models/hr/Payroll";
 import EmployeeModel from "@/models/hr/Employee";
+import { calcLeaveDeduction } from "@/lib/services/leave-deduction";
 
 export const runtime = "nodejs";
 
@@ -64,6 +65,7 @@ export async function GET(request: Request) {
       deductionTax:       r.deductionTax,
       deductionInsurance: r.deductionInsurance,
       deductionAdvance:   r.deductionAdvance,
+      deductionLeave:     r.deductionLeave,
       deductionOther:     r.deductionOther,
       totalDeductions:    r.totalDeductions,
       bonus:              r.bonus,
@@ -118,6 +120,11 @@ export async function POST(request: Request) {
     const totalAllowances = emp.allowanceTransport + emp.allowanceMeal + emp.allowanceHousing + emp.allowanceOther;
     const grossPay        = emp.baseSalary + totalAllowances;
 
+    // Auto-deduct approved unpaid leave taken this month, at baseSalary / 26 per day.
+    const { amount: deductionLeave } = await calcLeaveDeduction(String(emp._id), "employee", month, emp.baseSalary);
+    const totalDeductions = deductionLeave;
+    const netPay = grossPay - totalDeductions;
+
     await PayrollModel.create({
       employeeId:         emp._id,
       month,
@@ -132,11 +139,12 @@ export async function POST(request: Request) {
       deductionTax:       0,
       deductionInsurance: 0,
       deductionAdvance:   0,
+      deductionLeave,
       deductionOther:     0,
-      totalDeductions:    0,
+      totalDeductions,
       bonus:              0,
       grossPay,
-      netPay:             grossPay,
+      netPay,
       status:             "draft",
     });
     created++;
