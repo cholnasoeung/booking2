@@ -45,6 +45,13 @@ const credentialsProvider = CredentialsProvider({
   },
 });
 
+// Deliberately NOT process.env.NODE_ENV — Next.js's production build inlines
+// that comparison into a build-time constant (always `true` in a `next build`
+// image), so it can never reflect the deployment's actual runtime protocol.
+// NEXTAUTH_URL is a plain runtime env var read fresh on container start, so
+// this correctly tracks whether the site is actually served over HTTPS.
+const isHttps = (process.env.NEXTAUTH_URL ?? "").startsWith("https://");
+
 const sharedOptions: Omit<NextAuthOptions, "providers"> = {
   pages: { signIn: "/login" },
   session: {
@@ -58,7 +65,7 @@ const sharedOptions: Omit<NextAuthOptions, "providers"> = {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: process.env.NODE_ENV === "production",
+        secure: isHttps,
       },
     },
   },
