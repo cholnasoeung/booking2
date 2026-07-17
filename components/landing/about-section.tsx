@@ -33,7 +33,7 @@ export default function AboutSection() {
             Why choose us
           </p>
           <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">
-            Why Choose CambodiaBus?
+            Why Choose TKBus?
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-base text-slate-500">
             Cambodia&apos;s most trusted bus ticket booking platform with thousands of happy travelers.

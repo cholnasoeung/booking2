@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 
 const DEFAULT_SETTINGS = {
   general: {
-    businessName: "BusBooking",
+    businessName: "TKBus",
     contactEmail: "",
     supportPhone: "",
     currency: "USD",

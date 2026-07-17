@@ -59,7 +59,7 @@ const SettingsSchema = new Schema<ISettings>(
   {
     logoUrl: { type: String, default: "" },
     general: {
-      businessName: { type: String, default: "BusBooking" },
+      businessName: { type: String, default: "TKBus" },
       contactEmail: { type: String, default: "" },
       supportPhone: { type: String, default: "" },
       currency: { type: String, default: "USD" },

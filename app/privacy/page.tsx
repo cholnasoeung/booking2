@@ -76,10 +76,10 @@ export default function PrivacyPage() {
               <p className="mt-2">
                 Questions about this Privacy Policy can be sent to{" "}
                 <a
-                  href="mailto:support@cambodiabus.kh"
+                  href="mailto:support@tkbus.kh"
                   className="font-medium text-indigo-600 hover:text-indigo-700"
                 >
-                  support@cambodiabus.kh
+                  support@tkbus.kh
                 </a>
                 .
               </p>

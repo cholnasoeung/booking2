@@ -13,8 +13,8 @@ const channels = [
   {
     icon: Mail,
     title: "Email",
-    value: "support@cambodiabus.kh",
-    href: "mailto:support@cambodiabus.kh",
+    value: "support@tkbus.kh",
+    href: "mailto:support@tkbus.kh",
   },
   {
     icon: MapPin,

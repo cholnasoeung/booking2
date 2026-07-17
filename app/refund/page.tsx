@@ -73,10 +73,10 @@ export default function RefundPage() {
                 </a>{" "}
                 or{" "}
                 <a
-                  href="mailto:support@cambodiabus.kh"
+                  href="mailto:support@tkbus.kh"
                   className="font-medium text-indigo-600 hover:text-indigo-700"
                 >
-                  support@cambodiabus.kh
+                  support@tkbus.kh
                 </a>
                 .
               </p>

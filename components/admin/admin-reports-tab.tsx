@@ -215,7 +215,7 @@ export default function AdminReportsTab() {
         if (s) {
           const g = s.general as Record<string, string> | undefined;
           setCompany({
-            name:    g?.businessName ?? "BusBooking",
+            name:    g?.businessName ?? "TKBus",
             logoUrl: (s.logoUrl as string | null) ?? null,
             email:   g?.contactEmail ?? "",
             phone:   g?.supportPhone ?? "",
@@ -348,7 +348,7 @@ export default function AdminReportsTab() {
           }
 
           st(WHITE); fl("bold"); fs(14);
-          doc.text(company?.name ?? "BusBooking", M + logoSize + 4, 15);
+          doc.text(company?.name ?? "TKBus", M + logoSize + 4, 15);
           if (company?.email || company?.phone) {
             fl("normal"); fs(7.5); st("#93c5fd");
             doc.text(
@@ -368,7 +368,7 @@ export default function AdminReportsTab() {
         } else {
           sf(NAVY); doc.rect(0, 0, PW, 9, "F");
           st(WHITE); fl("bold"); fs(7.5);
-          doc.text(company?.name ?? "BusBooking", M, 6);
+          doc.text(company?.name ?? "TKBus", M, 6);
           fl("normal");
           doc.text(`${fmtDate(startDate)} – ${fmtDate(endDate)}`, PW - M, 6, { align: "right" });
           y = 15;
@@ -455,7 +455,7 @@ export default function AdminReportsTab() {
         sd(BORDER); ln(0.3);
         doc.line(M, fy - 2, PW - M, fy - 2);
         st(MUTED); fl("normal"); fs(7);
-        doc.text(`${company?.name ?? "BusBooking"} — Confidential`, M, fy + 2);
+        doc.text(`${company?.name ?? "TKBus"} — Confidential`, M, fy + 2);
         doc.text(`Page ${pageNum} of ${total}`, PW / 2, fy + 2, { align: "center" });
         doc.text(`${fmtDate(startDate)} – ${fmtDate(endDate)}`, PW - M, fy + 2, { align: "right" });
       };
@@ -787,7 +787,7 @@ export default function AdminReportsTab() {
                   }
                 </div>
                 <div>
-                  <p className="text-base font-bold text-white">{company?.name ?? "BusBooking"}</p>
+                  <p className="text-base font-bold text-white">{company?.name ?? "TKBus"}</p>
                   {(company?.email || company?.phone) && (
                     <p className="text-xs text-blue-200 mt-0.5">
                       {company?.email}{company?.email && company?.phone ? " · " : ""}{company?.phone}
