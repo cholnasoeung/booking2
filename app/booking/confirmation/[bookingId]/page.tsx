@@ -13,6 +13,7 @@ import {
   User,
   ArrowRight,
   Bus,
+  CreditCard,
 } from "lucide-react";
 
 import { requireUser } from "@/lib/auth";
@@ -20,6 +21,7 @@ import {
   formatBusType,
   formatCurrency,
   formatDateTime,
+  formatPaymentMethod,
   formatSeatList,
   formatTravelDate,
 } from "@/lib/utils/formatters";
@@ -75,6 +77,19 @@ export default async function ConfirmationPage({ params }: ConfirmationPageProps
                 : "This booking has been cancelled."}
             </p>
           </div>
+
+          {/* Pay-on-boarding reminder */}
+          {isConfirmed && booking.paymentStatus === "pending" && (
+            <div className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5">
+              <Clock className="h-5 w-5 shrink-0 text-amber-500" />
+              <div>
+                <p className="text-sm font-semibold text-amber-800">Payment due at boarding</p>
+                <p className="mt-0.5 text-xs text-amber-700">
+                  Your seat is reserved — pay the driver in cash ({formatCurrency(booking.totalPrice)}) when you board.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* ── Ticket card ── */}
           <div className="overflow-hidden rounded-3xl bg-white shadow-2xl shadow-indigo-200/40">
@@ -168,6 +183,9 @@ export default async function ConfirmationPage({ params }: ConfirmationPageProps
                 </InfoTile>
                 <InfoTile icon={<User className="h-4 w-4" />} label="Passenger">
                   {booking.user?.name ?? user.name}
+                </InfoTile>
+                <InfoTile icon={<CreditCard className="h-4 w-4" />} label="Payment Method">
+                  {formatPaymentMethod(booking.paymentMethod)}
                 </InfoTile>
               </div>
 

@@ -4,6 +4,8 @@ import PassengerDetailsForm from "@/components/booking/passenger-details-form";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireUser } from "@/lib/auth";
+import { connectToDatabase } from "@/lib/db/mongodb";
+import SettingsModel from "@/models/system/Settings";
 import { formatBusType, formatCurrency, formatTravelDate } from "@/lib/utils/formatters";
 import { getFirstSearchParam } from "@/lib/utils/validation";
 import type { Passenger } from "@/types/passenger";
@@ -25,7 +27,8 @@ async function initiateBookingPayment(
   pricePerSeat: number,
   promoCode?: string,
   boardingStop?: string,
-  droppingStop?: string
+  droppingStop?: string,
+  payOnBoarding?: boolean
 ) {
   "use server";
 
@@ -34,7 +37,7 @@ async function initiateBookingPayment(
   // Call the payment initiation function directly (no HTTP — avoids session/cookie issues)
   try {
     const { initiatePayment } = await import("@/lib/payment/initiate-payment");
-    const result = await initiatePayment({ userId, busId, seats: selectedSeats, passengers, totalPrice, promoCode, boardingStop, droppingStop });
+    const result = await initiatePayment({ userId, busId, seats: selectedSeats, passengers, totalPrice, promoCode, boardingStop, droppingStop, payOnBoarding });
 
     if ("error" in result) {
       return { success: false, error: result.error };
@@ -69,6 +72,10 @@ export default async function PassengersPage({ params, searchParams }: Passenger
 
   const bus = (await getBusSummary(busId)) ?? notFound();
 
+  await connectToDatabase();
+  const settings = (await SettingsModel.findOne().select("payment.activeGateway").lean()) as any;
+  const gatewayConfigured = (settings?.payment?.activeGateway ?? "none") !== "none";
+
   // Get selected seats from query params
   const rawSeats = query.seats;
   if (!rawSeats) {
@@ -95,7 +102,7 @@ export default async function PassengersPage({ params, searchParams }: Passenger
     redirect(`/book/${busId}?error=seats_unavailable`);
   }
 
-  async function handlePassengerSubmit(passengers: Passenger[], promoCode?: string) {
+  async function handlePassengerSubmit(passengers: Passenger[], promoCode?: string, payOnBoarding?: boolean) {
     "use server";
 
     return await initiateBookingPayment(
@@ -106,7 +113,8 @@ export default async function PassengersPage({ params, searchParams }: Passenger
       bus.pricePerSeat,
       promoCode,
       boardingStop,
-      droppingStop
+      droppingStop,
+      payOnBoarding
     );
   }
 
@@ -132,6 +140,7 @@ export default async function PassengersPage({ params, searchParams }: Passenger
               onSubmit={handlePassengerSubmit}
               boardingStop={boardingStop}
               droppingStop={droppingStop}
+              gatewayConfigured={gatewayConfigured}
             />
           </div>
 

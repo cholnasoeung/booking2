@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ArrowRight, CheckCircle2, User, Mail, Phone, Calendar, Users, Tag, X, Check, Loader2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, User, Mail, Phone, Calendar, Users, Tag, X, Check, Loader2, CreditCard, Banknote } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,12 +23,13 @@ type PassengerDetailsFormProps = {
   selectedSeats: string[];
   seatLabels?: string[];
   pricePerSeat?: number;
-  onSubmit: (passengers: Passenger[], promoCode?: string) => Promise<{ success: boolean; bookingId?: string; redirectUrl?: string; abaFormData?: Record<string, string> | null; error?: string }>;
+  onSubmit: (passengers: Passenger[], promoCode?: string, payOnBoarding?: boolean) => Promise<{ success: boolean; bookingId?: string; redirectUrl?: string; abaFormData?: Record<string, string> | null; error?: string }>;
   onCancel?: () => void;
   isSubmitting?: boolean;
   busId?: string;
   boardingStop?: string;
   droppingStop?: string;
+  gatewayConfigured?: boolean;
 };
 
 const GENDER_OPTIONS = [
@@ -54,6 +55,7 @@ export default function PassengerDetailsForm({
   busId = "",
   boardingStop,
   droppingStop,
+  gatewayConfigured = false,
 }: PassengerDetailsFormProps) {
   const { data: session } = useSession();
   const router = useRouter();
@@ -65,6 +67,9 @@ export default function PassengerDetailsForm({
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitError, setSubmitError] = useState("");
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
+  const [paymentChoice, setPaymentChoice] = useState<"online" | "boarding">(
+    gatewayConfigured ? "online" : "boarding"
+  );
 
   // Promo code state
   const [promoCode, setPromoCode] = useState("");
@@ -239,7 +244,7 @@ export default function PassengerDetailsForm({
     setIsFormSubmitting(true);
 
     try {
-      const result = await onSubmit(passengers, appliedPromo || undefined);
+      const result = await onSubmit(passengers, appliedPromo || undefined, paymentChoice === "boarding");
 
       if (!result.success) {
         setSubmitError(result.error ?? "Something went wrong. Please try again.");
@@ -414,6 +419,63 @@ export default function PassengerDetailsForm({
           </CardContent>
         </Card>
 
+        {/* Payment Method */}
+        <Card className="border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <CreditCard className="h-4 w-4 text-indigo-600" />
+              <h3 className="font-semibold text-indigo-900">Payment Method</h3>
+            </div>
+
+            {gatewayConfigured ? (
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => setPaymentChoice("online")}
+                  className={cn(
+                    "flex items-start gap-3 rounded-xl border-2 p-3.5 text-left transition-colors",
+                    paymentChoice === "online"
+                      ? "border-indigo-500 bg-white shadow-sm"
+                      : "border-slate-200 bg-white/60 hover:border-indigo-200"
+                  )}
+                >
+                  <CreditCard className={cn("h-5 w-5 shrink-0 mt-0.5", paymentChoice === "online" ? "text-indigo-600" : "text-slate-400")} />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">Pay Online Now</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Card or ABA PayWay — instant confirmation</p>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentChoice("boarding")}
+                  className={cn(
+                    "flex items-start gap-3 rounded-xl border-2 p-3.5 text-left transition-colors",
+                    paymentChoice === "boarding"
+                      ? "border-indigo-500 bg-white shadow-sm"
+                      : "border-slate-200 bg-white/60 hover:border-indigo-200"
+                  )}
+                >
+                  <Banknote className={cn("h-5 w-5 shrink-0 mt-0.5", paymentChoice === "boarding" ? "text-indigo-600" : "text-slate-400")} />
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900">Pay on Boarding</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Pay the driver in cash when you board</p>
+                  </div>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-start gap-3 rounded-xl border border-indigo-200 bg-white/70 p-3.5">
+                <Banknote className="h-5 w-5 shrink-0 mt-0.5 text-indigo-600" />
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Pay on Boarding</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Online payment isn&apos;t available right now — your seat will be reserved, and you&apos;ll pay the driver in cash when you board.
+                  </p>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Passengers List */}
         <div className="space-y-4">
           {passengers.map((passenger, index) => (
@@ -497,6 +559,11 @@ export default function PassengerDetailsForm({
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Processing...
+                </>
+              ) : paymentChoice === "boarding" ? (
+                <>
+                  Confirm Booking
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </>
               ) : (
                 <>

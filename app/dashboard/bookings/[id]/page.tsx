@@ -13,7 +13,7 @@ import { getBookingSummaryById } from "@/lib/db/queries";
 import { isValidObjectId } from "@/lib/utils/validation";
 import {
   formatBusType, formatCurrency, formatDateTime,
-  formatSeatList, formatTravelDate,
+  formatPaymentMethod, formatSeatList, formatTravelDate,
 } from "@/lib/utils/formatters";
 
 type Props = { params: Promise<{ id: string }> };
@@ -160,11 +160,14 @@ export default async function BookingDetailPage({ params }: Props) {
                     <div className="text-right">
                       <p className="text-xs text-slate-400">Payment</p>
                       <div className="mt-1 flex items-center justify-end gap-1.5">
-                        {isConfirmed
+                        {booking.paymentStatus === "paid"
                           ? <><CheckCircle2 className="h-4 w-4 text-emerald-500" /><span className="text-sm font-semibold text-emerald-600">Paid</span></>
-                          : <><XCircle className="h-4 w-4 text-red-400" /><span className="text-sm font-semibold text-red-500">Refunded</span></>
+                          : booking.paymentStatus === "pending"
+                          ? <><Clock className="h-4 w-4 text-amber-500" /><span className="text-sm font-semibold text-amber-600">Pending</span></>
+                          : <><XCircle className="h-4 w-4 text-red-400" /><span className="text-sm font-semibold text-red-500">{booking.paymentStatus === "failed" ? "Failed" : "Refunded"}</span></>
                         }
                       </div>
+                      <p className="mt-0.5 text-xs text-slate-400">{formatPaymentMethod(booking.paymentMethod)}</p>
                     </div>
                   </div>
                 </div>

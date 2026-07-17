@@ -9,6 +9,41 @@ import { sendCancellationSMS } from "@/lib/services/sms-service";
 
 export const runtime = "nodejs";
 
+// Admin-only: mark a pending payment (e.g. "pay on boarding") as collected.
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getCurrentSession();
+  if (session?.user?.role !== "admin") {
+    return Response.json({ message: "Forbidden" }, { status: 403 });
+  }
+
+  const { id } = await params;
+  if (!isValidObjectId(id)) {
+    return Response.json({ message: "Invalid booking id." }, { status: 400 });
+  }
+
+  const body = await request.json().catch(() => ({}));
+  if (body?.paymentStatus !== "paid") {
+    return Response.json({ message: "Only marking a booking as paid is supported here." }, { status: 400 });
+  }
+
+  await connectToDatabase();
+
+  const booking = await BookingModel.findByIdAndUpdate(
+    id,
+    { $set: { paymentStatus: "paid" } },
+    { new: true }
+  ).lean() as any;
+
+  if (!booking) {
+    return Response.json({ message: "Booking not found." }, { status: 404 });
+  }
+
+  return Response.json({ message: "Payment marked as collected.", paymentStatus: booking.paymentStatus });
+}
+
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }

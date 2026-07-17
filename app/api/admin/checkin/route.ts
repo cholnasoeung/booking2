@@ -98,8 +98,12 @@ export async function GET(request: Request) {
         checkedInAt: bk.checkedInAt ?? null,
         checkedInBy: bk.checkedInBy ?? null,
         boardingStop: bk.boardingStop ?? null,
+        droppingStop: bk.droppingStop ?? null,
         bookingSource: bk.metadata?.bookingSource ?? "web",
         createdAt: bk.createdAt,
+        totalPrice: bk.totalPrice,
+        paymentMethod: bk.metadata?.paymentMethod ?? null,
+        paymentStatus: bk.paymentStatus ?? "paid",
       };
     }),
   });

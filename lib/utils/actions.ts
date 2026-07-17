@@ -112,7 +112,10 @@ export async function createBooking(input: CreateBookingInput) {
     }
   }
 
-  // Create booking
+  // Create booking. No online payment was collected here (this path only
+  // runs when no payment gateway is active, or the customer chose to pay
+  // the driver directly) — the seat is reserved, but payment is still owed
+  // at boarding, so this must NOT be marked "paid".
   const booking = await BookingModel.create({
     bus: bus.id,
     user: input.userId,
@@ -125,6 +128,8 @@ export async function createBooking(input: CreateBookingInput) {
       boardingStop: input.boardingStop,
       droppingStop: input.droppingStop,
       status: "confirmed",
+      paymentStatus: "pending",
+      metadata: { paymentMethod: "pay_on_boarding", bookingSource: "web" },
     });
 
   // Update bus with new booked seats

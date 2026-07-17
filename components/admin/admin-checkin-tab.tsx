@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft, BusFront, Calendar, CheckCheck, CheckCircle2, ChevronDown,
-  Clock, LogIn, Mail, MapPin, Phone, RefreshCw, Search, Ticket,
+  Clock, CreditCard, LogIn, Mail, MapPin, Phone, RefreshCw, Search, Ticket,
   UserCheck, UserX, Users, XCircle,
 } from "lucide-react";
+import { formatPaymentMethod } from "@/lib/utils/formatters";
 
 // ─── types ────────────────────────────────────────────────────────────────────
 type CheckInStatus = "pending" | "checked-in" | "boarded" | "no-show";
@@ -47,6 +48,8 @@ interface Passenger {
   bookingSource: string;
   createdAt: string;
   totalPrice?: number;
+  paymentMethod?: string | null;
+  paymentStatus?: string;
   passengerDetails?: PassengerDetail[];
 }
 
@@ -158,6 +161,11 @@ function PassengerRow({
               {p.bookingSource === "counter" && (
                 <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">Counter</span>
               )}
+              {p.paymentStatus === "pending" && (
+                <span className="flex items-center gap-1 text-[10px] font-semibold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">
+                  <CreditCard className="w-2.5 h-2.5" /> Pay on Boarding
+                </span>
+              )}
             </div>
             <div className="flex flex-wrap gap-2 text-xs text-slate-400 mt-0.5">
               <span className="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-[11px] text-slate-700 font-semibold">
@@ -225,6 +233,18 @@ function PassengerRow({
               {p.totalPrice !== undefined && (
                 <DTile label="Total Fare" value={`$${p.totalPrice.toFixed(2)}`} />
               )}
+              <DTile
+                label="Payment"
+                icon={CreditCard}
+                value={
+                  <span className="flex items-center gap-1.5">
+                    {formatPaymentMethod(p.paymentMethod)}
+                    {p.paymentStatus === "pending" && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">Pending</span>
+                    )}
+                  </span>
+                }
+              />
             </div>
           </div>
 

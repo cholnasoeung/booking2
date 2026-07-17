@@ -17,6 +17,7 @@ type InitiatePaymentInput = {
   promoCode?: string;
   boardingStop?: string;
   droppingStop?: string;
+  payOnBoarding?: boolean;
 };
 
 type InitiatePaymentResult =
@@ -26,7 +27,7 @@ type InitiatePaymentResult =
   | { error: string };
 
 export async function initiatePayment(input: InitiatePaymentInput): Promise<InitiatePaymentResult> {
-  const { userId, busId, seats, passengers, totalPrice, promoCode, boardingStop, droppingStop } = input;
+  const { userId, busId, seats, passengers, totalPrice, promoCode, boardingStop, droppingStop, payOnBoarding } = input;
 
   await connectToDatabase();
 
@@ -37,6 +38,10 @@ export async function initiatePayment(input: InitiatePaymentInput): Promise<Init
   if (unavailable.length > 0) {
     return { error: `Seats ${unavailable.join(", ")} are no longer available` };
   }
+
+  // Customer explicitly chose to pay the driver at boarding — skip any
+  // configured online gateway and fall through to the direct-booking path.
+  if (payOnBoarding) return { gateway: "none" };
 
   const settings = await SettingsModel.findOne().lean() as any;
   const gateway: string = settings?.payment?.activeGateway ?? "none";

@@ -44,3 +44,17 @@ export function formatSeatList(seats: Array<string | number>) {
 export function formatBusType(value: string) {
   return isBusType(value) ? getBusTypeLabel(value) : "Bus";
 }
+
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  stripe: "Card (Stripe)",
+  abaPayway: "ABA PayWay",
+  aba: "ABA Pay",
+  wing: "Wing",
+  cash: "Cash",
+  pay_on_boarding: "Pay on Boarding",
+};
+
+export function formatPaymentMethod(value?: string | null) {
+  if (!value) return "Online Payment";
+  return PAYMENT_METHOD_LABELS[value] ?? value;
+}

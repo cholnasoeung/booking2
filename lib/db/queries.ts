@@ -93,6 +93,8 @@ type BookingRecord = {
   passengers?: PassengerRecord[];
   totalPrice: number;
   status: BookingStatus;
+  paymentStatus?: string;
+  metadata?: { paymentMethod?: string };
   cancelledAt?: Date;
   cancellationReason?: string;
   createdAt: Date;
@@ -204,6 +206,8 @@ export type BookingSummary = {
   bus: BusSummary | null;
   boardingStop?: string;
   droppingStop?: string;
+  paymentMethod: string | null;
+  paymentStatus: string;
 };
 
 export type PassengerSummary = {
@@ -384,6 +388,8 @@ function serializeBooking(
     })),
     boardingStop: booking.boardingStop,
     droppingStop: booking.droppingStop,
+    paymentMethod: booking.metadata?.paymentMethod ?? null,
+    paymentStatus: booking.paymentStatus ?? "paid",
     cancelledAt: booking.cancelledAt?.toISOString() ?? null,
     cancellationReason: booking.cancellationReason ?? null,
   };
@@ -570,6 +576,8 @@ export async function getUserBookings(userId: string) {
       totalPrice: summary.totalPrice,
       createdAt: summary.createdAt,
       bus: summary.bus,
+      paymentMethod: summary.paymentMethod,
+      paymentStatus: summary.paymentStatus,
     } satisfies BookingSummary;
   });
 }

@@ -39,6 +39,7 @@ import {
   formatBusType,
   formatCurrency,
   formatDateTime,
+  formatPaymentMethod,
   formatSeatList,
   formatTravelDate,
 } from "@/lib/utils/formatters";
@@ -238,12 +239,13 @@ export default function AdminBookingsManager({
       formatSeatList(b.seats),
       b.seats.length,
       b.totalPrice,
+      formatPaymentMethod(b.paymentMethod),
       b.createdAt,
       b.cancelledAt ?? "",
     ]);
     const headers = [
       "BookingID","Status","CustomerName","CustomerEmail","Route","TravelDate",
-      "DepartureTime","Seats","SeatCount","TotalPrice","BookedAt","CancelledAt",
+      "DepartureTime","Seats","SeatCount","TotalPrice","PaymentMethod","BookedAt","CancelledAt",
     ];
     const escape = (v: any) => {
       const s = String(v ?? "").replace(/"/g, '""');
@@ -285,6 +287,31 @@ export default function AdminBookingsManager({
       toastError("Unable to cancel the booking right now.");
     } finally {
       setBookingCancelPending(false);
+    }
+  }
+
+  const [markPaidPending, setMarkPaidPending] = useState(false);
+
+  async function markBookingPaid(bookingId: string) {
+    setMarkPaidPending(true);
+    try {
+      const response = await fetch(`/api/bookings/${bookingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentStatus: "paid" }),
+      });
+      const payload = (await response.json()) as { message?: string };
+      if (!response.ok) {
+        toastError(payload.message || "Unable to update payment status.");
+        return;
+      }
+      toastSuccess("Payment marked as collected.");
+      setSelectedBooking((cur) => cur && cur.id === bookingId ? { ...cur, paymentStatus: "paid" } : cur);
+      router.refresh();
+    } catch {
+      toastError("Unable to update payment status right now.");
+    } finally {
+      setMarkPaidPending(false);
     }
   }
 
@@ -521,6 +548,10 @@ export default function AdminBookingsManager({
                             <StatusBadge status={booking.status} />
                             <span className="text-sm font-bold text-slate-900">{formatCurrency(booking.totalPrice)}</span>
                           </div>
+                          <div>
+                            <p className="text-[11px] text-slate-400">Payment</p>
+                            <p className="text-sm font-semibold text-slate-700 truncate">{formatPaymentMethod(booking.paymentMethod)}</p>
+                          </div>
                         </div>
 
                         {/* Actions */}
@@ -576,11 +607,12 @@ export default function AdminBookingsManager({
 
               <div className="px-6 py-5 space-y-5">
                 {/* ── Summary row ── */}
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
                   {[
-                    { label: "Total Paid",  value: formatCurrency(selectedBooking.totalPrice), cls: "bg-indigo-50 text-indigo-700" },
+                    { label: selectedBooking.paymentStatus === "pending" ? "Amount Due" : "Total Paid", value: formatCurrency(selectedBooking.totalPrice), cls: "bg-indigo-50 text-indigo-700" },
                     { label: "Seats",       value: `${selectedBooking.seats.length} seat${selectedBooking.seats.length !== 1 ? "s" : ""}`, cls: "bg-slate-100 text-slate-700" },
                     { label: "Booked On",   value: formatDateTime(selectedBooking.createdAt),   cls: "bg-slate-100 text-slate-700" },
+                    { label: "Payment",     value: formatPaymentMethod(selectedBooking.paymentMethod), cls: selectedBooking.paymentStatus === "pending" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700" },
                     { label: "Status",      value: selectedBooking.status === "confirmed" ? "Active" : "Cancelled", cls: selectedBooking.status === "confirmed" ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600" },
                   ].map((item) => (
                     <div key={item.label} className={`rounded-xl px-3 py-2.5 ${item.cls}`}>
@@ -683,6 +715,14 @@ export default function AdminBookingsManager({
                   <Ticket className="size-4" />View Ticket
                 </Link>
                 <div className="flex items-center gap-2">
+                  {selectedBooking.status === "confirmed" && selectedBooking.paymentStatus === "pending" && (
+                    <Button type="button"
+                      className="h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm disabled:opacity-40"
+                      disabled={markPaidPending}
+                      onClick={() => markBookingPaid(selectedBooking.id)}>
+                      <CheckCircle2 className="size-4" />{markPaidPending ? "Updating…" : "Mark as Paid"}
+                    </Button>
+                  )}
                   <Button type="button" variant="outline"
                     className="h-9 rounded-xl border-red-200 text-red-700 hover:bg-red-50 text-sm disabled:opacity-40"
                     disabled={selectedBooking.status !== "confirmed"}
