@@ -1,4 +1,4 @@
-export const APP_NAME = "TKBus";
+export const APP_NAME = "TKbus";
 
 export const BUS_TYPES = ["bus_45", "mini_bus", "car", "sleeper_30", "sleeper_40"] as const;
 

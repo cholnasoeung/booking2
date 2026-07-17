@@ -35,7 +35,7 @@ export default function AboutPage() {
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15">
               <MapPin className="h-7 w-7" />
             </div>
-            <h1 className="text-3xl font-bold sm:text-4xl">About TKBus</h1>
+            <h1 className="text-3xl font-bold sm:text-4xl">About TKbus</h1>
             <p className="mx-auto mt-3 max-w-xl text-white/85">
               Cambodia&apos;s trusted platform for booking intercity bus tickets online — connecting
               travelers to destinations across the country with a simple, secure booking experience.
@@ -47,7 +47,7 @@ export default function AboutPage() {
           <h2 className="text-2xl font-bold text-slate-900">Our Mission</h2>
           <p className="mt-3 leading-relaxed text-slate-600">
             Intercity bus travel in Cambodia has traditionally meant phone calls, physical ticket
-            counters, and uncertainty about seat availability. TKBus was built to replace that
+            counters, and uncertainty about seat availability. TKbus was built to replace that
             with a single online platform where passengers can search routes, see real-time seat
             availability, and book a confirmed seat in minutes — while giving bus operators the tools
             to manage their fleet, drivers, and bookings from one dashboard.

@@ -67,7 +67,7 @@ type SettingsData = {
 };
 
 const DEFAULT: SettingsData = {
-  general: { businessName: "TKBus", contactEmail: "", supportPhone: "", currency: "USD", timezone: "UTC" },
+  general: { businessName: "TKbus", contactEmail: "", supportPhone: "", currency: "USD", timezone: "UTC" },
   booking: { maxSeatsPerBooking: 6, bookingCutoffMinutes: 30, cancellationWindowHours: 24, autoConfirm: true, requirePaymentUpfront: false },
   notifications: { emailEnabled: true, smsEnabled: false, adminAlertEmail: "", notifyOnNewBooking: true, notifyOnCancellation: true },
   payment: {

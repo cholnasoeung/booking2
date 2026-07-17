@@ -14,7 +14,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-lg font-semibold text-slate-900">1. Acceptance of Terms</h2>
               <p className="mt-2">
-                By creating an account or booking a ticket through TKBus, you agree to these
+                By creating an account or booking a ticket through TKbus, you agree to these
                 Terms of Service. If you do not agree, please do not use the platform.
               </p>
             </section>
@@ -53,7 +53,7 @@ export default function TermsPage() {
               <h2 className="text-lg font-semibold text-slate-900">5. Passenger Conduct</h2>
               <p className="mt-2">
                 Passengers must arrive at the boarding point on time and comply with the operating bus
-                company&apos;s onboard rules. TKBus is not liable for missed departures due to
+                company&apos;s onboard rules. TKbus is not liable for missed departures due to
                 late arrival.
               </p>
             </section>
@@ -61,7 +61,7 @@ export default function TermsPage() {
             <section>
               <h2 className="text-lg font-semibold text-slate-900">6. Limitation of Liability</h2>
               <p className="mt-2">
-                TKBus facilitates bookings between passengers and bus operators. We are not
+                TKbus facilitates bookings between passengers and bus operators. We are not
                 responsible for delays, route changes, or service issues caused by the operating bus
                 company, though we will assist with rebooking or refunds where our policies apply.
               </p>

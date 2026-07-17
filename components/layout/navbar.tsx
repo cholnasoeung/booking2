@@ -17,10 +17,10 @@ const getSiteBranding = cache(async () => {
     const s = await SettingsModel.findOne({}, { logoUrl: 1, "general.businessName": 1 }).lean() as any;
     return {
       logoUrl:      (s?.logoUrl as string | undefined) || null,
-      businessName: (s?.general?.businessName as string | undefined) || "TKBus",
+      businessName: (s?.general?.businessName as string | undefined) || "TKbus",
     };
   } catch {
-    return { logoUrl: null, businessName: "TKBus" };
+    return { logoUrl: null, businessName: "TKbus" };
   }
 });
 

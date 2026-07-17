@@ -26,17 +26,17 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="bg-white py-20">
+    <section className="bg-black py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-12 text-center">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-indigo-600">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-red-500">
             Simple process
           </p>
-          <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">
+          <h2 className="text-3xl font-bold text-white sm:text-4xl">
             How It Works
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-base text-slate-500">
+          <p className="mx-auto mt-3 max-w-md text-base text-zinc-400">
             Book your bus ticket in 4 simple steps.
           </p>
         </div>
@@ -46,17 +46,17 @@ export default function HowItWorks() {
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <div key={step.title} className="rounded-xl border border-slate-100 bg-slate-50 p-5">
+              <div key={step.title} className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
                 <div className="mb-4 flex items-center gap-3">
-                  <span className="flex size-7 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
+                  <span className="flex size-7 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white">
                     {index + 1}
                   </span>
-                  <div className="flex size-9 items-center justify-center rounded-lg bg-white border border-slate-200">
-                    <Icon className="size-5 text-indigo-600" />
+                  <div className="flex size-9 items-center justify-center rounded-lg bg-zinc-800 border border-zinc-700">
+                    <Icon className="size-5 text-red-500" />
                   </div>
                 </div>
-                <h3 className="font-semibold text-slate-900">{step.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{step.description}</p>
+                <h3 className="font-semibold text-white">{step.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-zinc-400">{step.description}</p>
               </div>
             );
           })}
@@ -66,7 +66,7 @@ export default function HowItWorks() {
         <div className="mt-10 text-center">
           <Link
             href="/search"
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+            className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700"
           >
             Start Booking Now
           </Link>

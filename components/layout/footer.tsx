@@ -27,7 +27,7 @@ export default function Footer() {
               </div>
               <div>
                 <h3 className="font-heading text-xl font-bold text-slate-900">
-                  TKBus
+                  TKbus
                 </h3>
                 <p className="text-xs text-slate-600">Your Journey Starts Here</p>
               </div>
@@ -93,7 +93,7 @@ export default function Footer() {
         <div className="mt-12 border-t border-slate-200 pt-8">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <p className="text-sm text-slate-600">
-              © {new Date().getFullYear()} TKBus. All rights reserved.
+              © {new Date().getFullYear()} TKbus. All rights reserved.
             </p>
             <div className="flex items-center gap-4 text-sm">
               <Link href="/privacy" className="text-slate-600 hover:text-indigo-600">

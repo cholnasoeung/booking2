@@ -13,7 +13,7 @@ export default function BlogPage() {
         </div>
         <h1 className="mt-6 text-2xl font-bold text-slate-900">Blog coming soon</h1>
         <p className="mt-2 max-w-md text-sm text-slate-500">
-          We&apos;re working on travel guides, route updates, and news from TKBus. Check back
+          We&apos;re working on travel guides, route updates, and news from TKbus. Check back
           soon.
         </p>
         <Link

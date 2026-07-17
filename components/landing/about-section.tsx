@@ -25,17 +25,17 @@ const features = [
 
 export default function AboutSection() {
   return (
-    <section className="bg-slate-50 py-20">
+    <section className="bg-black py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-12 text-center">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-indigo-600">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-red-500">
             Why choose us
           </p>
-          <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl">
-            Why Choose TKBus?
+          <h2 className="text-3xl font-bold text-white sm:text-4xl">
+            Why Choose TKbus?
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-base text-slate-500">
+          <p className="mx-auto mt-3 max-w-xl text-base text-zinc-400">
             Cambodia&apos;s most trusted bus ticket booking platform with thousands of happy travelers.
           </p>
         </div>
@@ -47,13 +47,13 @@ export default function AboutSection() {
             return (
               <div
                 key={feature.title}
-                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="rounded-xl border border-zinc-800 bg-zinc-900 p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-red-600/50 hover:shadow-md hover:shadow-red-900/20"
               >
-                <div className="flex size-10 items-center justify-center rounded-lg bg-indigo-50">
-                  <Icon className="size-5 text-indigo-600" />
+                <div className="flex size-10 items-center justify-center rounded-lg bg-red-500/10">
+                  <Icon className="size-5 text-red-500" />
                 </div>
-                <h3 className="mt-3 font-semibold text-slate-900">{feature.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{feature.description}</p>
+                <h3 className="mt-3 font-semibold text-white">{feature.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-zinc-400">{feature.description}</p>
               </div>
             );
           })}

@@ -44,7 +44,7 @@ export async function generateTicketPDF(data: TicketData): Promise<Buffer> {
 
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text('TKBus', pageWidth / 2, 35, { align: 'center' });
+  doc.text('TKbus', pageWidth / 2, 35, { align: 'center' });
 
   yPosition = 60;
 

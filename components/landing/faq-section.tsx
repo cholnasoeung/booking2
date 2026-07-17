@@ -39,17 +39,17 @@ export default function FAQSection() {
   }
 
   return (
-    <section className="bg-slate-50 py-16 sm:py-20 lg:py-24">
+    <section className="bg-black py-16 sm:py-20 lg:py-24">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mx-auto max-w-2xl text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-red-500">
             <HelpCircle className="h-6 w-6" />
           </div>
-          <h2 className="font-heading text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+          <h2 className="font-heading text-3xl font-bold tracking-tight text-white sm:text-4xl">
             Frequently Asked Questions
           </h2>
-          <p className="mt-4 text-lg text-slate-600">
+          <p className="mt-4 text-lg text-zinc-400">
             Find answers to common questions about booking buses with us
           </p>
         </div>
@@ -59,19 +59,19 @@ export default function FAQSection() {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+              className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 shadow-sm"
             >
               <button
                 type="button"
                 onClick={() => toggle(index)}
-                className="flex w-full items-center justify-between p-6 text-left transition hover:bg-slate-50"
+                className="flex w-full items-center justify-between p-6 text-left transition hover:bg-zinc-800/50"
               >
-                <span className="font-semibold text-slate-900">{faq.question}</span>
+                <span className="font-semibold text-white">{faq.question}</span>
                 <span className="ml-4 flex-shrink-0">
                   {openIndex === index ? (
-                    <ChevronUp className="h-5 w-5 text-indigo-600" />
+                    <ChevronUp className="h-5 w-5 text-red-500" />
                   ) : (
-                    <ChevronDown className="h-5 w-5 text-slate-400" />
+                    <ChevronDown className="h-5 w-5 text-zinc-500" />
                   )}
                 </span>
               </button>
@@ -82,7 +82,7 @@ export default function FAQSection() {
                 )}
               >
                 <div className="px-6 pb-6">
-                  <p className="text-slate-600 leading-relaxed">{faq.answer}</p>
+                  <p className="text-zinc-400 leading-relaxed">{faq.answer}</p>
                 </div>
               </div>
             </div>
@@ -91,9 +91,9 @@ export default function FAQSection() {
 
         {/* Contact CTA */}
         <div className="mt-12 text-center">
-          <p className="text-slate-600">
+          <p className="text-zinc-400">
             Still have questions?{" "}
-            <a href="/contact" className="font-semibold text-indigo-600 hover:text-indigo-700">
+            <a href="/contact" className="font-semibold text-red-500 hover:text-red-400">
               Contact our support team
             </a>
           </p>

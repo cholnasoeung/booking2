@@ -22,7 +22,51 @@ export default function Home() {
       <PromoBanner />
       <main>
         {/* ── HERO ─────────────────────────────────────────────────────── */}
-        <section className="relative overflow-hidden bg-gradient-to-r from-red-700 to-orange-500 pb-32 pt-14 text-white">
+        <section className="relative overflow-hidden bg-black pb-32 pt-14 text-white">
+          {/* Red glow accents */}
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-red-700/30 blur-3xl" />
+            <div className="absolute top-1/3 right-0 h-[28rem] w-[28rem] rounded-full bg-red-600/20 blur-3xl" />
+            <div className="absolute inset-0 bg-gradient-to-b from-red-950/40 via-black to-black" />
+          </div>
+
+          {/* Bus, van & car silhouette — sits in the gap between the subtitle and the search card */}
+          <div className="pointer-events-none absolute inset-0 hidden lg:block">
+            <svg
+              viewBox="0 0 640 276"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="white"
+              preserveAspectRatio="xMinYMax meet"
+              className="absolute bottom-0 left-[34%] h-[186px] w-auto opacity-[0.16]"
+            >
+              {/* Road line */}
+              <rect x="10" y="144" width="610" height="4" rx="2" />
+
+              {/* ── Coach bus ── */}
+              <rect x="40" y="50" width="160" height="26" rx="6" />
+              <rect x="40" y="70" width="190" height="55" rx="8" />
+              <rect x="212" y="96" width="10" height="16" rx="2" />
+              <circle cx="75" cy="128" r="14" />
+              <circle cx="195" cy="128" r="14" />
+              <circle cx="75" cy="128" r="5" fill="black" fillOpacity="0.35" />
+              <circle cx="195" cy="128" r="5" fill="black" fillOpacity="0.35" />
+
+              {/* ── Van ── */}
+              <polygon points="260,90 260,135 350,135 350,100 330,90" />
+              <circle cx="280" cy="128" r="11" />
+              <circle cx="335" cy="128" r="11" />
+              <circle cx="280" cy="128" r="4" fill="black" fillOpacity="0.35" />
+              <circle cx="335" cy="128" r="4" fill="black" fillOpacity="0.35" />
+
+              {/* ── Sedan car ── */}
+              <path d="M395,135 L395,120 Q400,105 420,102 L440,90 Q456,85 476,90 L496,102 Q511,105 516,120 L516,135 Z" />
+              <circle cx="416" cy="132" r="10" />
+              <circle cx="491" cy="132" r="10" />
+              <circle cx="416" cy="132" r="3.5" fill="black" fillOpacity="0.35" />
+              <circle cx="491" cy="132" r="3.5" fill="black" fillOpacity="0.35" />
+            </svg>
+          </div>
+
           {/* Angkor Wat + palm silhouette */}
           <div className="pointer-events-none absolute inset-0 flex items-end justify-end">
             <svg
@@ -30,7 +74,7 @@ export default function Home() {
               xmlns="http://www.w3.org/2000/svg"
               fill="white"
               preserveAspectRatio="xMaxYMax meet"
-              className="h-full w-auto max-w-[62%] opacity-[0.13]"
+              className="h-full w-auto max-w-[62%] opacity-[0.08]"
             >
               {/* Ground platform */}
               <rect x="0" y="280" width="540" height="30" />
@@ -108,23 +152,23 @@ export default function Home() {
         </section>
 
         {/* ── SEARCH FORM — floats over hero bottom ─────────────────────── */}
-        <div className="relative z-10 -mt-20 pb-14">
+        <div className="relative z-10 -mt-20 bg-black pb-14">
           <div className="mx-auto max-w-5xl px-5 sm:px-8">
             <HeroSearchForm />
           </div>
         </div>
 
         {/* ── POPULAR ROUTES ────────────────────────────────────────────── */}
-        <section className="bg-slate-50 py-20">
+        <section className="bg-black py-20">
           <div className="mx-auto max-w-7xl px-5 sm:px-8">
             <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-red-500">
                   Popular trips
                 </p>
-                <h2 className="text-3xl font-bold text-slate-900">Routes people love</h2>
+                <h2 className="text-3xl font-bold text-white">Routes people love</h2>
               </div>
-              <p className="max-w-xs text-sm text-slate-500">
+              <p className="max-w-xs text-sm text-zinc-400">
                 Most-booked journeys — ready to search in one click.
               </p>
             </div>
@@ -134,30 +178,30 @@ export default function Home() {
                 <Link
                   key={`${route.from}-${route.to}`}
                   href={`/search?from=${encodeURIComponent(route.from)}&to=${encodeURIComponent(route.to)}&date=${tomorrow}&passengers=1`}
-                  className="group rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-red-200 hover:shadow-md"
+                  className="group rounded-xl border border-zinc-800 bg-zinc-900 p-5 shadow-sm transition hover:border-red-600/50 hover:shadow-md hover:shadow-red-900/20"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex-1">
-                      <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-slate-400">From</p>
-                      <p className="mt-0.5 text-lg font-bold text-slate-900">{route.from}</p>
+                      <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-zinc-500">From</p>
+                      <p className="mt-0.5 text-lg font-bold text-white">{route.from}</p>
                     </div>
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 transition group-hover:border-red-200 group-hover:bg-red-50">
-                      <ArrowRight className="size-4 text-slate-400 transition group-hover:text-red-500" />
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800 transition group-hover:border-red-600/50 group-hover:bg-red-500/10">
+                      <ArrowRight className="size-4 text-zinc-500 transition group-hover:text-red-500" />
                     </div>
                     <div className="flex-1 text-right">
-                      <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-slate-400">To</p>
-                      <p className="mt-0.5 text-lg font-bold text-slate-900">{route.to}</p>
+                      <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-zinc-500">To</p>
+                      <p className="mt-0.5 text-lg font-bold text-white">{route.to}</p>
                     </div>
                   </div>
 
-                  <div className="my-4 h-px bg-slate-100" />
+                  <div className="my-4 h-px bg-zinc-800" />
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                    <div className="flex items-center gap-1.5 text-xs text-zinc-500">
                       <Clock className="size-3.5" />
                       {route.duration}
                     </div>
-                    <p className="text-sm font-semibold text-slate-700">
+                    <p className="text-sm font-semibold text-zinc-300">
                       from <span className="text-red-500">{formatCurrency(route.fare)}</span>
                     </p>
                   </div>
@@ -168,7 +212,7 @@ export default function Home() {
         </section>
 
         {/* ── FEATURE STRIP ─────────────────────────────────────────────── */}
-        <section className="border-y border-slate-100 bg-white py-14">
+        <section className="border-y border-zinc-800 bg-black py-14">
           <div className="mx-auto max-w-7xl px-5">
             <div className="grid gap-6 sm:grid-cols-3">
               {[
@@ -188,13 +232,13 @@ export default function Home() {
                   body: "Your payment details are encrypted and never stored on our servers.",
                 },
               ].map(({ icon: Icon, title, body }) => (
-                <div key={title} className="flex gap-4 rounded-xl border border-slate-100 p-5">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-red-50">
+                <div key={title} className="flex gap-4 rounded-xl border border-zinc-800 p-5">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-red-500/10">
                     <Icon className="size-5 text-red-500" />
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-900">{title}</p>
-                    <p className="mt-1 text-sm leading-relaxed text-slate-500">{body}</p>
+                    <p className="font-semibold text-white">{title}</p>
+                    <p className="mt-1 text-sm leading-relaxed text-zinc-400">{body}</p>
                   </div>
                 </div>
               ))}
