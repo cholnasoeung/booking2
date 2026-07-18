@@ -95,6 +95,12 @@ function EarningFormFields({ form, onChange, drivers, buses }: {
 }) {
   const { regular, overtime, total } = calcEarnings(form);
 
+  const driverSelectItems: Record<string, string> = {};
+  for (const d of drivers) driverSelectItems[d.id] = d.name;
+
+  const busSelectItems: Record<string, string> = { _none: "Not specified" };
+  for (const b of buses) busSelectItems[b.id] = b.reg ? `${b.name} (${b.reg})` : b.name;
+
   return (
     <div className="space-y-5">
       {/* Driver + Vehicle */}
@@ -104,6 +110,7 @@ function EarningFormFields({ form, onChange, drivers, buses }: {
           <Select
             value={form.driverId}
             onValueChange={(v) => onChange("driverId", v ?? "")}
+            items={driverSelectItems}
           >
             <SelectTrigger><SelectValue placeholder="Select driver" /></SelectTrigger>
             <SelectContent>
@@ -116,6 +123,7 @@ function EarningFormFields({ form, onChange, drivers, buses }: {
           <Select
             value={form.busDetailId}
             onValueChange={(v) => onChange("busDetailId", v ?? "")}
+            items={busSelectItems}
           >
             <SelectTrigger><SelectValue placeholder="Not specified" /></SelectTrigger>
             <SelectContent>
@@ -449,7 +457,11 @@ export default function AdminDriverEarningsTab() {
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-indigo-100/80 bg-white p-4 shadow-sm">
         <ListFilter className="size-4 text-slate-400 shrink-0" />
 
-        <Select value={filterDriver} onValueChange={(v) => { setFD(v == null || v === "_all" ? "" : v); setPage(1); }}>
+        <Select
+          value={filterDriver || "_all"}
+          onValueChange={(v) => { setFD(v == null || v === "_all" ? "" : v); setPage(1); }}
+          items={{ _all: "All drivers", ...Object.fromEntries(drivers.map((d) => [d.id, d.name])) }}
+        >
           <SelectTrigger className="h-9 w-44">
             <SelectValue placeholder="All drivers" />
           </SelectTrigger>
