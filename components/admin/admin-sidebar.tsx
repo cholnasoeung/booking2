@@ -99,12 +99,20 @@ export default function AdminSidebar({ userName, userEmail }: AdminSidebarProps)
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  // Only "Main" is expanded by default
-  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
-    new Set(navSections.slice(1).map((s) => s.title))
-  );
-  const [search, setSearch] = useState("");
   const activeTab = searchParams?.get("tab") ?? "overview";
+  // "Main" is always expanded by default, plus whichever section contains
+  // the currently active tab (so a direct link/refresh reveals where you are)
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(() => {
+    const activeSectionTitle = navSections.find((s) =>
+      s.items.some((item) => (item.href.split("?tab=")[1] || "overview") === activeTab)
+    )?.title;
+    return new Set(
+      navSections
+        .filter((s) => s.title !== "Main" && s.title !== activeSectionTitle)
+        .map((s) => s.title)
+    );
+  });
+  const [search, setSearch] = useState("");
 
   const userInitials = userName
     .split(" ")
