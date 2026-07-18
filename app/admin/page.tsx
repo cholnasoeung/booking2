@@ -27,22 +27,22 @@ export default async function AdminPage() {
       <div className="flex-1 flex flex-col lg:ml-64">
 
         {/* Header */}
-        <header className="sticky top-0 z-10 bg-[#1a2035] border-b border-white/[0.08] shadow-lg">
+        <header className="sticky top-0 z-10 bg-white border-b border-slate-200 shadow-sm">
           <div className="px-5 py-3 lg:px-8">
             <div className="flex items-center justify-between gap-4">
 
               {/* Left: Identity */}
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.1] border border-white/[0.12]">
-                  <LayoutDashboard className="size-4 text-slate-300" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 border border-slate-200">
+                  <LayoutDashboard className="size-4 text-slate-600" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h1 className="text-base font-bold text-white tracking-tight leading-none">
+                    <h1 className="text-base font-bold text-slate-900 tracking-tight leading-none">
                       Control Center
                     </h1>
-                    <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/[0.08] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-slate-300">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-slate-600">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       Live
                     </span>
                   </div>
@@ -57,20 +57,20 @@ export default async function AdminPage() {
                 <NotificationBell />
 
                 {/* Divider */}
-                <div className="hidden md:block h-7 w-px bg-white/[0.1]" />
+                <div className="hidden md:block h-7 w-px bg-slate-200" />
 
                 {/* Stat chips */}
                 <div className="hidden md:flex items-center gap-1.5">
                   {stats.map(({ label, value, icon: Icon }) => (
                     <div
                       key={label}
-                      className="flex items-center gap-2 rounded-xl border border-white/[0.1] bg-white/[0.05] hover:bg-white/[0.09] px-3 py-2 transition-colors"
+                      className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 px-3 py-2 transition-colors"
                     >
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-white/[0.08]">
-                        <Icon className="size-3.5 text-slate-400" />
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-slate-100">
+                        <Icon className="size-3.5 text-slate-500" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-white leading-none">{value}</p>
+                        <p className="text-sm font-bold text-slate-900 leading-none">{value}</p>
                         <p className="text-[9px] text-slate-500 uppercase tracking-widest mt-0.5 leading-none">{label}</p>
                       </div>
                     </div>
@@ -80,9 +80,9 @@ export default async function AdminPage() {
                 {/* Mobile: compact chips */}
                 <div className="flex md:hidden items-center gap-1.5">
                   {stats.map(({ label, value, icon: Icon }) => (
-                    <div key={label} className="flex items-center gap-1 rounded-lg border border-white/[0.1] bg-white/[0.07] px-2 py-1">
-                      <Icon className="size-3 text-slate-400" />
-                      <span className="text-xs font-bold text-white">{value}</span>
+                    <div key={label} className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1">
+                      <Icon className="size-3 text-slate-500" />
+                      <span className="text-xs font-bold text-slate-900">{value}</span>
                     </div>
                   ))}
                 </div>
@@ -92,7 +92,7 @@ export default async function AdminPage() {
         </header>
 
         {/* Main Content */}
-        <div className="flex-1 bg-[#eef1fb] px-6 py-6 lg:px-8 lg:py-8">
+        <div className="flex-1 bg-[#eef1fb] px-5 py-4 lg:px-6 lg:py-5">
           <AdminPanel {...snapshot} />
         </div>
       </div>
