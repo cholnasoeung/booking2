@@ -26,9 +26,9 @@ export default function HeroSearchForm() {
   return (
     <div>
       {/* Horizontal search bar */}
-      <div className="flex flex-col overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 shadow-xl shadow-red-950/20 sm:flex-row">
+      <div className="flex flex-col overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-800 shadow-xl shadow-red-950/20 sm:flex-row">
         {/* FROM */}
-        <div className="flex flex-1 items-center gap-3 border-b border-zinc-800 px-5 py-4 sm:border-b-0 sm:border-r">
+        <div className="flex flex-1 items-center gap-3 border-b border-zinc-700 px-5 py-4 sm:border-b-0 sm:border-r">
           <BusFront className="size-5 shrink-0 text-zinc-500" />
           <div className="flex-1 min-w-0">
             <p className="text-xs text-zinc-500">From</p>
@@ -45,7 +45,7 @@ export default function HeroSearchForm() {
         </div>
 
         {/* SWAP */}
-        <div className="hidden sm:flex w-14 shrink-0 items-center justify-center border-r border-zinc-800">
+        <div className="hidden sm:flex w-14 shrink-0 items-center justify-center border-r border-zinc-700">
           <button
             type="button"
             onClick={swapCities}
@@ -56,7 +56,7 @@ export default function HeroSearchForm() {
         </div>
 
         {/* TO */}
-        <div className="flex flex-1 items-center gap-3 border-b border-zinc-800 px-5 py-4 sm:border-b-0 sm:border-r">
+        <div className="flex flex-1 items-center gap-3 border-b border-zinc-700 px-5 py-4 sm:border-b-0 sm:border-r">
           <BusFront className="size-5 shrink-0 text-zinc-500" />
           <div className="flex-1 min-w-0">
             <p className="text-xs text-zinc-500">To</p>
@@ -73,7 +73,7 @@ export default function HeroSearchForm() {
         </div>
 
         {/* DATE */}
-        <div className="flex flex-1 items-center gap-3 border-b border-zinc-800 px-5 py-4 sm:border-b-0 sm:border-r">
+        <div className="flex flex-1 items-center gap-3 border-b border-zinc-700 px-5 py-4 sm:border-b-0 sm:border-r">
           <Calendar className="size-5 shrink-0 text-zinc-500" />
           <div className="flex-1 min-w-0">
             <p className="text-xs text-zinc-500">Date of journey</p>

@@ -26,7 +26,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="bg-black py-20">
+    <section className="bg-zinc-900 py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-12 text-center">
@@ -46,12 +46,12 @@ export default function HowItWorks() {
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <div key={step.title} className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
+              <div key={step.title} className="rounded-xl border border-zinc-700 bg-zinc-800 p-5">
                 <div className="mb-4 flex items-center gap-3">
                   <span className="flex size-7 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white">
                     {index + 1}
                   </span>
-                  <div className="flex size-9 items-center justify-center rounded-lg bg-zinc-800 border border-zinc-700">
+                  <div className="flex size-9 items-center justify-center rounded-lg bg-zinc-700 border border-zinc-600">
                     <Icon className="size-5 text-red-500" />
                   </div>
                 </div>

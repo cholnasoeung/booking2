@@ -39,7 +39,7 @@ export default function FAQSection() {
   }
 
   return (
-    <section className="bg-black py-16 sm:py-20 lg:py-24">
+    <section className="bg-zinc-900 py-16 sm:py-20 lg:py-24">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mx-auto max-w-2xl text-center">
@@ -59,7 +59,7 @@ export default function FAQSection() {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 shadow-sm"
+              className="overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-800 shadow-sm"
             >
               <button
                 type="button"

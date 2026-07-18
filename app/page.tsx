@@ -22,12 +22,12 @@ export default function Home() {
       <PromoBanner />
       <main>
         {/* ── HERO ─────────────────────────────────────────────────────── */}
-        <section className="relative overflow-hidden bg-black pb-32 pt-14 text-white">
+        <section className="relative overflow-hidden bg-zinc-900 pb-32 pt-14 text-white">
           {/* Red glow accents */}
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-red-700/30 blur-3xl" />
             <div className="absolute top-1/3 right-0 h-[28rem] w-[28rem] rounded-full bg-red-600/20 blur-3xl" />
-            <div className="absolute inset-0 bg-gradient-to-b from-red-950/40 via-black to-black" />
+            <div className="absolute inset-0 bg-gradient-to-b from-red-950/40 via-zinc-900 to-zinc-900" />
           </div>
 
           {/* Bus, van & car silhouette — sits in the gap between the subtitle and the search card */}
@@ -152,14 +152,14 @@ export default function Home() {
         </section>
 
         {/* ── SEARCH FORM — floats over hero bottom ─────────────────────── */}
-        <div className="relative z-10 -mt-20 bg-black pb-14">
+        <div className="relative z-10 -mt-20 bg-zinc-900 pb-14">
           <div className="mx-auto max-w-5xl px-5 sm:px-8">
             <HeroSearchForm />
           </div>
         </div>
 
         {/* ── POPULAR ROUTES ────────────────────────────────────────────── */}
-        <section className="bg-black py-20">
+        <section className="bg-zinc-900 py-20">
           <div className="mx-auto max-w-7xl px-5 sm:px-8">
             <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -178,14 +178,14 @@ export default function Home() {
                 <Link
                   key={`${route.from}-${route.to}`}
                   href={`/search?from=${encodeURIComponent(route.from)}&to=${encodeURIComponent(route.to)}&date=${tomorrow}&passengers=1`}
-                  className="group rounded-xl border border-zinc-800 bg-zinc-900 p-5 shadow-sm transition hover:border-red-600/50 hover:shadow-md hover:shadow-red-900/20"
+                  className="group rounded-xl border border-zinc-700 bg-zinc-800 p-5 shadow-sm transition hover:border-red-600/50 hover:shadow-md hover:shadow-red-900/20"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex-1">
                       <p className="text-[0.65rem] font-semibold uppercase tracking-widest text-zinc-500">From</p>
                       <p className="mt-0.5 text-lg font-bold text-white">{route.from}</p>
                     </div>
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800 transition group-hover:border-red-600/50 group-hover:bg-red-500/10">
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded-full border border-zinc-600 bg-zinc-700 transition group-hover:border-red-600/50 group-hover:bg-red-500/10">
                       <ArrowRight className="size-4 text-zinc-500 transition group-hover:text-red-500" />
                     </div>
                     <div className="flex-1 text-right">
@@ -194,7 +194,7 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div className="my-4 h-px bg-zinc-800" />
+                  <div className="my-4 h-px bg-zinc-700" />
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5 text-xs text-zinc-500">
@@ -212,7 +212,7 @@ export default function Home() {
         </section>
 
         {/* ── FEATURE STRIP ─────────────────────────────────────────────── */}
-        <section className="border-y border-zinc-800 bg-black py-14">
+        <section className="border-y border-zinc-700 bg-zinc-900 py-14">
           <div className="mx-auto max-w-7xl px-5">
             <div className="grid gap-6 sm:grid-cols-3">
               {[
@@ -232,7 +232,7 @@ export default function Home() {
                   body: "Your payment details are encrypted and never stored on our servers.",
                 },
               ].map(({ icon: Icon, title, body }) => (
-                <div key={title} className="flex gap-4 rounded-xl border border-zinc-800 p-5">
+                <div key={title} className="flex gap-4 rounded-xl border border-zinc-700 p-5">
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-red-500/10">
                     <Icon className="size-5 text-red-500" />
                   </div>

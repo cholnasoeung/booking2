@@ -10,7 +10,7 @@ const benefits = [
 
 export default function CTASection() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-black via-zinc-950 to-red-950 py-16 sm:py-20 lg:py-24">
+    <section className="relative overflow-hidden bg-gradient-to-br from-zinc-900 via-zinc-800 to-red-950 py-16 sm:py-20 lg:py-24">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAzNGMwLTItMi00LTItNHMyLTItNCAyLTRzLTItMi00LTJjMCAwIDItMiAyLTRzLTItMi00LTJjMCAwIDItMiAyLTRzLTItMi00LTJjMCAwIDItMiAyLTR6IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz48L2c+PC9zdmc+')] opacity-10" />
       {/* Red glow accent */}

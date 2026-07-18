@@ -62,12 +62,12 @@ export default function LoginForm({ callbackUrl }: LoginFormProps) {
 
   return (
     <div className="w-full overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-slate-200/60">
-      <div className="h-1.5 w-full bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400" />
+      <div className="h-1.5 w-full bg-gradient-to-r from-red-500 via-rose-500 to-orange-500" />
 
       <div className="px-8 py-8">
         <div className="mb-8 flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-50 ring-1 ring-amber-200">
-            <Bus className="h-6 w-6 text-amber-500" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-red-50 ring-1 ring-red-200">
+            <Bus className="h-6 w-6 text-red-500" />
           </div>
           <div>
             <h2 className="text-2xl font-bold tracking-tight text-slate-900">
@@ -93,7 +93,7 @@ export default function LoginForm({ callbackUrl }: LoginFormProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                className="h-11 rounded-xl border-slate-200 bg-slate-50 pl-10 pr-4 text-slate-900 placeholder:text-slate-400 focus-visible:bg-white focus-visible:ring-amber-400"
+                className="h-11 rounded-xl border-slate-200 bg-slate-50 pl-10 pr-4 text-slate-900 placeholder:text-slate-400 focus-visible:bg-white focus-visible:ring-red-400"
               />
             </div>
           </div>
@@ -103,7 +103,7 @@ export default function LoginForm({ callbackUrl }: LoginFormProps) {
               <Label htmlFor="login-password" className="text-sm font-medium text-slate-700">
                 Password
               </Label>
-              <Link href="/forgot-password" className="text-xs font-semibold text-amber-600 hover:text-amber-700 hover:underline">
+              <Link href="/forgot-password" className="text-xs font-semibold text-red-600 hover:text-red-700 hover:underline">
                 Forgot password?
               </Link>
             </div>
@@ -116,7 +116,7 @@ export default function LoginForm({ callbackUrl }: LoginFormProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 required
-                className="h-11 rounded-xl border-slate-200 bg-slate-50 pl-10 pr-11 text-slate-900 placeholder:text-slate-400 focus-visible:bg-white focus-visible:ring-amber-400"
+                className="h-11 rounded-xl border-slate-200 bg-slate-50 pl-10 pr-11 text-slate-900 placeholder:text-slate-400 focus-visible:bg-white focus-visible:ring-red-400"
               />
               <button
                 type="button"
@@ -139,7 +139,7 @@ export default function LoginForm({ callbackUrl }: LoginFormProps) {
           <Button
             type="submit"
             disabled={isPending}
-            className="h-11 w-full rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 text-sm font-semibold text-white shadow-md shadow-amber-300/50 transition-all hover:from-amber-500 hover:to-orange-500 hover:shadow-amber-400/60 disabled:opacity-60"
+            className="h-11 w-full rounded-xl bg-gradient-to-r from-red-600 to-rose-600 text-sm font-semibold text-white shadow-md shadow-red-300/50 transition-all hover:from-red-700 hover:to-rose-700 hover:shadow-red-400/60 disabled:opacity-60"
           >
             {isPending ? (
               <span className="flex items-center gap-2">
@@ -183,9 +183,9 @@ export default function LoginForm({ callbackUrl }: LoginFormProps) {
             <p className="text-xl font-bold text-slate-900">98%</p>
             <p className="text-xs text-slate-500">On-time checks</p>
           </div>
-          <div className="rounded-xl bg-amber-50 px-4 py-3 ring-1 ring-amber-100">
-            <p className="text-xl font-bold text-amber-600">24/7</p>
-            <p className="text-xs text-amber-600/70">Live crew support</p>
+          <div className="rounded-xl bg-red-50 px-4 py-3 ring-1 ring-red-100">
+            <p className="text-xl font-bold text-red-600">24/7</p>
+            <p className="text-xs text-red-600/70">Live crew support</p>
           </div>
         </div>
 
@@ -193,7 +193,7 @@ export default function LoginForm({ callbackUrl }: LoginFormProps) {
           New here?{" "}
           <Link
             href={registerHref}
-            className="font-semibold text-amber-600 hover:text-amber-700 hover:underline"
+            className="font-semibold text-red-600 hover:text-red-700 hover:underline"
           >
             Create a free account
           </Link>

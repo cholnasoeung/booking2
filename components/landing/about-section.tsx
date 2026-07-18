@@ -25,7 +25,7 @@ const features = [
 
 export default function AboutSection() {
   return (
-    <section className="bg-black py-20">
+    <section className="bg-zinc-900 py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-12 text-center">
@@ -47,7 +47,7 @@ export default function AboutSection() {
             return (
               <div
                 key={feature.title}
-                className="rounded-xl border border-zinc-800 bg-zinc-900 p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-red-600/50 hover:shadow-md hover:shadow-red-900/20"
+                className="rounded-xl border border-zinc-700 bg-zinc-800 p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-red-600/50 hover:shadow-md hover:shadow-red-900/20"
               >
                 <div className="flex size-10 items-center justify-center rounded-lg bg-red-500/10">
                   <Icon className="size-5 text-red-500" />
