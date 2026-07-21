@@ -32,8 +32,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: `/uploads/bus-details/${filename}` }, { status: 201 });
   } catch (error) {
+    console.error("[upload/bus-detail-image] failed to write file:", UPLOAD_FOLDER, error);
     const message =
       error instanceof Error ? error.message : "Unable to upload the image right now.";
-    return NextResponse.json({ message }, { status: 500 });
+    return NextResponse.json({ message: `Upload failed: ${message}` }, { status: 500 });
   }
 }

@@ -42,10 +42,16 @@ export async function POST(request: Request) {
   const fileName = `${Date.now()}-${safeName}.${ext}`;
 
   const dir = path.join(process.cwd(), "public", "uploads", "vehicles");
-  await mkdir(dir, { recursive: true });
 
-  const bytes = await file.arrayBuffer();
-  await writeFile(path.join(dir, fileName), Buffer.from(bytes));
+  try {
+    await mkdir(dir, { recursive: true });
+    const bytes = await file.arrayBuffer();
+    await writeFile(path.join(dir, fileName), Buffer.from(bytes));
+  } catch (error) {
+    console.error("[upload-vehicle-image] failed to write file:", dir, error);
+    const message = error instanceof Error ? error.message : "Unable to save the image.";
+    return Response.json({ message: `Upload failed: ${message}` }, { status: 500 });
+  }
 
   return Response.json({ url: `/uploads/vehicles/${fileName}` });
 }

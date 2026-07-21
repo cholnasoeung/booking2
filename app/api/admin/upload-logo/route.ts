@@ -35,23 +35,29 @@ export async function POST(request: Request) {
 
   const ext = VALID_TYPES[file.type];
   const uploadsDir = path.join(process.cwd(), "public", "uploads");
-
-  await mkdir(uploadsDir, { recursive: true });
-
-  // Remove any existing logo files
-  try {
-    const existing = await readdir(uploadsDir);
-    await Promise.all(
-      existing
-        .filter((f) => f.startsWith("logo."))
-        .map((f) => rm(path.join(uploadsDir, f), { force: true }))
-    );
-  } catch { /* ignore if dir empty */ }
-
   const fileName = `logo.${ext}`;
   const filePath = path.join(uploadsDir, fileName);
-  const bytes    = await file.arrayBuffer();
-  await writeFile(filePath, Buffer.from(bytes));
+
+  try {
+    await mkdir(uploadsDir, { recursive: true });
+
+    // Remove any existing logo files
+    try {
+      const existing = await readdir(uploadsDir);
+      await Promise.all(
+        existing
+          .filter((f) => f.startsWith("logo."))
+          .map((f) => rm(path.join(uploadsDir, f), { force: true }))
+      );
+    } catch { /* ignore if dir empty */ }
+
+    const bytes = await file.arrayBuffer();
+    await writeFile(filePath, Buffer.from(bytes));
+  } catch (error) {
+    console.error("[upload-logo] failed to write file:", uploadsDir, error);
+    const message = error instanceof Error ? error.message : "Unable to save the logo.";
+    return Response.json({ message: `Upload failed: ${message}` }, { status: 500 });
+  }
 
   const logoUrl = `/uploads/${fileName}`;
 

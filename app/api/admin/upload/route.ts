@@ -43,9 +43,15 @@ export async function POST(request: Request) {
   const dir      = join(process.cwd(), "public", "uploads", "avatars");
   const filePath = join(dir, filename);
 
-  await mkdir(dir, { recursive: true });
-  const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(filePath, buffer);
+  try {
+    await mkdir(dir, { recursive: true });
+    const buffer = Buffer.from(await file.arrayBuffer());
+    await writeFile(filePath, buffer);
+  } catch (error) {
+    console.error("[upload/avatar] failed to write file:", dir, error);
+    const message = error instanceof Error ? error.message : "Unable to save the file.";
+    return Response.json({ message: `Upload failed: ${message}` }, { status: 500 });
+  }
 
   const url = `/uploads/avatars/${filename}`;
 
