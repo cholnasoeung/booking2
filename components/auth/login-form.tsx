@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { Eye, EyeOff, Mail, Lock, Bus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,12 @@ export default function LoginForm({ callbackUrl }: LoginFormProps) {
         return;
       }
 
-      router.push(callbackUrl || "/dashboard");
+      if (callbackUrl) {
+        router.push(callbackUrl);
+      } else {
+        const session = await getSession();
+        router.push(session?.user?.role === "admin" ? "/admin" : "/dashboard");
+      }
       router.refresh();
     } catch {
       setError("Unable to sign you in right now.");
