@@ -3,7 +3,6 @@ import { cache } from "react";
 import Link from "next/link";
 import { Shield, LogIn, UserPlus, Ticket } from "lucide-react";
 
-import LanguageToggle from "@/components/common/language-toggle";
 import LogoutButton from "@/components/auth/logout-button";
 import NavbarLogo from "@/components/layout/navbar-logo";
 import NotificationBell from "@/components/dashboard/notification-bell";
@@ -62,7 +61,10 @@ export default async function Navbar() {
           {/* ── Centre nav ── */}
           <nav className="hidden md:flex flex-1 items-center justify-center gap-0.5">
             <NavLink href="/">Home</NavLink>
+            <NavLink href="/about">About</NavLink>
+            <NavLink href="/faq">FAQ</NavLink>
             <NavLink href="/support">Support</NavLink>
+            <NavLink href="/contact">Contact</NavLink>
             <NavLink href="/lost-found">Lost & Found</NavLink>
             {user && (
               <>
@@ -84,10 +86,8 @@ export default async function Navbar() {
             )}
           </nav>
 
-          {/* ── Right: lang + user ── */}
+          {/* ── Right: user ── */}
           <div className="flex items-center gap-2 shrink-0">
-            <LanguageToggle />
-
             {user ? (
               <div className="flex items-center gap-2">
                 <NotificationBell />
