@@ -566,6 +566,7 @@ export default function AdminBusDialog({
                       return { ...current, busDetailId: value, busType: selectedDetail.busType, seatLayout: structuredClone(template) };
                     });
                   }}
+                  items={{ "": "Unassigned", ...Object.fromEntries(busDetails.map((detail) => [detail.id, `${detail.name} · ${detail.registrationNumber}`])) }}
                 >
                   <SelectTrigger className="h-10 rounded-xl border-indigo-100 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20">
                     <SelectValue placeholder="Select a vehicle or leave blank" />
@@ -615,6 +616,7 @@ export default function AdminBusDialog({
                 <Select
                   value={form.driverId}
                   onValueChange={(value) => setForm((current) => ({ ...current, driverId: value }))}
+                  items={{ "": "Unassigned", ...Object.fromEntries(drivers.map((driver) => [driver.id, `${driver.name} · ${driver.phone}`])) }}
                 >
                   <SelectTrigger id="bus-driver" className="h-10 rounded-xl border-indigo-100 bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20">
                     <SelectValue placeholder="Select a driver" />

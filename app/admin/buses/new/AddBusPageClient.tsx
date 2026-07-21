@@ -369,6 +369,7 @@ export default function AddBusPageClient({ routes }: { routes: RouteSummary[] })
                       return { ...c, busDetailId: v, busType: d.busType, seatLayout: structuredClone(tpl) };
                     });
                   }}
+                  items={{ "": "Unassigned", ...Object.fromEntries(busDetails.map((d) => [d.id, `${d.name} · ${d.registrationNumber}`])) }}
                 >
                   <SelectTrigger className="h-11 rounded-xl border-slate-200 text-sm">
                     <SelectValue placeholder="Select a vehicle or leave blank" />
@@ -402,7 +403,11 @@ export default function AddBusPageClient({ routes }: { routes: RouteSummary[] })
                     {availabilityLoading && " · checking…"}
                   </span>
                 </div>
-                <Select value={form.driverId ?? ""} onValueChange={(v) => setForm((c) => ({ ...c, driverId: v || null }))}>
+                <Select
+                  value={form.driverId ?? ""}
+                  onValueChange={(v) => setForm((c) => ({ ...c, driverId: v || null }))}
+                  items={{ "": "Unassigned", ...Object.fromEntries(drivers.map((d) => [d.id, `${d.name} · ${d.phone}`])) }}
+                >
                   <SelectTrigger className="h-11 rounded-xl border-slate-200 text-sm">
                     <SelectValue placeholder="Select a driver" />
                   </SelectTrigger>
