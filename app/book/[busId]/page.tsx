@@ -10,7 +10,7 @@ import VehicleGallery from "@/components/common/vehicle-gallery";
 import DepartureStatusBadge from "@/components/search/departure-status-badge";
 import JoinWaitlistButton from "@/components/booking/join-waitlist-button";
 import SeatSelection from "@/components/booking/seat-selection";
-import { requireUser } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { AMENITY_OPTIONS, MAX_SEATS_PER_BOOKING } from "@/lib/utils/constants";
 import { AmenityIcon } from "@/lib/utils/amenity-icons";
 import { formatBusType, formatCurrency, formatTravelDate } from "@/lib/utils/formatters";
@@ -31,7 +31,7 @@ export default async function BookPage({ params, searchParams }: BookPageProps) 
     ? `/book/${busId}?passengers=${passengers}`
     : `/book/${busId}`;
 
-  await requireUser(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`);
+  const user = await getCurrentUser();
 
   const bus = await getBusSummary(busId);
   if (!bus) notFound();
@@ -147,7 +147,13 @@ export default async function BookPage({ params, searchParams }: BookPageProps) 
                     requestedSeats={requestedSeats}
                   />
                 ) : (
-                  <SeatSelection key={bus.id} bus={bus} selectionLimit={selectionLimit} />
+                  <SeatSelection
+                    key={bus.id}
+                    bus={bus}
+                    selectionLimit={selectionLimit}
+                    isGuest={!user}
+                    callbackUrl={callbackUrl}
+                  />
                 )}
               </div>
             </div>

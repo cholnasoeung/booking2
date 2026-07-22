@@ -22,6 +22,8 @@ import {
 type SeatSelectionProps = {
   bus: BusSummary;
   selectionLimit: number;
+  isGuest?: boolean;
+  callbackUrl?: string;
 };
 
 type SavedSeatTemplate = {
@@ -54,6 +56,8 @@ type TemplateMessage = {
 export default function SeatSelection({
   bus,
   selectionLimit,
+  isGuest = false,
+  callbackUrl,
 }: SeatSelectionProps) {
   const router = useRouter();
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
@@ -220,6 +224,11 @@ export default function SeatSelection({
   }, [holdExpiresAt]);
 
   useEffect(() => {
+    if (isGuest) {
+      setIsLoadingTemplate(false);
+      return;
+    }
+
     let mounted = true;
 
     async function loadSeatTemplate() {
@@ -254,6 +263,12 @@ export default function SeatSelection({
 
   function toggleSeat(seatCode: string) {
     if (liveBookedSeats.includes(seatCode) || otherBlockedSeats.includes(seatCode)) {
+      return;
+    }
+
+    if (isGuest) {
+      const target = callbackUrl ?? `/book/${bus.id}`;
+      router.push(`/login?callbackUrl=${encodeURIComponent(target)}`);
       return;
     }
 
@@ -419,6 +434,23 @@ export default function SeatSelection({
             Pick up to {selectionLimit} seat(s). Seat colors update instantly to show
             what&apos;s available, selected, and already taken.
           </p>
+          {isGuest && (
+            <div className="flex items-center justify-between gap-3 rounded-2xl border border-red-100 bg-red-50 px-3 py-2 text-xs text-red-800">
+              <span>You&apos;re browsing as a guest — sign in to select and hold seats.</span>
+              <Button
+                type="button"
+                size="sm"
+                className="h-7 shrink-0 rounded-full bg-red-600 px-3 text-xs text-white hover:bg-red-700"
+                onClick={() =>
+                  router.push(
+                    `/login?callbackUrl=${encodeURIComponent(callbackUrl ?? `/book/${bus.id}`)}`
+                  )
+                }
+              >
+                Sign in
+              </Button>
+            </div>
+          )}
         </CardHeader>
 
         <CardContent>
@@ -445,61 +477,63 @@ export default function SeatSelection({
             </Badge>
           </div>
 
-          <div className="mb-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-2.5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
-                  Saved seat template
-                </p>
-                <p className="text-sm text-slate-600">
-                  {savedTemplate?.seats.length
-                    ? `Template for ${formatBusType(bus.busType)}: ${formatSeatList(savedTemplate.seats)}`
-                    : isLoadingTemplate
-                    ? "Loading your saved seat template..."
-                    : `No saved ${formatBusType(bus.busType).toLowerCase()} seat template yet.`}
-                </p>
+          {!isGuest && (
+            <div className="mb-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-2.5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                    Saved seat template
+                  </p>
+                  <p className="text-sm text-slate-600">
+                    {savedTemplate?.seats.length
+                      ? `Template for ${formatBusType(bus.busType)}: ${formatSeatList(savedTemplate.seats)}`
+                      : isLoadingTemplate
+                      ? "Loading your saved seat template..."
+                      : `No saved ${formatBusType(bus.busType).toLowerCase()} seat template yet.`}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-full"
+                    disabled={!savedTemplate?.seats.length}
+                    onClick={applySavedTemplate}
+                  >
+                    Apply saved template
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-full"
+                    disabled={isSavingTemplate || selectedSeats.length === 0}
+                    onClick={saveSeatTemplate}
+                  >
+                    {isSavingTemplate
+                      ? "Saving template..."
+                      : savedTemplate?.seats.length
+                      ? "Update saved template"
+                      : "Save current seats"}
+                  </Button>
+                </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-full"
-                  disabled={!savedTemplate?.seats.length}
-                  onClick={applySavedTemplate}
+              {templateMessage ? (
+                <p
+                  className={`mt-3 rounded-xl border px-3 py-2 text-sm ${
+                    templateMessage.type === "success"
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                      : templateMessage.type === "info"
+                      ? "border-amber-200 bg-amber-50 text-amber-800"
+                      : "border-red-200 bg-red-50 text-red-700"
+                  }`}
                 >
-                  Apply saved template
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="rounded-full"
-                  disabled={isSavingTemplate || selectedSeats.length === 0}
-                  onClick={saveSeatTemplate}
-                >
-                  {isSavingTemplate
-                    ? "Saving template..."
-                    : savedTemplate?.seats.length
-                    ? "Update saved template"
-                    : "Save current seats"}
-                </Button>
-              </div>
+                  {templateMessage.text}
+                </p>
+              ) : null}
             </div>
-
-            {templateMessage ? (
-              <p
-                className={`mt-3 rounded-xl border px-3 py-2 text-sm ${
-                  templateMessage.type === "success"
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                    : templateMessage.type === "info"
-                    ? "border-amber-200 bg-amber-50 text-amber-800"
-                    : "border-red-200 bg-red-50 text-red-700"
-                }`}
-              >
-                {templateMessage.text}
-              </p>
-            ) : null}
-          </div>
+          )}
 
           <div className="mb-3 grid gap-2.5 sm:grid-cols-2">
             <div>
