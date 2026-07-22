@@ -139,12 +139,12 @@ export default function SearchFilters({
     <Card className="border-white/60 bg-white/90 shadow-xl sticky top-6 overflow-hidden">
       <CardContent className="p-0">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 bg-gradient-to-r from-indigo-50 to-purple-50">
+        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 bg-gradient-to-r from-red-50 to-rose-50">
           <div className="flex items-center gap-2">
-            <Filter className="h-5 w-5 text-indigo-600" />
-            <h3 className="font-semibold text-slate-900">Filters</h3>
+            <Filter className="h-4 w-4 text-red-600" />
+            <h3 className="text-sm font-semibold text-slate-900">Filters</h3>
             {activeFilterCount > 0 && (
-              <Badge variant="secondary" className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200">
+              <Badge variant="secondary" className="bg-red-100 text-red-700 hover:bg-red-200">
                 {activeFilterCount} active
               </Badge>
             )}
@@ -178,7 +178,7 @@ export default function SearchFilters({
 
         {/* Filters - Collapsible on mobile */}
         <div className={cn(
-          "space-y-5 px-5 py-4",
+          "space-y-4 px-4 py-3",
           !isExpanded && "hidden lg:block"
         )}>
           {/* Bus Type Filter */}
@@ -227,9 +227,9 @@ type BusTypeFilterProps = {
 
 function BusTypeFilter({ value, onChange }: BusTypeFilterProps) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       <Label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-        <BusFront className="h-4 w-4 text-indigo-600" />
+        <BusFront className="h-4 w-4 text-red-600" />
         Bus Type
       </Label>
       <div className="grid grid-cols-2 gap-2">
@@ -239,10 +239,10 @@ function BusTypeFilter({ value, onChange }: BusTypeFilterProps) {
             type="button"
             onClick={() => onChange(option.value as BusTypeFilter)}
             className={cn(
-              "rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all",
+              "rounded-lg border-2 px-3 py-2 text-xs font-medium transition-all",
               value === option.value
-                ? "border-indigo-500 bg-indigo-50 text-indigo-700 shadow-md"
-                : "border-slate-200 bg-white text-slate-700 hover:border-indigo-300 hover:bg-slate-50"
+                ? "border-red-500 bg-red-50 text-red-700 shadow-md"
+                : "border-slate-200 bg-white text-slate-700 hover:border-red-300 hover:bg-slate-50"
             )}
           >
             {option.label}
@@ -269,10 +269,10 @@ function PriceRangeFilter({
   return (
     <div className="space-y-4">
       <Label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-        <DollarSign className="h-4 w-4 text-indigo-600" />
+        <DollarSign className="h-4 w-4 text-red-600" />
         Price Range
       </Label>
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         <Slider
           value={value}
           onValueChange={onChange}
@@ -282,11 +282,11 @@ function PriceRangeFilter({
           className="py-2"
         />
         <div className="flex items-center justify-between text-sm">
-          <span className="font-medium text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
+          <span className="font-medium text-red-600 bg-red-50 px-3 py-1 rounded-full">
             ${value[0]}
           </span>
           <span className="text-slate-500">to</span>
-          <span className="font-medium text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
+          <span className="font-medium text-red-600 bg-red-50 px-3 py-1 rounded-full">
             ${value[1]}
           </span>
         </div>
@@ -310,9 +310,9 @@ function TimeSlotFilter({ selectedSlots, onChange }: TimeSlotFilterProps) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       <Label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-        <Calendar className="h-4 w-4 text-indigo-600" />
+        <Calendar className="h-4 w-4 text-red-600" />
         Departure Time
       </Label>
       <div className="grid grid-cols-2 gap-2">
@@ -326,8 +326,8 @@ function TimeSlotFilter({ selectedSlots, onChange }: TimeSlotFilterProps) {
               className={cn(
                 "flex items-center gap-2 rounded-xl border-2 px-3 py-2.5 text-xs font-medium transition-all",
                 isSelected
-                  ? "border-indigo-500 bg-indigo-50 text-indigo-700 shadow-md"
-                  : "border-slate-200 bg-white text-slate-700 hover:border-indigo-300 hover:bg-slate-50"
+                  ? "border-red-500 bg-red-50 text-red-700 shadow-md"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-red-300 hover:bg-slate-50"
               )}
             >
               {slot.icon}
@@ -355,9 +355,9 @@ function AmenitiesFilter({ selected, onChange }: AmenitiesFilterProps) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       <Label className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-        <Sparkles className="h-4 w-4 text-indigo-600" />
+        <Sparkles className="h-4 w-4 text-red-600" />
         Amenities
       </Label>
       <div className="space-y-2">
@@ -370,23 +370,23 @@ function AmenitiesFilter({ selected, onChange }: AmenitiesFilterProps) {
               type="button"
               onClick={() => toggleAmenity(amenity.id)}
               className={cn(
-                "flex w-full items-center gap-3 rounded-xl border-2 px-4 py-3 text-sm font-medium transition-all",
+                "flex w-full items-center gap-2.5 rounded-lg border-2 px-3 py-2.5 text-xs font-medium transition-all",
                 isSelected
-                  ? "border-indigo-500 bg-indigo-50 text-indigo-700 shadow-md"
-                  : "border-slate-200 bg-white text-slate-700 hover:border-indigo-300 hover:bg-slate-50"
+                  ? "border-red-500 bg-red-50 text-red-700 shadow-md"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-red-300 hover:bg-slate-50"
               )}
             >
               <div className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-lg",
+                "flex h-6 w-6 items-center justify-center rounded-md",
                 isSelected
-                  ? "bg-indigo-500 text-white"
+                  ? "bg-red-500 text-white"
                   : "bg-slate-200 text-slate-600"
               )}>
                 <Icon className="h-4 w-4" />
               </div>
               <span>{amenity.label}</span>
               {isSelected && (
-                <svg className="ml-auto h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="ml-auto h-4 w-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               )}

@@ -136,11 +136,15 @@ export default function SeatSelection({
     if (selectedSeats.length === 0) {
       // Release any previously held seats
       if (heldSeatsRef.current.length > 0) {
+        const released = heldSeatsRef.current;
         fetch(`/api/buses/${bus.id}/hold`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ seats: heldSeatsRef.current }),
+          body: JSON.stringify({ seats: released }),
         }).catch(() => {});
+        // Optimistically clear locally so the seat doesn't flash as
+        // "blocked" while waiting on the next SSE poll to catch up.
+        setLiveBlockedSeats((prev) => prev.filter((s) => !released.includes(s)));
         heldSeatsRef.current = [];
       }
       setHoldExpiresAt(null);
@@ -150,11 +154,13 @@ export default function SeatSelection({
     holdDebounceRef.current = setTimeout(async () => {
       // Release old hold if different seats
       if (heldSeatsRef.current.length > 0) {
+        const released = heldSeatsRef.current;
         await fetch(`/api/buses/${bus.id}/hold`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ seats: heldSeatsRef.current }),
+          body: JSON.stringify({ seats: released }),
         }).catch(() => {});
+        setLiveBlockedSeats((prev) => prev.filter((s) => !released.includes(s)));
       }
 
       const res = await fetch(`/api/buses/${bus.id}/hold`, {
@@ -261,7 +267,14 @@ export default function SeatSelection({
     }
 
     if (selectedSeats.length >= selectionLimit) {
-      setError(`You can select up to ${selectionLimit} seat(s) for this booking.`);
+      // At the limit — auto-swap: drop the oldest pick(s) to make room for
+      // the new one instead of blocking the click with an error.
+      setSelectedSeats((current) => {
+        const overflow = current.length - selectionLimit + 1;
+        return [...current.slice(overflow), seatCode].sort(compareSeatCodes);
+      });
+      setError("");
+      setTemplateMessage(null);
       return;
     }
 
@@ -392,9 +405,9 @@ export default function SeatSelection({
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1.45fr_0.9fr]">
-      <Card className="border-white/60 bg-white/90 shadow-xl shadow-red-950/5">
-        <CardHeader className="space-y-3">
+    <div className="grid gap-5 xl:grid-cols-[1.45fr_0.9fr]">
+      <Card size="sm" className="border-white/60 bg-white/90 shadow-xl shadow-red-950/5">
+        <CardHeader className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">{formatBusType(bus.busType)}</Badge>
             <Badge variant="outline">
@@ -402,29 +415,29 @@ export default function SeatSelection({
             </Badge>
           </div>
           <CardTitle>Choose your seats</CardTitle>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Pick up to {selectionLimit} seat(s). Seat colors update instantly to show
             what&apos;s available, selected, and already taken.
           </p>
         </CardHeader>
 
         <CardContent>
-          <div className="mb-4 flex flex-wrap gap-2">
+          <div className="mb-3 flex flex-wrap gap-1.5">
             <Badge
               variant="outline"
-              className="rounded-full border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700"
+              className="rounded-full border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs text-emerald-700"
             >
               {selectedSeats.length} selected
             </Badge>
             <Badge
               variant="outline"
-              className="rounded-full border-amber-200 bg-amber-50 px-3 py-1 text-amber-800"
+              className="rounded-full border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs text-amber-800"
             >
               Up to {selectionLimit} seats
             </Badge>
             <Badge
               variant="outline"
-              className="rounded-full border-slate-200 bg-white px-3 py-1 text-slate-700"
+              className="rounded-full border-slate-200 bg-white px-2.5 py-0.5 text-xs text-slate-700"
             >
               {bus.seatLayout.items.some((i) => (i as any).tier && (i as any).tier !== "standard")
                 ? `from ${formatCurrency(bus.pricePerSeat)}`
@@ -432,7 +445,7 @@ export default function SeatSelection({
             </Badge>
           </div>
 
-          <div className="mb-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-3">
+          <div className="mb-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-2.5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
@@ -488,14 +501,14 @@ export default function SeatSelection({
             ) : null}
           </div>
 
-          <div className="mb-4 grid gap-3 sm:grid-cols-2">
+          <div className="mb-3 grid gap-2.5 sm:grid-cols-2">
             <div>
               <p className="text-xs text-muted-foreground">Boarding stop</p>
               <Select
                 value={boardingStop}
                 onValueChange={(value) => value && setBoardingStop(value)}
               >
-                <SelectTrigger className="h-10 rounded-xl">
+                <SelectTrigger className="h-9 rounded-xl text-sm">
                   <SelectValue placeholder="Boarding stop" />
                 </SelectTrigger>
                 <SelectContent>
@@ -514,7 +527,7 @@ export default function SeatSelection({
                 value={droppingStop}
                 onValueChange={(value) => value && setDroppingStop(value)}
               >
-                <SelectTrigger className="h-10 rounded-xl">
+                <SelectTrigger className="h-9 rounded-xl text-sm">
                   <SelectValue placeholder="Drop-off stop" />
                 </SelectTrigger>
                 <SelectContent>
@@ -539,16 +552,16 @@ export default function SeatSelection({
         </CardContent>
       </Card>
 
-      <Card className="border-white/60 bg-white/90 shadow-xl shadow-red-950/5">
+      <Card size="sm" className="border-white/60 bg-white/90 shadow-xl shadow-red-950/5">
         <CardHeader className="space-y-1">
           <CardTitle>Booking summary</CardTitle>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Review your seats and trip details before moving to the passenger form.
           </p>
         </CardHeader>
 
-        <CardContent className="space-y-5">
-          <div className="rounded-[28px] border border-amber-100 bg-gradient-to-br from-amber-50 via-orange-50 to-white p-4 shadow-sm">
+        <CardContent className="space-y-4">
+          <div className="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 via-orange-50 to-white p-3.5 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-amber-700/80">
@@ -615,7 +628,7 @@ export default function SeatSelection({
                   const tier = (item as any)?.tier;
                   return (
                     <div key={code} className="flex justify-between">
-                      <span>{code}{tier && tier !== "standard" ? <span className="ml-1 font-semibold capitalize text-indigo-600">({tier})</span> : null}</span>
+                      <span>{code}{tier && tier !== "standard" ? <span className="ml-1 font-semibold capitalize text-red-600">({tier})</span> : null}</span>
                       <span>{formatCurrency(p)}</span>
                     </div>
                   );
@@ -660,7 +673,7 @@ export default function SeatSelection({
             type="button"
             size="lg"
             disabled={selectedSeats.length === 0 || bus.seatsLeft === 0}
-            className="h-12 w-full rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-lg shadow-indigo-200 transition hover:from-indigo-600 hover:to-violet-700"
+            className="h-11 w-full rounded-2xl bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg shadow-red-200 transition hover:from-red-600 hover:to-rose-700"
             onClick={proceedToPassengerDetails}
           >
             Continue to Passenger Details

@@ -47,7 +47,7 @@ const Slider = React.forwardRef<
         <div className="relative w-full h-2 bg-slate-200 rounded-full">
           {/* Active Track */}
           <div
-            className="absolute h-full bg-indigo-500 rounded-full"
+            className="absolute h-full bg-red-500 rounded-full"
             style={{
               left: `${percentage}%`,
               right: `${100 - percentageEnd}%`,
@@ -91,11 +91,11 @@ const Slider = React.forwardRef<
 
         {/* Thumbs */}
         <div
-          className="absolute h-5 w-5 bg-white border-2 border-indigo-500 rounded-full shadow-md cursor-grab active:scale-110 transition-transform pointer-events-none z-20"
+          className="absolute h-5 w-5 bg-white border-2 border-red-500 rounded-full shadow-md cursor-grab active:scale-110 transition-transform pointer-events-none z-20"
           style={{ left: `calc(${percentage}% - 10px)` }}
         />
         <div
-          className="absolute h-5 w-5 bg-white border-2 border-indigo-500 rounded-full shadow-md cursor-grab active:scale-110 transition-transform pointer-events-none z-20"
+          className="absolute h-5 w-5 bg-white border-2 border-red-500 rounded-full shadow-md cursor-grab active:scale-110 transition-transform pointer-events-none z-20"
           style={{ left: `calc(${percentageEnd}% - 10px)` }}
         />
       </div>

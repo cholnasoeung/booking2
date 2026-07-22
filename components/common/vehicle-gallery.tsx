@@ -44,9 +44,9 @@ export default function VehicleGallery({ images, vehicleName }: Props) {
     <>
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
         {/* Card header */}
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5">
+        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
           <div className="flex items-center gap-2">
-            <Images className="h-4 w-4 text-indigo-500" />
+            <Images className="h-4 w-4 text-red-500" />
             <h2 className="text-sm font-bold text-slate-900">Vehicle Photos</h2>
           </div>
           <span className="text-xs font-medium text-slate-400">
@@ -111,7 +111,7 @@ export default function VehicleGallery({ images, vehicleName }: Props) {
                   className={[
                     "shrink-0 overflow-hidden rounded-lg transition-all duration-200",
                     i === safeActive
-                      ? "ring-2 ring-indigo-500 ring-offset-2 opacity-100"
+                      ? "ring-2 ring-red-500 ring-offset-2 opacity-100"
                       : "ring-1 ring-slate-200 opacity-60 hover:opacity-90",
                   ].join(" ")}
                 >

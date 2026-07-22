@@ -53,8 +53,8 @@ export default function SearchForm({
   const [returnDate, setReturnDate] = useState(initialValues?.returnDate ?? "");
   const [isRoundTrip, setIsRoundTrip] = useState(Boolean(initialValues?.returnDate));
   const [error, setError] = useState("");
-  const fieldHeight = compact ? "h-11" : "h-10";
-  const formPadding = compact ? "p-4" : "p-4 sm:p-5";
+  const fieldHeight = compact ? "h-10" : "h-9";
+  const formPadding = compact ? "p-3" : "p-3.5 sm:p-4";
   const isLight = tone === "light";
   const shellClasses = isLight
     ? "border-slate-200/80 bg-white/95 text-slate-900 shadow-xl shadow-slate-200/70"
@@ -167,7 +167,7 @@ export default function SearchForm({
             <button
               type="button"
               className={cn(
-                "inline-flex items-center justify-center rounded-full border-2 border-indigo-200 bg-indigo-50 text-indigo-600 transition hover:scale-110 hover:border-indigo-300 hover:bg-indigo-100",
+                "inline-flex items-center justify-center rounded-full border-2 border-red-200 bg-red-50 text-red-600 transition hover:scale-110 hover:border-red-300 hover:bg-red-100",
                 compact ? "h-9 w-9" : "h-10 w-10"
               )}
               onClick={() => {
@@ -268,8 +268,8 @@ export default function SearchForm({
                   className={cn(
                     "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition",
                     isRoundTrip
-                      ? "border-indigo-300 bg-indigo-100 text-indigo-700"
-                      : "border-slate-200 bg-white/60 text-slate-500 hover:border-indigo-200 hover:text-indigo-600"
+                      ? "border-red-300 bg-red-100 text-red-700"
+                      : "border-slate-200 bg-white/60 text-slate-500 hover:border-red-200 hover:text-red-600"
                   )}
                 >
                   <RefreshCw className="size-3" />
@@ -302,7 +302,7 @@ export default function SearchForm({
               disabled={isPending}
               className={cn(
                 fieldHeight,
-                "rounded-2xl bg-amber-400 px-5 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-400/30",
+                "rounded-2xl bg-red-600 px-5 text-sm font-semibold text-white shadow-lg shadow-red-600/30 hover:bg-red-700",
                 compact ? "w-full" : "w-full"
               )}
             >
