@@ -97,6 +97,13 @@ export default function SeatSelection({
     () => new Set(getSeatCodesFromLayout(bus.seatLayout)),
     [bus.seatLayout]
   );
+  // liveBlockedSeats includes seats *this* session holds (our own hold call
+  // blocks them server-side too). Strip our own selections out so they render
+  // and behave as "selected", not as "blocked/unavailable" to their own owner.
+  const otherBlockedSeats = useMemo(
+    () => liveBlockedSeats.filter((s) => !selectedSeats.includes(s)),
+    [liveBlockedSeats, selectedSeats]
+  );
 
   // Real-time seat updates via Server-Sent Events
   useEffect(() => {
@@ -106,9 +113,16 @@ export default function SeatSelection({
         const data = JSON.parse(event.data);
         if (data.bookedSeats) setLiveBookedSeats(data.bookedSeats);
         if (data.blockedSeats) setLiveBlockedSeats(data.blockedSeats);
-        // Deselect any seat that was just taken by someone else
+        // Deselect any seat that was just taken by someone else — but not
+        // seats this session itself is holding (blockedSeats includes our
+        // own hold, so without this check we'd immediately un-select and
+        // release our own pick as soon as the next SSE update arrives).
         setSelectedSeats((prev) =>
-          prev.filter((s) => !data.bookedSeats?.includes(s) && !data.blockedSeats?.includes(s))
+          prev.filter(
+            (s) =>
+              !data.bookedSeats?.includes(s) &&
+              (!data.blockedSeats?.includes(s) || heldSeatsRef.current.includes(s))
+          )
         );
       } catch {}
     };
@@ -233,7 +247,7 @@ export default function SeatSelection({
   }, [bus.busType]);
 
   function toggleSeat(seatCode: string) {
-    if (liveBookedSeats.includes(seatCode) || liveBlockedSeats.includes(seatCode)) {
+    if (liveBookedSeats.includes(seatCode) || otherBlockedSeats.includes(seatCode)) {
       return;
     }
 
@@ -329,7 +343,7 @@ export default function SeatSelection({
     const availableTemplateSeats = savedTemplate.seats
       .map((seat) => seat.trim())
       .filter((seat) => validSeatCodes.has(seat))
-      .filter((seat) => !liveBookedSeats.includes(seat) && !liveBlockedSeats.includes(seat));
+      .filter((seat) => !liveBookedSeats.includes(seat) && !otherBlockedSeats.includes(seat));
     const nextSeats = [...new Set(availableTemplateSeats)]
       .sort(compareSeatCodes)
       .slice(0, selectionLimit);
@@ -517,7 +531,7 @@ export default function SeatSelection({
           <SeatMap
             layout={bus.seatLayout}
             bookedSeats={liveBookedSeats}
-            blockedSeats={liveBlockedSeats}
+            blockedSeats={otherBlockedSeats}
             selectedSeats={selectedSeats}
             onSeatToggle={toggleSeat}
             showLegend
